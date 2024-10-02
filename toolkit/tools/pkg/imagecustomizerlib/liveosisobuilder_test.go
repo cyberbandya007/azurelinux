@@ -62,9 +62,9 @@ func TestCustomizeImageLiveCd1(t *testing.T) {
 
 	// Check the iso-kernel-args.txt file.
 	isoKernelArgsPath := filepath.Join(isoMountDir, savedConfigsDir, savedConfigsFileName)
-	isoKernelArgsContents, err := file.Read(isoKernelArgsPath)
+	savedConfigsContents, err := file.Read(isoKernelArgsPath)
 	assert.NoErrorf(t, err, "read (%s) file", savedConfigsFileName)
-	assert.Equal(t, "rd.info", isoKernelArgsContents)
+	assert.Equal(t, "iso:\n    kernelCommandLine:\n        extraCommandLine: rd.info\n    additionalFiles: []\npxe:\n    isoImageUrl: \"\"\n", savedConfigsContents)
 
 	err = isoImageMount.CleanClose()
 	if !assert.NoError(t, err) {
@@ -132,9 +132,9 @@ func TestCustomizeImageLiveCd1(t *testing.T) {
 	assert.Regexp(t, "linux.* rd.debug ", grubCfgContents)
 
 	// Check the iso-kernel-args.txt file.
-	isoKernelArgsContents, err = file.Read(isoKernelArgsPath)
+	savedConfigsContents, err = file.Read(isoKernelArgsPath)
 	assert.NoErrorf(t, err, "read (%s) file", savedConfigsFileName)
-	assert.Equal(t, "rd.info rd.debug", isoKernelArgsContents)
+	assert.Equal(t, "iso:\n    kernelCommandLine:\n        extraCommandLine: rd.info rd.debug\n    additionalFiles: []\npxe:\n    isoImageUrl: \"\"\n", savedConfigsContents)
 }
 
 // Tests:
