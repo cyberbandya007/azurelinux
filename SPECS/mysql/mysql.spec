@@ -1,6 +1,6 @@
 Summary:        MySQL.
 Name:           mysql
-Version:        8.0.36
+Version:        8.0.39
 Release:        1%{?dist}
 License:        GPLv2 with exceptions AND LGPLv2 AND BSD
 Vendor:         Microsoft Corporation
@@ -98,6 +98,9 @@ fi
 %{_libdir}/pkgconfig/mysqlclient.pc
 
 %changelog
+* Tue Oct 10 2024 Sandeep Karambelkar <skarambelkar@microsoft.com> - 8.0.36-1
+- Upgrade to 8.0.39 to fix CVEs
+
 * Tue Jun 18 2024 Archana Choudhary <archana1@microsoft.com> - 8.0.36-1
 - Upgrade to 8.0.36 to fix 10 CVEs
 
