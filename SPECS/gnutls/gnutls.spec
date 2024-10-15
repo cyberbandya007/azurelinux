@@ -8,8 +8,6 @@ Distribution:   Mariner
 Group:          System Environment/Libraries
 URL:            https://www.gnutls.org
 Source0:        https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/%{name}-%{version}.tar.xz
-Patch0:         CVE-2023-0361.patch
-Patch1:         CVE-2024-0567.patch
 BuildRequires:  autogen-libopts-devel
 BuildRequires:  gc-devel
 BuildRequires:  guile-devel
@@ -98,6 +96,7 @@ sed -i 's/TESTS += test-ciphers-openssl.sh//'  tests/slow/Makefile.am
 %changelog
 * Fri Oct 11 2024 CBL-Mariner Servicing Account <cblmargh@microsoft.com> - 3.8.3-1
 - Auto-upgrade to 3.8.3 - to fix CVE-2024-0553
+- Removing the patches that are fixed in 3.8.3
 
 * Wed Sep 20 2023 Zhichun Wan <zhichunwan@microsoft.com> - 3.7.7-4
 - Add patch to fix CVE-2024-0567
