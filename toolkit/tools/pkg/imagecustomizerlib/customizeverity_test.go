@@ -102,7 +102,7 @@ func testCustomizeImageVerityShrinkExtractHelper(t *testing.T, testName string, 
 	testTempDir := filepath.Join(tmpDir, testName)
 	buildDir := filepath.Join(testTempDir, "build")
 	outImageFilePath := filepath.Join(testTempDir, "image.raw")
-	configFile := filepath.Join(testDir, "verity-partition-labels.yaml")
+	configFile := filepath.Join(testDir, "verity-alt-config.yaml")
 
 	var config imagecustomizerapi.Config
 	err := imagecustomizerapi.UnmarshalYamlFile(configFile, &config)
@@ -156,8 +156,8 @@ func testCustomizeImageVerityShrinkExtractHelper(t *testing.T, testName string, 
 	defer bootMount.Close()
 
 	// Verify that verity is configured correctly.
-	verifyVerity(t, bootMountPath, rootDevice.DevicePath(), hashDevice.DevicePath(), "PARTLABEL=root",
-		"PARTLABEL=root-hash")
+	verifyVerity(t, bootMountPath, rootDevice.DevicePath(), hashDevice.DevicePath(), "PARTUUID="+partitions[3].PartUuid,
+		"PARTUUID="+partitions[4].PartUuid)
 }
 
 func verifyVerity(t *testing.T, bootPath string, rootDevice string, hashDevice string, rootId string, hashId string) {

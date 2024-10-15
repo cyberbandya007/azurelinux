@@ -312,7 +312,8 @@ func TestStorageIsValidBadDeviceId(t *testing.T) {
 
 	err := value.IsValid()
 	assert.Error(t, err)
-	assert.ErrorContains(t, err, "no partition with matching ID (a)")
+	assert.ErrorContains(t, err, "invalid fileSystem at index 1")
+	assert.ErrorContains(t, err, "no partition or verity with matching ID (a)")
 }
 
 func TestStorageIsValidDuplicatePartitionId(t *testing.T) {

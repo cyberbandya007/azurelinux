@@ -157,7 +157,7 @@ func partitionSettingToImager(fileSystem imagecustomizerapi.FileSystem,
 	}
 
 	imagerPartitionSetting := configuration.PartitionSetting{
-		ID:              fileSystem.DeviceId,
+		ID:              fileSystem.PartitionId,
 		MountIdentifier: imagerMountIdentifierType,
 		MountOptions:    mountOptions,
 		MountPoint:      mountPath,

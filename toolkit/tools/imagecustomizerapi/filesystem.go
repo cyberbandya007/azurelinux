@@ -15,6 +15,11 @@ type FileSystem struct {
 	Type FileSystemType `yaml:"type"`
 	// MountPoint contains the mount settings.
 	MountPoint *MountPoint `yaml:"mountPoint"`
+
+	// If 'DeviceId' points at a verity device, this value is the 'Id' of the data partition.
+	// Otherwise, it is the same as 'DeviceId'.
+	// Filled in by Storage.IsValid().
+	PartitionId string
 }
 
 // IsValid returns an error if the MountPoint is not valid

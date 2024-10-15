@@ -14,7 +14,7 @@ import (
 	"github.com/microsoft/azurelinux/toolkit/tools/internal/safechroot"
 )
 
-func enableVerityPartition(verity *imagecustomizerapi.Verity, imageChroot *safechroot.Chroot,
+func enableVerityPartition(verity []imagecustomizerapi.Verity, imageChroot *safechroot.Chroot,
 ) (bool, error) {
 	var err error
 
@@ -63,7 +63,7 @@ func updateFstabForVerity(imageChroot *safechroot.Chroot) error {
 	for _, entry := range fstabEntries {
 		if entry.Target == "/" {
 			// Replace existing root partition line with the Verity target.
-			entry.Source = "/dev/mapper/root"
+			entry.Source = imagecustomizerapi.VerityRootDevicePath
 			entry.Options = "ro," + entry.Options
 		}
 		updatedEntries = append(updatedEntries, entry)
@@ -97,22 +97,16 @@ func prepareGrubConfigForVerity(imageChroot *safechroot.Chroot) error {
 	return nil
 }
 
-func updateGrubConfigForVerity(verity *imagecustomizerapi.Verity, rootHash string, grubCfgFullPath string,
+func updateGrubConfigForVerity(rootfsVerity imagecustomizerapi.Verity, rootHash string, grubCfgFullPath string,
 	partIdToPartUuid map[string]string,
 ) error {
 	var err error
 
 	// Format the dataPartitionId and hashPartitionId using the helper function.
-	formattedDataPartition, err := systemdFormatPartitionId(verity.DataPartition, partIdToPartUuid)
-	if err != nil {
-		return err
-	}
-	formattedHashPartition, err := systemdFormatPartitionId(verity.HashPartition, partIdToPartUuid)
-	if err != nil {
-		return err
-	}
+	formattedDataPartition := systemdFormatPartitionId(rootfsVerity.DataDeviceId, partIdToPartUuid)
+	formattedHashPartition := systemdFormatPartitionId(rootfsVerity.HashDeviceId, partIdToPartUuid)
 
-	formattedCorruptionOption, err := systemdFormatCorruptionOption(verity.CorruptionOption)
+	formattedCorruptionOption, err := systemdFormatCorruptionOption(rootfsVerity.CorruptionOption)
 	if err != nil {
 		return err
 	}
@@ -142,12 +136,13 @@ func updateGrubConfigForVerity(verity *imagecustomizerapi.Verity, rootHash strin
 	}
 
 	if grubMkconfigEnabled {
-		grub2Config, err = updateKernelCommandLineArgs(grub2Config, []string{"root"}, []string{"root=/dev/mapper/root"})
+		grub2Config, err = updateKernelCommandLineArgs(grub2Config, []string{"root"},
+			[]string{"root=" + imagecustomizerapi.VerityRootDevicePath})
 		if err != nil {
 			return fmt.Errorf("failed to set verity root command-line arg:\n%w", err)
 		}
 	} else {
-		grub2Config, err = replaceSetCommandValue(grub2Config, "rootdevice", "/dev/mapper/root")
+		grub2Config, err = replaceSetCommandValue(grub2Config, "rootdevice", imagecustomizerapi.VerityRootDevicePath)
 		if err != nil {
 			return fmt.Errorf("failed to set verity root device:\n%w", err)
 		}
@@ -162,67 +157,31 @@ func updateGrubConfigForVerity(verity *imagecustomizerapi.Verity, rootHash strin
 }
 
 // idToPartitionBlockDevicePath returns the block device path for a given idType and id.
-func idToPartitionBlockDevicePath(partitionId imagecustomizerapi.IdentifiedPartition,
+func idToPartitionBlockDevicePath(configDeviceId string,
 	diskPartitions []diskutils.PartitionInfo, partIdToPartUuid map[string]string,
 ) (string, error) {
 	// Iterate over each partition to find the matching id.
 	for _, partition := range diskPartitions {
-		matches, err := partitionMatchesId(partitionId, partition, partIdToPartUuid)
-		if err != nil {
-			return "", err
-		}
-
-		if matches {
+		if partitionMatchesDeviceId(configDeviceId, partition, partIdToPartUuid) {
 			return partition.Path, nil
 		}
 	}
 
 	// If no partition is found with the given id.
-	return "", fmt.Errorf("no partition found for %s: %s", partitionId.IdType, partitionId.Id)
+	return "", fmt.Errorf("no partition found with id (%s)", configDeviceId)
 }
 
-func partitionMatchesId(partitionId imagecustomizerapi.IdentifiedPartition, partition diskutils.PartitionInfo,
+func partitionMatchesDeviceId(configDeviceId string, partition diskutils.PartitionInfo,
 	partIdToPartUuid map[string]string,
-) (bool, error) {
-	switch partitionId.IdType {
-	case imagecustomizerapi.IdTypeId:
-		partUuid := partIdToPartUuid[partitionId.Id]
-		return partition.PartUuid == partUuid, nil
-
-	case imagecustomizerapi.IdTypePartLabel:
-		return partition.PartLabel == partitionId.Id, nil
-
-	case imagecustomizerapi.IdTypeUuid:
-		return partition.Uuid == partitionId.Id, nil
-
-	case imagecustomizerapi.IdTypePartUuid:
-		return partition.PartUuid == partitionId.Id, nil
-
-	default:
-		return true, fmt.Errorf("invalid idType provided (%s)", string(partitionId.IdType))
-	}
+) bool {
+	partUuid := partIdToPartUuid[configDeviceId]
+	return partition.PartUuid == partUuid
 }
 
 // systemdFormatPartitionId formats the partition ID based on the ID type following systemd dm-verity style.
-func systemdFormatPartitionId(partition imagecustomizerapi.IdentifiedPartition, partIdToPartUuid map[string]string,
-) (string, error) {
-	switch partition.IdType {
-	case imagecustomizerapi.IdTypeId:
-		partUuid := partIdToPartUuid[partition.Id]
-		return fmt.Sprintf("%s=%s", "PARTUUID", partUuid), nil
-
-	case imagecustomizerapi.IdTypePartLabel:
-		return fmt.Sprintf("%s=%s", "PARTLABEL", partition.Id), nil
-
-	case imagecustomizerapi.IdTypeUuid:
-		return fmt.Sprintf("%s=%s", "UUID", partition.Id), nil
-
-	case imagecustomizerapi.IdTypePartUuid:
-		return fmt.Sprintf("%s=%s", "PARTUUID", partition.Id), nil
-
-	default:
-		return "", fmt.Errorf("invalid idType provided (%s)", string(partition.IdType))
-	}
+func systemdFormatPartitionId(configDeviceId string, partIdToPartUuid map[string]string) string {
+	partUuid := partIdToPartUuid[configDeviceId]
+	return fmt.Sprintf("%s=%s", "PARTUUID", partUuid)
 }
 
 func systemdFormatCorruptionOption(corruptionOption imagecustomizerapi.CorruptionOption) (string, error) {
