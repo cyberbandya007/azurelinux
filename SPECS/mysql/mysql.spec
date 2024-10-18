@@ -1,6 +1,6 @@
 Summary:        MySQL.
 Name:           mysql
-Version:        8.0.39
+Version:        8.0.40
 Release:        1%{?dist}
 License:        GPLv2 with exceptions AND LGPLv2 AND BSD
 Vendor:         Microsoft Corporation
@@ -83,8 +83,8 @@ make test
 %{_libdir}/pkgconfig/mysqlclient.pc
 
 %changelog
-* Wed Oct 16 2024 Sandeep Karambelkar <skarambelkar@microsoft.com> - 8.0.39-1
-- Upgrade to 8.0.39 for cve fixes
+* Wed Oct 17 2024 Sandeep Karambelkar <skarambelkar@microsoft.com> - 8.0.40-1
+- Upgrade to 8.0.40 for cve fixes
 
 * Thu Feb 22 2024 CBL-Mariner Servicing Account <cblmargh@microsoft.com> - 8.0.36-1
 - Auto-upgrade to 8.0.36
