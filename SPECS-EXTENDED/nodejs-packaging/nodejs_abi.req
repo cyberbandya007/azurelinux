@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Get the ABI version
+abi_version=$(/usr/bin/node -p process.versions.modules)
+
+# Write out the Virtual Requires
+echo "nodejs(abi) = ${abi_version}"
+

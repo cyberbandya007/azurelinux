@@ -1,94 +1,103 @@
-%bcond_without bugzilla
-%define libjson_devel json-c-devel
+%if 0%{?suse_version}
+  %bcond_with bugzilla
+
+  %define dbus_devel dbus-1-devel
+  %define libjson_devel libjson-devel
+%else
+  %bcond_without bugzilla
+
+  %define dbus_devel dbus-devel
+  %define libjson_devel json-c-devel
+%endif
+
 %define glib_ver 2.43.4
 
-Summary:        Generic library for reporting various problems
-Name:           libreport
-Version:        2.13.1
-Release:        9%{?dist}
-License:        GPLv2+
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
-URL:            https://abrt.readthedocs.org/
-Source:         https://github.com/abrt/%{name}/archive/%{version}/%{name}-%{version}.tar.gz
-Patch0:         0001-gui-wizard-gtk-Fix-segfault.patch
-BuildRequires:  dbus-devel
-# BuildRequires: gtk3-devel
-BuildRequires:  asciidoc
-BuildRequires:  augeas
-BuildRequires:  augeas-devel
-BuildRequires:  curl-devel
-BuildRequires:  desktop-file-utils
-BuildRequires:  doxygen
-BuildRequires:  gettext
-BuildRequires:  git-core
-BuildRequires:  glib2-devel >= %{glib_ver}
-BuildRequires:  intltool
-BuildRequires:  libproxy-devel
-BuildRequires:  libtar-devel
-BuildRequires:  libtool
-BuildRequires:  libxml2-devel
-BuildRequires:  lz4
-BuildRequires:  nettle-devel
-BuildRequires:  newt-devel
-BuildRequires:  python3-devel
-BuildRequires:  satyr-devel >= 0.24
-BuildRequires:  systemd-devel
-BuildRequires:  texinfo
-BuildRequires:  xmlrpc-c
-BuildRequires:  xmlto
-BuildRequires:  xz
-Requires:       glib2 >= %{glib_ver}
-Requires:       libreport-filesystem = %{version}-%{release}
-Requires:       lz4
-Requires:       nettle
-Requires:       satyr >= 0.24
-Requires:       xz
-%if 0%{?with_check} && 0%{?mariner_failing_tests}
+Summary: Generic library for reporting various problems
+Name: libreport
+Version: 2.17.15
+Release: 3%{?dist}
+License: GPL-2.0-or-later
+URL: https://abrt.readthedocs.org/
+Source: https://github.com/abrt/%{name}/archive/%{version}/%{name}-%{version}.tar.gz
+BuildRequires: %{dbus_devel}
+BuildRequires: gtk3-devel
+BuildRequires: curl-devel
+BuildRequires: desktop-file-utils
+BuildRequires: python3-devel
+BuildRequires: gettext
+BuildRequires: libxml2-devel
+BuildRequires: intltool
+BuildRequires: libtool
+BuildRequires: make
+BuildRequires: texinfo
+BuildRequires: asciidoc
+BuildRequires: xmlto
+BuildRequires: newt-devel
+BuildRequires: satyr-devel >= 0.38
+BuildRequires: glib2-devel >= %{glib_ver}
+BuildRequires: git-core
+
+%if 0%{?fedora} >= 24 || 0%{?rhel} > 7
 # A test case uses zh_CN locale to verify XML event translations
-BuildRequires:  glibc-all-langpacks
+BuildRequires: glibc-all-langpacks
 %endif
+
 %if %{with bugzilla}
-BuildRequires:  xmlrpc-c-devel
+BuildRequires: xmlrpc-c-devel
 %endif
+BuildRequires: doxygen
+BuildRequires: systemd-devel
+BuildRequires: augeas-devel
+BuildRequires: augeas
+BuildRequires: libarchive-devel
+Requires: libreport-filesystem = %{version}-%{release}
+Requires: satyr%{?_isa} >= 0.38
+Requires: glib2%{?_isa} >= %{glib_ver}
+Requires: libarchive%{?_isa}
+
 # Required for the temporary modularity hack, see below
 %if 0%{?_module_build}
-BuildRequires:  sed
+BuildRequires: sed
 %endif
+
+Obsoletes: %{name}-compat < 2.13.2
+Obsoletes: %{name}-plugin-rhtsupport < 2.13.2
+Obsoletes: %{name}-rhel < 2.13.2
 
 %description
 Libraries providing API for reporting different problems in applications
 to different bug targets like Bugzilla, ftp, trac, etc...
 
 %package filesystem
-Summary:        Filesystem layout for libreport
-BuildArch:      noarch
+Summary: Filesystem layout for libreport
+BuildArch: noarch
 
 %description filesystem
 Filesystem layout for libreport
 
 %package devel
-Summary:        Development libraries and headers for libreport
-Requires:       libreport = %{version}-%{release}
+Summary: Development libraries and headers for libreport
+Requires: libreport = %{version}-%{release}
 
 %description devel
 Development libraries and headers for libreport
 
 %package web
-Summary:        Library providing network API for libreport
-Requires:       libreport = %{version}-%{release}
+Summary: Library providing network API for libreport
+Requires: libreport = %{version}-%{release}
 
 %description web
 Library providing network API for libreport
 
 %package web-devel
-Summary:        Development headers for libreport-web
-Requires:       libreport-web = %{version}-%{release}
+Summary: Development headers for libreport-web
+Requires: libreport-web = %{version}-%{release}
 
 %description web-devel
 Development headers for libreport-web
 
 %package -n python3-libreport
+Summary: Python 3 bindings for report-libs
 %if 0%{?_module_build}
 # This is required for F26 Boltron (the modular release)
 # Different parts of libreport are shipped with different
@@ -96,63 +105,81 @@ Development headers for libreport-web
 # strict NVR dependency to make it work.  Temporary and
 # limited to F26 Boltron.
 %global distfreerelease %(echo %{release}|sed 's/%{?dist}$//'||echo 0)
-Requires:       libreport >= %{version}-%{distfreerelease}
+Requires: libreport >= %{version}-%{distfreerelease}
 %else
-Requires:       libreport = %{version}-%{release}
+Requires: libreport = %{version}-%{release}
 %endif
-Summary:        Python 3 bindings for report-libs
+Requires: python3-dnf
+Requires: python3-requests
+Requires: python3-urllib3
 %{?python_provide:%python_provide python3-libreport}
-Requires:       python3-dnf
 
 %description -n python3-libreport
 Python 3 bindings for report-libs.
 
 %package cli
-Summary:        %{name}'s command line interface
-Requires:       %{name} = %{version}-%{release}
+Summary: %{name}'s command line interface
+Requires: %{name} = %{version}-%{release}
 
 %description cli
 This package contains simple command line tool for working
 with problem dump reports
 
 %package newt
-Summary:        %{name}'s newt interface
-Requires:       %{name} = %{version}-%{release}
-Provides:       report-newt = 0:0.23-1
-Obsoletes:      report-newt < 0:0.23-1
+Summary: %{name}'s newt interface
+Requires: %{name} = %{version}-%{release}
+Provides: report-newt = 0:0.23-1
+Obsoletes: report-newt < 0:0.23-1
 
 %description newt
 This package contains a simple newt application for reporting
 bugs
 
+%package gtk
+Summary: GTK front-end for libreport
+Requires: libreport = %{version}-%{release}
+Requires: libreport-plugin-reportuploader = %{version}-%{release}
+Provides: report-gtk = 0:0.23-1
+Obsoletes: report-gtk < 0:0.23-1
+
+%description gtk
+Applications for reporting bugs using libreport backend
+
+%package gtk-devel
+Summary: Development libraries and headers for libreport
+Requires: libreport-gtk = %{version}-%{release}
+
+%description gtk-devel
+Development libraries and headers for libreport-gtk
+
 %package plugin-kerneloops
-Summary:        %{name}'s kerneloops reporter plugin
-Requires:       %{name} = %{version}-%{release}
-Requires:       curl
-Requires:       libreport-web = %{version}-%{release}
+Summary: %{name}'s kerneloops reporter plugin
+Requires: curl
+Requires: %{name} = %{version}-%{release}
+Requires: libreport-web = %{version}-%{release}
 
 %description plugin-kerneloops
 This package contains plugin which sends kernel crash information to specified
 server, usually to kerneloops.org.
 
 %package plugin-logger
-Summary:        %{name}'s logger reporter plugin
-Requires:       %{name} = %{version}-%{release}
+Summary: %{name}'s logger reporter plugin
+Requires: %{name} = %{version}-%{release}
 
 %description plugin-logger
 The simple reporter plugin which writes a report to a specified file.
 
 %package plugin-systemd-journal
-Summary:        %{name}'s systemd journal reporter plugin
-Requires:       %{name} = %{version}-%{release}
+Summary: %{name}'s systemd journal reporter plugin
+Requires: %{name} = %{version}-%{release}
 
 %description plugin-systemd-journal
 The simple reporter plugin which writes a report to the systemd journal.
 
 %package plugin-mailx
-Summary:        %{name}'s mailx reporter plugin
-Requires:       %{name} = %{version}-%{release}
-Requires:       mailx
+Summary: %{name}'s mailx reporter plugin
+Requires: %{name} = %{version}-%{release}
+Requires: /usr/bin/mailx
 
 %description plugin-mailx
 The simple reporter plugin which sends a report via mailx to a specified
@@ -160,74 +187,60 @@ email address.
 
 %if %{with bugzilla}
 %package plugin-bugzilla
-Summary:        %{name}'s bugzilla plugin
-Requires:       %{name} = %{version}-%{release}
-Requires:       libreport-web = %{version}-%{release}
+Summary: %{name}'s bugzilla plugin
+Requires: %{name} = %{version}-%{release}
+Requires: libreport-web = %{version}-%{release}
+Requires: python3-libreport = %{version}-%{release}
+%if 0%{?fedora} >= 38
+Requires: python3-satyr
+Suggests: python3-pytest
+Suggests: python3-vcrpy
+%endif
+
+
 
 %description plugin-bugzilla
 Plugin to report bugs into the bugzilla.
 %endif
 
 %package plugin-mantisbt
-Summary:        %{name}'s mantisbt plugin
-Requires:       %{name} = %{version}-%{release}
-Requires:       libreport-web = %{version}-%{release}
+Summary: %{name}'s mantisbt plugin
+Requires: %{name} = %{version}-%{release}
+Requires: libreport-web = %{version}-%{release}
 
 %description plugin-mantisbt
 Plugin to report bugs into the mantisbt.
 
 %package centos
-Summary:        %{name}'s CentOS Bug Tracker workflow
-Requires:       %{name} = %{version}-%{release}
-Requires:       libreport-plugin-mantisbt = %{version}-%{release}
-Requires:       libreport-web = %{version}-%{release}
+Summary: %{name}'s CentOS Bug Tracker workflow
+Requires: %{name} = %{version}-%{release}
+Requires: libreport-web = %{version}-%{release}
+Requires: libreport-plugin-mantisbt = %{version}-%{release}
 
 %description centos
 Workflows to report issues into the CentOS Bug Tracker.
 
 %package plugin-ureport
-Summary:        %{name}'s micro report plugin
-BuildRequires:  %{libjson_devel}
-Requires:       %{name} = %{version}-%{release}
-Requires:       libreport-web = %{version}-%{release}
-%if 0%{?rhel}
-Requires:       python3-subscription-manager-rhsm
-%endif
+Summary: %{name}'s micro report plugin
+BuildRequires: %{libjson_devel}
+Requires: %{name} = %{version}-%{release}
+Requires: libreport-web = %{version}-%{release}
 
 %description plugin-ureport
 Uploads micro-report to abrt server
 
-%package plugin-rhtsupport
-Summary:        %{name}'s RHTSupport plugin
-Requires:       %{name} = %{version}-%{release}
-Requires:       libreport-web = %{version}-%{release}
-
-%description plugin-rhtsupport
-Plugin to report bugs into RH support system.
-
-%if %{with bugzilla}
-%package compat
-Summary:        %{name}'s compat layer for obsoleted 'report' package
-Requires:       %{name}-plugin-bugzilla = %{version}-%{release}
-Requires:       %{name}-plugin-rhtsupport = %{version}-%{release}
-Requires:       libreport = %{version}-%{release}
-
-%description compat
-Provides 'report' command-line tool.
-%endif
-
 %package plugin-reportuploader
-Summary:        %{name}'s reportuploader plugin
-Requires:       %{name} = %{version}-%{release}
-Requires:       libreport-web = %{version}-%{release}
+Summary: %{name}'s reportuploader plugin
+Requires: %{name} = %{version}-%{release}
+Requires: libreport-web = %{version}-%{release}
 
 %description plugin-reportuploader
 Plugin to report bugs into anonymous FTP site associated with ticketing system.
 
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?eln}
 %package fedora
-Summary:        Default configuration for reporting bugs via Fedora infrastructure
-Requires:       %{name} = %{version}-%{release}
+Summary: Default configuration for reporting bugs via Fedora infrastructure
+Requires: %{name} = %{version}-%{release}
 
 %description fedora
 Default configuration for reporting bugs via Fedora infrastructure
@@ -235,22 +248,12 @@ used to easily configure the reporting process for Fedora systems. Just
 install this package and you're done.
 %endif
 
-%if 0%{?rhel}
-%package rhel
-Summary:        Default configuration for reporting bugs via Red Hat infrastructure
-Requires:       %{name} = %{version}-%{release}
-Requires:       %{name}-plugin-ureport
-
-%description rhel
-Default configuration for reporting bugs via Red Hat infrastructure
-used to easily configure the reporting process for Red Hat systems. Just
-install this package and you're done.
-
+%if 0%{?rhel} && ! 0%{?eln}
 %package rhel-bugzilla
-Summary:        Default configuration for reporting bugs to Red Hat Bugzilla
-Requires:       %{name} = %{version}-%{release}
-Requires:       libreport-plugin-bugzilla = %{version}-%{release}
-Requires:       libreport-plugin-ureport = %{version}-%{release}
+Summary: Default configuration for reporting bugs to Red Hat Bugzilla
+Requires: %{name} = %{version}-%{release}
+Requires: libreport-plugin-bugzilla = %{version}-%{release}
+Requires: libreport-plugin-ureport = %{version}-%{release}
 
 %description rhel-bugzilla
 Default configuration for reporting bugs to Red Hat Bugzilla used to easily
@@ -258,9 +261,9 @@ configure the reporting process for Red Hat systems. Just install this package
 and you're done.
 
 %package rhel-anaconda-bugzilla
-Summary:        Default configuration for reporting anaconda bugs to Red Hat Bugzilla
-Requires:       %{name} = %{version}-%{release}
-Requires:       libreport-plugin-bugzilla = %{version}-%{release}
+Summary: Default configuration for reporting anaconda bugs to Red Hat Bugzilla
+Requires: %{name} = %{version}-%{release}
+Requires: libreport-plugin-bugzilla = %{version}-%{release}
 
 %description rhel-anaconda-bugzilla
 Default configuration for reporting Anaconda problems to Red Hat Bugzilla used
@@ -270,13 +273,11 @@ package and you're done.
 
 %if %{with bugzilla}
 %package anaconda
-Summary:        Default configuration for reporting anaconda bugs
-Requires:       %{name} = %{version}-%{release}
-Requires:       libreport-plugin-reportuploader = %{version}-%{release}
-%if 0%{?rhel}
-Requires:       libreport-plugin-rhtsupport = %{version}-%{release}
-%else
-Requires:       libreport-plugin-bugzilla = %{version}-%{release}
+Summary: Default configuration for reporting anaconda bugs
+Requires: %{name} = %{version}-%{release}
+Requires: libreport-plugin-reportuploader = %{version}-%{release}
+%if ! 0%{?rhel} || 0%{?eln}
+Requires: libreport-plugin-bugzilla = %{version}-%{release}
 %endif
 
 %description anaconda
@@ -285,29 +286,25 @@ data over ftp/scp...
 %endif
 
 %prep
-%autosetup -S git
+%autosetup
 
 %build
-autoconf
+./autogen.sh
 
 %configure \
 %if %{without bugzilla}
         --without-bugzilla \
 %endif
-%if 0%{?rhel}
-        --enable-import-rhtsupport-cert \
-%endif
         --enable-doxygen-docs \
-        --disable-silent-rules \
-        --without-gtk
+        --disable-silent-rules
 
 %make_build
 
 %install
 %make_install \
 %if %{with python3}
-             PYTHON=python3 \
-%endif # with python3
+             PYTHON=%{__python3} \
+%endif
              mandir=%{_mandir}
 
 %find_lang %{name}
@@ -332,7 +329,7 @@ mkdir -p %{buildroot}/%{_datadir}/%{name}/workflows/
 rm -f %{buildroot}/%{_infodir}/dir
 
 # Remove unwanted Fedora specific workflow configuration files
-%if 0%{!?fedora:1}
+%if ! 0%{?fedora} && ! 0%{?eln}
 rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_FedoraCCpp.xml
 rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_FedoraKerneloops.xml
 rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_FedoraPython.xml
@@ -348,17 +345,8 @@ rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_AnacondaFedora.xml
 %endif
 
 # Remove unwanted RHEL specific workflow configuration files
-%if 0%{!?rhel:1}
-rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_RHELCCpp.xml
-rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_RHELKerneloops.xml
-rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_RHELPython.xml
-rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_RHELvmcore.xml
-rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_RHELxorg.xml
-rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_RHELLibreport.xml
-rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_RHELJava.xml
-rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_RHELJavaScript.xml
+%if ! 0%{?rhel} || 0%{?eln}
 rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_uReport.xml
-rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_AnacondaRHEL.xml
 rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_AnacondaRHELBugzilla.xml
 rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_RHELBugzillaCCpp.xml
 rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_RHELBugzillaKerneloops.xml
@@ -376,41 +364,59 @@ rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_RHELAddDataxorg.xml
 rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_RHELAddDataLibreport.xml
 rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_RHELAddDataJava.xml
 rm -f %{buildroot}/%{_datadir}/libreport/workflows/workflow_RHELAddDataJavaScript.xml
-rm -f %{buildroot}/%{_sysconfdir}/libreport/workflows.d/report_rhel.conf
-rm -f %{buildroot}/%{_sysconfdir}/libreport/workflows.d/report_rhel_add_data.conf
 rm -f %{buildroot}/%{_sysconfdir}/libreport/workflows.d/report_uReport.conf
 rm -f %{buildroot}/%{_sysconfdir}/libreport/workflows.d/report_rhel_bugzilla.conf
-rm -f %{buildroot}%{_mandir}/man5/report_rhel.conf.5
 rm -f %{buildroot}%{_mandir}/man5/report_uReport.conf.5
 rm -f %{buildroot}%{_mandir}/man5/report_rhel_bugzilla.conf.5
 %endif
 
-rm -f %{buildroot}%{_mandir}/man1/report-gtk.1
-rm -f %{buildroot}%{_mandir}/man5/forbidden_words.conf.5
-rm -f %{buildroot}%{_mandir}/man5/ignored_words.conf.5
+%if 0%{?fedora} >= 38
+    mv %{buildroot}/%{_bindir}/reporter-bugzilla-python %{buildroot}/%{_bindir}/reporter-bugzilla
+%endif
 
 %check
-make check
-check_result=$?
-if [[ $check_result -ne 0 ]]; then
+make check|| {
     # find and print the logs of failed test
     # do not cat tests/testsuite.log because it contains a lot of bloat
     find tests/testsuite.dir -name "testsuite.log" -print -exec cat '{}' \;
-fi
-[[ $check_result -eq 0 ]]
+    exit 1
+}
 
 %ldconfig_scriptlets
 %ldconfig_scriptlets web
+%if 0%{?rhel} && 0%{?rhel} <= 7
+%post gtk
+%{?ldconfig}
+# update icon cache
+touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
+
+%postun gtk
+%{?ldconfig}
+if [ $1 -eq 0 ] ; then
+    touch --no-create %{_datadir}/icons/hicolor &>/dev/null
+    gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+fi
+
+%posttrans gtk
+gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+
+%endif
 
 %files -f %{name}.lang
 %doc README.md
 %license COPYING
 %config(noreplace) %{_sysconfdir}/%{name}/libreport.conf
 %config(noreplace) %{_sysconfdir}/%{name}/report_event.conf
+%config(noreplace) %{_sysconfdir}/%{name}/forbidden_words.conf
+%config(noreplace) %{_sysconfdir}/%{name}/ignored_words.conf
+%config(noreplace) %{_sysconfdir}/%{name}/ignored_elements.conf
 %{_datadir}/%{name}/conf.d/libreport.conf
 %{_libdir}/libreport.so.*
 %{_mandir}/man5/libreport.conf.5*
 %{_mandir}/man5/report_event.conf.5*
+%{_mandir}/man5/forbidden_words.conf.5*
+%{_mandir}/man5/ignored_words.conf.5*
+%{_mandir}/man5/ignored_elements.conf.5*
 # filesystem package owns /usr/share/augeas/lenses directory
 %{_datadir}/augeas/lenses/libreport.aug
 
@@ -441,6 +447,9 @@ fi
 %{_includedir}/libreport/file_obj.h
 %{_includedir}/libreport/config_item_info.h
 %{_includedir}/libreport/workflow.h
+%{_includedir}/libreport/problem_details_widget.h
+%{_includedir}/libreport/problem_details_dialog.h
+%{_includedir}/libreport/problem_utils.h
 %{_includedir}/libreport/ureport.h
 %{_includedir}/libreport/reporters.h
 %{_includedir}/libreport/global_configuration.h
@@ -471,6 +480,16 @@ fi
 %files newt
 %{_bindir}/report-newt
 %{_mandir}/man1/report-newt.1.gz
+
+%files gtk
+%{_bindir}/report-gtk
+%{_libdir}/libreport-gtk.so.*
+%{_mandir}/man1/report-gtk.1.gz
+
+%files gtk-devel
+%{_libdir}/libreport-gtk.so
+%{_includedir}/libreport/internal_libreport_gtk.h
+%{_libdir}/pkgconfig/libreport-gtk.pc
 
 %files plugin-kerneloops
 %{_datadir}/%{name}/events/report_Kerneloops.xml
@@ -515,7 +534,7 @@ fi
 %{_mandir}/man1/reporter-ureport.1.gz
 %{_mandir}/man5/ureport.conf.5.gz
 %{_datadir}/%{name}/events/report_uReport.xml
-%if 0%{?rhel}
+%if 0%{?rhel} && ! 0%{?eln}
 %config(noreplace) %{_sysconfdir}/libreport/workflows.d/report_uReport.conf
 %{_datadir}/%{name}/workflows/workflow_uReport.xml
 %{_mandir}/man5/report_uReport.conf.5.*
@@ -545,6 +564,10 @@ fi
 %{_mandir}/man5/bugzilla_formatdup_analyzer_libreport.conf.5.*
 %{_mandir}/man5/bugzilla_format_kernel.conf.5.*
 %{_bindir}/reporter-bugzilla
+%if 0%{?fedora} < 38
+%{_bindir}/reporter-bugzilla-python
+%endif
+
 %endif
 
 %files plugin-mantisbt
@@ -581,26 +604,6 @@ fi
 %config(noreplace) %{_sysconfdir}/libreport/events.d/centos_report_event.conf
 %{_mandir}/man5/centos_report_event.conf.5.gz
 
-%files plugin-rhtsupport
-%config(noreplace) %{_sysconfdir}/libreport/plugins/rhtsupport.conf
-%{_datadir}/%{name}/conf.d/plugins/rhtsupport.conf
-%{_datadir}/%{name}/events/report_RHTSupport.xml
-%{_datadir}/%{name}/events/report_RHTSupport_AddData.xml
-%if 0%{?rhel}
-%attr(600,root,root)%{_sysconfdir}/%{name}/cert-api.access.redhat.com.pem
-%endif
-%config(noreplace) %{_sysconfdir}/libreport/events.d/rhtsupport_event.conf
-%{_mandir}/man1/reporter-rhtsupport.1.gz
-%{_mandir}/man5/rhtsupport.conf.5.*
-%{_mandir}/man5/rhtsupport_event.conf.5.*
-%{_bindir}/reporter-rhtsupport
-
-%if %{with bugzilla}
-%files compat
-%{_bindir}/report
-%{_mandir}/man1/report.1.gz
-%endif
-
 %files plugin-reportuploader
 %{_mandir}/man*/reporter-upload.*
 %{_mandir}/man5/uploader_event.conf.5.*
@@ -617,7 +620,7 @@ fi
 %config(noreplace) %{_sysconfdir}/libreport/events/report_Uploader.conf
 %{_mandir}/man5/report_Uploader.conf.5.*
 
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?eln}
 %files fedora
 %{_datadir}/%{name}/workflows/workflow_FedoraCCpp.xml
 %{_datadir}/%{name}/workflows/workflow_FedoraKerneloops.xml
@@ -632,28 +635,8 @@ fi
 %{_mandir}/man5/report_fedora.conf.5.*
 %endif
 
-%if 0%{?rhel}
-%files rhel
-%{_datadir}/%{name}/workflows/workflow_RHELCCpp.xml
-%{_datadir}/%{name}/workflows/workflow_RHELKerneloops.xml
-%{_datadir}/%{name}/workflows/workflow_RHELPython.xml
-%{_datadir}/%{name}/workflows/workflow_RHELvmcore.xml
-%{_datadir}/%{name}/workflows/workflow_RHELxorg.xml
-%{_datadir}/%{name}/workflows/workflow_RHELLibreport.xml
-%{_datadir}/%{name}/workflows/workflow_RHELJava.xml
-%{_datadir}/%{name}/workflows/workflow_RHELJavaScript.xml
-%{_datadir}/%{name}/workflows/workflow_RHELAddDataCCpp.xml
-%{_datadir}/%{name}/workflows/workflow_RHELAddDataJava.xml
-%{_datadir}/%{name}/workflows/workflow_RHELAddDataKerneloops.xml
-%{_datadir}/%{name}/workflows/workflow_RHELAddDataLibreport.xml
-%{_datadir}/%{name}/workflows/workflow_RHELAddDataPython.xml
-%{_datadir}/%{name}/workflows/workflow_RHELAddDatavmcore.xml
-%{_datadir}/%{name}/workflows/workflow_RHELAddDataxorg.xml
-%{_datadir}/%{name}/workflows/workflow_RHELAddDataJavaScript.xml
-%config(noreplace) %{_sysconfdir}/libreport/workflows.d/report_rhel.conf
-%config(noreplace) %{_sysconfdir}/libreport/workflows.d/report_rhel_add_data.conf
-%{_mandir}/man5/report_rhel.conf.5.*
-
+%if %{with bugzilla}
+%if 0%{?rhel} && ! 0%{?eln}
 %files rhel-bugzilla
 %{_datadir}/%{name}/workflows/workflow_RHELBugzillaCCpp.xml
 %{_datadir}/%{name}/workflows/workflow_RHELBugzillaKerneloops.xml
@@ -670,13 +653,9 @@ fi
 %{_datadir}/%{name}/workflows/workflow_AnacondaRHELBugzilla.xml
 %endif
 
-%if %{with bugzilla}
 %files anaconda
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?eln}
 %{_datadir}/%{name}/workflows/workflow_AnacondaFedora.xml
-%endif
-%if 0%{?rhel}
-%{_datadir}/%{name}/workflows/workflow_AnacondaRHEL.xml
 %endif
 %{_datadir}/%{name}/workflows/workflow_AnacondaUpload.xml
 %config(noreplace) %{_sysconfdir}/libreport/workflows.d/anaconda_event.conf
@@ -690,26 +669,305 @@ fi
 %endif
 
 %changelog
-* Tue Dec 20 2022 Muhammad Falak <mwani@microsoft.com> - 2.13.1-9
-- License verified
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.17.15-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Thu Dec 09 2021 Muhammad Falak <mwani@microsoft.com> - 2.13.1-8
-- Introduce macro '%{mariner_failing_tests}' to gate `--run-check` failures
-- Remove non 0 exit from check to avoid build break
+* Fri Jun 07 2024 Python Maint <python-maint@redhat.com> - 2.17.15-2
+- Rebuilt for Python 3.13
 
-* Wed Aug 11 2021 Thomas Crain <thcrain@microsoft.com> - 2.13.1-7
-- Only require testing requirements during check builds
-- Only build Fedora subpackage on Fedora
+* Sun Feb 18 2024 Packit <hello@packit.dev> - 2.17.15-1
+- Release version 2.17.15 (Michal Srb)
+- reporter-bugzilla: Make the supplementary bugs easily identifiable (Michal Srb)
+- reporter-bugzilla: Fix formatting in the supplementary bugs (Michal Srb)
+- reporter-bugzilla: Fix code comment (Michal Srb)
 
-* Tue Jan 12 2021 Joe Schmitt <joschmit@microsoft.com> - 2.13.1-6
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
-- Remove gtk3 dependency and features. ignored_words and forbidden_words are built only when gtk support is on.
+* Mon Feb 12 2024 Packit <hello@packit.dev> - 2.17.14-1
+- Release version 2.17.14 (Michal Srb)
+- reporter-bugzilla: Reduce number of duplicate bug reports (Michal Srb)
+- reporter-bugzilla: Fix config loading (Michal Srb)
+- reporter-bugzilla: API key must consist of latin-1 characters (Michal Srb)
+- reporter-bugzilla: Fix typo (Michal Srb)
+- reporter-bugzilla: Fix creating binary attachments (Michal Srb)
+- Update translations (mgrabovsky)
 
-* Wed Oct 07 2020 Matěj Grabovský <mgrabovs@redhat.com> - 2.13.1-5
+* Sun Feb 04 2024 Packit <hello@packit.dev> - 2.17.13-1
+- Release version 2.17.13 (Michal Srb)
+- Exclude coredump archives when creating a bug (Michal Srb)
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.17.11-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Florian Weimer <fweimer@redhat.com> - 2.17.11-5
+- Fix C compatibility issues in tests
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.17.11-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.17.11-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Sat Jul 01 2023 Python Maint <python-maint@redhat.com> - 2.17.11-2
+- Rebuilt for Python 3.12
+
+* Fri Jun 30 2023 Packit <hello@packit.dev> - 2.17.11-1
+- Release version 2.17.11 (Michal Srb)
+- spec: Add missing requires for python3-libreport (Michal Srb)
+- Build URL with urllib.parse.urljoin() (Michal Srb)
+- Add XDG_ACTIVATION_TOKEN to the list of ignored words (Michal Srb)
+- Attachments are minor updates in Bugzilla (Michal Srb)
+- Retry Bugzilla search queries with delays (Michal Srb)
+- Fix "NameError: name 'ticket' is not defined" exception (Michal Srb)
+- Update translations (mgrabovsky)
+
+* Thu Jun 15 2023 Python Maint <python-maint@redhat.com> - 2.17.10-2
+- Rebuilt for Python 3.12
+
+* Thu May 11 2023 Packit <hello@packit.dev> - 2.17.10-1
+- Release version 2.17.10 (Matěj Grabovský)
+- reporter-upload: Fix a use-after-free error in string handling (Matěj Grabovský)
+- Update translations (mgrabovsky)
+- Update translations (mgrabovsky)
+
+* Fri Mar 24 2023 Packit <hello@packit.dev> - 2.17.9-1
+- Release version 2.17.9 (Michal Srb)
+- reporter-bugzilla: Fix string interpolation (Matěj Grabovský)
+- reporter-bugzilla: Replace flags with just keyword arg (Michal Srb)
+- reporter-bugzilla: Make sure that the creator of a bug is always in CC (Michal Srb)
+- reporter-bugzilla: Don't fail if reported_to file doesn't exist (Michal Srb)
+- reporter-bugzilla: Fix reporting when the bug already exists (Michal Srb)
+- use $XDG_CONFIG_HOME to access user's configuration files (Yann Droneaud)
+- Update translations (mgrabovsky)
+
+* Fri Mar 03 2023 Packit <hello@packit.dev> - 2.17.8-1
+- Release version 2.17.8 (Michal Srb)
+- Update changelog (Michal Srb)
+- reporter-bugzilla: Fix KeyError when HOME env var is not set (Michal Srb)
+- Update changelog (Michal Srb)
+- reporter-bugzilla: Fix password prompt in client/server mode (Michal Srb)
+
+* Mon Feb 20 2023 Packit <hello@packit.dev> - 2.17.7-1
+- Release version 2.17.7 (Michal Srb)
+- spec: Add disttag (Michal Srb)
+- Update changelog (Michal Srb)
+- Fix rpm -V issue with missing reporter-bugzilla-python in f38 (Michal Srb)
+- Fix TypeError (Michal Srb)
+- Update pot file (Matěj Grabovský)
+- readme: Add diagram of related projects (Matěj Grabovský)
+- Update translations (mgrabovsky)
+- Use SPDX format for license field (Matěj Grabovský)
+- ignored_words: Add KeyboardInterrupt (Michal Fabik)
+- packit: Add dependencies for SRPM build (Matěj Grabovský)
+- Update translations (mgrabovsky)
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.17.6-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Sun Nov 06 2022 Packit <hello@packit.dev> - 2.17.6-1
+- Release version 2.17.6 (Michal Srb)
+- Update translations (mgrabovsky)
+- Update changelog (Michal Srb)
+- reporter-bugzilla: Fix TypeError (Michal Srb)
+
+* Mon Oct 24 2022 Michal Srb <michal@redhat.com> - 2.17.5-2
+- Fix dist-tag
+
+* Mon Oct 24 2022 Packit <hello@packit.dev> - 2.17.5-1
+- Release version 2.17.5 (Michal Srb)
+- Update changelog (Michal Srb)
+- dump_dir.py: check that the filename doesn't start with "/" (Michal Srb)
+- dump_dir.py: Don't pass libreport flags to open() (Michal Srb)
+- reporter-bugzilla: Fix exceptions (Michal Srb)
+- Update translations (mgrabovsky)
+
+* Wed Sep 14 2022 Packit <hello@packit.dev> - 2.17.4-1
+- Release version 2.17.4 (Michal Fabik)
+- Update changelog (Michal Fabik)
+- reporter_bugzilla.py: Don't ask for API key if we already have it (Michal Srb)
+- internal/bz_connection.py: Fix "TypeError: 'builtin_function_or_method' object is not subscriptable" (Michal Srb)
+- reporter_bugzilla.py: Fix condition (Michal Srb)
+- internal/reported_to.py: Prevent possible ValueError if the line is for example empty (Michal Srb)
+- reporter_bugzilla.py: Prevent possible KeyError exception (Michal Srb)
+- reporter_bugzilla.py: Default value for `b_create_private` is False (Michal Srb)
+- reporter_bugzilla.py: Prevent possible KeyError exception (Michal Srb)
+
+* Mon Sep 12 2022 Packit <hello@packit.dev> - 2.17.3-1
+- Release version 2.17.3 (Michal Fabik)
+- Update changelog (Michal Fabik)
+- Run autoupdate to get rid of obsolete/deprecated macros (Michal Fabik)
+- Makefile: Move README.md to EXTRA_DIST (Michal Fabik)
+- Don't build rhel-bugzilla --without-bugzilla (Michal Fabik)
+- doc: Make anaconda_event.conf depend on BZ (Michal Fabik)
+- Fix build --without-bugzilla (Michal Fabik)
+- spec: Don't list files twice (Michal Fabik)
+- Update translations (mgrabovsky)
+
+* Thu Aug 18 2022 Packit <hello@packit.dev> - 2.17.2-1
+- Release version 2.17.2 (Michal Fabik)
+- reporter_bugzilla.py: Build, install (Michal Fabik)
+- reporter_bugzilla.py: Add tests (Michal Fabik)
+- reporter_bugzilla.py: Initial commit (Michal Fabik)
+- Update translations (mgrabovsky)
+- abrt_xmlrpc: Don't warn about discarded const (Michal Fabik)
+- Update translations (mgrabovsky)
+- Update translations (mgrabovsky)
+- Use conventional lseek arg order (Michal Fabik)
+- Update translations (mgrabovsky)
+- ignored_words: Ignore more debuginfod URLs (Matěj Grabovský)
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.17.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Mon Jun 13 2022 Python Maint <python-maint@redhat.com> - 2.17.1-2
+- Rebuilt for Python 3.11
+
+* Thu Mar 10 2022 Packit Service <user-cont-team+packit-service@redhat.com> - 2.17.1-1
+- Release version 2.17.1 (Michal Srb)
+- reporter-bugzilla: send API key in HTTP header (Michal Srb)
+- tito: Use custom tagger that updates changelog (Matěj Grabovský)
+- changelog: Fix link to release diff (Matěj Grabovský)
+- reporter-bugzilla: Fix APIKey name (Michal Fabik)
+- Update translations (mgrabovsky)
+- Add missing va_end (Michal Židek)
+
+* Mon Feb 21 2022 Michal Srb <michal@redhat.com> - 2.17.0-1
+- [reporter-bugzilla] Use API key for authentication
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.16.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Wed Jan 19 2022 Matěj Grabovský <mgrabovs@redhat.com> - 2.16.0-2
+- Rebuild for testing
+
+* Mon Jan 17 2022 Matěj Grabovský <mgrabovs@redhat.com> - 2.16.0-1
+- Bump satyr dependency to 0.38
+- Bump libreport library revision to 2:1:0
+- Drop build-time dependency on libproxy-devel
+- Drop last reference to global_uuid file
+- Don't use deprecated assertEquals() in tests
+- Add DEBUGINFOD_URLS environment variable to ignored_words
+- rhbz: Retry XML-RPC calls when uploading attachments
+- rhbz: Be a little bit more defensive when working with subcomponents
+- Update translations
+
+* Thu Jan 13 2022 Matěj Grabovský <mgrabovs@redhat.com> - 2.15.2-11
+- Backport patch for building with Python 3.11
+  (https://bugzilla.redhat.com/show_bug.cgi?id=2019402)
+
+* Wed Jan 12 2022 Matěj Grabovský <mgrabovs@redhat.com> - 2.15.2-10
+- Bump for rebuild
+
+* Thu Jan 06 2022 Matěj Grabovský <mgrabovs@redhat.com> - 2.15.2-9
+- Bump release for rebuild
+
+* Thu Jan 06 2022 Matěj Grabovský <mgrabovs@redhat.com> - 2.15.2-8
+- Bump release for rebuild
+
+* Wed Dec 22 2021 Matěj Grabovský <mgrabovs@redhat.com> - 2.15.2-7
+- Rebuild for satyr 0.39
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.15.2-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Sat Jul 10 2021 Björn Esser <besser82@fedoraproject.org> - 2.15.2-5
+- Rebuild for versioned symbols in json-c
+
+* Mon Jun 07 2021 Python Maint <python-maint@redhat.com> - 2.15.2-4
+- Rebuilt for Python 3.10
+
+* Fri Jun 04 2021 Python Maint <python-maint@redhat.com> - 2.15.2-2
+- Rebuilt for Python 3.10
+
+* Tue Jun 01 2021 Packit Service <user-cont-team+packit-service@redhat.com> - 2.15.2-1
+- Release version 2.15.2-1 (Michal Fabik)
+- binhex: Remove unused API (Matěj Grabovský)
+- lib: Use GLib for computing SHA-1 digests (Matěj Grabovský)
+- run_event: Improve memory management (Matěj Grabovský)
+- gtk: Fix segfault (Matěj Grabovský)
+
+* Tue May 04 2021 Packit Service <user-cont-team+packit-service@redhat.com> - 2.15.1-1
+- Release version 2.15.1-1 (Michal Fabik)
+- ureport: Strange usage of tmp variable (Michal Židek)
+- steal_directory: Silence a warning (Michal Židek)
+- dump_dir: Use g_free and re-init to NULL (Michal Židek)
+- dump_dir: Use g_free instead of free (Michal Židek)
+- dirsize: No need to check for NULL (Michal Židek)
+- dirsize: Bad checks for NULL (Michal Židek)
+- gui-wizard-gtk: Possible double free (Michal Židek)
+- gui-wizard-gtk: Check if EXCLUDE_FROM_REPORT is set (Michal Židek)
+- gui-wizard-gtk: Improve docs and add missing free (Michal Židek)
+- cli: Address of local auto-variable assigned to a function parameter (Michal Židek)
+- gtk-helpers: Add missing g_strfreev() (Michal Židek)
+- cli: Add missing g_free call (Michal Židek)
+- gitignore: Drop misleading comment (Michal Fabik)
+- spec: Sync upstream with distgit (Michal Fabik)
+- changelog: Add missing link to changes in 2.15.0 (Matěj Grabovský)
+- spec: Make plugin-mailx depend on /usr/bin/mailx (Matěj Grabovský)
+- Add support for excluding whole elements from search for sensitive words (Michal Srb)
+- ignored_words: add more "key" variations (Michal Srb)
+
+* Fri Jan 29 2021 Michal Srb <michal@redhat.com> - 2.14.0-17
+- Drop AnacondaRHEL workflow reference
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.14.0-16
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Mon Jan 18 2021 Peter Robinson <pbrobinson@fedoraproject.org> - 2.14.0-15
+- Bump rev for upgrades
+
+* Fri Dec 11 2020 Matěj Grabovský <mgrabovs@redhat.com> - 2.14.0-13
+- Add fix for https://bugzilla.redhat.com/show_bug.cgi?id=1906405
+
+* Tue Nov 03 2020 Matěj Grabovský <mgrabovs@redhat.com> - 2.14.0-12
+- Add fix for https://bugzilla.redhat.com/show_bug.cgi?id=1893595
+
+* Fri Oct 09 2020 Matěj Grabovský <mgrabovs@redhat.com> - 2.14.0-11
+- Add fix for https://bugzilla.redhat.com/show_bug.cgi?id=1882328
+
+* Tue Sep 29 2020 Matěj Grabovský <mgrabovs@redhat.com> - 2.14.0-10
 - Add fix for https://bugzilla.redhat.com/show_bug.cgi?id=1883337
+- Add fix for https://bugzilla.redhat.com/show_bug.cgi?id=1883410
 
-* Mon May 11 2020 Michal Fabik <mfabik@redhat.com> 2.13.1-2
-- Fix broken abrt-vmcore.service due to bad namespacing
+* Sun Sep 27 2020 Matěj Grabovský <mgrabovs@redhat.com> - 2.14.0-9
+- Add upstream fixes for memory management
+
+* Sun Sep 27 2020 Matěj Grabovský <mgrabovs@redhat.com> - 2.14.0-8
+- Add fix for https://bugzilla.redhat.com/show_bug.cgi?id=1882950
+
+* Fri Sep 25 2020 Matěj Grabovský <mgrabovs@redhat.com> - 2.14.0-7
+- Add fix for https://bugzilla.redhat.com/show_bug.cgi?id=1882319
+
+* Wed Aug 19 2020 Merlin Mathesius <mmathesi@redhat.com> - 2.14.0-6
+- Updates so ELN builds in a Fedora-like reporting configuration, even though
+  the %%{rhel} macro is set.
+
+* Thu Aug 13 2020 Michal Fabik <mfabik@redhat.com> 2.14.0-3
+- forbidden_words: Add potentially sensitive env vars
+- lib: Add version script for libreport
+- lib: compress: Use libarchive
+- Replace various utility functions with stock GLib ones
+- gtk,lib: Update symbol list
+- dd: Update dd_get_owner to handle error return values
+- dirsize: Don't pick .lock'd dirs for deletion
+- setgid instead of setuid the abrt-action-install-debuginfo-to-abrt-cache
+- Various coding style improvements
+- Various memory management fixes
+- lib: Check for errors when opening files
+- gtk-helpers: Check return value
+- doc: Exclude more files with --without-bugzilla
+- lib: Don’t use external executables for decompression
+- lib: Decommission libreport_list_free_with_free
+- Drop Red Hat Customer Portal reporter
+- ureport: Drop Strata integration
+- lib: Remove creates-items tag parsing in event definitions
+
+* Fri Aug 07 2020 Peter Robinson <pbrobinson@fedoraproject.org> - 2.13.1-4
+- Bump to fix upgrade path
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.13.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Sun May 24 2020 Miro Hrončok <mhroncok@redhat.com> - 2.13.1-2
+- Rebuilt for Python 3.9
 
 * Mon May 11 2020 Michal Fabik <mfabik@redhat.com> 2.13.1-1
 - Fix broken abrt-vmcore.service due to bad namespacing
@@ -722,6 +980,9 @@ fi
 - lib: Drop D-Bus code 
 - plugins: reporter-rhtsupport: Drop unused debugging code 
 - Update translations
+
+* Tue Apr 21 2020 Björn Esser <besser82@fedoraproject.org> - 2.12.0-4
+- Rebuild (json-c)
 
 * Fri Mar 20 2020 Ernestas Kulik <ekulik@redhat.com> - 2.12.0-3
 - Add patch for https://bugzilla.redhat.com/show_bug.cgi?id=1815544

@@ -29,7 +29,7 @@ BuildRequires:  mvn(commons-io:commons-io)
 BuildRequires:  mvn(net.i2p.crypto:eddsa)
 
 BuildArch:      noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 
 %description
 Trilead SSH-2 for Java is a library which implements the SSH-2 protocol in pure

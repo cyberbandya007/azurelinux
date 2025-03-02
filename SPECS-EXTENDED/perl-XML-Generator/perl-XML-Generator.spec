@@ -1,62 +1,140 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
-Summary:            XML-Generator Perl module
+Summary:            Perl extension for generating XML
 Name:               perl-XML-Generator
-Version:            1.04
-Release:            25%{?dist}
-License:            GPL+ or Artistic
+Version:            1.13
+Release:            5%{?dist}
+License:            GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:                https://metacpan.org/release/XML-Generator
+Source0:            https://cpan.metacpan.org/authors/id/T/TI/TIMLEGGE/XML-Generator-%{version}.tar.gz
 BuildArch:          noarch
-Source0:            https://cpan.metacpan.org/authors/id/B/BH/BHOLZMAN/XML-Generator-%{version}.tar.gz#/perl-XML-Generator-%{version}.tar.gz
 BuildRequires:      coreutils
-BuildRequires:      findutils
 BuildRequires:      make
-BuildRequires:      perl-interpreter
 BuildRequires:      perl-generators
-BuildRequires:      perl(ExtUtils::MakeMaker)
+BuildRequires:      perl-interpreter
+BuildRequires:      perl(Config)
+BuildRequires:      perl(ExtUtils::MakeMaker) >= 6.76
+BuildRequires:      perl(strict)
+BuildRequires:      perl(warnings)
 # Run-time:
 BuildRequires:      perl(base)
 BuildRequires:      perl(Carp)
 BuildRequires:      perl(constant)
 BuildRequires:      perl(overload)
-BuildRequires:      perl(strict)
 BuildRequires:      perl(vars)
-BuildRequires:      perl(warnings)
 BuildRequires:      perl(XML::DOM)
 # Tests:
 BuildRequires:      perl(Test)
+BuildRequires:      perl(Test::More)
+BuildRequires:      perl(utf8)
 # Optional tests:
 BuildRequires:      perl(Tie::IxHash)
-Requires:           perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires:           perl(warnings)
 
 %description
-perl module for generating XML documents
+Perl module for generating XML documents
+
+%package tests
+Summary:        Tests for %{name}
+Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       perl-Test-Harness
+Requires:       perl(Tie::IxHash)
+
+%description tests
+Tests from %{name}. Execute them
+with "%{_libexecdir}/%{name}/test".
 
 %prep
 %setup -q -n XML-Generator-%{version}
 
+# Help generators to recognize Perl scripts
+for F in t/*.t; do
+    perl -i -MConfig -ple 'print $Config{startperl} if $. == 1 && !s{\A#!.*perl\b}{$Config{startperl}}' "$F"
+    chmod +x "$F"
+done
+
 %build
-%{__perl} Makefile.PL INSTALLDIRS=vendor
-make %{?_smp_mflags}
+perl Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1 NO_PERLLOCAL=1
+%{make_build}
 
 %install
-make pure_install PERL_INSTALL_ROOT=%{buildroot}
-find %{buildroot} -type f -name .packlist -exec rm -f {} ';'
-find %{buildroot} -depth -type d -exec rmdir {} 2>/dev/null ';'
-chmod -R u+w %{buildroot}/*
+%{make_install}
+%{_fixperms} %{buildroot}/*
+
+# Install tests
+mkdir -p %{buildroot}%{_libexecdir}/%{name}
+cp -a t %{buildroot}%{_libexecdir}/%{name}
+rm %{buildroot}%{_libexecdir}/%{name}/t/author-pod-*
+cat > %{buildroot}%{_libexecdir}/%{name}/test << 'EOF'
+#!/bin/sh
+cd %{_libexecdir}/%{name} && exec prove -I . -j "$(getconf _NPROCESSORS_ONLN)"
+EOF
+chmod +x %{buildroot}%{_libexecdir}/%{name}/test
 
 %check
+unset AUTHOR_TESTING
+export HARNESS_OPTIONS=j$(perl -e 'if ($ARGV[0] =~ /.*-j([0-9][0-9]*).*/) {print $1} else {print 1}' -- '%{?_smp_mflags}')
 make test
 
 %files
+%license LICENSE
 %doc Changes README
 %{perl_vendorlib}/*
 %{_mandir}/man3/*.3*
 
+%files tests
+%{_libexecdir}/%{name}
+
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.04-25
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.13-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.13-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.13-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.13-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Wed May 03 2023 Jitka Plesnikova <jplesnik@redhat.com> - 1.13-1
+- 1.13 bump
+
+* Tue Apr 18 2023 Jitka Plesnikova <jplesnik@redhat.com> - 1.11-1
+- 1.11 bump
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.09-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.09-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Wed Jun 01 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.09-2
+- Perl 5.36 rebuild
+
+* Mon Feb 21 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.09-1
+- 1.09 bump
+- Package tests
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.04-31
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Fri Jul 23 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.04-30
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Sat May 22 2021 Jitka Plesnikova <jplesnik@redhat.com> - 1.04-29
+- Perl 5.34 rebuild
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.04-28
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.04-27
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 1.04-26
+- Perl 5.32 rebuild
+
+* Fri Feb 28 2020 Jitka Plesnikova <jplesnik@redhat.com> - 1.04-25
+- Use make_* macros
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.04-24
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

@@ -1,41 +1,46 @@
-Remove the contents of libjasper_compat.c.  The assignment
+Include "pm.h" for the declaration of the overflow_add function.  This
+avoids an implicit function declaration.  Future C compilers will
+require that all functions are declared explicitly.  Implicit function
+declarations are a language feature that was removed in 1999.
 
-        *errorP  = errorP;
+Likewise, include "pm.h" for the newly added declarations of realloc2.
+This fixes a pointer truncation bug in pjtoppm.
 
-is bogus because it creates a non-null value in *errorP even on
-success, and the caller expects a null pointer int his case.
+Both issues are specific to downstream patches.
 
-The source file is compiled, but not actually linked in, so this is
-only a problem because of the type error that fails the build.
-
-diff --git a/converter/other/jpeg2000/libjasper_compat.c b/converter/other/jpeg2000/libjasper_compat.c
-index 101820a321212dc6..e69de29bb2d1d643 100644
---- a/converter/other/jpeg2000/libjasper_compat.c
-+++ b/converter/other/jpeg2000/libjasper_compat.c
-@@ -1,26 +0,0 @@
--#include "netpbm/nstring.h"
--
--#include "jasper/jasper.h"
--#include "jasper/jas_image.h"
--
--#ifndef JAS_HAVE_PMJAS_IMAGE_DECODE
--
--void
--pmjas_image_decode(jas_stream_t * const in,
--                   int            const fmtArg,
--                   const char *   const optstr,
--                   jas_image_t ** const imagePP,
--                   const char **  const errorP) {
--
--    jas_image_t * const jasperP = jas_image_decode(in, fmtArg, optstr);
--
--    if (jasperP) {
--        *imagePP = jasperP;
--        *errorP  = errorP;
--    } else {
--        pm_asprintf(errorP, "Failed.  Details may have been written to "
--                    "Standard Error");
--    }
--}
--
--#endif
+diff --git a/converter/pbm/pbmtoppa/pbm.c b/converter/pbm/pbmtoppa/pbm.c
+index 1c8d236219b297e1..d63cab63b13f2051 100644
+--- a/converter/pbm/pbmtoppa/pbm.c
++++ b/converter/pbm/pbmtoppa/pbm.c
+@@ -12,6 +12,7 @@
+ #include <stdlib.h>
+ #include <string.h>
+ 
++#include "pm.h"
+ #include "ppapbm.h"
+ 
+ int make_pbm_stat(pbm_stat* pbm,FILE* fptr)
+diff --git a/converter/ppm/pjtoppm.c b/converter/ppm/pjtoppm.c
+index c458c06457c2b9bd..5e93a6acb8d6f198 100644
+--- a/converter/ppm/pjtoppm.c
++++ b/converter/ppm/pjtoppm.c
+@@ -10,6 +10,7 @@
+ ** implied warranty.
+ */
+ 
++#include "pm.h"
+ #include "ppm.h"
+ #include "mallocvar.h"
+ 
+diff --git a/lib/pm.h b/lib/pm.h
+index 5037c2519c565fbc..435445d5e7f52fbf 100644
+--- a/lib/pm.h
++++ b/lib/pm.h
+@@ -457,6 +457,7 @@ pm_parse_height(const char * const arg);
+ 
+ void *malloc2(int, int);
+ void *malloc3(int, int, int);
++void *realloc2(void * a, int b, int c);
+ #define overflow2(a,b) __overflow2(a,b)
+ void __overflow2(int, int);
+ void overflow3(int, int, int);

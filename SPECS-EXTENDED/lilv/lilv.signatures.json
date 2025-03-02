@@ -1,5 +1,7 @@
 {
  "Signatures": {
-  "lilv-0.24.14.tar.bz2": "6399dfcbead61a143acef3a38ad078047ab225b00470ad5d33745637341d6406"
+  "drobilla.gpg": "29c8ffc9ffee2982ad3c3355736ed043377c1f0f4ea4776df4b98a464692b70e",
+  "lilv-0.24.24.tar.xz": "6bb6be9f88504176d0642f12de809b2b9e2dc55621a68adb8c7edb99aefabb4f",
+  "lilv-0.24.24.tar.xz.sig": "67f4c9b14e1974b5efeb414bceb74a5d999062db4551b3d8e7d6be24df7b5e5a"
  }
 }

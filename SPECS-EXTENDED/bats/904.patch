@@ -1,0 +1,724 @@
+From 1061858136e1310bf61d0c762f9864059f120c89 Mon Sep 17 00:00:00 2001
+From: Debarshi Ray <debarshir@gnome.org>
+Date: Wed, 29 May 2024 22:13:43 +0200
+Subject: [PATCH 01/11] Add newline at end of file
+
+Some editors like GNU Emacs insist on adding the newline at end of file,
+if it's missing, which leads to noise when looking at the actual code
+changes.
+
+https://github.com/bats-core/bats-core/pull/904
+---
+ libexec/bats-core/bats-gather-tests | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libexec/bats-core/bats-gather-tests b/libexec/bats-core/bats-gather-tests
+index dcf42119ac..8ca6127cf8 100755
+--- a/libexec/bats-core/bats-gather-tests
++++ b/libexec/bats-core/bats-gather-tests
+@@ -307,4 +307,4 @@ fi
+ 
+ if (( focus_mode )); then
+   printf "focus_mode\n"
+-fi
+\ No newline at end of file
++fi
+
+From 6cc1dbcebfc3a56e28bc7f65bf846a889a84746a Mon Sep 17 00:00:00 2001
+From: Debarshi Ray <debarshir@gnome.org>
+Date: Wed, 29 May 2024 22:15:11 +0200
+Subject: [PATCH 02/11] Unbreak test suites with multiple files loading common
+ constants
+
+Test suites with a helper file with common constants that is loaded by
+multiple files stopped working with:
+  $ bats /some/path
+  /some/path/test_helper.bash: line 1: A_CONSTANT: readonly variable
+  Error while sourcing library loader at '/some/path/test_helper.bash'
+
+If the helper file had anything else other than the common constants,
+then the tests would run, but the spew about the constants would still
+remain:
+  $ bats --tap /some/path
+  /some/path/test_helper.bash: line 1: A_CONSTANT: readonly variable
+  1..2
+  ok 1 first
+  ok 2 second
+
+Fallout from 9d5ecdbe319bd0e39ef2637806832bb07768fb23
+
+https://github.com/bats-core/bats-core/pull/904
+---
+ docs/CHANGELOG.md                   | 2 ++
+ libexec/bats-core/bats-gather-tests | 8 ++++++++
+ 2 files changed, 10 insertions(+)
+
+diff --git a/libexec/bats-core/bats-gather-tests b/libexec/bats-core/bats-gather-tests
+index 8ca6127cf8..e58be19195 100755
+--- a/libexec/bats-core/bats-gather-tests
++++ b/libexec/bats-core/bats-gather-tests
+@@ -271,6 +271,14 @@ trap bats_gather_tests_exit_trap EXIT
+ 
+ bats_set_stacktrace_limit
+ 
++# override test_functions.bash's version to use it for test registration
++load() {
++  # the standard error stream and exit code will be revealed when running the tests
++  if ! bats_load_safe "$@" 2>/dev/null; then
++    return 0
++  fi
++}
++
+ bats_setup_tracing
+ focus_mode=0
+ for filename in "$@"; do
+
+From f94763e4579bf8b2343ad783f3986e1047d31ceb Mon Sep 17 00:00:00 2001
+From: Debarshi Ray <debarshir@gnome.org>
+Date: Wed, 29 May 2024 22:15:11 +0200
+Subject: [PATCH 03/11] Test test suites with multiple files loading common
+ constants
+
+https://github.com/bats-core/bats-core/pull/904
+---
+ .../suite/errors_in_multiple_load/a.bats      |  5 ++++
+ .../suite/errors_in_multiple_load/b.bats      |  5 ++++
+ .../suite/errors_in_multiple_load/c.bats      |  5 ++++
+ .../errors_in_multiple_load/test_helper.bash  |  1 +
+ .../suite/multiple_load_constants/a.bats      |  5 ++++
+ .../suite/multiple_load_constants/b.bats      |  5 ++++
+ .../multiple_load_constants/test_helper.bash  |  2 ++
+ test/suite.bats                               | 27 +++++++++++++++++++
+ 8 files changed, 55 insertions(+)
+ create mode 100644 test/fixtures/suite/errors_in_multiple_load/a.bats
+ create mode 100644 test/fixtures/suite/errors_in_multiple_load/b.bats
+ create mode 100644 test/fixtures/suite/errors_in_multiple_load/c.bats
+ create mode 100644 test/fixtures/suite/errors_in_multiple_load/test_helper.bash
+ create mode 100644 test/fixtures/suite/multiple_load_constants/a.bats
+ create mode 100644 test/fixtures/suite/multiple_load_constants/b.bats
+ create mode 100644 test/fixtures/suite/multiple_load_constants/test_helper.bash
+
+diff --git a/test/fixtures/suite/errors_in_multiple_load/a.bats b/test/fixtures/suite/errors_in_multiple_load/a.bats
+new file mode 100644
+index 0000000000..ba019095bc
+--- /dev/null
++++ b/test/fixtures/suite/errors_in_multiple_load/a.bats
+@@ -0,0 +1,5 @@
++load test_helper
++
++@test "truth" {
++  true
++}
+diff --git a/test/fixtures/suite/errors_in_multiple_load/b.bats b/test/fixtures/suite/errors_in_multiple_load/b.bats
+new file mode 100644
+index 0000000000..c0873fb927
+--- /dev/null
++++ b/test/fixtures/suite/errors_in_multiple_load/b.bats
+@@ -0,0 +1,5 @@
++load test_helper
++
++@test "more truth" {
++  true
++}
+diff --git a/test/fixtures/suite/errors_in_multiple_load/c.bats b/test/fixtures/suite/errors_in_multiple_load/c.bats
+new file mode 100644
+index 0000000000..75b37b6367
+--- /dev/null
++++ b/test/fixtures/suite/errors_in_multiple_load/c.bats
+@@ -0,0 +1,5 @@
++load nonexistent
++
++@test "yet more truth" {
++  true
++}
+diff --git a/test/fixtures/suite/errors_in_multiple_load/test_helper.bash b/test/fixtures/suite/errors_in_multiple_load/test_helper.bash
+new file mode 100644
+index 0000000000..b550798fb3
+--- /dev/null
++++ b/test/fixtures/suite/errors_in_multiple_load/test_helper.bash
+@@ -0,0 +1 @@
++call-to-undefined-command
+diff --git a/test/fixtures/suite/multiple_load_constants/a.bats b/test/fixtures/suite/multiple_load_constants/a.bats
+new file mode 100644
+index 0000000000..767a5419be
+--- /dev/null
++++ b/test/fixtures/suite/multiple_load_constants/a.bats
+@@ -0,0 +1,5 @@
++load test_helper
++
++@test "constant" {
++  [ "$A_CONSTANT" = "value" ]
++}
+diff --git a/test/fixtures/suite/multiple_load_constants/b.bats b/test/fixtures/suite/multiple_load_constants/b.bats
+new file mode 100644
+index 0000000000..f2b22dce11
+--- /dev/null
++++ b/test/fixtures/suite/multiple_load_constants/b.bats
+@@ -0,0 +1,5 @@
++load test_helper
++
++@test "constant (again)" {
++  [ "$A_CONSTANT" = "value" ]
++}
+diff --git a/test/fixtures/suite/multiple_load_constants/test_helper.bash b/test/fixtures/suite/multiple_load_constants/test_helper.bash
+new file mode 100644
+index 0000000000..5b825ccb82
+--- /dev/null
++++ b/test/fixtures/suite/multiple_load_constants/test_helper.bash
+@@ -0,0 +1,2 @@
++# shellcheck disable=SC2034
++readonly A_CONSTANT="value"
+diff --git a/test/suite.bats b/test/suite.bats
+index 31f9fa502b..ca92233eef 100755
+--- a/test/suite.bats
++++ b/test/suite.bats
+@@ -36,6 +36,14 @@ setup() {
+   echo "$output" | grep "^ok . quasi-truth"
+ }
+ 
++@test "aggregated output of multiple tests in a suite loading common constants" {
++  reentrant_run bats "$FIXTURE_ROOT/multiple_load_constants"
++  [ $status -eq 0 ]
++  [ "${lines[0]}" = "1..2" ]
++  [ "${lines[1]}" = "ok 1 constant" ]
++  [ "${lines[2]}" = "ok 2 constant (again)" ]
++}
++
+ @test "a failing test in a suite results in an error exit code" {
+   FLUNK=1 reentrant_run bats "$FIXTURE_ROOT/multiple"
+   [ $status -eq 1 ]
+@@ -43,6 +51,25 @@ setup() {
+   echo "$output" | grep "^not ok . quasi-truth"
+ }
+ 
++@test "errors when loading common helper from multiple tests in a suite" {
++  reentrant_run bats "$FIXTURE_ROOT/errors_in_multiple_load"
++  [ $status -eq 1 ]
++  [ "${lines[0]}" = "1..3" ]
++  regex="test_helper\.bash: line 1: call-to-undefined-command: command not found"
++  [[ "${lines[1]}" =~ $regex ]]
++  regex="Error while sourcing library loader at '.*test_helper\.bash'"
++  [[ "${lines[2]}" =~ $regex ]]
++  [ "${lines[3]}" = "not ok 1 setup_file failed" ]
++  regex="test_helper\.bash: line 1: call-to-undefined-command: command not found"
++  [[ "${lines[8]}" =~ $regex ]]
++  regex="Error while sourcing library loader at '.*test_helper\.bash'"
++  [[ "${lines[9]}" =~ $regex ]]
++  [ "${lines[10]}" = "not ok 2 setup_file failed" ]
++  regex="bats_load_safe: Could not find '.*nonexistent'\[\.bash\]"
++  [[ "${lines[15]}" =~ $regex ]]
++  [ "${lines[16]}" = "not ok 3 setup_file failed" ]
++}
++
+ @test "running an ad-hoc suite by specifying multiple test files" {
+   reentrant_run bats "$FIXTURE_ROOT/multiple/a.bats" "$FIXTURE_ROOT/multiple/b.bats"
+   [ $status -eq 0 ]
+
+From 5c52dc304f13593f48ccf97a070a0e57032c97fd Mon Sep 17 00:00:00 2001
+From: Martin Schulze <martin.schulze@vireso.de>
+Date: Wed, 29 May 2024 22:15:11 +0200
+Subject: [PATCH 04/11] Evaluate each test file in own shell during
+ gather-tests to avoid bad interactions
+
+---
+ libexec/bats-core/bats-gather-tests | 102 ++++++++++++++++++++--------
+ test/suite.bats                     |  21 ++----
+ 2 files changed, 82 insertions(+), 41 deletions(-)
+
+diff --git a/libexec/bats-core/bats-gather-tests b/libexec/bats-core/bats-gather-tests
+index e58be19195..e64db855bd 100755
+--- a/libexec/bats-core/bats-gather-tests
++++ b/libexec/bats-core/bats-gather-tests
+@@ -3,8 +3,6 @@ set -eET
+ 
+ args=("$@")
+ filter_tags_list=()
+-included_tests=()
+-excluded_tests=()
+ 
+ # shellcheck source=lib/bats-core/common.bash disable=SC2153 
+ source "$BATS_ROOT/lib/bats-core/common.bash"
+@@ -250,69 +248,119 @@ if [[ -n "${filter_status-}" ]]; then
+   else
+     printf "No recording of previous runs found. Running all tests!\n" >&2
+   fi
++else
++  : #printf "Not filtering by status!\n" >&2
+ fi
+ 
+ # shellcheck source=lib/bats-core/tracing.bash
+ source "$BATS_ROOT/lib/bats-core/tracing.bash"
+ 
++BATS_OUT="$BATS_RUN_TMPDIR/gather-tests.out"
++touch "$BATS_OUT"
++
+ bats_gather_tests_exit_trap() {
+   local bats_gather_tests_exit_status=$?
+   trap - ERR EXIT DEBUG
+-  if [[ ${BATS_ERROR_STATUS:-0} != 0 ]]; then
+-    bats_gather_tests_exit_status=$BATS_ERROR_STATUS
++  if (( bats_gather_tests_exit_status != 0)); then
+     printf "1..1\nnot ok 1 bats-gather-tests\n"
+-    bats_get_failure_stack_trace stack_trace
+-    bats_print_stack_trace "${stack_trace[@]}"
+-    bats_print_failed_command "${stack_trace[@]}" 
++    # play back traces from test file evaluation
++    bats_replace_filename < "$BATS_TRACE"
++    bats_replace_filename <"$BATS_OUT" | bats_prefix_lines_for_tap_output
+   fi >&2
+   exit "$bats_gather_tests_exit_status"
+ }
++
+ trap bats_gather_tests_exit_trap EXIT
+ 
+-bats_set_stacktrace_limit
++# prepare tracing for errors during test file evaluation
++BATS_TRACE="$BATS_RUN_TMPDIR/bats-gather-tests.trace"
++touch "$BATS_TRACE"
+ 
+-# override test_functions.bash's version to use it for test registration
+-load() {
+-  # the standard error stream and exit code will be revealed when running the tests
+-  if ! bats_load_safe "$@" 2>/dev/null; then
+-    return 0
++bats_gather_tests_source_exit_trap() {
++  local bats_gather_tests_source_exit_status=$?
++  trap - ERR EXIT DEBUG
++  if (( bats_gather_tests_source_exit_status != 0)); then
++    bats_get_failure_stack_trace stack_trace
++    bats_print_stack_trace "${stack_trace[@]}"
++    # TODO: why doesn't this work via ERR trap?
++    BATS_ERROR_STATUS=$bats_gather_tests_source_exit_status
++    bats_print_failed_command "${stack_trace[@]}"
++  fi  >>"$BATS_TRACE"
++  exit "$bats_gather_tests_source_exit_status"
++}
++
++bats_gather_tests_for_file() {
++  local test_names=() test_dupes=() included_tests=() excluded_tests=()
++
++  trap bats_gather_tests_source_exit_trap EXIT
++  bats_setup_tracing
++  bats_set_stacktrace_limit
++
++  # do the actual evaluation for gathering the tests
++  # shellcheck disable=SC1090
++  BATS_TEST_DIRNAME="${filename%/*}" source "$BATS_TEST_SOURCE" 1>"$BATS_OUT" 2>&1
++
++  if [[ "${#test_dupes[@]}" -ne 0 ]]; then
++    printf 'file_duplicate_test_names="%q"\n' "${test_dupes[*]#$filename$'\t'}"
++  fi
++
++  if [[ -n "$filter_status" ]]; then
++    # save filtered tests to exclude them again in next round
++    for test_line in "${excluded_tests[@]}"; do
++      printf "status-filtered %s %s\n" "$filter_status" "$test_line"
++    done >>"$BATS_RUNLOG_FILE"
+   fi
++
++  
++  printf "file_test_count=%d\n" "${#test_names[@]}"
++  printf "file_included_test_count=%d\n" "${#included_tests[@]}"
++  printf "focus_mode=%d\n" "$focus_mode"
+ }
+ 
+-bats_setup_tracing
+ focus_mode=0
++total_test_count=0
++total_included_test_count=0
+ for filename in "$@"; do
+   if [[ ! -f "$filename" ]]; then
+     abort 'Test file "%s" does not exist.\n' "${filename}"
+   fi
+ 
+-  test_names=()
+-  test_dupes=()
+-
+   BATS_TEST_FILENAME="$filename"
+   _bats_test_functions_setup -1 # invalid TEST_NUMBER, as this is not a test
+ 
+   BATS_TEST_NAME=source
+   BATS_TEST_FILTER="$BATS_TEST_FILTER" bats_preprocess_source # uses BATS_TEST_FILENAME
+-  # shellcheck disable=SC1090
+-  BATS_TEST_DIRNAME="${filename%/*}" source "$BATS_TEST_SOURCE"
+ 
+-  if [[ "${#test_dupes[@]}" -ne 0 ]]; then
+-    abort 'Duplicate test name(s) in file "%s": %s' "${filename}" "${test_dupes[*]#$filename$'\t'}"
++  file_duplicate_test_names=""
++  file_test_count=0
++  file_included_test_count=0
++  saved_focus_mode=$focus_mode
++  # get new values for the variables above
++  result="$(set -eET; bats_gather_tests_for_file)"
++  eval "$result"
++
++  if [[ -n "$file_duplicate_test_names" ]]; then
++    trap - EXIT # prevent 1..1 from being printed
++    abort 'Duplicate test name(s) in file "%s": %s' "$filename" "$file_duplicate_test_names"
++  fi
++
++  total_test_count=$((total_test_count + file_test_count))
++
++  # did focus mode turn on in this file? (cannot turn off afterwards)
++  if (( saved_focus_mode != focus_mode)); then # -> only count new tests
++    total_included_test_count=$file_included_test_count
++  else # -> count previous tests as well
++    total_included_test_count=$((total_included_test_count + file_included_test_count))
+   fi
+ done
+ 
+ if [[ -n "$filter_status" ]]; then
+-  # save filtered tests to exclude them again in next round
+-  for test_line in "${excluded_tests[@]}"; do
+-    printf "status-filtered %s %s\n" "$filter_status" "$test_line"
+-  done >>"$BATS_RUNLOG_FILE"
+-
+-  if [[ ${#test_names[@]} -eq 0 && ${#included_tests[@]} -eq 0 ]]; then
++  if (( total_test_count == 0 && total_included_test_count == 0 )); then
+     printf "There were no tests of status '%s' in the last recorded run.\n" "$filter_status" >&2
+   fi
+ fi
+ 
++# communicate to the caller that we are running in focus mode
+ if (( focus_mode )); then
+   printf "focus_mode\n"
+ fi
+diff --git a/test/suite.bats b/test/suite.bats
+index ca92233eef..b008d83532 100755
+--- a/test/suite.bats
++++ b/test/suite.bats
+@@ -54,20 +54,13 @@ setup() {
+ @test "errors when loading common helper from multiple tests in a suite" {
+   reentrant_run bats "$FIXTURE_ROOT/errors_in_multiple_load"
+   [ $status -eq 1 ]
+-  [ "${lines[0]}" = "1..3" ]
+-  regex="test_helper\.bash: line 1: call-to-undefined-command: command not found"
+-  [[ "${lines[1]}" =~ $regex ]]
+-  regex="Error while sourcing library loader at '.*test_helper\.bash'"
+-  [[ "${lines[2]}" =~ $regex ]]
+-  [ "${lines[3]}" = "not ok 1 setup_file failed" ]
+-  regex="test_helper\.bash: line 1: call-to-undefined-command: command not found"
+-  [[ "${lines[8]}" =~ $regex ]]
+-  regex="Error while sourcing library loader at '.*test_helper\.bash'"
+-  [[ "${lines[9]}" =~ $regex ]]
+-  [ "${lines[10]}" = "not ok 2 setup_file failed" ]
+-  regex="bats_load_safe: Could not find '.*nonexistent'\[\.bash\]"
+-  [[ "${lines[15]}" =~ $regex ]]
+-  [ "${lines[16]}" = "not ok 3 setup_file failed" ]
++  [ "${lines[0]}" = "1..1" ]
++  [ "${lines[1]}" = "not ok 1 bats-gather-tests" ]
++  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/errors_in_multiple_load/a.bats, line 1)" ]
++  [ "${lines[3]}" = "#   \`load test_helper' failed" ]
++  [ "${lines[4]}" = "# $FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash: line 1: call-to-undefined-command: command not found" ]
++  [ "${lines[5]}" = "# Error while sourcing library loader at '$FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash'" ]
++  [ "${#lines[@]}" -eq 6 ]
+ }
+ 
+ @test "running an ad-hoc suite by specifying multiple test files" {
+
+From 34833b5a0d9bc19535bb686e54b4457aac37f0db Mon Sep 17 00:00:00 2001
+From: Martin Schulze <martin.schulze@vireso.de>
+Date: Wed, 29 May 2024 22:15:11 +0200
+Subject: [PATCH 05/11] Simplify tracing code
+
+---
+ lib/bats-core/tracing.bash | 10 ++++------
+ 1 file changed, 4 insertions(+), 6 deletions(-)
+
+diff --git a/lib/bats-core/tracing.bash b/lib/bats-core/tracing.bash
+index 91f9cb4c9b..c7cb07319f 100644
+--- a/lib/bats-core/tracing.bash
++++ b/lib/bats-core/tracing.bash
+@@ -277,19 +277,17 @@ bats_debug_trap() {
+   # We need to normalize them to a common format!
+   local NORMALIZED_INPUT
+   bats_normalize_windows_dir_path NORMALIZED_INPUT "${1%/*}"
+-  local file_excluded='' path
++  local path
+   for path in "${BATS_DEBUG_EXCLUDE_PATHS[@]}"; do
+     if [[ "$NORMALIZED_INPUT" == "$path"* ]]; then
+-      file_excluded=1
+-      break
++      return # skip this call
+     fi
+   done
+ 
+   # don't update the trace within library functions or we get backtraces from inside traps
+   # also don't record new stack traces while handling interruptions, to avoid overriding the interrupted command
+-  if [[ -z "$file_excluded" &&
+-    "${BATS_INTERRUPTED-NOTSET}" == NOTSET &&
+-    "${BATS_TIMED_OUT-NOTSET}" == NOTSET ]]; then
++  if [[ "${BATS_INTERRUPTED-NOTSET}" == NOTSET &&
++        "${BATS_TIMED_OUT-NOTSET}" == NOTSET ]]; then
+     BATS_DEBUG_LASTLAST_STACK_TRACE=(
+       ${BATS_DEBUG_LAST_STACK_TRACE[@]+"${BATS_DEBUG_LAST_STACK_TRACE[@]}"}
+     )
+
+From c1cc8184da4ca7efb4f5f4f219886f52565d3537 Mon Sep 17 00:00:00 2001
+From: Martin Schulze <martin.schulze@vireso.de>
+Date: Wed, 29 May 2024 22:15:11 +0200
+Subject: [PATCH 06/11] Adapt to differing source error behavior between bash
+ versions
+
+---
+ test/suite.bats | 33 ++++++++++++++++++++++++++++-----
+ 1 file changed, 28 insertions(+), 5 deletions(-)
+
+diff --git a/test/suite.bats b/test/suite.bats
+index b008d83532..660b383dfe 100755
+--- a/test/suite.bats
++++ b/test/suite.bats
+@@ -56,11 +56,34 @@ setup() {
+   [ $status -eq 1 ]
+   [ "${lines[0]}" = "1..1" ]
+   [ "${lines[1]}" = "not ok 1 bats-gather-tests" ]
+-  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/errors_in_multiple_load/a.bats, line 1)" ]
+-  [ "${lines[3]}" = "#   \`load test_helper' failed" ]
+-  [ "${lines[4]}" = "# $FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash: line 1: call-to-undefined-command: command not found" ]
+-  [ "${lines[5]}" = "# Error while sourcing library loader at '$FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash'" ]
+-  [ "${#lines[@]}" -eq 6 ]
++
++  # bash > 4.0 returns error codes from source
++  # bash < 4.0 does not handle the status on source, it fails through the ERREXIT instead, which creates another trace
++  # bash == 4.0 seems to be sonwhere in between
++  if (( BASH_VERSINFO[0] > 4 )) || (( BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] > 0 )); then
++    [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/errors_in_multiple_load/a.bats, line 1)" ]
++    [ "${lines[3]}" = "#   \`load test_helper' failed" ]
++    [ "${lines[4]}" = "# $FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash: line 1: call-to-undefined-command: command not found" ]
++    [ "${lines[5]}" = "# Error while sourcing library loader at '$FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash'" ]
++    [ "${#lines[@]}" -eq 6 ]
++  else
++    [ "${lines[2]}" = "# (in file $FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash, line 1," ]
++    [ "${lines[3]}" = "#  from function \`bats_internal_load' in file $BATS_ROOT/lib/bats-core/test_functions.bash, line 69," ]
++    [ "${lines[4]}" = "#  from function \`bats_load_safe' in file $BATS_ROOT/lib/bats-core/test_functions.bash, line 106," ]
++    [ "${lines[5]}" = "#  from function \`load' in file $BATS_ROOT/lib/bats-core/test_functions.bash, line 156," ]
++    [ "${lines[6]}" = "#  in test file $FIXTURE_ROOT/errors_in_multiple_load/a.bats, line 1)" ]
++    if (( BASH_VERSINFO[0] == 4)); then
++      [ "${lines[7]}" = "#   \`load test_helper' failed" ]
++      [ "${lines[8]}" = "# $FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash: line 1: call-to-undefined-command: command not found" ]
++      [ "${lines[9]}" = "# Error while sourcing library loader at '$FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash'" ]
++      [ "${#lines[@]}" -eq 10 ]
++    else
++      [ "${lines[7]}" = "#   \`load test_helper' failed with status 127" ]
++      [ "${lines[8]}" = "# $FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash: line 1: call-to-undefined-command: command not found" ]
++      [ "${#lines[@]}" -eq 9 ]
++    fi
++  fi
++
+ }
+ 
+ @test "running an ad-hoc suite by specifying multiple test files" {
+
+From 4ac00c5e52ee1d5d98ed87c84c8e765c870534b8 Mon Sep 17 00:00:00 2001
+From: Martin Schulze <martin.schulze@vireso.de>
+Date: Wed, 29 May 2024 22:30:13 +0200
+Subject: [PATCH 07/11] Centrallize RELATIVE_BATS_ROOT in test_helper.bash
+ fixture()
+
+---
+ test/suite.bats       | 10 +++++-----
+ test/test_helper.bash |  9 +++++++++
+ test/warnings.bats    |  9 ---------
+ 3 files changed, 14 insertions(+), 14 deletions(-)
+
+diff --git a/test/suite.bats b/test/suite.bats
+index 660b383dfe..526fce65fd 100755
+--- a/test/suite.bats
++++ b/test/suite.bats
+@@ -67,11 +67,11 @@ setup() {
+     [ "${lines[5]}" = "# Error while sourcing library loader at '$FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash'" ]
+     [ "${#lines[@]}" -eq 6 ]
+   else
+-    [ "${lines[2]}" = "# (in file $FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash, line 1," ]
+-    [ "${lines[3]}" = "#  from function \`bats_internal_load' in file $BATS_ROOT/lib/bats-core/test_functions.bash, line 69," ]
+-    [ "${lines[4]}" = "#  from function \`bats_load_safe' in file $BATS_ROOT/lib/bats-core/test_functions.bash, line 106," ]
+-    [ "${lines[5]}" = "#  from function \`load' in file $BATS_ROOT/lib/bats-core/test_functions.bash, line 156," ]
+-    [ "${lines[6]}" = "#  in test file $FIXTURE_ROOT/errors_in_multiple_load/a.bats, line 1)" ]
++    [ "${lines[2]}" = "# (in file $RELATIVE_FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash, line 1," ]
++    [ "${lines[3]}" = "#  from function \`bats_internal_load' in file ${RELATIVE_BATS_ROOT}lib/bats-core/test_functions.bash, line 69," ]
++    [ "${lines[4]}" = "#  from function \`bats_load_safe' in file ${RELATIVE_BATS_ROOT}lib/bats-core/test_functions.bash, line 106," ]
++    [ "${lines[5]}" = "#  from function \`load' in file ${RELATIVE_BATS_ROOT}lib/bats-core/test_functions.bash, line 156," ]
++    [ "${lines[6]}" = "#  in test file $RELATIVE_FIXTURE_ROOT/errors_in_multiple_load/a.bats, line 1)" ]
+     if (( BASH_VERSINFO[0] == 4)); then
+       [ "${lines[7]}" = "#   \`load test_helper' failed" ]
+       [ "${lines[8]}" = "# $FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash: line 1: call-to-undefined-command: command not found" ]
+diff --git a/test/test_helper.bash b/test/test_helper.bash
+index 5b6dee5de1..ad2a8fb4ee 100644
+--- a/test/test_helper.bash
++++ b/test/test_helper.bash
+@@ -15,6 +15,15 @@ fixtures() {
+   FIXTURE_ROOT="$BATS_TEST_DIRNAME/fixtures/$1"
+   # shellcheck disable=SC2034
+   RELATIVE_FIXTURE_ROOT="${FIXTURE_ROOT#"$BATS_CWD"/}"
++  if [[ $BATS_ROOT == "$BATS_CWD" ]]; then
++    RELATIVE_BATS_ROOT=''
++  else
++    RELATIVE_BATS_ROOT=${BATS_ROOT#"$BATS_CWD"/}
++  fi
++  if [[ -n "$RELATIVE_BATS_ROOT" && "$RELATIVE_BATS_ROOT" != */ ]]; then
++    RELATIVE_BATS_ROOT+=/
++  fi
++  echo "RELATIVE_BATS_ROOT=$RELATIVE_BATS_ROOT" "BATS_ROOT=$BATS_ROOT" "BATS_CWD=$BATS_CWD"
+ }
+ 
+ filter_control_sequences() {
+diff --git a/test/warnings.bats b/test/warnings.bats
+index 84506a6aa5..c636a2e7a4 100644
+--- a/test/warnings.bats
++++ b/test/warnings.bats
+@@ -5,15 +5,6 @@ bats_require_minimum_version 1.5.0
+ setup() {
+   load test_helper
+   fixtures warnings
+-  if [[ $BATS_ROOT == "$BATS_CWD" ]]; then
+-    RELATIVE_BATS_ROOT=''
+-  else
+-    RELATIVE_BATS_ROOT=${BATS_ROOT#"$BATS_CWD"/}
+-  fi
+-  if [[ -n "$RELATIVE_BATS_ROOT" && "$RELATIVE_BATS_ROOT" != */ ]]; then
+-    RELATIVE_BATS_ROOT+=/
+-  fi
+-  echo "RELATIVE_BATS_ROOT=$RELATIVE_BATS_ROOT" "BATS_ROOT=$BATS_ROOT" "BATS_CWD=$BATS_CWD"
+ }
+ 
+ @test "invalid warning is an error" {
+
+From e3266cd93a80041462a71464d7785e90b6be6968 Mon Sep 17 00:00:00 2001
+From: Martin Schulze <martin.schulze@vireso.de>
+Date: Thu, 30 May 2024 22:09:17 +0200
+Subject: [PATCH 08/11] Reduce noise in tests
+
+---
+ test/test_helper.bash | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/test/test_helper.bash b/test/test_helper.bash
+index ad2a8fb4ee..0254b4b262 100644
+--- a/test/test_helper.bash
++++ b/test/test_helper.bash
+@@ -23,7 +23,6 @@ fixtures() {
+   if [[ -n "$RELATIVE_BATS_ROOT" && "$RELATIVE_BATS_ROOT" != */ ]]; then
+     RELATIVE_BATS_ROOT+=/
+   fi
+-  echo "RELATIVE_BATS_ROOT=$RELATIVE_BATS_ROOT" "BATS_ROOT=$BATS_ROOT" "BATS_CWD=$BATS_CWD"
+ }
+ 
+ filter_control_sequences() {
+
+From cba81e07c4873a93669bb805d9b4ba304306a9e3 Mon Sep 17 00:00:00 2001
+From: Martin Schulze <martin.schulze@vireso.de>
+Date: Thu, 30 May 2024 22:11:17 +0200
+Subject: [PATCH 09/11] Fix test failures on Bash 4.3
+
+Failures are due to scoping issues in traps that only happen when $() is
+used:
+
+bats-gather-tests:280, start of bats_gather_tests_source_exit_trap:
+  local: can only be used in a function
+tracing.bash:301, end of bats_debug_trap:
+   pop_scope: head of shell_variables not a temporary environment scope
+---
+ libexec/bats-core/bats-gather-tests | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/libexec/bats-core/bats-gather-tests b/libexec/bats-core/bats-gather-tests
+index e64db855bd..ca2de9fc0b 100755
+--- a/libexec/bats-core/bats-gather-tests
++++ b/libexec/bats-core/bats-gather-tests
+@@ -335,8 +335,18 @@ for filename in "$@"; do
+   file_test_count=0
+   file_included_test_count=0
+   saved_focus_mode=$focus_mode
++
+   # get new values for the variables above
+-  result="$(set -eET; bats_gather_tests_for_file)"
++  if [[ $BASH_VERSION == 4.3.*  ]]; then
++    # Bash 4.3 has function scoping issues when this is run in $() -> work around via file
++    bats_gather_tests_var_transfer_file=$BATS_RUN_TMPDIR/gather-tests-var-transfer
++    (set -eET; bats_gather_tests_for_file >"$bats_gather_tests_var_transfer_file")
++    result=$(<"$bats_gather_tests_var_transfer_file")
++  else
++    # separate retrieval from eval to avoid hiding the exit code
++    result="$(set -eET; bats_gather_tests_for_file)"
++  fi
++
+   eval "$result"
+ 
+   if [[ -n "$file_duplicate_test_names" ]]; then
+
+From f27d259d7358293b752753df9562a1a82d096997 Mon Sep 17 00:00:00 2001
+From: Martin Schulze <martin.schulze@vireso.de>
+Date: Thu, 30 May 2024 22:56:48 +0200
+Subject: [PATCH 10/11] CI: Split npm commands
+
+---
+ .github/workflows/tests.yml | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/.github/workflows/tests.yml b/.github/workflows/tests.yml
+index 5e8f1641e6..947f71454e 100644
+--- a/.github/workflows/tests.yml
++++ b/.github/workflows/tests.yml
+@@ -89,14 +89,13 @@ jobs:
+     steps:
+       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+       - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
++      - run: npm pack ./
++      - run: sudo npm install --loglevel verbose -g ./bats-*.tgz
+       - name: Run test on OS ${{ matrix.os }}
+         shell: 'script -q -e -c "bash {0}"' # work around tty issues
+         env:
+           TERM: linux # fix tput for tty issue work around
+-        run: |
+-          npm pack ./
+-          sudo npm install -g ./bats-*.tgz
+-          bats test --print-output-on-failure
++        run: bats test --print-output-on-failure
+ 
+   windows:
+     runs-on: windows-2019
+
+From e406c0106f7a22e80dd5b5b911a7967f1165be10 Mon Sep 17 00:00:00 2001
+From: Martin Schulze <martin.schulze@vireso.de>
+Date: Thu, 30 May 2024 22:58:11 +0200
+Subject: [PATCH 11/11] CI: Fix bats not found when installed via npm
+
+Windows and Linux go a newer version ( v18.20.3) with npm 10.7 (instead of 10.5)
+---
+ .github/workflows/tests.yml | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/.github/workflows/tests.yml b/.github/workflows/tests.yml
+index 947f71454e..b0c233a106 100644
+--- a/.github/workflows/tests.yml
++++ b/.github/workflows/tests.yml
+@@ -89,8 +89,10 @@ jobs:
+     steps:
+       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+       - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
++        with:
++          node-version: v18.20.2 
+       - run: npm pack ./
+-      - run: sudo npm install --loglevel verbose -g ./bats-*.tgz
++      - run: npm install -g ./bats-*.tgz
+       - name: Run test on OS ${{ matrix.os }}
+         shell: 'script -q -e -c "bash {0}"' # work around tty issues
+         env:
+@@ -115,6 +117,8 @@ jobs:
+     steps:
+       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+       - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
++        with:
++          node-version: v18.20.2 
+       - run: npm pack ./
+       - run: npm install -g (get-item .\bats-*.tgz).FullName
+       - run: bats  -T --print-output-on-failure test
+@@ -160,6 +164,8 @@ jobs:
+     steps:
+       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+       - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
++        with:
++          node-version: v18.20.2 
+       - name: Install unbuffer via expect
+         run: brew install expect
+       - name: Run test on OS ${{ matrix.os }}

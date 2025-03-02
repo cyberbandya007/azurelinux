@@ -1,53 +1,65 @@
-%global alternative md
-%global cfgfile %{name}.conf
-%global genname whois
+## START: Set by rpmautospec
+## (rpmautospec version 0.6.5)
+## RPMAUTOSPEC: autorelease, autochangelog
+%define autorelease(e:s:pb:n) %{?-p:0.}%{lua:
+    release_number = 4;
+    base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
+    print(release_number + base_release_number - 1);
+}%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{!?-n:%{?dist}}
+## END: Set by rpmautospec
 
-Summary:        Improved WHOIS client
-Name:           whois
-Version:        5.5.15
-Release:        1%{?dist}
-License:        GPLv2+
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
-URL:            https://www.linux.it/~md/software/
-Source0:        http://ftp.debian.org/debian/pool/main/w/%{name}/%{name}_%{version}.tar.xz
+# Package mkpasswd tool
+%{bcond_without whois_enables_mkpasswd}
+# Enable IDN, use libidn2 instead of libidn
+%{bcond_without whois_enables_libidn2}
+# Add libidn support
+%{bcond_with    whois_enables_idn}
+
+%global forgeurl https://github.com/rfc1036/whois
+
+Name:       whois       
+Version:    5.5.20
+Release:    %autorelease
+Summary:    Improved WHOIS client
+License:    GPL-2.0-or-later
+URL:        https://www.linux.it/~md/software/
+VCS:        git:%{forgeurl}
+Source0:    https://ftp.debian.org/debian/pool/main/w/%{name}/%{name}_%{version}.tar.xz
+Source1:    https://ftp.debian.org/debian/pool/main/w/%{name}/%{name}_%{version}.dsc
+# This keyring needs to be processed at prep time, dscverify is not able to use it as it is
+Source2:    https://www.linux.it/~md/md-pgp.asc
 BuildRequires:  coreutils
 BuildRequires:  gcc
 BuildRequires:  gettext
-BuildRequires:  make
-BuildRequires:  perl-interpreter
-BuildRequires:  perl(autodie)
-BuildRequires:  perl(strict)
-BuildRequires:  perl(warnings)
-Requires:       iana-etc
-Requires:       whois-nls = %{version}-%{release}
-Requires(post): %{_sbindir}/update-alternatives
-Requires(postun): %{_sbindir}/update-alternatives
-# Add IDN support
-%{bcond_without whois_enables_idn}
-# Use libidn2 instead of libidn
-%{bcond_without whois_enables_libidn2}
-# Package mkpasswd tool
-%if 0%{?rhel}
-%{bcond_with whois_enables_mkpasswd}
-%else
-%{bcond_without whois_enables_mkpasswd}
-%endif
-%if %{with whois_enables_idn}
 %if %{with whois_enables_libidn2}
 BuildRequires:  pkgconfig(libidn2) >= 2.0.3
-%else
+%elif %{with whois_enables_idn}
 BuildRequires:  pkgconfig(libidn)
 BuildConflicts: pkgconfig(libidn2)
-%endif
 %else
 BuildConflicts: pkgconfig(libidn)
 BuildConflicts: pkgconfig(libidn2)
 %endif
 %if %{with whois_enables_mkpasswd}
-BuildRequires:  pkgconfig(libcrypt)
 BuildRequires:  pkgconfig(libxcrypt) >= 4.1
 %endif
+BuildRequires:  make
+BuildRequires:  perl-interpreter
+BuildRequires:  perl(autodie)
+BuildRequires:  perl(strict)
+BuildRequires:  perl(warnings)
+%if 0%{?fedora}
+# Extra source verification. devscripts are not in rhel
+BuildRequires:  devscripts
+BuildRequires:  gnupg2
+%endif
+Requires(post): %{_sbindir}/update-alternatives
+Requires(postun): %{_sbindir}/update-alternatives
+Requires:   whois-nls = %{version}-%{release}
+
+%global genname whois
+%global alternative md
+%global cfgfile %{name}.conf
 
 %description
 Searches for an object in a RFC 3912 database.
@@ -59,15 +71,15 @@ addresses and network names.
 
 %if %{with whois_enables_mkpasswd}
 %package -n mkpasswd
-Summary:        Encrypt a password with crypt(3) function using a salt
-Requires:       whois-nls = %{version}-%{release}
+Summary:    Encrypt a password with crypt(3) function using a salt
 # /usr/bin/mkpasswd was provided by "expect" package, bug #1649426
-Conflicts:      expect < 5.45.4-8.fc30
+Conflicts:  expect < 5.45.4-8.fc30
+Requires:   whois-nls = %{version}-%{release}
 # whois-mkpasswd package renamed to mkpasswd in 5.4.0-2.fc30, bug #1649426
-Obsoletes:      whois-mkpasswd <= 5.4.0-1.fc30
+Obsoletes:  whois-mkpasswd <= 5.4.0-1.fc30
 # but we continued upgrading whois in Fedoras < 30 without the rename
-Obsoletes:      whois-mkpasswd <= 5.5.3-1.fc29
-Provides:       whois-mkpasswd = %{version}-%{release}
+Obsoletes:  whois-mkpasswd <= 5.5.3-1.fc29
+Provides:   whois-mkpasswd = %{version}-%{release}
 
 %description -n mkpasswd
 mkpasswd tool encrypts a given password with the crypt(3) libc function
@@ -77,42 +89,49 @@ using a given salt.
 # The same gettext catalogs are used by whois tool and mkpasswd tool. But we
 # want to have the tools installable independently.
 %package nls
-Summary:        Gettext catalogs for whois tools
-Conflicts:      whois < 5.3.2-2
-BuildArch:      noarch
+Summary:    Gettext catalogs for whois tools
+Conflicts:  whois < 5.3.2-2
+BuildArch:  noarch
 
 %description nls
 whois tools messages translated into different natural languages.
 
 %prep
-%setup -q -n %{name}
+%if 0%{?fedora}
+  export GNUPGHOME="$(mktemp --tmpdir -d %{name}-XXXXXXX)"
+  TMPKEY="$GNUPGHOME/keyring.key"
+  gpg --no-default-keyring --keyring "${TMPKEY}" --trust-model always --import %{SOURCE2}
+  dscverify --keyring "${TMPKEY}" %{SOURCE1}
+  rm -rf "$GNUPGHOME"
+%endif
+%autosetup -p1 -n %{name}
 
 %build
-%make_build CONFIG_FILE="%{_sysconfdir}/%{cfgfile}" \
+%{make_build} CONFIG_FILE="%{_sysconfdir}/%{cfgfile}" \
     HAVE_ICONV=1 \
-    CFLAGS="%{optflags}" LDFLAGS="%{__global_ldflags}"
+    CFLAGS="$RPM_OPT_FLAGS" LDFLAGS="%{__global_ldflags}" INSTALL="install -p"
 
 %install
 %if %{with whois_enables_mkpasswd}
-make install-mkpasswd install-pos BASEDIR=%{buildroot}
+make install-mkpasswd install-pos BASEDIR=$RPM_BUILD_ROOT
 %endif
-make install-whois install-pos BASEDIR=%{buildroot}
-install -p -m644 -D %{cfgfile} %{buildroot}%{_sysconfdir}/%{cfgfile}
+make install-whois install-pos BASEDIR=$RPM_BUILD_ROOT
+install -p -m644 -D %{cfgfile} $RPM_BUILD_ROOT%{_sysconfdir}/%{cfgfile}
 %find_lang %{name}
 
 # Rename to alternative names
-mv %{buildroot}%{_bindir}/%{name}{,.%{alternative}}
-touch %{buildroot}%{_bindir}/%{name}
-chmod 755 %{buildroot}%{_bindir}/%{name}
-mv %{buildroot}%{_mandir}/man1/%{name}{,.%{alternative}}.1
-touch %{buildroot}%{_mandir}/man1/%{name}.1
+mv $RPM_BUILD_ROOT%{_bindir}/%{name}{,.%{alternative}}
+touch $RPM_BUILD_ROOT%{_bindir}/%{name}
+chmod 755 $RPM_BUILD_ROOT%{_bindir}/%{name}
+mv $RPM_BUILD_ROOT%{_mandir}/man1/%{name}{,.%{alternative}}.1
+touch $RPM_BUILD_ROOT%{_mandir}/man1/%{name}.1
 
 %post
 %{_sbindir}/update-alternatives \
     --install %{_bindir}/%{name} \
         %{genname} %{_bindir}/%{name}.%{alternative} 30 \
     --slave %{_mandir}/man1/%{name}.1.gz \
-        %{genname}-man %{_mandir}/man1/%{name}.%{alternative}.1.gz
+        %{genname}-man %{_mandir}/man1/%{name}.%{alternative}.1.gz 
 
 %postun
 if [ $1 -eq 0 ] ; then
@@ -135,24 +154,94 @@ fi
 %if %{with whois_enables_mkpasswd}
 %files -n mkpasswd
 %license COPYING debian/copyright
-%doc README debian/changelog
+%doc README
 %{_bindir}/mkpasswd
 %{_mandir}/man1/mkpasswd.*
 %endif
 
 %changelog
-* Thu Feb 02 2023 Toshi Aoyama <toaoyama@microsoft.com> - 5.5.15-1
-- 5.5.15 bump
-- License verified
+## START: Generated by rpmautospec
+* Sat Jul 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 5.5.20-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Tue Jan 31 2023 Toshi Aoyama <toaoyama@microsoft.com> - 5.5.7-3
-- Add requirement of iana-etc package.
+* Sat Jan 27 2024 Fedora Release Engineering <releng@fedoraproject.org> - 5.5.20-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
 
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 5.5.7-2
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Dec 07 2023 Petr Menšík <pemensik@redhat.com> - 5.5.20-2
+- fixup! Update to 5.5.20 (#2242798)
+
+* Wed Dec 06 2023 Petr Menšík <pemensik@redhat.com> - 5.5.20-1
+- Update to 5.5.20 (#2242798)
+
+* Sun Jul 30 2023 Petr Menšík <pemensik@redhat.com> - 5.5.18-1
+- Update to 5.5.18 (#2224795)
+
+* Sun Jul 30 2023 Petr Menšík <pemensik@redhat.com> - 5.5.17-4
+- Use self-contained gnupg home for source verification (#2225463)
+
+* Sat Jul 22 2023 Fedora Release Engineering <releng@fedoraproject.org> - 5.5.17-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jun 29 2023 Petr Menšík <pemensik@redhat.com> - 5.5.17-2
+- Change License tag to SPDX format
+
+* Wed May 03 2023 Petr Menšík <pemensik@redhat.com> - 5.5.17-1
+- Update to 5.5.17 (#2192932)
+
+* Fri Apr 14 2023 Petr Menšík <pemensik@redhat.com> - 5.5.16-1
+- Update to 5.5.16 (#2173826)
+
+* Sat Jan 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 5.5.15-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jan 06 2023 Petr Menšík <pemensik@redhat.com> - 5.5.15-2
+- Switch back to debian archives with signature checking
+- Correct VCS tag format
+
+* Tue Jan 03 2023 Petr Menšík <pemensik@redhat.com> - 5.5.15-1
+- Update to 5.5.15 (#2156870)
+
+* Tue Oct 18 2022 Petr Menšík <pemensik@redhat.com> - 5.5.14-1
+- Update to 5.5.14 (#2135226)
+
+* Sat Jul 23 2022 Fedora Release Engineering <releng@fedoraproject.org> - 5.5.13-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu May 19 2022 Petr Menšík <pemensik@redhat.com> - 5.5.13-1
+- Update to 5.5.13 (#2073241)
+
+* Fri Apr 22 2022 Petr Menšík <pemensik@redhat.com> - 5.5.12-2
+- Remove changelog from mkpasswd, it has double size of actual tool
+
+* Fri Feb 25 2022 Petr Menšík <pemensik@redhat.com> - 5.5.12-1
+- Update to 5.5.12
+
+* Sat Jan 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 5.5.11-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Wed Jan 12 2022 Petr Menšík <pemensik@redhat.com> - 5.5.11-1
+- Update to 5.5.11 (#2036766)
+
+* Fri Jul 23 2021 Fedora Release Engineering <releng@fedoraproject.org> - 5.5.10-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jun 08 2021 Petr Menšík <pemensik@redhat.com> - 5.5.10-1
+- Update to 5.5.10 (#1968209)
+
+* Mon Mar 29 2021 Petr Pisar <ppisar@redhat.com> - 5.5.9-1
+- 5.5.9 bump
+
+* Tue Feb 16 2021 Petr Pisar <ppisar@redhat.com> - 5.5.8-1
+- 5.5.8 bump
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 5.5.7-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
 * Mon Oct 05 2020 Petr Pisar <ppisar@redhat.com> - 5.5.7-1
 - 5.5.7 bump
+
+* Wed Jul 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 5.5.6-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Mon Feb 17 2020 Petr Pisar <ppisar@redhat.com> - 5.5.6-1
 - 5.5.6 bump
@@ -413,3 +502,5 @@ fi
 
 * Wed Sep 29 2010 Petr Pisar <ppisar@redhat.com> - 5.0.7-1
 - 5.0.7 imported
+
+## END: Generated by rpmautospec

@@ -1,45 +1,35 @@
-%global __requires_exclude %{?__requires_exclude:%__requires_exclude|}perl\\(Exporter\\)\\s*$
-
-Summary:        Utilities related to RGB colors
 Name:           perl-Color-RGB-Util
-Version:        0.606
-Release:        3%{?dist}
-License:        GPL+ OR Artistic
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+Version:        0.607
+Release:        4%{?dist}
+Summary:        Utilities related to RGB colors
+License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/Color-RGB-Util/
 Source0:        https://cpan.metacpan.org/authors/id/P/PE/PERLANCAR/Color-RGB-Util-%{version}.tar.gz
-
 BuildArch:      noarch
-
 BuildRequires:  coreutils
 BuildRequires:  make
 BuildRequires:  perl-generators
 BuildRequires:  perl-interpreter
 BuildRequires:  perl(:VERSION) >= 5.10.1
 BuildRequires:  perl(Config)
-# Run-time
-BuildRequires:  perl(Digest::SHA)
-BuildRequires:  perl(Exporter) >= 5.57
 BuildRequires:  perl(ExtUtils::MakeMaker) >= 6.76
 BuildRequires:  perl(strict)
 BuildRequires:  perl(warnings)
-
-%if 0%{?with_check}
+# Run-time
+BuildRequires:  perl(Digest::SHA)
+BuildRequires:  perl(Exporter) >= 5.57
+# Tests
+BuildRequires:  perl(blib)
 BuildRequires:  perl(File::Spec)
 BuildRequires:  perl(IO::Handle)
 BuildRequires:  perl(IPC::Open3)
 BuildRequires:  perl(Test::Exception)
 BuildRequires:  perl(Test::More) >= 0.98
-BuildRequires:  perl(blib)
-
-# Missing test dependencies:
-# BuildRequires:  perl(Test::RandomResult)
-%endif
-
-Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
+BuildRequires:  perl(Test::RandomResult)
 Requires:       perl(Digest::SHA)
 Requires:       perl(Exporter) >= 5.57
+
+%global __requires_exclude %{?__requires_exclude:%__requires_exclude|}perl\\(Exporter\\)\\s*$
 
 %description
 This module contains utilities related to RGB colors.
@@ -64,10 +54,10 @@ done
 
 %build
 perl Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1 NO_PERLLOCAL=1
-%make_build
+%{make_build}
 
 %install
-%make_install
+%{make_install}
 %{_fixperms} %{buildroot}/*
 
 # Install tests
@@ -95,12 +85,32 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
-* Thu Aug 31 2023 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.606-3
-- Disabling missing test dependency.
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.607-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Wed Jan 26 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.606-2
-- Initial CBL-Mariner import from Fedora 36 (license: MIT).
-- License verified.
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.607-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.607-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Wed Dec 13 2023 Jitka Plesnikova <jplesnik@redhat.com> - 0.607-1
+- 0.607 bump (rhbz#2254140)
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.606-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.606-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.606-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.606-3
+- Perl 5.36 rebuild
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.606-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
 
 * Fri Aug 06 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.606-1
 - 0.606 bump

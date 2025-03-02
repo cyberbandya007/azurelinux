@@ -1,0 +1,40 @@
+From 12a8764c6113887c5691cab6a92bb1c13414395c Mon Sep 17 00:00:00 2001
+From: Tony Asleson <tasleson@redhat.com>
+Date: Thu, 26 Mar 2020 13:07:47 -0500
+Subject: [PATCH 05/12] nvme.py: Sync the containing directory
+
+It's apparent that some thought went into making sure the config
+file makes it atomically to the fs.  However, one thing is missing
+which is doing a fsync on the containing directory of the config file.
+
+See: https://lwn.net/Articles/457667/
+
+Signed-off-by: Tony Asleson <tasleson@redhat.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ nvmet/nvme.py | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/nvmet/nvme.py b/nvmet/nvme.py
+index 687a45a..04659de 100644
+--- a/nvmet/nvme.py
++++ b/nvmet/nvme.py
+@@ -305,6 +305,15 @@ class Root(CFSNode):
+ 
+         os.rename(savefile + ".temp", savefile)
+ 
++        # Sync the containing directory too
++        dir_fd = None
++        try:
++            dir_fd = os.open(savefile_dir, os.O_RDONLY)
++            os.fsync(dir_fd)
++        finally:
++            if dir_fd:
++                os.close(dir_fd)
++
+     def clear_existing(self):
+         '''
+         Remove entire current configuration.
+-- 
+2.29.2
+

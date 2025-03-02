@@ -6,14 +6,12 @@
 %endif
 
 Name:           perl-PPI
-Version:        1.270
-Release:        4%{?dist}
+Version:        1.279
+Release:        1%{?dist}
 Summary:        Parse, Analyze and Manipulate Perl
-License:        GPL+ or Artistic
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/PPI
-Source0:        https://cpan.metacpan.org/modules/by-module/PPI/PPI-%{version}.tar.gz#/perl-PPI-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/modules/by-module/PPI/PPI-%{version}.tar.gz
 BuildArch:      noarch
 # =============== Module Build ======================
 BuildRequires:  coreutils
@@ -32,13 +30,17 @@ BuildRequires:  perl(Digest::MD5) >= 2.35
 BuildRequires:  perl(Exporter)
 BuildRequires:  perl(File::Path)
 BuildRequires:  perl(File::Spec)
-BuildRequires:  perl(IO::String) >= 1.07
+BuildRequires:  perl(if)
 BuildRequires:  perl(List::Util) >= 1.33
 BuildRequires:  perl(overload)
 BuildRequires:  perl(Params::Util) >= 1.00
 BuildRequires:  perl(Scalar::Util)
 BuildRequires:  perl(Storable) >= 2.17
 BuildRequires:  perl(strict)
+# =============== Optional Functionality ============
+%if %{with XSAccessor}
+BuildRequires:  perl(Class::XSAccessor)
+%endif
 # =============== Test Suite ========================
 BuildRequires:  perl(B)
 BuildRequires:  perl(Class::Inspector) >= 1.22
@@ -46,23 +48,17 @@ BuildRequires:  perl(CPAN::Meta) >= 2.120900
 BuildRequires:  perl(Encode)
 BuildRequires:  perl(File::Copy)
 BuildRequires:  perl(File::Spec::Functions)
-BuildRequires:  perl(File::Spec::Unix)
 BuildRequires:  perl(File::Temp)
-BuildRequires:  perl(if)
 BuildRequires:  perl(lib)
-BuildRequires:  perl(Test::Deep)
-BuildRequires:  perl(Test::More) >= 0.88
+BuildRequires:  perl(parent)
+BuildRequires:  perl(Test::More) >= 0.96
 BuildRequires:  perl(Test::NoWarnings)
 BuildRequires:  perl(Test::Object) >= 0.07
 BuildRequires:  perl(Test::SubCalls) >= 1.07
 BuildRequires:  perl(Test::Warnings)
 BuildRequires:  perl(Time::HiRes)
 BuildRequires:  perl(utf8)
-# =============== Module Runtime ====================
-Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
-%if %{with XSAccessor}
-BuildRequires:  perl(Class::XSAccessor)
-%endif
+# =============== Dependencies ======================
 # Run-require Task::Weaken, see Changes for more details.
 Requires:       perl(Task::Weaken)
 
@@ -74,6 +70,9 @@ Parse, analyze and manipulate Perl (without perl).
 
 %prep
 %setup -q -n PPI-%{version}
+
+# Fix bogus exec permissions
+chmod -c -x Changes LICENSE README
 
 %if %{without XSAccessor}
 rm lib/PPI/XSAccessor.pm
@@ -99,8 +98,86 @@ make test
 %{_mandir}/man3/PPI*.3*
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.270-4
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Fri Aug 23 2024 Paul Howarth <paul@city-fan.org> - 1.279-1
+- Update to 1.279
+  - Implemented a cache to speed up sibling iteration (GH#287)
+
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.278-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Mon Mar 11 2024 Paul Howarth <paul@city-fan.org> - 1.278-1
+- Update to 1.278
+  - Add support for new octal number syntax (GH#295)
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.277-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.277-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Sep 22 2023 Paul Howarth <paul@city-fan.org> - 1.277-1
+- Update to 1.277
+  - Parse prototypes as literal quotes: enables parens and newlines in protos
+  - Fix false positive detection of labels (GH#289)
+
+* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.276-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.276-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.276-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Wed Jul 20 2022 Paul Howarth <paul@city-fan.org> - 1.276-1
+- Update to 1.276
+  - Implement replace method (GH#274)
+
+* Tue Jul 19 2022 Paul Howarth <paul@city-fan.org> - 1.275-1
+- Update to 1.275
+  - CHECK bareword handle was parsed as scheduled block (GH#247)
+
+* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.274-2
+- Perl 5.36 rebuild
+
+* Tue May  3 2022 Paul Howarth <paul@city-fan.org> - 1.274-1
+- Update to 1.274
+  - Indentation in here-docs is now preserved (GH#252)
+
+* Mon Apr 25 2022 Paul Howarth <paul@city-fan.org> - 1.273-1
+- Update to 1.273
+  - Whitespace in signatures is now preserved (GH#257)
+
+* Wed Feb  2 2022 Paul Howarth <paul@city-fan.org> - 1.272-1
+- Update to 1.272
+  - Drop prerequisite for IO::String on perl 5.8+
+
+* Wed Jan 26 2022 Paul Howarth <paul@city-fan.org> - 1.271-1
+- Update to 1.271
+  - Return correct name for lexical subroutines
+  - Silence uninitialized warning in t/07_token.t
+  - Bump minimum Test::More version to 0.96
+  - Fix some typos in Pod
+  - Moved repository to Perl-Critic GitHub org:
+    https://github.com/Perl-Critic/PPI
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.270-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.270-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 1.270-7
+- Perl 5.34 rebuild
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.270-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.270-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 1.270-4
+- Perl 5.32 rebuild
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.270-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

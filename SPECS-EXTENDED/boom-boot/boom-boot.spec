@@ -1,29 +1,34 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 %global summary A set of libraries and tools for managing boot loader entries
 %global sphinx_docs 1
 
 Name:		boom-boot
-Version:	1.2
-Release:	2%{?dist}
+Version:	1.6.5
+Release:	1%{?dist}
 Summary:	%{summary}
 
-License:	GPLv2
+License:	GPL-2.0-only
 URL:		https://github.com/snapshotmanager/boom
-Source0:	https://github.com/snapshotmanager/boom/archive/%{version}/boom-%{version}.tar.gz
-Patch1:		0001-etc-Remove-executable-permission-from-etc-default-bo.patch
-Patch2:		0002-man-Fix-line-starting-with.patch
+Source0:	%{url}/archive/%{version}/%{name}-%{version}.tar.gz
 
 BuildArch:	noarch
 
+BuildRequires:	make
 BuildRequires:	python3-setuptools
 BuildRequires:	python3-devel
 %if 0%{?sphinx_docs}
+BuildRequires:	python3-dbus
 BuildRequires:	python3-sphinx
 %endif
+BuildRequires: make
 
 Requires: python3-boom = %{version}-%{release}
 Requires: %{name}-conf = %{version}-%{release}
+Requires: python3-dbus
+Requires: systemd >= 254
+
+Obsoletes: boom-boot-grub2 <= 1.3
+# boom-grub2 was not an official name of subpackage in fedora, but was used upstream:
+Obsoletes: boom-grub2 <= 1.3
 
 %package -n python3-boom
 Summary: %{summary}
@@ -39,10 +44,6 @@ Conflicts: boom
 
 %package conf
 Summary: %{summary}
-
-%package grub2
-Summary: %{summary}
-Supplements: (grub2 and boom-boot = %{version}-%{release})
 
 %description
 Boom is a boot manager for Linux systems using boot loaders that support
@@ -72,25 +73,12 @@ include this support in both Red Hat Enterprise Linux 7 and Fedora).
 
 This package provides configuration files for boom.
 
-%description grub2
-Boom is a boot manager for Linux systems using boot loaders that support
-the BootLoader Specification for boot entry configuration.
-
-Boom requires a BLS compatible boot loader to function: either the
-systemd-boot project, or Grub2 with the BLS patch (Red Hat Grub2 builds
-include this support in both Red Hat Enterprise Linux 7 and Fedora).
-
-This package provides integration scripts for grub2 bootloader.
-
 %prep
-%setup -n boom-%{version}
-# NOTE: Do not use backup extension - MANIFEST.in is picking them
-%patch 1 -p1
-%patch 2 -p1
+%autosetup -p1 -n %{name}-%{version}
 
 %build
 %if 0%{?sphinx_docs}
-make -C doc html
+make %{?_smp_mflags} -C doc html
 rm doc/_build/html/.buildinfo
 mv doc/_build/html doc/html
 rm -r doc/_build
@@ -100,12 +88,6 @@ rm -r doc/_build
 
 %install
 %py3_install
-
-# Install Grub2 integration scripts
-mkdir -p ${RPM_BUILD_ROOT}/etc/grub.d
-mkdir -p ${RPM_BUILD_ROOT}/etc/default
-install -m 755 etc/grub.d/42_boom ${RPM_BUILD_ROOT}/etc/grub.d
-install -m 644 etc/default/boom ${RPM_BUILD_ROOT}/etc/default
 
 # Make configuration directories
 # mode 0700 - in line with /boot/grub2 directory:
@@ -136,7 +118,8 @@ rm doc/conf.py
 %files -n python3-boom
 %license COPYING
 %doc README.md
-%{python3_sitelib}/*
+%{python3_sitelib}/boom/*
+%{python3_sitelib}/boom_boot-*.egg-info/
 %doc doc
 %doc examples
 %doc tests
@@ -151,21 +134,88 @@ rm doc/conf.py
 %dir /boot/boom/cache
 %dir /boot/loader/entries
 
-%files grub2
-%license COPYING
-%doc README.md
-%{_sysconfdir}/grub.d/42_boom
-%config(noreplace) %{_sysconfdir}/default/boom
-
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.2-2
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Wed Sep 18 2024 Bryan Gurney <bgurney@redhat.com> - 1.6.5-1
+- Update to release 1.6.5.
+
+* Fri Jul 26 2024 Bryn M. Reeves <bmr@redhat.com> - 1.6.4-1
+* Update to release 1.6.4.
+
+* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.3-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Tue Jun 18 2024 Bryan Gurney <bgurney@redhat.com> - 1.6.3-1
+- Update to release 1.6.3.
+
+* Fri Jun 07 2024 Python Maint <python-maint@redhat.com> - 1.6.2-2
+- Rebuilt for Python 3.13
+
+* Thu May 30 2024 Bryan Gurney <bgurney@redhat.com> - 1.6.2-1
+- Update to release 1.6.2.
+
+* Tue Jan 23 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.0-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jan 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Tue Nov 21 2023 Marian Csontos <mcsontos@redhat.com> - 1.6.0-1
+- Update to release 1.6.0.
+
+* Wed Jul 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jun 15 2023 Python Maint <python-maint@redhat.com> - 1.5.1-2
+- Rebuilt for Python 3.12
+
+* Tue May 16 2023 Marian Csontos <mcsontos@redhat.com> - 1.5.1-1
+- Update to release 1.5.1.
+
+* Wed Jan 18 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.4-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Wed Jul 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Wed Jul 13 2022 Marian Csontos <mcsontos@redhat.com> 1.4-1
+- Update to release 1.4.
+
+* Mon Jun 13 2022 Python Maint <python-maint@redhat.com> - 1.3-5
+- Rebuilt for Python 3.11
+
+* Wed Jan 19 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.3-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.3-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri Jun 04 2021 Python Maint <python-maint@redhat.com> - 1.3-2
+- Rebuilt for Python 3.10
+
+* Fri Jan 29 2021 Marian Csontos <mcsontos@redhat.com> 1.3-1
+- Update to release 1.3.
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.2-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Sun Jun 07 2020 Marian Csontos <mcsontos@redhat.com> 1.2-1
 - Update to bug fix release 1.2.
 
-* Tue May 26 2020 Marian Csontos <mcsontos@redhat.com> 1.1-1
+* Tue May 26 2020 Miro Hrončok <mhroncok@redhat.com> - 1.1-4
+- Rebuilt for Python 3.9
+
+* Tue May 26 2020 Marian Csontos <mcsontos@redhat.com> 1.1-3
+- Fix unicode entries handling.
+- Add tracebacks when --debug is used.
+
+* Tue May 26 2020 Miro Hrončok <mhroncok@redhat.com> - 1.1-2
+- Rebuilt for Python 3.9
+
+* Thu May 14 2020 Marian Csontos <mcsontos@redhat.com> 1.1-1
 - Update to new upstream release 1.1.
 - Add caching of kernel and init ramdisk images.
 

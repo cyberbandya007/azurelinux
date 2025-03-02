@@ -1,21 +1,20 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 %global snapshot 0
 
 Name:           libpinyin
-Version:        2.3.0
-Release:        4%{?dist}
+Version:        2.9.91
+Release:        1%{?dist}
 Summary:        Library to deal with pinyin
 
-License:        GPLv3+
+License:        GPL-3.0-or-later
 URL:            https://github.com/libpinyin/libpinyin
 Source0:        http://downloads.sourceforge.net/libpinyin/libpinyin/%{name}-%{version}.tar.gz
 %if %snapshot
-Patch0:         libpinyin-2.3.x-head.patch
+Patch0:         libpinyin-2.8.x-head.patch
 %endif
 
 BuildRequires:  gcc-c++
 BuildRequires:  kyotocabinet-devel, glib2-devel
+BuildRequires:  make
 Requires:       %{name}-data%{?_isa} = %{version}-%{release}
 
 %description
@@ -61,20 +60,20 @@ The libzhuyin package contains libzhuyin compatibility library.
 %setup -q
 
 %if %snapshot
-%patch 0 -p1 -b .head
+%patch -P0 -p1 -b .head
 %endif
 
 %build
 %configure --disable-static \
            --with-dbm=KyotoCabinet \
            --enable-libzhuyin
-make %{?_smp_mflags}
+%make_build
 
 %check
 make check
 
 %install
-make install DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p"
+%make_install
 find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
 
 
@@ -109,9 +108,92 @@ find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
 %{_libdir}/libzhuyin*.so.*
 
 %changelog
-* Mon Jun 28 2021 Thomas Crain <thcrain@microsoft.com> - 2.3.0-4
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
-- Require libzhuyin subpackage from libpinyin-devel
+* Tue Aug 13 2024 Peng Wu <pwu@redhat.com> - 2.9.91-1
+- Update to 2.9.91
+- auto clean user data when data corruption
+- support to export bigram phrase
+
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.8.1-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.8.1-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.8.1-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Wed Aug 23 2023 Peng Wu <pwu@redhat.com> - 2.8.1-5
+- Switch to use Kyoto Cabinet
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.8.1-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Fri May 19 2023 Peng Wu <pwu@redhat.com> - 2.8.1-3
+- Migrate to SPDX license
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.8.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Mon Jan 16 2023 Peng Wu <pwu@redhat.com> - 2.8.1-1
+- Update to 2.8.1
+- bug fixes
+
+* Wed Jan  4 2023 Peng Wu <pwu@redhat.com> - 2.8.0-1
+- Update to 2.8.0
+- bug fixes for ARMv7
+
+* Wed Oct 19 2022 Peng Wu <pwu@redhat.com> - 2.7.92-1
+- Update to 2.7.92
+- bug fixes
+
+* Wed Oct 19 2022 Peng Wu <pwu@redhat.com> - 2.7.91-1
+- Update to 2.7.91
+- improve suggestion candidates
+- support longer candidates
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.6.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Wed Apr 13 2022 Peng Wu <pwu@redhat.com> - 2.6.2-1
+- Update to 2.6.2
+- bug fixes
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.6.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Wed Oct 27 2021 Peng Wu <pwu@redhat.com> - 2.6.1-2
+- Rebuild the package
+
+* Wed Sep 15 2021 Peng Wu <pwu@redhat.com> - 2.6.1-1
+- Update to 2.6.1
+- bug fixes
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.6.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.6.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Dec 15 2020 Peng Wu <pwu@redhat.com> - 2.6.0-1
+- Update to 2.6.0
+- bug fixes
+
+* Thu Oct 22 2020 Peng Wu <pwu@redhat.com> - 2.4.92-1
+- Update to 2.4.92
+- update pinyin data
+- bug fixes
+
+* Wed Aug 26 2020 Peng Wu <pwu@redhat.com> - 2.4.91-1
+- Update to 2.4.91
+- improve full pinyin auto correction
+- bug fixes
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Wed Jul 22 2020 Tom Stellard <tstellar@redhat.com> - 2.3.0-4
+- Use make macros
+- https://fedoraproject.org/wiki/Changes/UseMakeBuildInstallMacro
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

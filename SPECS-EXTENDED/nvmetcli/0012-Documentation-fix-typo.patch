@@ -1,0 +1,28 @@
+From 297f40aef117875d98303b0535fb076626b91a19 Mon Sep 17 00:00:00 2001
+From: Maurizio Lombardi <mlombard@redhat.com>
+Date: Mon, 1 Feb 2021 15:47:56 +0100
+Subject: [PATCH 12/12] Documentation: fix typo
+
+Signed-off-by: Maurizio Lombardi <mlombard@redhat.com>
+Reviewed-by: Chaitanya Kulkarni <chaitanya.kulkarni@wdc.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ Documentation/nvmetcli.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Documentation/nvmetcli.txt b/Documentation/nvmetcli.txt
+index 05a0344..7d6ffda 100644
+--- a/Documentation/nvmetcli.txt
++++ b/Documentation/nvmetcli.txt
+@@ -116,7 +116,7 @@ your devices and all dependent modules are loaded,
+ and configfs is mounted on /sys/kernel/config
+ using:
+ 
+-	mount -t configs none /sys/kernel/config
++	mount -t configfs none /sys/kernel/config
+ 
+ The following section walks through a configuration example.
+ 
+-- 
+2.29.2
+

@@ -8,7 +8,7 @@ Source0:        https://archive.apache.org/dist/commons/net/source/commons-net-%
 Source1:        https://downloads.apache.org/commons/net/source/commons-net-%{version}-src.tar.gz.asc
 Source2:        https://downloads.apache.org/commons/KEYS
 BuildArch:      noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 
 BuildRequires:  maven-local
 BuildRequires:  mvn(org.apache.commons:commons-parent:pom:)

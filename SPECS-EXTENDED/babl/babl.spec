@@ -1,5 +1,13 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+## START: Set by rpmautospec
+## (rpmautospec version 0.7.3)
+## RPMAUTOSPEC: autorelease, autochangelog
+%define autorelease(e:s:pb:n) %{?-p:0.}%{lua:
+    release_number = 1;
+    base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
+    print(release_number + base_release_number - 1);
+}%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{!?-n:%{?dist}}
+## END: Set by rpmautospec
+
 # skip tests known to be problematic in a specific version
 %global skip_checks_version 0.1.58
 %ifarch ppc64 ppc64le
@@ -12,31 +20,56 @@ Distribution:   Azure Linux
   %endif
 %endif
 
+%if ! 0%{?fedora}%{?rhel} || 0%{?fedora} >= 20 || 0%{?rhel} > 7
 %global develdocdir %{_docdir}/%{name}-devel/html
+%else
+%global develdocdir %{_docdir}/%{name}-devel-%{version}/html
+%endif
 
-Summary:	A dynamic, any to any, pixel format conversion library
-Name:		babl
-Version:	0.1.82
-Release:	3%{?dist}
+Summary:    A dynamic, any to any, pixel format conversion library
+Name:       babl
+Version:    0.1.110
+Release:    %autorelease
 
 # Compute some version related macros
-# Ugly hack, you need to get your quoting backslashes/percent signs straight
-%global major %(ver=%version; echo ${ver%%%%.*})
-%global minor %(ver=%version; ver=${ver#%major.}; echo ${ver%%%%.*})
-%global micro %(ver=%version; ver=${ver#%major.%minor.}; echo ${ver%%%%.*})
+# In the case of a snapshot version (e.g. "Version: 2.99.19^20240814git256e0ca5a0"), this computes
+# the "plain" version (as defined in upstream sources), %%snapshot and %%git_rev macros. In the case
+# of a normal release, %%plain_version will be the same as %%version.
+%global plain_version %{lua:
+    local plain_version = (string.gsub(macros.version, '^(.*)[%^~].*$', '%1'))
+    print(plain_version)
+    if plain_version ~= macros.version then
+        macros.snapshot = (string.gsub(macros.version, '^.*[%^~](.*)$', '%1'))
+        macros.git_rev = (string.gsub(macros.snapshot, '^.*git(.*)$', '%1'))
+    end
+}
+%global major %{lua:
+    print((string.gsub(macros.plain_version, '^(%d+)%..*$', '%1')))
+}
+%global minor %{lua:
+    print((string.gsub(macros.plain_version, '^%d+%.(%d+)%..*$', '%1')))
+}
+%global micro %{lua:
+    print((string.gsub(macros.plain_version, '^%d+%.%d+%.(%d+).*$', '%1')))
+}
+
 %global apiver %major.%minor
 
 # The gggl codes contained in this package are under the GPL, with exceptions allowing their use under libraries covered under the LGPL
-License:	LGPLv3+ and GPLv3+
-URL:		http://www.gegl.org/babl/
-Source0:	https://download.gimp.org/pub/babl/%{apiver}/%{name}-%{version}.tar.xz
+License:    LGPL-3.0-or-later AND GPL-3.0-or-later
+URL:        https://www.gegl.org/babl/
+Source0:    https://download.gimp.org/pub/babl/%{apiver}/%{name}-%{plain_version}.tar.xz
+%if %defined git_rev
+Patch:      babl-%{plain_version}-git%{git_rev}.patch
+%endif
 
-BuildRequires:	gcc
-BuildRequires:	gobject-introspection-devel
-BuildRequires:	librsvg2-tools
-BuildRequires:	meson, vala
-BuildRequires:	pkgconfig(lcms2)
-BuildRequires:	openssh-clients
+BuildRequires:  gcc
+BuildRequires:  openssh-clients
+BuildRequires:  gobject-introspection-devel
+BuildRequires:  gi-docgen
+BuildRequires:  librsvg2-tools
+BuildRequires:  meson, vala
+BuildRequires:  pkgconfig(lcms2)
 
 %description
 Babl is a dynamic, any to any, pixel format conversion library. It
@@ -45,27 +78,32 @@ stored in. Babl doesn't only help with existing pixel formats, but also
 facilitates creation of new and uncommon ones.
 
 %package devel
-Summary:	Headers for developing programs that will use %{name}
-Requires:	%{name}%{?_isa} = %{version}-%{release}
-Requires:	pkgconfig
+Summary:    Headers for developing programs that will use %{name}
+Requires:   %{name}%{?_isa} = %{version}-%{release}
+Requires:   pkgconfig
+%if ! (0%{?fedora} >= 22 || 0%{?rhel} > 7)
+# Split off devel docs from 0.1.2-2 on
+Obsoletes:  %{name}-devel < 0.1.2-2%{?dist}
+Conflicts:  %{name}-devel < 0.1.2-2%{?dist}
+%endif
 
 %description devel
 This package contains the libraries and header files needed for
 developing with %{name}.
 
 %package devel-docs
-Summary:	Documentation for developing programs that will use %{name}
-BuildArch:	noarch
-Requires:	%{name}-devel = %{version}-%{release}
+Summary:    Documentation for developing programs that will use %{name}
+BuildArch:  noarch
+Requires:   %{name}-devel = %{version}-%{release}
 # Split off devel docs from 0.1.2-2 on
-Obsoletes:	%{name}-devel < 0.1.2-2%{?dist}
-Conflicts:	%{name}-devel < 0.1.2-2%{?dist}
+Obsoletes:  %{name}-devel < 0.1.2-2%{?dist}
+Conflicts:  %{name}-devel < 0.1.2-2%{?dist}
 
 %description devel-docs
 This package contains documentation needed for developing with %{name}.
 
 %prep
-%autosetup -p1
+%autosetup -p1 -n babl-%{plain_version}
 
 %build
 %meson
@@ -75,10 +113,10 @@ This package contains documentation needed for developing with %{name}.
 %meson_install
 
 mkdir -p "%{buildroot}/%{develdocdir}"
-cp -pr docs/graphics docs/*.html docs/babl.css "%{buildroot}/%{develdocdir}"
-rm -f "%{buildroot}/%{develdocdir}"/graphics/meson.build
-rm -f "%{buildroot}/%{develdocdir}"/graphics/.gitignore
+cp -pr "%{_vpath_builddir}"/docs/* "%{buildroot}/%{develdocdir}"
+rm -f "%{buildroot}/%{develdocdir}/index.html.tmp"
 
+mv "%{buildroot}/%{_docdir}/%{name}-%{apiver}" "%{buildroot}/%{develdocdir}"
 
 %check
 # skip tests known to be problematic in a specific version
@@ -101,6 +139,7 @@ popd
 %files
 %license docs/COPYING*
 %doc AUTHORS NEWS
+%{_bindir}/babl
 %{_libdir}/libbabl-%{apiver}.so.0*
 %{_libdir}/babl-%{apiver}/
 %dir %{_libdir}/girepository-1.0
@@ -109,7 +148,7 @@ popd
 %files devel
 %{_includedir}/babl-%{apiver}/
 %{_libdir}/libbabl-%{apiver}.so
-%{_libdir}/pkgconfig/%{name}.pc
+%{_libdir}/pkgconfig/%{name}-%{apiver}.pc
 %dir %{_datadir}/gir-1.0
 %{_datadir}/gir-1.0/Babl-%{apiver}.gir
 %{_datadir}/vala/
@@ -118,12 +157,72 @@ popd
 %doc %{develdocdir}
 
 %changelog
-* Fri Mar 18 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.1.82-3
-- Adding BR on "openssh-clients" to provide "scp".
-- License verified.
+## START: Generated by rpmautospec
+* Fri Nov 01 2024 Nils Philippsen <nils@tiptoe.de> - 0.1.110-1
+- Update to 0.1.110
 
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.1.82-2
-- Initial CBL-Mariner import from Fedora 33 (license: MIT).
+* Fri Sep 27 2024 Nils Philippsen <nils@tiptoe.de> - 0.1.108^20240927git6ecbee3-1
+- Update to a 2024-09-27 git snapshot
+
+* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.1.108-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Tue May 07 2024 Nils Philippsen <nils@tiptoe.de> - 0.1.108-1
+- Update to 0.1.108
+
+* Tue Jan 23 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.1.106-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jan 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.1.106-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Tue Aug 29 2023 Nils Philippsen <nils@tiptoe.de> - 0.1.106-1
+- Update to 0.1.106
+
+* Wed Jul 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.1.102-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Tue May 02 2023 Josef Ridky <jridky@redhat.com> - 0.1.102-2
+- move to SPDX license format
+
+* Tue Mar 07 2023 David King <amigadave@amigadave.com> - 0.1.102-1
+- Update to 0.1.102
+
+* Wed Jan 18 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.1.92-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Tue Aug 02 2022 Josef Ridky <jridky@redhat.com> - 0.1.92-3
+- Fix FTBFS in F37 (#2113117)
+
+* Wed Jul 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.1.92-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Mar 31 2022 Josef Ridky <jridky@redhat.com> - 0.1.92-1
+- New upstream release 0.1.92
+
+* Mon Mar 14 2022 Josef Ridky <jridky@redhat.com> - 0.1.90-2
+- Fix docs install to include all files
+
+* Mon Mar 14 2022 Josef Ridky <jridky@redhat.com> - 0.1.90-1
+- New upstream release 0.1.90
+
+* Wed Jan 19 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.1.88-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Mon Oct 18 2021 Josef Ridky <jridky@redhat.com> - 0.1.88-1
+- New upstream release 0.1.88
+
+* Mon Aug 02 2021 Josef Ridky <jridky@redhat.com> - 0.1.86-3
+- fix FTBFS by adding openssh-clients requirement (#1987380)
+
+* Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.1.86-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri Apr 02 2021 Kalev Lember <klember@redhat.com> - 0.1.86-1
+- Update to 0.1.86
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.1.82-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
 * Fri Oct 16 2020 Kalev Lember <klember@redhat.com> - 0.1.82-1
 - Update to 0.1.82
@@ -377,15 +476,15 @@ popd
 - Update to 0.0.18
 
 * Mon Nov 26 2007 Deji Akingunola <dakingun@gmail.com> - 0.0.16-1
-- Update to 0.0.16 release 
+- Update to 0.0.16 release
 - License change from GPLv2+ to GPLv3+
 
 * Mon Oct 22 2007 Deji Akingunola <dakingun@gmail.com> - 0.0.15-0.5.20071011svn
-- Update the License field 
+- Update the License field
 
 * Fri Oct 12 2007 Deji Akingunola <dakingun@gmail.com> - 0.0.15-0.4.20071011svn
 - Package the extension libraries in the main package
-- Run 'make check' 
+- Run 'make check'
 
 * Fri Oct 12 2007 Deji Akingunola <dakingun@gmail.com> - 0.0.15-0.3.20071011svn
 - Ensure timestamps are kept during install
@@ -396,3 +495,5 @@ popd
 
 * Thu Oct 11 2007 Deji Akingunola <dakingun@gmail.com> - 0.0.15-0.1.20071011svn
 - Initial packaging for Fedora
+
+## END: Generated by rpmautospec

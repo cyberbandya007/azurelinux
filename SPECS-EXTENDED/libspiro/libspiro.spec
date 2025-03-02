@@ -1,19 +1,21 @@
-Summary:        Library to simplify the drawing of beautiful curves
 Name:           libspiro
 Version:        20221101
-Release:        1%{?dist}
+Release:        7%{?dist}
+Summary:        Library to simplify the drawing of beautiful curves
+
+# The files that are used to compile this library are all in GPLv3+
+# https://github.com/fontforge/libspiro/issues/8
 License:        GPL-3.0-or-later
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 URL:            https://github.com/fontforge/libspiro/
-Source0:        https://github.com/fontforge/libspiro/releases/download/%{version}/libspiro-dist-%{version}.tar.gz#/%{name}-%{version}.tar.gz
+# Let's use libspiro-dist tarball from upstream as it does not require autoreconf
+Source0:        https://github.com/fontforge/libspiro/releases/download/%{version}/libspiro-dist-%{version}.tar.gz
 BuildRequires:  gcc
-BuildRequires:  make
+BuildRequires: make
 
 %description
-This library will take an array of spiro control points and
-convert them into a series of bézier splines which can then
-be used in the myriad of ways the world has come to use béziers.
+This library will take an array of spiro control points and 
+convert them into a series of bézier splines which can then 
+be used in the myriad of ways the world has come to use béziers. 
 
 %package        devel
 Summary:        Development files for %{name}
@@ -28,11 +30,14 @@ developing applications that use %{name}.
 
 %build
 %configure --disable-static
-%make_build
+%{make_build}
 
 %install
-%make_install
-find %{buildroot} -type f -name "*.la" -delete -print
+%{make_install}
+find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
+
+%check
+make check
 
 %files
 %doc README* ChangeLog AUTHORS
@@ -46,13 +51,47 @@ find %{buildroot} -type f -name "*.la" -delete -print
 %{_mandir}/man3/libspiro.3.gz
 
 %changelog
-* Fri Oct 15 2021 Muhammad Falak <mwani@microsoft.com> - 20221101-1
-- Bump version to address CVE-2019-19847
-- Lint spec
-- License verified
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 20221101-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 20190731-3
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 20221101-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 20221101-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 20221101-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Fri Jun 23 2023 Parag Nemade <pnemade AT redhat DOT com> - 20221101-3
+- Migrate to SPDX license expression
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 20221101-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Nov 10 2022 Parag Nemade <pnemade AT redhat DOT com> - 20221101-1
+- Update to 20221101 version (#2139603)
+
+* Sun Jul 24 2022 Parag Nemade <pnemade AT redhat DOT com> - 20220722-1
+- Update to 20220722 version (#2110088)
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 20200505-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 20200505-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 20200505-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 20200505-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 20200505-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Wed May 06 2020 Parag Nemade <pnemade AT redhat DOT com> - 20200505-1
+- Update to 20200505 version (#1831576)
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 20190731-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

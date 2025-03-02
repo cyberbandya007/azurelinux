@@ -1,23 +1,33 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
-%global _hardened_build 1
-
-
 Name:           fuse-sshfs
-Version:        3.7.1
-Release:        2%{?dist}
+Version:        3.7.3
+Release:        10%{?dist}
 Summary:        FUSE-Filesystem to access remote filesystems via SSH
-License:        GPLv2
+License:        GPL-2.0-only
 URL:            https://github.com/libfuse/sshfs
 Source0:        https://github.com/libfuse/sshfs/releases/download/sshfs-%{version}/sshfs-%{version}.tar.xz
 Source1:        https://github.com/libfuse/sshfs/releases/download/sshfs-%{version}/sshfs-%{version}.tar.xz.asc
+# Find which key was used for signing the release:
+#
+# $ LANG=C gpg --verify sshfs-3.7.3.tar.xz.asc sshfs-3.7.3.tar.xz
+# gpg: Signature made Thu May 26 15:23:53 2022 CEST
+# gpg:                using RSA key ED31791B2C5C1613AF388B8AD113FCAC3C4E599F
+# gpg: Can't check signature: No public key
+#
+# Now export the key required as follows:
+#
+# gpg --no-default-keyring --keyring ./keyring.gpg --keyserver keyserver.ubuntu.com --recv-key ED31791B2C5C1613AF388B8AD113FCAC3C4E599F
+# gpg --no-default-keyring --keyring ./keyring.gpg  --output ED31791B2C5C1613AF388B8AD113FCAC3C4E599F.gpg --export
+Source2:	ED31791B2C5C1613AF388B8AD113FCAC3C4E599F.gpg
+
 Patch1:         sshfs-0001-Refer-to-mount.fuse3-instead-of-mount.fuse.patch
 
 Provides:       sshfs = %{version}-%{release}
 Requires:       fuse3 >= 3.1.0
 Requires:       openssh-clients
+Recommends:     openssh-askpass
 
 BuildRequires:  gcc
+BuildRequires:  gnupg2
 BuildRequires:  meson
 BuildRequires:  fuse3-devel >= 3.1.0
 BuildRequires:  glib2-devel >= 2.0
@@ -37,13 +47,13 @@ mounting the filesystem is as easy as logging into the server with ssh.
 
 
 %prep
+%{gpgverify} --keyring='%{SOURCE2}' --signature='%{SOURCE1}' --data='%{SOURCE0}'
 %autosetup -p1 -n sshfs-%{version}
 # fix tests
 sed -i "s/'fusermount'/'fusermount3'/g" test/util.py
 
 
 %build
-sed -i '28 s/rst2man/rst2man3/2;28 s/rst2man/rst2man3/3' meson.build 
 %meson
 %meson_build
 
@@ -54,7 +64,8 @@ sed -i '28 s/rst2man/rst2man3/2;28 s/rst2man/rst2man3/3' meson.build
 
 %check
 cd %{_vpath_builddir}
-python3 -m pytest test/
+# FIXME requires sshd running? Previously tests were just skipped.
+#python3 -m pytest test/
 
 
 %files
@@ -67,9 +78,47 @@ python3 -m pytest test/
 
 
 %changelog
-* Thu Jun 17 2021 Thomas Crain <thcrain@microsoft.com> - 3.7.1-2
-- Initial CBL-Mariner import from Fedora 33 (license: MIT).
-- Update meson.build to look for the rst2man3 program shipping by python3-docutils
+* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.7.3-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Wed Mar 27 2024 Dusty Mabe <dusty@dustymabe.com> - 3.7.3-9
+- Lower openssh-askpass dep to recommends
+
+* Mon Mar 25 2024 Vasiliy Glazov <vascom2@gmail.com> - 3.7.3-8
+- Add requires openssh-askpass
+
+* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.7.3-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jan 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.7.3-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sat Oct 21 2023 Peter Lemenkov <lemenkov@gmail.com> - 3.7.3-5
+- Check GPG signature
+
+* Wed Jul 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.7.3-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.7.3-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.7.3-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Tue May 31 2022 Vasiliy Glazov <vascom2@gmail.com> - 3.7.3-1
+- Update to 3.7.3
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.7.2-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.7.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Wed Jun 09 2021 Vasiliy Glazov <vascom2@gmail.com> - 3.7.2-1
+- Update to 3.7.2
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.7.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
 * Fri Nov 13 2020 Vasiliy Glazov <vascom2@gmail.com> - 3.7.1-1
 - Update to 3.7.1

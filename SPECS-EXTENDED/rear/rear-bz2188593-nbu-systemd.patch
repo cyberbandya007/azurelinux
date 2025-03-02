@@ -45,6 +45,257 @@ index 00000000..f7423e0a
 +unset -f get_unit_path
 +unset -f get_unit_dropin_paths
 +unset -f unit_is_enabled
+diff --git a/usr/share/rear/skel/default/etc/scripts/run-automatic-rear b/usr/share/rear/skel/default/etc/scripts/run-automatic-rear
+new file mode 100755
+index 00000000..6edc657a
+--- /dev/null
++++ b/usr/share/rear/skel/default/etc/scripts/run-automatic-rear
+@@ -0,0 +1,82 @@
++#!/bin/bash
++
++source /etc/scripts/system-setup-functions.sh
++
++# In debug mode run the automated 'rear recover' also with debug options.
++# Because the kernel command line option 'debug' means 'set -x' for the system setup scripts
++# it also means '-D' (i.e. 'set -x') for the automated 'rear recover' run:
++if rear_debug ; then
++    rear_debug_options='-D'
++else
++    rear_debug_options=''
++fi
++
++# Launch rear recover automatically:
++if automatic_recovery ; then
++    choices=( "View Relax-and-Recover log file(s)"
++              "Go to Relax-and-Recover shell"
++            )
++    echo -e "\nLaunching 'rear recover' automatically\n"
++    if rear $rear_debug_options recover ; then
++        echo -e "\n'rear recover' finished successfully\n"
++        choices+=( "Reboot" )
++    else
++        echo -e "\n'rear recover' failed, check the Relax-and-Recover log file(s)\n"
++    fi
++    PS3="Select what to do "
++    select choice in "${choices[@]}" ; do
++        case "$REPLY" in
++            (1)
++                # Do not assume the ReaR log file is named rear-$HOSTNAME.log
++                # the user can have specified any name as LOGFILE:
++                less /var/log/rear/*
++                ;;
++            (2)
++                echo "" > /etc/issue
++                echo "" > /etc/motd
++                break
++                ;;
++            (3)
++                reboot
++                ;;
++        esac
++        for (( i=1 ; i <= ${#choices[@]} ; i++ )) ; do
++            echo "$i) ${choices[$i-1]}"
++        done
++    done 2>&1
++fi
++
++# Launch rear recover automatically in unattended mode
++# i.e. with automated reboot after successful 'rear recover':
++if unattended_recovery ; then
++    choices=( "View Relax-and-Recover log file(s)"
++              "Go to Relax-and-Recover shell"
++            )
++    echo -e "\nLaunching 'rear recover' automatically in unattended mode\n"
++    if rear $rear_debug_options recover ; then
++        echo -e "\n'rear recover' finished successfully\n"
++        echo -e "\nRebooting in 30 seconds (Ctrl-C to interrupt)\n"
++        sleep 30
++        reboot
++    else
++        echo -e "\n'rear recover' failed, check the Relax-and-Recover log file(s)\n"
++        PS3="Select what to do "
++        select choice in "${choices[@]}" ; do
++            case "$REPLY" in
++                (1)
++                    # Do not assume the ReaR log file is named rear-$HOSTNAME.log
++                    # the user can have specified any name as LOGFILE:
++                    less /var/log/rear/*
++                    ;;
++                (2)
++                    echo "" > /etc/issue
++                    echo "" > /etc/motd
++                    break
++                    ;;
++            esac
++            for (( i=1 ; i <= ${#choices[@]} ; i++ )) ; do
++                echo "$i) ${choices[$i-1]}"
++            done
++        done 2>&1
++    fi
++fi
+diff --git a/usr/share/rear/skel/default/etc/scripts/system-setup b/usr/share/rear/skel/default/etc/scripts/system-setup
+index 1dc7f1e8..17487ac7 100755
+--- a/usr/share/rear/skel/default/etc/scripts/system-setup
++++ b/usr/share/rear/skel/default/etc/scripts/system-setup
+@@ -9,36 +9,7 @@
+ # (e.g. "ls foo*bar" becomes plain "ls" without "foo*bar: No such file or directory" error).
+ shopt -s nullglob
+ 
+-# Use an artificial array to get the kernel command line parameters as array elements
+-kernel_command_line=( $( cat /proc/cmdline ) )
+-
+-function rear_debug() {
+-    for kernel_command_line_parameter in "${kernel_command_line[@]}" ; do
+-        test "debug" = "$kernel_command_line_parameter" && return 0
+-    done
+-    return 1
+-}
+-
+-function unattended_recovery() {
+-    for kernel_command_line_parameter in "${kernel_command_line[@]}" ; do
+-        test "unattended" = "$kernel_command_line_parameter" && return 0
+-    done
+-    return 1
+-}
+-
+-function automatic_recovery() {
+-    # The unattended recovery mode implies automatic recovery (see the implementations below)
+-    # so that in unattended mode the automatic recovery code below must not be run
+-    # otherwise first the automatic recovery code and then the unattended recovery code
+-    # get run automatically one after the other where the unattended recovery fails
+-    # because for two subsequent 'rear recover' the second one fails:
+-    unattended_recovery && return 1
+-    for kernel_command_line_parameter in "${kernel_command_line[@]}" ; do
+-        test "auto_recover" = "$kernel_command_line_parameter" && return 0
+-        test "automatic" = "$kernel_command_line_parameter" && return 0
+-    done
+-    return 1
+-}
++source /etc/scripts/system-setup-functions.sh
+ 
+ # The 'sleep 1' is used as workaround to avoid whatever inexplicable actual reason
+ # that at least on SLES12 some initial output lines of this script would get lost
+@@ -135,84 +106,3 @@ echo -e "\nRelax-and-Recover rescue system is ready\n"
+ # Wait two seconds so that the user can read the 'Relax-and-Recover rescue system is ready' message
+ # on his screen before the screen gets cleared and replaced by the login screen:
+ sleep 2
+-
+-# In debug mode run the automated 'rear recover' also with debug options.
+-# Because the kernel command line option 'debug' means 'set -x' for the system setup scripts
+-# it also means '-D' (i.e. 'set -x') for the automated 'rear recover' run:
+-if rear_debug ; then
+-    rear_debug_options='-D'
+-else
+-    rear_debug_options=''
+-fi
+-
+-# Launch rear recover automatically:
+-if automatic_recovery ; then
+-    choices=( "View Relax-and-Recover log file(s)"
+-              "Go to Relax-and-Recover shell"
+-            )
+-    echo -e "\nLaunching 'rear recover' automatically\n"
+-    # The recover workflow is always verbose (see usr/sbin/rear):
+-    if rear $rear_debug_options recover ; then
+-        echo -e "\n'rear recover' finished successfully\n"
+-        choices+=( "Reboot" )
+-    else
+-        echo -e "\n'rear recover' failed, check the Relax-and-Recover log file(s)\n"
+-    fi
+-    PS3="Select what to do "
+-    select choice in "${choices[@]}" ; do
+-        case "$REPLY" in
+-            (1)
+-                # Do not assume the ReaR log file is named rear-$HOSTNAME.log
+-                # the user can have specified any name as LOGFILE:
+-                less /var/log/rear/*
+-                ;;
+-            (2)
+-                echo "" > /etc/issue
+-                echo "" > /etc/motd
+-                break
+-                ;;
+-            (3)
+-                reboot
+-                ;;
+-        esac
+-        for (( i=1 ; i <= ${#choices[@]} ; i++ )) ; do
+-            echo "$i) ${choices[$i-1]}"
+-        done
+-    done 2>&1
+-fi
+-
+-# Launch rear recover automatically in unattended mode
+-# i.e. with automated reboot after successful 'rear recover':
+-if unattended_recovery ; then
+-    choices=( "View Relax-and-Recover log file(s)"
+-              "Go to Relax-and-Recover shell"
+-            )
+-    echo -e "\nLaunching 'rear recover' automatically in unattended mode\n"
+-    # The recover workflow is always verbose (see usr/sbin/rear):
+-    if rear $rear_debug_options recover ; then
+-        echo -e "\n'rear recover' finished successfully\n"
+-        echo -e "\nRebooting in 30 seconds (Ctrl-C to interrupt)\n"
+-        sleep 30
+-        reboot
+-    else
+-        echo -e "\n'rear recover' failed, check the Relax-and-Recover log file(s)\n"
+-        PS3="Select what to do "
+-        select choice in "${choices[@]}" ; do
+-            case "$REPLY" in
+-                (1)
+-                    # Do not assume the ReaR log file is named rear-$HOSTNAME.log
+-                    # the user can have specified any name as LOGFILE:
+-                    less /var/log/rear/*
+-                    ;;
+-                (2)
+-                    echo "" > /etc/issue
+-                    echo "" > /etc/motd
+-                    break
+-                    ;;
+-            esac
+-            for (( i=1 ; i <= ${#choices[@]} ; i++ )) ; do
+-                echo "$i) ${choices[$i-1]}"
+-            done
+-        done 2>&1
+-    fi
+-fi
+diff --git a/usr/share/rear/skel/default/etc/scripts/system-setup-functions.sh b/usr/share/rear/skel/default/etc/scripts/system-setup-functions.sh
+new file mode 100644
+index 00000000..c320cf88
+--- /dev/null
++++ b/usr/share/rear/skel/default/etc/scripts/system-setup-functions.sh
+@@ -0,0 +1,30 @@
++# Use an artificial array to get the kernel command line parameters as array elements
++kernel_command_line=( $( cat /proc/cmdline ) )
++
++function rear_debug() {
++    for kernel_command_line_parameter in "${kernel_command_line[@]}" ; do
++        test "debug" = "$kernel_command_line_parameter" && return 0
++    done
++    return 1
++}
++
++function unattended_recovery() {
++    for kernel_command_line_parameter in "${kernel_command_line[@]}" ; do
++        test "unattended" = "$kernel_command_line_parameter" && return 0
++    done
++    return 1
++}
++
++function automatic_recovery() {
++    # The unattended recovery mode implies automatic recovery (see the implementations below)
++    # so that in unattended mode the automatic recovery code below must not be run
++    # otherwise first the automatic recovery code and then the unattended recovery code
++    # get run automatically one after the other where the unattended recovery fails
++    # because for two subsequent 'rear recover' the second one fails:
++    unattended_recovery && return 1
++    for kernel_command_line_parameter in "${kernel_command_line[@]}" ; do
++        test "auto_recover" = "$kernel_command_line_parameter" && return 0
++        test "automatic" = "$kernel_command_line_parameter" && return 0
++    done
++    return 1
++}
 diff --git a/usr/share/rear/skel/default/etc/systemd/system/default.target.wants/.gitignore b/usr/share/rear/skel/default/etc/systemd/system/default.target.wants/.gitignore
 new file mode 100644
 index 00000000..d6b7ef32
@@ -53,3 +304,137 @@ index 00000000..d6b7ef32
 @@ -0,0 +1,2 @@
 +*
 +!.gitignore
+diff --git a/usr/share/rear/skel/default/usr/lib/systemd/system/automatic-rear.service b/usr/share/rear/skel/default/usr/lib/systemd/system/automatic-rear.service
+new file mode 100644
+index 00000000..ee3187a8
+--- /dev/null
++++ b/usr/share/rear/skel/default/usr/lib/systemd/system/automatic-rear.service
+@@ -0,0 +1,13 @@
++[Unit]
++Description=Run Relax-and-Recover recovery automatically if requested
++Wants=network-online.target
++After=network-online.target
++
++[Service]
++Type=oneshot
++ExecStart=/etc/scripts/run-automatic-rear
++StandardInput=tty
++RemainAfterExit=yes
++
++[Install]
++WantedBy=multi-user.target
+diff --git a/usr/share/rear/skel/default/usr/lib/systemd/system/getty@.service b/usr/share/rear/skel/default/usr/lib/systemd/system/getty@.service
+index bf858ca8..abafd8b5 100644
+--- a/usr/share/rear/skel/default/usr/lib/systemd/system/getty@.service
++++ b/usr/share/rear/skel/default/usr/lib/systemd/system/getty@.service
+@@ -6,6 +6,8 @@ Description=Getty on %I
+ Documentation=man:agetty(8)
+ After=systemd-user-sessions.service plymouth-quit-wait.service
+ After=sysinit.service
++# Automatic ReaR uses the system console
++After=automatic-rear.service
+ 
+ # If additional gettys are spawned during boot then we should make
+ # sure that this is synchronized before getty.target, even though
+diff --git a/usr/share/rear/skel/default/usr/lib/systemd/system/multi-user.target b/usr/share/rear/skel/default/usr/lib/systemd/system/multi-user.target
+index c5ea1cca..a88e219f 100644
+--- a/usr/share/rear/skel/default/usr/lib/systemd/system/multi-user.target
++++ b/usr/share/rear/skel/default/usr/lib/systemd/system/multi-user.target
+@@ -4,7 +4,7 @@
+ 
+ [Unit]
+ Description=Multi-User
+-Requires=sysinit.target
++Requires=sysinit.target basic.target
+ AllowIsolate=yes
+ 
+ [Install]
+diff --git a/usr/share/rear/skel/default/usr/lib/systemd/system/multi-user.target.wants/automatic-rear.service b/usr/share/rear/skel/default/usr/lib/systemd/system/multi-user.target.wants/automatic-rear.service
+new file mode 120000
+index 00000000..3e8a4161
+--- /dev/null
++++ b/usr/share/rear/skel/default/usr/lib/systemd/system/multi-user.target.wants/automatic-rear.service
+@@ -0,0 +1 @@
++../automatic-rear.service
+\ No newline at end of file
+diff --git a/usr/share/rear/skel/default/usr/lib/systemd/system/network-online.target b/usr/share/rear/skel/default/usr/lib/systemd/system/network-online.target
+new file mode 100644
+index 00000000..c3edfeb4
+--- /dev/null
++++ b/usr/share/rear/skel/default/usr/lib/systemd/system/network-online.target
+@@ -0,0 +1,14 @@
++#  SPDX-License-Identifier: LGPL-2.1-or-later
++#
++#  This file is part of systemd.
++#
++#  systemd is free software; you can redistribute it and/or modify it
++#  under the terms of the GNU Lesser General Public License as published by
++#  the Free Software Foundation; either version 2.1 of the License, or
++#  (at your option) any later version.
++
++[Unit]
++Description=Network is Online
++Documentation=man:systemd.special(7)
++Documentation=https://www.freedesktop.org/wiki/Software/systemd/NetworkTarget
++After=network.target
+diff --git a/usr/share/rear/skel/default/usr/lib/systemd/system/network-online.target.wants/sysinit.service b/usr/share/rear/skel/default/usr/lib/systemd/system/network-online.target.wants/sysinit.service
+new file mode 120000
+index 00000000..ed660a10
+--- /dev/null
++++ b/usr/share/rear/skel/default/usr/lib/systemd/system/network-online.target.wants/sysinit.service
+@@ -0,0 +1 @@
++../sysinit.service
+\ No newline at end of file
+diff --git a/usr/share/rear/skel/default/usr/lib/systemd/system/rsyslog.service b/usr/share/rear/skel/default/usr/lib/systemd/system/rsyslog.service
+index ac171e0f..18fa17b5 100644
+--- a/usr/share/rear/skel/default/usr/lib/systemd/system/rsyslog.service
++++ b/usr/share/rear/skel/default/usr/lib/systemd/system/rsyslog.service
+@@ -1,6 +1,5 @@
+ [Unit]
+ Description=Relax-and-Recover run-syslog script
+-DefaultDependencies=no
+ 
+ [Service]
+ Type=simple
+diff --git a/usr/share/rear/skel/default/usr/lib/systemd/system/sysinit.service b/usr/share/rear/skel/default/usr/lib/systemd/system/sysinit.service
+index ee22fafc..b34b2fe8 100644
+--- a/usr/share/rear/skel/default/usr/lib/systemd/system/sysinit.service
++++ b/usr/share/rear/skel/default/usr/lib/systemd/system/sysinit.service
+@@ -1,9 +1,14 @@
+ [Unit]
+ Description=Initialize Rescue System
+-After=systemd-udevd.service
++DefaultDependencies=no
++After=systemd-udevd.service rear-boot-helper.service
++Before=network-online.target
+ 
+ [Service]
+ Type=oneshot
+ ExecStart=/etc/scripts/system-setup
+ StandardInput=tty
+ RemainAfterExit=yes
++
++[Install]
++WantedBy=network-online.target
+diff --git a/usr/share/rear/skel/default/usr/lib/systemd/system/sysinit.target b/usr/share/rear/skel/default/usr/lib/systemd/system/sysinit.target
+index 4187ef67..2a16369b 100644
+--- a/usr/share/rear/skel/default/usr/lib/systemd/system/sysinit.target
++++ b/usr/share/rear/skel/default/usr/lib/systemd/system/sysinit.target
+@@ -4,3 +4,5 @@
+ 
+ [Unit]
+ Description=System Initialization
++Wants=sysinit.service rear-boot-helper.service
++After=sysinit.service rear-boot-helper.service
+diff --git a/usr/share/rear/skel/default/usr/lib/systemd/system/syslog.socket b/usr/share/rear/skel/default/usr/lib/systemd/system/syslog.socket
+index 9a0064c0..3fb02344 100644
+--- a/usr/share/rear/skel/default/usr/lib/systemd/system/syslog.socket
++++ b/usr/share/rear/skel/default/usr/lib/systemd/system/syslog.socket
+@@ -4,7 +4,6 @@
+ 
+ [Unit]
+ Description=Syslog Socket
+-DefaultDependencies=no
+ Before=sockets.target syslog.target
+ 
+ [Socket]

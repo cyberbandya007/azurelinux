@@ -1,15 +1,16 @@
+# Enable optional dependencies
+%bcond_without perl_File_ShareDir_enables_optional_deps
+
 Name:           perl-File-ShareDir
-Version:        1.116
-Release:        8%{?dist}
+Version:        1.118
+Release:        12%{?dist}
 Summary:        Locate per-dist and per-module shared files
 # other files:              GPL+ or Artistic
 ## not in binary packages
 # inc/latest/private.pm:    ASL 2.0
-License:        GPL+ or Artistic
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/File-ShareDir
-Source0:        https://cpan.metacpan.org/authors/id/R/RE/REHSACK/File-ShareDir-%{version}.tar.gz#/perl-File-ShareDir-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/R/RE/REHSACK/File-ShareDir-%{version}.tar.gz
 BuildArch:      noarch
 BuildRequires:  coreutils
 BuildRequires:  make
@@ -31,20 +32,24 @@ BuildRequires:  perl(base)
 BuildRequires:  perl(Class::Inspector) >= 1.12
 BuildRequires:  perl(constant)
 # Optional run-time
+%if %{with perl_File_ShareDir_enables_optional_deps}
 BuildRequires:  perl(List::MoreUtils) >= 0.428
 BuildRequires:  perl(Params::Util) >= 1.07
+%endif
 # Tests
-BuildRequires:  perl(CPAN::Meta)
 BuildRequires:  perl(Cwd)
 BuildRequires:  perl(File::Basename)
 BuildRequires:  perl(File::Path)
 BuildRequires:  perl(parent)
 BuildRequires:  perl(POSIX)
 BuildRequires:  perl(Test::More) >= 0.47
-Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
+# Optional tests
+BuildRequires:  perl(CPAN::Meta)
 Requires:       perl(Class::Inspector) >= 1.12
+%if %{with perl_File_ShareDir_enables_optional_deps}
 Recommends:     perl(List::MoreUtils) >= 0.428
 Recommends:     perl(Params::Util) >= 1.07
+%endif
 
 %{?perl_default_filter}
 %global __requires_exclude %{?__requires_exclude}|perl\\(Class::Inspector\\)$
@@ -59,11 +64,11 @@ available to the larger Perl community.
 %setup -q -n File-ShareDir-%{version}
 
 %build
-perl Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1
-make %{?_smp_mflags}
+perl Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1 NO_PERLLOCAL=1
+%{make_build}
 
 %install
-make pure_install DESTDIR=%{buildroot}
+%{make_install}
 %{_fixperms} %{buildroot}/*
 chmod 644 share/sample.txt
 chmod 644 share/subdir/sample.txt
@@ -80,8 +85,47 @@ make test AUTOMATED_TESTING=1
 %{_mandir}/man3/*
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.116-8
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.118-12
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.118-11
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.118-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.118-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.118-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.118-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.118-6
+- Perl 5.36 rebuild
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.118-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.118-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 1.118-3
+- Perl 5.34 rebuild
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.118-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Wed Oct 21 2020 Jitka Plesnikova <jplesnik@redhat.com> - 1.118-1
+- 1.118 bump
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.116-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 1.116-8
+- Perl 5.32 rebuild
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.116-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

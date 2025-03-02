@@ -1,0 +1,29 @@
+From 226b73a4ae317c6aa3c7b00da2adbd1ec769ce34 Mon Sep 17 00:00:00 2001
+From: Tony Asleson <tasleson@redhat.com>
+Date: Thu, 26 Mar 2020 13:07:46 -0500
+Subject: [PATCH 04/12] nvme.py: Explicit close is redundant
+
+One of the benefits of using 'with' statement for open files is the
+close is going to be called regardless of what happens.
+
+Signed-off-by: Tony Asleson <tasleson@redhat.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ nvmet/nvme.py | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/nvmet/nvme.py b/nvmet/nvme.py
+index fdec4ff..687a45a 100644
+--- a/nvmet/nvme.py
++++ b/nvmet/nvme.py
+@@ -302,7 +302,6 @@ class Root(CFSNode):
+             f.write("\n")
+             f.flush()
+             os.fsync(f.fileno())
+-            f.close()
+ 
+         os.rename(savefile + ".temp", savefile)
+ 
+-- 
+2.29.2
+

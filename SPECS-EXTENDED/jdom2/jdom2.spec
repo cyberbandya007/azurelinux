@@ -1,35 +1,32 @@
-Summary:        Java manipulation of XML made easy
-Name:           jdom2
-Version:        2.0.6
-Release:        29%{?dist}
-# Sam as the "Saxpath" license but restricts the use of the name "JDOM" instead of "SAXPath".
-License:        JDOM
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
-URL:            http://www.jdom.org/
+%bcond_with bootstrap
+
+Name:          jdom2
+Version:       2.0.6.1
+Release:       9%{?dist}
+Summary:       Java manipulation of XML made easy
+License:       Saxpath
+URL:           http://www.jdom.org/
 # ./generate-tarball.sh
-Source0:        https://github.com/hunterhacker/jdom/archive/JDOM-%{version}.tar.gz#/%{name}-%{version}.tar.gz
+Source0:       %{name}-%{version}.tar.gz
+# Bnd tool configuration
+Source3:       bnd.properties
 # Remove bundled jars that might not have clear licensing
-Source4:        generate-tarball.sh
+Source4:       generate-tarball.sh
 # Use system libraries
 # Disable gpg signatures
 # Process contrib and junit pom files
-Patch0:         0001-Adapt-build.patch
-#
-# Security patches
-# P100 -> ...
-#
-# CVE-2021-33813
-Patch100:       bd3ab78370098491911d7fe9d7a43b97144a234e.patch
-Patch101:       dd4f3c2fc7893edd914954c73eb577f925a7d361.patch
-Patch102:       07f316957b59d305f04c7bdb26292852bcbc2eb5.patch
+Patch0:        0001-Adapt-build.patch
 
-BuildArch:      noarch
+%if %{with bootstrap}
+BuildRequires: javapackages-bootstrap
+%else
+BuildRequires: javapackages-local
+BuildRequires: ant
+BuildRequires: ant-junit
+%endif
 
-BuildRequires:  ant
-BuildRequires:  ant-junit
-BuildRequires:  fdupes
-BuildRequires:  javapackages-local-bootstrap
+BuildArch:     noarch
+#ExclusiveArch: %{java_arches} noarch
 
 %description
 JDOM is a Java-oriented object model which models XML documents.
@@ -43,15 +40,17 @@ complex and memory-consumptive options that current API
 offerings provide.
 
 %package javadoc
-Summary:        Javadoc for %{name}
+Summary:       Javadoc for %{name}
 
 %description javadoc
 This package contains javadoc for %{name}.
 
 %prep
-%autosetup -p1 -n jdom-JDOM-%{version}
+%setup -q -n jdom-JDOM-%{version}
 
-sed -i 's/\r//' LICENSE.txt README.txt
+%patch 0 -p1
+
+sed -i 's/\r//' LICENSE.txt
 
 # Unable to run coverage: use log4j12 but switch to log4j 2.x
 sed -i.coverage "s|coverage, jars|jars|" build.xml
@@ -62,35 +61,55 @@ sed -i '/import org.jdom2.xpath.XPathFactory/d' core/src/java/org/jdom2/JDOMCons
 
 %build
 mkdir lib
-%ant -Dversion=%{version} -Dcompile.source=1.7 -Dcompile.target=1.7 -Dj2se.apidoc=%{_javadocdir}/java maven
+%ant -Dversion=%{version} -Dcompile.source=1.8 -Dcompile.target=1.8 -Dj2se.apidoc=%{_javadocdir}/java maven
+
+# Make jar into an OSGi bundle
+# XXX disabled until BND is fixed
+#bnd wrap --output build/package/jdom-%{version}.bar --properties %{SOURCE3} \
+#         --version %{version} build/package/jdom-%{version}.jar
+#mv build/package/jdom-%{version}.bar build/package/jdom-%{version}.jar
 
 %install
-# jar
-install -dm 0755 %{buildroot}%{_javadir}/%{name}
-install -pm 0644 build/package/jdom-%{version}.jar %{buildroot}%{_javadir}/%{name}/%{name}.jar
-# pom
-install -dm 0755 %{buildroot}%{_mavenpomdir}/%{name}
-install -pm 0644 build/maven/core/%{name}-%{version}.pom %{buildroot}%{_mavenpomdir}/%{name}/%{name}.pom
-%add_maven_depmap %{name}/%{name}.pom %{name}/%{name}.jar
-# javadoc
-install -dm 0755 %{buildroot}%{_javadocdir}/%{name}
-cp -pr build/apidocs/* %{buildroot}%{_javadocdir}/%{name}/
-%fdupes %{buildroot}%{_javadocdir}
+%mvn_artifact build/maven/core/%{name}-%{version}.pom build/package/jdom-%{version}.jar
+%mvn_install -J build/apidocs
 
 %files -f .mfiles
+%doc CHANGES.txt COMMITTERS.txt README.md TODO.txt
 %license LICENSE.txt
-%doc CHANGES.txt COMMITTERS.txt README.txt TODO.txt
 
-%files javadoc
-%{_javadocdir}/%{name}
+%files javadoc -f .mfiles-javadoc
+%license LICENSE.txt
 
 %changelog
-* Fri Apr 29 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 2.0.6-29
-- Fixing source URL.
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.6.1-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Tue Feb 22 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 2.0.6-28
-- Initial CBL-Mariner import from Fedora 36 (license: MIT).
-- License verified.
+* Thu Feb 29 2024 Jiri Vanek <jvanek@redhat.com> - 2.0.6.1-8
+- bump of release for for java-21-openjdk as system jdk
+
+* Tue Feb 27 2024 Jiri Vanek <jvanek@redhat.com> - 2.0.6.1-7
+- Rebuilt for java-21-openjdk as system jdk
+
+* Tue Feb 20 2024 Marian Koncek <mkoncek@redhat.com> - 2.0.6.1-6
+- Update Java source/target to 1.8
+
+* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.6.1-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sat Jan 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.6.1-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.6.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.6.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Sep 08 2022 Marian Koncek <mkoncek@redhat.com> - 2.0.6.1-1
+- Update to upstream version 2.0.6.1
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.6-28
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
 
 * Sat Feb 05 2022 Jiri Vanek <jvanek@redhat.com> - 2.0.6-27
 - Rebuilt for java-17-openjdk as system jdk

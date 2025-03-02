@@ -19,7 +19,7 @@ Summary:        Java Expression Language
 
 License:        Apache-2.0
 BuildArch:      noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 URL:            https://commons.apache.org/proper/commons-jexl/
 VCS:            git:https://github.com/apache/commons-jexl.git
 Source0:        https://archive.apache.org/dist/commons/jexl/source/commons-jexl-%{version}-src.tar.gz

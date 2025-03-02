@@ -1,10 +1,9 @@
 Summary:	Tool to translate x86-64 CPU Machine Check Exception data
 Name:		mcelog
-Version:	168
-Release:	3%{?dist}
-License:	GPLv2
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+Version:	175
+Release:	11%{?dist}
+Epoch:		3
+License:	GPL-2.0-only
 URL:		https://github.com/andikleen/mcelog
 Source0:	%{url}/archive/v%{version}/%{name}-%{version}.tar.gz
 # note that this source OVERRIDES the one on the tarball above!
@@ -13,6 +12,7 @@ ExclusiveArch:	i686 x86_64
 Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
+BuildRequires: make
 BuildRequires:  gcc
 BuildRequires: systemd
 
@@ -52,7 +52,6 @@ install -p -m644 mcelog*.5 $RPM_BUILD_ROOT/%{_mandir}/man5/
 %systemd_postun_with_restart mcelog.service
 
 %files
-%license LICENSE
 %{_sbindir}/mcelog
 %dir %{_sysconfdir}/mcelog
 %{_sysconfdir}/mcelog/triggers
@@ -61,11 +60,45 @@ install -p -m644 mcelog*.5 $RPM_BUILD_ROOT/%{_mandir}/man5/
 %{_mandir}/*/*
 
 %changelog
-* Mon Nov 01 2021 Muhammad Falak <mwani@microsft.com> - 168-3
-- Remove epoch
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3:175-11
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 3:168-2
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3:175-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3:175-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sat Jul 29 2023 Prarit Bhargava <prarit@redhat.com> 3:175-8
+- migrated to SPDX license
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3:175-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3:175-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3:175-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3:175-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3:175-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Mar 02 2021 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 3:175-2
+- Rebuilt for updated systemd-rpm-macros
+  See https://pagure.io/fesco/issue/2583.
+
+* Mon Feb 08 2021 Nicolas Chauvet <kwizart@gmail.com> - 3:175-1
+- Update to 175
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3:168-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 3:168-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Mon Feb 24 2020 Nicolas Chauvet <kwizart@gmail.com> - 3:168-1
 - Update to 168

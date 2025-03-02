@@ -1,0 +1,589 @@
+commit 096bfde5e234f5a803bae74f24e3821798022c7c
+Merge: 625775fc 1df15b03
+Author: pcahyna <pcahyna@users.noreply.github.com>
+Date:   Tue Feb 6 18:37:52 2024 +0100
+
+    Merge pull request #3136 from pcahyna/no-recovery-bootdisk
+    
+    Include GRUB tools unconditionally and don't create $VAR_DIR/recovery/bootdisk in prep
+
+diff --git a/usr/share/rear/prep/GNU/Linux/300_include_grub_tools.sh b/usr/share/rear/prep/GNU/Linux/300_include_grub_tools.sh
+index fcf0a5ff..7d494281 100644
+--- a/usr/share/rear/prep/GNU/Linux/300_include_grub_tools.sh
++++ b/usr/share/rear/prep/GNU/Linux/300_include_grub_tools.sh
+@@ -1,8 +1,6 @@
+ #
+ # GRUB2 has much more commands than the legacy grub command, including modules
+ 
+-test -d $VAR_DIR/recovery || mkdir -p $VAR_DIR/recovery
+-
+ # cf. https://github.com/rear/rear/issues/2137
+ # s390 zlinux does not use grub 
+ # *********************************************************************************
+@@ -11,19 +9,8 @@ test -d $VAR_DIR/recovery || mkdir -p $VAR_DIR/recovery
+ # *********************************************************************************
+ [ "$ARCH" == "Linux-s390"  ] && return 0
+ 
+-# Because usr/sbin/rear sets 'shopt -s nullglob' the 'echo -n' command
+-# outputs nothing if nothing matches the bash globbing pattern '/boot/grub*'
+-local grubdir="$( echo -n /boot/grub* )"
+-# Use '/boot/grub' as fallback if nothing matches '/boot/grub*'
+-test -d "$grubdir" || grubdir='/boot/grub'
+-
+-# Check if we're using grub or grub2 before doing something.
+-if has_binary grub-probe ; then
+-    grub-probe -t device $grubdir >$VAR_DIR/recovery/bootdisk 2>/dev/null || return 0
+-elif has_binary grub2-probe ; then
+-    grub2-probe -t device $grubdir >$VAR_DIR/recovery/bootdisk 2>/dev/null || return 0
+-fi
+-
++# It is safe to assume that we are using GRUB and try to add these files to the rescue image
++# even if the assumption is wrong.
+ # Missing programs in the PROGS array are ignored:
+ PROGS+=( grub-bios-setup      grub2-bios-setup
+          grub-install         grub2-install
+diff --git a/usr/share/rear/prep/Linux-s390/305_include_s390_tools.sh b/usr/share/rear/prep/Linux-s390/305_include_s390_tools.sh
+index b4ab3786..4451f53d 100644
+--- a/usr/share/rear/prep/Linux-s390/305_include_s390_tools.sh
++++ b/usr/share/rear/prep/Linux-s390/305_include_s390_tools.sh
+@@ -1,8 +1,6 @@
+ #
+ #  s390 zIPL boot loader and grubby for configuring boot loader`
+ 
+-test -d $VAR_DIR/recovery || mkdir -p $VAR_DIR/recovery
+-
+ # See the code in prep/GNU/Linux/300_include_grub_tools.sh
+ # that sets grubdir via
+ #   local grubdir="$( echo -n /boot/grub* )"
+@@ -21,7 +19,7 @@ local bootdir="/boot/"
+ #   findmnt returns --> /dev/dasda3[/@/.snapshots/1/snapshot]
+ #   use 300_include_grub_tools.sh instead of this file (grub2-probe)
+ if has_binary findmnt ; then
+-    findmnt -no SOURCE --target $bootdir >$VAR_DIR/recovery/bootdisk || return 0
++    findmnt -no SOURCE --target $bootdir > /dev/null || return 0
+ fi
+ 
+ # Missing programs in the PROGS array are ignored:
+diff --git a/usr/share/rear/prep/default/320_include_uefi_env.sh b/usr/share/rear/prep/default/320_include_uefi_env.sh
+index ea86af4c..93e59eae 100644
+--- a/usr/share/rear/prep/default/320_include_uefi_env.sh
++++ b/usr/share/rear/prep/default/320_include_uefi_env.sh
+@@ -87,7 +87,3 @@ fi
+ DebugPrint "Found EFI system partition ${esp_proc_mounts_line[0]} on ${esp_proc_mounts_line[1]} type ${esp_proc_mounts_line[2]}"
+ USING_UEFI_BOOTLOADER=1
+ LogPrint "Using UEFI Boot Loader for Linux (USING_UEFI_BOOTLOADER=1)"
+-
+-# Remember the ESP device node in VAR_DIR/recovery/bootdisk:
+-echo "${esp_proc_mounts_line[0]}" >$VAR_DIR/recovery/bootdisk
+-
+
+commit ca99d855579cfcab37f985e2547a3187e0f0aeeb
+Merge: 8c59415c 40b883c0
+Author: pcahyna <pcahyna@users.noreply.github.com>
+Date:   Fri Feb 16 11:40:04 2024 +0100
+
+    Merge pull request #3145 from rear/restore-hybrid-bootloader
+    
+    Support saving and restoring hybrid BIOS/UEFI bootloader setup and clean up bootloader detection
+
+    Cherry-picked-by: Lukáš Zaoral <lzaoral@redhat.com>
+
+diff --git a/usr/share/rear/finalize/Linux-i386/630_install_grub.sh b/usr/share/rear/finalize/Linux-i386/630_install_grub.sh
+index f3d9a820..a0e87e1d 100644
+--- a/usr/share/rear/finalize/Linux-i386/630_install_grub.sh
++++ b/usr/share/rear/finalize/Linux-i386/630_install_grub.sh
+@@ -1,22 +1,18 @@
+ # This script is an improvement over the default grub-install '(hd0)'
+ #
+-# However the following issues still exist:
++# However the following issue still exists:
+ #
+ #  * We don't know what the first disk will be, so we cannot be sure the MBR
+-#    is written to the correct disk(s). That's why we make all disks bootable.
+-#
+-#  * There is no guarantee that GRUB was the boot loader used originally.
+-#    One possible attempt would be to save and restore the MBR for each disk,
+-#    but this does not guarantee a correct boot order,
+-#    or even a working boot loader config
+-#    (eg. GRUB stage2 might not be at the exact same location).
++#    is written to the correct disk(s). That's why we make all suitable disks bootable.
+ 
+ # Skip if another boot loader is already installed
+ # (then $NOBOOTLOADER is not a true value cf. finalize/default/010_prepare_checks.sh):
+ is_true $NOBOOTLOADER || return 0
+ 
+-# For UEFI systems with grub legacy with should use efibootmgr instead:
+-is_true $USING_UEFI_BOOTLOADER && return
++# For UEFI systems with grub legacy with should use efibootmgr instead,
++# but if BOOTLOADER is explicitly set to GRUB, we are on a hybrid (BIOS/UEFI)
++# boot system and we need to install GRUB to MBR as well.
++# Therefore, we don't test $USING_UEFI_BOOTLOADER.
+ 
+ # If the BOOTLOADER variable (read by finalize/default/010_prepare_checks.sh)
+ # is not "GRUB" (which means GRUB Legacy) skip this script (which is only for GRUB Legacy)
+@@ -25,31 +21,27 @@ is_true $USING_UEFI_BOOTLOADER && return
+ test "GRUB" = "$BOOTLOADER" || return 0
+ 
+ # If the BOOTLOADER variable is "GRUB" (which means GRUB Legacy)
+-# do not unconditionally trust that because https://github.com/rear/rear/pull/589
+-# reads (excerpt):
+-#   Problems found:
+-#   The ..._install_grub.sh checked for GRUB2 which is not part
+-#   of the first 2048 bytes of a disk - only GRUB was present -
+-#   thus the check for grub-probe/grub2-probe
+-# and https://github.com/rear/rear/commit/079de45b3ad8edcf0e3df54ded53fe955abded3b
+-# reads (excerpt):
+-#    replace grub-install by grub-probe
+-#    as grub-install also exist in legacy grub
+-# so that it seems there are cases where actually GRUB 2 is used
+-# but wrongly detected as "GRUB" so that another test is needed
+-# to detected if actually GRUB 2 is used and that test is to
+-# check if grub-probe or grub2-probe is installed because
+-# grub-probe or grub2-probe is only installed in case of GRUB 2
+-# and when GRUB 2 is installed we assume GRUB 2 is used as boot loader
+-# so that then we skip this script (which is only for GRUB Legacy)
+-# because finalize/Linux-i386/660_install_grub2.sh is for installing GRUB 2:
+-if type -p grub-probe >&2 || type -p grub2-probe >&2 ; then
+-    LogPrint "Skip installing GRUB Legacy boot loader because GRUB 2 is installed (grub-probe or grub2-probe exist)."
++# we could in principle trust that and continue because
++# layout/save/default/445_guess_bootloader.sh (where the value has been set)
++# is now able to distinguish between GRUB Legacy and GRUB 2.
++# But, as this code used to support the value "GRUB" for GRUB 2,
++# the user can have BOOTLOADER=GRUB set explicitly in the configuration file
++# and then it overrides the autodetection in layout/save/default/445_guess_bootloader.sh .
++# The user expects this setting to work with GRUB 2, thus for backward compatibility
++# we need to take into accout the possibility that GRUB actually means GRUB 2.
++if is_grub2_installed ; then
++    LogPrint "Skip installing GRUB Legacy boot loader because GRUB 2 is installed."
++    # We have the ErrorIfDeprecated function, but it aborts ReaR by default,
++    # which is not a good thing to do during recovery.
++    # Therefore it better to log a warning and continue.
++    LogPrintError "WARNING: setting BOOTLOADER=GRUB for GRUB 2 is deprecated, set BOOTLOADER=GRUB2 if setting BOOTLOADER explicitly"
+     return
+ fi
+ 
+ # The actual work:
+ LogPrint "Installing GRUB Legacy boot loader:"
++# See above for the reasoning why not to use ErrorIfDeprecated
++LogPrintError "WARNING: support for GRUB Legacy is deprecated"
+ 
+ # Installing GRUB Legacy boot loader requires an executable "grub":
+ type -p grub >&2 || Error "Cannot install GRUB Legacy boot loader because there is no 'grub' program."
+@@ -79,8 +71,10 @@ if [[ -r "$LAYOUT_FILE" && -r "$LAYOUT_DEPS" ]] ; then
+ 
+     for disk in $disks ; do
+         # Installing grub on an LVM PV will wipe the metadata so we skip those
+-        # function is_disk_a_pv returns with 1 if disk is a PV
+-        is_disk_a_pv "$disk"  ||  continue
++        # function is_disk_a_pv returns true if disk is a PV
++        is_disk_a_pv "$disk"  &&  continue
++        # Is the disk suitable for GRUB installation at all?
++        is_disk_grub_candidate "$disk" || continue
+         # Use first boot partition by default
+         part=$( echo $bootparts | cut -d' ' -f1 )
+ 
+diff --git a/usr/share/rear/finalize/Linux-i386/660_install_grub2.sh b/usr/share/rear/finalize/Linux-i386/660_install_grub2.sh
+index d1c36bd3..5bf9144c 100644
+--- a/usr/share/rear/finalize/Linux-i386/660_install_grub2.sh
++++ b/usr/share/rear/finalize/Linux-i386/660_install_grub2.sh
+@@ -36,7 +36,9 @@
+ #   This script does not check BOOTLOADER because it is also used as fallback
+ #   to install the nowadays most often used bootloader GRUB2
+ #   unless the BOOTLOADER variable tells to install another bootloader
+-#   (other bootloader install scripts check the BOOTLOADER variable).
++#   (other bootloader install scripts check the BOOTLOADER variable)
++#   and unless we are using UEFI (BOOTLOADER then indicates the BIOS bootloader
++#   in a a hybrid boot setup).
+ #
+ # This script does not error out because at this late state of "rear recover"
+ # (i.e. after the backup was restored) I <jsmeix@suse.de> consider it too hard
+@@ -45,6 +47,37 @@
+ # so that after "rear recover" finished he can manually install the bootloader
+ # as appropriate for his particular system.
+ 
++local grub_name
++local grub2_install_failed grub2_install_device
++local source_disk target_disk junk
++local grub2_installed_disks
++local part bootparts
++local disk disks bootdisk
++
++function bios_grub_install ()
++{
++    local grub2_install_device="$1"
++
++    if is_true $USING_UEFI_BOOTLOADER ; then
++        # If running under UEFI, we need to specify the target explicitly, otherwise grub-install thinks
++        # that we are installing the EFI bootloader.
++        if ! chroot $TARGET_FS_ROOT /bin/bash --login -c "$grub_name-install --target=i386-pc $grub2_install_device" ; then
++            LogPrintError "Failed to install GRUB2 for BIOS boot (target i386-pc) on $bootdisk"
++            # purely informational test that may help to explain the reason for the error
++            if ! test -d "$TARGET_FS_ROOT/boot/$grub_name/i386-pc" ; then
++                LogPrintError "GRUB2 module dir for BIOS boot (boot/$grub_name/i386-pc in $TARGET_FS_ROOT) does not exist, is GRUB2 for BIOS (target i386-pc) installed?"
++            fi
++            return 1
++        fi
++    else
++        if ! chroot $TARGET_FS_ROOT /bin/bash --login -c "$grub_name-install $grub2_install_device" ; then
++            LogPrintError "Failed to install GRUB2 on $grub2_install_device"
++            return 1
++        fi
++    fi
++    return 0
++}
++
+ # Skip if another bootloader was already installed:
+ # In this case NOBOOTLOADER is not true,
+ # cf. finalize/default/050_prepare_checks.sh
+@@ -52,12 +85,16 @@ is_true $NOBOOTLOADER || return 0
+ 
+ # For UEFI systems with grub2 we should use efibootmgr instead,
+ # cf. finalize/Linux-i386/670_run_efibootmgr.sh
+-is_true $USING_UEFI_BOOTLOADER && return
++# but if BOOTLOADER is explicitly set to GRUB2, we are on a hybrid (BIOS/UEFI)
++# boot system and we need to install GRUB to MBR as well
++if is_true $USING_UEFI_BOOTLOADER && [ "GRUB2" != "$BOOTLOADER" ] ; then
++   return 0
++fi
+ 
+ # Only for GRUB2 - GRUB Legacy will be handled by its own script.
+ # GRUB2 is detected by testing for grub-probe or grub2-probe which does not exist in GRUB Legacy.
+ # If neither grub-probe nor grub2-probe is there assume GRUB2 is not there:
+-type -p grub-probe || type -p grub2-probe || return 0
++is_grub2_installed || return 0
+ 
+ LogPrint "Installing GRUB2 boot loader..."
+ 
+@@ -101,7 +138,7 @@ if test "$GRUB2_INSTALL_DEVICES" ; then
+         else
+             LogPrint "Installing GRUB2 on $grub2_install_device (specified in GRUB2_INSTALL_DEVICES)"
+         fi
+-        if ! chroot $TARGET_FS_ROOT /bin/bash --login -c "$grub_name-install $grub2_install_device" ; then
++        if ! bios_grub_install "$grub2_install_device" ; then
+             LogPrintError "Failed to install GRUB2 on $grub2_install_device"
+             grub2_install_failed="yes"
+         fi
+@@ -145,8 +182,8 @@ fi
+ grub2_installed_disks=()
+ for disk in $disks ; do
+     # Installing GRUB2 on an LVM PV will wipe the metadata so we skip those:
+-    # function is_disk_a_pv returns with 1 if disk is a PV
+-    is_disk_a_pv "$disk" || continue
++    # function is_disk_a_pv returns true if disk is a PV
++    is_disk_a_pv "$disk" && continue
+ 
+     # Use first boot partition by default:
+     part=$( echo $bootparts | cut -d' ' -f1 )
+@@ -165,6 +202,8 @@ for disk in $disks ; do
+ 
+     # Install GRUB2 on the boot disk if one was found:
+     if test "$bootdisk" ; then
++        # Is the disk suitable for GRUB installation at all?
++        is_disk_grub_candidate "$bootdisk" || continue
+         # Continue with the next possible boot disk when GRUB2 was already installed on the current one.
+         # When there are more disks like /dev/sda and /dev/sdb it can happen that
+         # for /dev/sda bootdisk=/dev/sda and GRUB2 gets installed on /dev/sda and
+@@ -172,7 +211,7 @@ for disk in $disks ; do
+         # so we avoid that GRUB2 gets needlessly installed two times on the same device:
+         IsInArray "$bootdisk" "${grub2_installed_disks[@]}" && continue
+         LogPrint "Found possible boot disk $bootdisk - installing GRUB2 there"
+-        if chroot $TARGET_FS_ROOT /bin/bash --login -c "$grub_name-install $bootdisk" ; then
++        if bios_grub_install "$bootdisk" ; then
+             grub2_installed_disks+=( "$bootdisk" )
+             # In contrast to the above behaviour when GRUB2_INSTALL_DEVICES is specified
+             # consider it here as a successful bootloader installation when GRUB2
+@@ -181,11 +220,14 @@ for disk in $disks ; do
+             # Continue with the next possible boot disk:
+             continue
+         fi
+-        LogPrintError "Failed to install GRUB2 on possible boot disk $bootdisk"
+     fi
+ done
+ 
+ is_true $NOBOOTLOADER || return 0
+-LogPrintError "Failed to install GRUB2 - you may have to manually install it"
++if is_true $USING_UEFI_BOOTLOADER ; then
++    LogPrintError "Failed to install GRUB2 for BIOS boot - you may have to manually install it to preserve the hybrid BIOS/UEFI boot support, otherwise only UEFI boot will work"
++else
++    LogPrintError "Failed to install GRUB2 - you may have to manually install it"
++fi
+ return 1
+ 
+diff --git a/usr/share/rear/finalize/default/050_prepare_checks.sh b/usr/share/rear/finalize/default/050_prepare_checks.sh
+index 1679c9a4..57b44bca 100644
+--- a/usr/share/rear/finalize/default/050_prepare_checks.sh
++++ b/usr/share/rear/finalize/default/050_prepare_checks.sh
+@@ -10,10 +10,18 @@
+ NOBOOTLOADER=1
+ 
+ # Try to read the BOOTLOADER value if /var/lib/rear/recovery/bootloader is not empty.
+-# Currently (June 2016) the used BOOTLOADER values (grep for '$BOOTLOADER') are:
++# Currently (February 2024) the used BOOTLOADER values (grep for '$BOOTLOADER') are:
+ #   GRUB  for GRUB Legacy
+ #   GRUB2 for GRUB 2
+ #   ELILO for elilo
++#   LILO  for lilo
++#   GRUB2-EFI for GRUB 2, EFI version
++#   EFI   for any EFI bootloader, dummy value
++#   ARM   for ARM devices, dummy value
++#   ARM-ALLWINNER for Allwinner devices
++#   ZIPL  for zIPL, on IBM Z (s390x)
++#   PPC   for any bootloader in the PReP boot partition (can be LILO, YABOOT, GRUB2)
++
+ local bootloader_file="$VAR_DIR/recovery/bootloader"
+ # The output is stored in an artificial bash array so that $BOOTLOADER is the first word:
+ test -s $bootloader_file && BOOTLOADER=( $( grep -v '^[[:space:]]*#' $bootloader_file ) )
+diff --git a/usr/share/rear/layout/save/default/445_guess_bootloader.sh b/usr/share/rear/layout/save/default/445_guess_bootloader.sh
+index 06de7648..374a706f 100644
+--- a/usr/share/rear/layout/save/default/445_guess_bootloader.sh
++++ b/usr/share/rear/layout/save/default/445_guess_bootloader.sh
+@@ -1,10 +1,26 @@
+ 
+ # Determine or guess the used bootloader if not specified by the user
+ # and save this information into /var/lib/rear/recovery/bootloader
+-bootloader_file="$VAR_DIR/recovery/bootloader"
++local bootloader_file="$VAR_DIR/recovery/bootloader"
++
++local sysconfig_bootloader
++local block_device
++local blockd
++local disk_device
++local bootloader_area_strings_file
++local block_size
++local known_bootloader
+ 
+ # When BOOTLOADER is specified use that:
+ if test "$BOOTLOADER" ; then
++    # case-insensitive match, as later we conver all to uppercase
++    if [[ "$BOOTLOADER" == [Gg][Rr][Uu][Bb] ]] ; then
++        if is_grub2_installed ; then
++            LogPrintError "BOOTLOADER=GRUB used to mean GRUB 2 if GRUB 2 is installed and GRUB Legacy if not"
++            Error "BOOTLOADER set to '$BOOTLOADER', set it to 'GRUB2' explicitly to avoid the ambiguity"
++        fi
++        # we should add an ErrorIfDeprecated call here or later for GRUB Legacy deprecation
++    fi
+     LogPrint "Using specified bootloader '$BOOTLOADER' for 'rear recover'"
+     echo "$BOOTLOADER" | tr '[a-z]' '[A-Z]' >$bootloader_file
+     return
+@@ -57,39 +73,31 @@ for block_device in /sys/block/* ; do
+         # Continue guessing the used bootloader by inspecting the first bytes on the next disk:
+         continue
+     fi
+-    # 'Hah!IdontNeedEFI' is the ASCII representation of the official GUID number
+-    # for a GPT BIOS boot partition which is 21686148-6449-6E6F-744E-656564454649
+-    # see https://en.wikipedia.org/wiki/BIOS_boot_partition (issue #1752).
+-    # Use single quotes for 'Hah!IdontNeedEFI' to be on the safe side
+-    # because with double quotes the ! would cause history expansion if that is enabled
+-    # (non-interactive shells do not perform history expansion by default but better safe than sorry):
+-    if grep -q 'Hah!IdontNeedEFI' $bootloader_area_strings_file ; then
+-        # Because 'Hah!IdontNeedEFI' contains the known bootloader 'EFI'
+-        # the default code below would falsely guess that 'EFI' is used
+-        # but actually another non-EFI bootloader is used here
+-        # cf. https://github.com/rear/rear/issues/1752#issue-303856221
+-        # so that in the 'Hah!IdontNeedEFI' case only non-EFI bootloaders are tested.
+-        # IBM Z (s390) uses zipl boot loader for RHEL and Ubuntu
+-        # cf. https://github.com/rear/rear/issues/2137
+-        for known_bootloader in GRUB2 GRUB ELILO LILO ZIPL ; do
+-            if grep -q -i "$known_bootloader" $bootloader_area_strings_file ; then
+-                LogPrint "Using guessed bootloader '$known_bootloader' for 'rear recover' (found in first bytes on $disk_device with GPT BIOS boot partition)"
+-                echo "$known_bootloader" >$bootloader_file
+-                return
+-            fi
+-        done
+-        # When in the 'Hah!IdontNeedEFI' case no known non-EFI bootloader is found
+-        # continue guessing the used bootloader by inspecting the first bytes on the next disk
+-        # because otherwise the default code below would falsely guess that 'EFI' is used
+-        # cf. https://github.com/rear/rear/pull/1754#issuecomment-383531597
+-        continue
+-    fi
+     # Check the default cases of known bootloaders.
+     # IBM Z (s390) uses zipl boot loader for RHEL and Ubuntu
+     # cf. https://github.com/rear/rear/issues/2137
+-    for known_bootloader in GRUB2-EFI EFI GRUB2 GRUB ELILO LILO ZIPL ; do
++    for known_bootloader in GRUB2 GRUB LILO ZIPL ; do
+         if grep -q -i "$known_bootloader" $bootloader_area_strings_file ; then
+-            LogPrint "Using guessed bootloader '$known_bootloader' for 'rear recover' (found in first bytes on $disk_device)"
++            # If we find "GRUB" (which means GRUB Legacy)
++            # do not unconditionally trust that because https://github.com/rear/rear/pull/589
++            # reads (excerpt):
++            #   Problems found:
++            #   The ..._install_grub.sh checked for GRUB2 which is not part
++            #   of the first 2048 bytes of a disk - only GRUB was present -
++            #   thus the check for grub-probe/grub2-probe
++            # and https://github.com/rear/rear/commit/079de45b3ad8edcf0e3df54ded53fe955abded3b
++            # reads (excerpt):
++            #    replace grub-install by grub-probe
++            #    as grub-install also exist in legacy grub
++            # so that if actually GRUB 2 is used, the string in the bootloader area
++            # is "GRUB" so that another test is needed to detect if actually GRUB 2 is used.
++            # When GRUB 2 is installed we assume GRUB 2 is used as boot loader.
++            if [ "$known_bootloader" = "GRUB" ] && is_grub2_installed ; then
++                known_bootloader=GRUB2
++                LogPrint "GRUB found in first bytes on $disk_device and GRUB 2 is installed, using GRUB2 as a guessed bootloader for 'rear recover'"
++            else
++                LogPrint "Using guessed bootloader '$known_bootloader' for 'rear recover' (found in first bytes on $disk_device)"
++            fi
+             echo "$known_bootloader" >$bootloader_file
+             return
+         fi
+@@ -103,6 +111,26 @@ for block_device in /sys/block/* ; do
+     Log "End of strings in the first bytes on $disk_device"
+ done
+ 
++# No bootloader detected, but we are using UEFI - there is probably an EFI bootloader
++if is_true $USING_UEFI_BOOTLOADER ; then
++    if is_grub2_installed ; then
++        echo "GRUB2-EFI" >$bootloader_file
++    elif test -f /sbin/elilo ; then
++        echo "ELILO" >$bootloader_file
++    else
++        # There is an EFI bootloader, we don't know which one exactly.
++        # The value "EFI" is a bit redundant with USING_UEFI_BOOTLOADER=1,
++        # which already indicates that there is an EFI bootloader. We use it as a placeholder
++        # to not leave $bootloader_file empty.
++        # Note that it is legal to have USING_UEFI_BOOTLOADER=1 and e.g. known_bootloader=GRUB2
++        # (i.e. a non=EFI bootloader). This will happen in BIOS/UEFI hybrid boot scenarios.
++        # known_bootloader=GRUB2 indicates that there is a BIOS bootloader and USING_UEFI_BOOTLOADER=1
++        # indicates that there is also an EFI bootloader. Only the EFI one is being used at this
++        # time, but both will need to be restored.
++        echo "EFI" >$bootloader_file
++    fi
++    return 0
++fi
+ 
+ # Error out when no bootloader was specified or could be autodetected:
+ Error "Cannot autodetect what is used as bootloader, see default.conf about 'BOOTLOADER'"
+diff --git a/usr/share/rear/lib/bootloader-functions.sh b/usr/share/rear/lib/bootloader-functions.sh
+index a7363c4c..3dade874 100644
+--- a/usr/share/rear/lib/bootloader-functions.sh
++++ b/usr/share/rear/lib/bootloader-functions.sh
+@@ -529,6 +529,53 @@ function get_root_disk_UUID {
+     ( set -o pipefail ; mount | grep ' on / ' | awk '{print $1}' | xargs blkid -s UUID -o value || Error "Failed to get root disk UUID" )
+ }
+ 
++# Detect whether actually GRUB 2 is installed and that test is to
++# check if grub-probe or grub2-probe is installed because
++# grub-probe or grub2-probe is only installed in case of GRUB 2.
++# Needed because one can't tell the GRUB version by looking at the MBR
++# (both GRUB 2 and GRUB Legacy have the string "GRUB" in their MBR).
++function is_grub2_installed () {
++    if type -p grub-probe >&2 || type -p grub2-probe >&2 ; then
++        Log "GRUB 2 is installed (grub-probe or grub2-probe exist)."
++        return 0
++    else
++        return 1
++    fi
++}
++
++# Determine whether a disk is worth detecting or installing GRUB on
++function is_disk_grub_candidate () {
++    local disk="$1"
++    local disk_partitions part
++    local label flags
++
++    # ToDo : validate $disk (does it even exist? Isn't it write-protected?)
++
++    # Installing grub on an LVM PV will wipe the metadata so we skip those
++    is_disk_a_pv "$disk" && return 1
++
++    label="$( get_disklabel_type "$disk" )" || return 1
++    # We don't care about the SUSE-specific 'gpt_sync_mbr' partition scheme
++    # anymore: https://github.com/rear/rear/pull/3145#discussion_r1481388431
++    if [ "$label" == gpt ] ; then
++        # GPT needs a special BIOS boot partition to store GRUB (BIOS version).
++        # Let's try to find it. It can be recognized as having the bios_grub flag.
++        disk_partitions=( $( get_child_components "$disk" "part" ) )
++        for part in "${disk_partitions[@]}" ; do
++            flags=( $( get_partition_flags "$part" ) )
++            IsInArray bios_grub "${flags[@]}" && return 0 # found!
++        done
++        # If a given GPT-partitioned disk does not contain a BIOS boot partition,
++        # GRUB for BIOS booting can not be installed into its MBR (grub-install errors out).
++        return 1
++    else
++        # Other disklabel types don't need anything special to install GRUB.
++        # The test for the PReP boot partition (finalize/Linux-ppc64le/660_install_grub2.sh)
++        # is a bit similar, but operates on the partition itself, not on the uderlying disk.
++        return 0
++    fi
++}
++
+ # Output GRUB2 configuration on stdout:
+ # $1 is the kernel file with appropriate path for GRUB2 to load the kernel from within GRUB2's root filesystem
+ # $2 is the initrd file with appropriate path for GRUB2 to load the initrd from within GRUB2's root filesystem
+diff --git a/usr/share/rear/lib/layout-functions.sh b/usr/share/rear/lib/layout-functions.sh
+index 69f38b47..ee651b2a 100644
+--- a/usr/share/rear/lib/layout-functions.sh
++++ b/usr/share/rear/lib/layout-functions.sh
+@@ -532,6 +532,33 @@ get_component_type() {
+     grep -E "^[^ ]+ $1 " $LAYOUT_TODO | cut -d " " -f 3
+ }
+ 
++# Get the disklabel (partition table) type of the disk $1 from the layout file
++# (NOT from the actual disk, so layout file must exist before calling this,
++# and it is useful during recovery even before the disk layout has been recreated)
++function get_disklabel_type () {
++    # from create_disk() in layout/prepare/GNU/Linux/100_include_partition_code.sh
++    local component disk size label junk
++
++    disk=''
++
++    read component disk size label junk < <(grep "^disk $1 " "$LAYOUT_FILE")
++    test $disk || return 1
++
++    echo $label
++}
++
++# Get partition flags from layout (space-separated) of partition given as $1
++function get_partition_flags () {
++    local part disk size pstart name flags partition junk
++
++    while read part disk size pstart name flags partition junk; do
++        if [ "$partition" == "$1" ] ; then
++            echo "$flags" | tr ',' ' '
++            return 0
++        fi
++    done < <(grep "^part " $LAYOUT_FILE)
++}
++
+ # Function returns 0 when v1 is greater or equal than v2
+ version_newer() {
+   local v1list=( ${1//[-.]/ } )
+@@ -806,17 +833,17 @@ blkid_label_of_device() {
+     echo "$label"
+ }
+ 
+-# Returns 1 if the device is an LVM physical volume
+-# Returns 0 otherwise or if the device doesn't exists
++# Returns true if the device is an LVM physical volume
++# Returns false otherwise or if the device doesn't exist
+ is_disk_a_pv() {
+     disk=$1
+ 
+     # Using awk, select the 'lvmdev' line for which $disk is the device (column 3),
+     # cf. https://github.com/rear/rear/pull/1897
+     # If exit == 1, then there is such line (so $disk is a PV),
+-    # otherwise exit with default value '0', which falls through to 'return 0' below.
+-    awk "\$1 == \"lvmdev\" && \$3 == \"${disk}\" { exit 1 }" "$LAYOUT_FILE" >/dev/null || return 1
+-    return 0
++    # otherwise exit with default value '0', which falls through to 'return 1' below.
++    awk "\$1 == \"lvmdev\" && \$3 == \"${disk}\" { exit 1 }" "$LAYOUT_FILE" >/dev/null || return 0
++    return 1
+ }
+ 
+ function is_multipath_used {
+diff --git a/usr/share/rear/lib/savelayout-workflow.sh b/usr/share/rear/lib/savelayout-workflow.sh
+index 69cda58e..27bb0a1a 100644
+--- a/usr/share/rear/lib/savelayout-workflow.sh
++++ b/usr/share/rear/lib/savelayout-workflow.sh
+@@ -10,6 +10,10 @@ if [[ "$VERBOSE" ]]; then
+ fi
+ WORKFLOWS+=( savelayout )
+ WORKFLOW_savelayout () {
++    # layout code needs to know whether we are using UEFI (USING_UEFI_BOOTLOADER)
++    # as it also detects the bootloader in use ( layout/save/default/445_guess_bootloader.sh )
++    Source $SHARE_DIR/prep/default/320_include_uefi_env.sh
++
+     #DISKLAYOUT_FILE=$VAR_DIR/layout/disklayout.conf # defined in default.conf now (issue #678)
+     SourceStage "layout/save"
+ }

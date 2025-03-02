@@ -1,18 +1,21 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+%global forgeurl https://github.com/rhinstaller/isomd5sum
+
 Summary: Utilities for working with md5sum implanted in ISO images
 Name:    isomd5sum
-Version: 1.2.3
-Release: 10%{?dist}
-License: GPLv2+1.25.12-4
+Version: 1.2.5
+Release: 2%{?dist}
+Epoch: 1
+License: GPL-2.0-or-later
 
-Url:     https://github.com/rhinstaller/isomd5sum
-Source0: https://github.com/rhinstaller/%{name}/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
-Patch0:  fix-lib-path.patch
+%global tag %{version}
+%forgemeta
+Url:     %{forgeurl}
+Source0: %{forgesource}
 
 BuildRequires: gcc
 BuildRequires: popt-devel
 BuildRequires: python3-devel
+BuildRequires: make
 
 %description
 The isomd5sum package contains utilities for implanting and verifying
@@ -20,8 +23,8 @@ an md5sum implanted into an ISO9660 image.
 
 %package devel
 Summary: Development headers and library for using isomd5sum 
-Requires: %{name} = %{version}-%{release}
-Provides: %{name}-static = %{version}-%{release}
+Requires: %{name} = %{epoch}:%{version}-%{release}
+Provides: %{name}-static = %{epoch}:%{version}-%{release}
 
 %description devel
 This contains header files and a library for working with the isomd5sum
@@ -36,7 +39,7 @@ an md5sum implanted into an ISO9660 image.
 
 
 %prep
-%autosetup
+%forgeautosetup
 
 
 %build
@@ -64,12 +67,78 @@ PYTHON=%{__python3} make DESTDIR=$RPM_BUILD_ROOT install-bin install-devel insta
 %{python3_sitearch}/pyisomd5sum.so
 
 %changelog
-* Mon Nov 01 2021 Muhammad Falak <mwani@microsft.com> - 1.2.3-10
-- Remove epoch
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1:1.2.5-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Wed Mar 08 2021 Henry Li <lihl@microsoft.com> - 1:1.2.3-9
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
-- Add fix-lib-path.patch to install at /lib instead of /lib64
+* Tue Jun 25 2024 Brian C. Lane <bcl@redhat.com> - 1.2.5-1
+- New Version 1.2.5 (bcl)
+- testpyisomd5sum.py: Use a consistent iso size (bcl)
+- Remove quiet from iso creation, size seems wrong (bcl)
+- workflows: Move to Fedora 39 and checkout v4 (bcl)
+- Revert "test: Update testing to include small iso and larger iso" (bcl)
+- Revert "Fix checksum failure with small isos" (bcl)
+
+* Fri Jun 07 2024 Python Maint <python-maint@redhat.com> - 1:1.2.4-3
+- Rebuilt for Python 3.13
+
+* Mon Apr 29 2024 Brian C. Lane <bcl@redhat.com> - 1.2.4-2
+- Revert small iso fix, it resulted in incorrect checksums
+  Resolves: rhbz#2277398
+
+* Fri Feb 16 2024 Brian C. Lane <bcl@redhat.com> - 1.2.4-1
+- New Version 1.2.4 (bcl)
+- Add support for riscv64 (davidlt)
+- workflows: Update to use actions/checkout (bcl)
+- Fix checksum failure with small isos (bcl)
+- test: Update testing to include small iso and larger iso (bcl)
+- Add a GitHub Action to run tests (bcl)
+- Add mips64 (wangray1021)
+- testpyisomd5sum.py: Support genisoimage, Python 2 (ryan)
+
+* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1:1.2.3-23
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sat Jan 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1:1.2.3-22
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1:1.2.3-21
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Tue Jun 13 2023 Python Maint <python-maint@redhat.com> - 1:1.2.3-20
+- Rebuilt for Python 3.12
+
+* Mon Jan 30 2023 Brian C. Lane <bcl@redhat.com> - 1.2.3-19
+- SPDX migration
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1:1.2.3-18
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1:1.2.3-17
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Mon Jun 13 2022 Python Maint <python-maint@redhat.com> - 1:1.2.3-16
+- Rebuilt for Python 3.11
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1:1.2.3-15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1:1.2.3-14
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri Jun 04 2021 Python Maint <python-maint@redhat.com> - 1:1.2.3-13
+- Rebuilt for Python 3.10
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1:1.2.3-12
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Dec 01 2020 Brian C. Lane <bcl@redhat.com> - 1.2.3-11
+- Add make to BuildRequires
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1:1.2.3-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue May 26 2020 Miro Hrončok <mhroncok@redhat.com> - 1:1.2.3-9
+- Rebuilt for Python 3.9
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1:1.2.3-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

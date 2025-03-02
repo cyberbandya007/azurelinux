@@ -1,29 +1,21 @@
-%global docs 0
-Summary:        Library to handle UPnP IGD port mapping
 Name:           gupnp-igd
-Version:        1.2.0
-Release:        7%{?dist}
-License:        LGPLv2+
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+Version:        1.6.0
+Release:        5%{?dist}
+Summary:        Library to handle UPnP IGD port mapping
+
+License:        LGPL-2.1-or-later
 URL:            https://wiki.gnome.org/Projects/GUPnP
-Source0:        https://github.com/GNOME/%{name}/archive/refs/tags/%{version}.tar.gz#/%{name}-%{version}.tar.gz
-BuildRequires:  glib2-devel
+Source0:        https://download.gnome.org/sources/%{name}/1.6/%{name}-%{version}.tar.xz
+
+BuildRequires:  pkgconfig(glib-2.0)
+BuildRequires:  pkgconfig(gupnp-1.6)
 BuildRequires:  gobject-introspection-devel
-BuildRequires:  gupnp-devel
-BuildRequires:  meson
-Provides:       %{name}-python = %{version}-%{release}
-Provides:       %{name}-python%{?_isa} = %{version}-%{release}
-Obsoletes:      %{name}-python < %{version}-%{release}
-Provides:       %{name}-python2 = %{version}-%{release}
-Provides:       %{name}-python2%{?_isa} = %{version}-%{release}
-Obsoletes:      %{name}-python2 < %{version}-%{release}
-%if %{with docs}
 BuildRequires:  gtk-doc
-%endif
+BuildRequires:  meson
 
 %description
 %{name} is a library to handle UPnP IGD port mapping.
+
 
 %package        devel
 Summary:        Development files for %{name}
@@ -33,49 +25,62 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 The %{name}-devel package contains libraries and header files for
 developing applications that use %{name}.
 
+
 %prep
 %autosetup -p1
-# Dependent packages of gssdp and gupnp have api versions 1.6 in Mariner
-sed -i '/subdir.*tests/d' meson.build
-sed -i 's/\(.*\)gssdp-1.2\(.*\)/\1gssdp-1.6\2/' meson.build
-sed -i 's/\(.*\)gupnp-1.2\(.*\)/\1gupnp-1.6\2/' meson.build
+
 
 %build
-%meson \
-%if %{with docs}
-     -Dgtk_doc=true
-%else
-     -Dgtk_doc=false
-%endif
+%meson -Dgtk_doc=true
 %meson_build
+
 
 %install
 %meson_install
 
+
 %files
 %license COPYING
-%doc README
-%{_libdir}/libgupnp-igd-1.0.so.4*
+%doc NEWS README
+%{_libdir}/libgupnp-igd-1.6.so.0*
 %dir %{_libdir}/girepository-1.0
-%{_libdir}/girepository-1.0/GUPnPIgd-1.0.typelib
+%{_libdir}/girepository-1.0/GUPnPIgd-1.6.typelib
+
 
 %files devel
 %{_includedir}/*
-%{_libdir}/libgupnp-igd-1.0.so
-%{_libdir}/pkgconfig/%{name}-1.0*.pc
-%if %{with docs}
+%{_libdir}/libgupnp-igd-1.6.so
+%{_libdir}/pkgconfig/%{name}-1.6*.pc
 %dir %{_datadir}/gtk-doc
 %dir %{_datadir}/gtk-doc/html
 %{_datadir}/gtk-doc/html/%{name}/
-%endif
 %dir %{_datadir}/gir-1.0
-%{_datadir}/gir-1.0/GUPnPIgd-1.0.gir
+%{_datadir}/gir-1.0/GUPnPIgd-1.6.gir
+
 
 %changelog
-* Wed Feb 01 2023 Sumedh Sharma <sumsharma@microsoft.com> - 1.2.0-7
-- Initial CBL-Mariner import from Fedora 37 (license: MIT)
-- Patch build to use api versions 1.6 for BR's gssdp and gupnp
-- License verified
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.0-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.0-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sat Jan 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Fri Apr 14 2023 David King <amigadave@amigadave.com> - 1.6.0-1
+- Update to 1.6.0
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.0-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Tue Nov 22 2022 David King <amigadave@amigadave.com> - 1.2.0-7
+- Use pkgconfig for BuildRequires
+- Remove old python provides and obsoletes
+- Use GUPnP 1.6 API
 
 * Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.0-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
@@ -244,3 +249,4 @@ sed -i 's/\(.*\)gupnp-1.2\(.*\)/\1gupnp-1.6\2/' meson.build
 
 * Wed Dec 31 2008 Brian Pepple <bpepple@fedoraproject.org> - 0.1.1-1
 - Initial Fedora spec.
+

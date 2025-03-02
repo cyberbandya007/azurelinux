@@ -1,0 +1,15 @@
+diff --git a/usr/share/rear/output/ISO/Linux-i386/249_check_rhel_grub2_efi_package.sh b/usr/share/rear/output/ISO/Linux-i386/249_check_rhel_grub2_efi_package.sh
+new file mode 100644
+index 00000000..4c4ded08
+--- /dev/null
++++ b/usr/share/rear/output/ISO/Linux-i386/249_check_rhel_grub2_efi_package.sh
+@@ -0,0 +1,9 @@
++# 249_check_rhel_grub2_efi_package.sh
++
++is_true $USING_UEFI_BOOTLOADER || return    # empty or 0 means NO UEFI
++
++(
++    VERBOSE=1
++    test -r /usr/lib/grub/x86_64-efi/moddep.lst
++    PrintIfError "WARNING: /usr/lib/grub/x86_64-efi/moddep.lst not found, grub2-mkimage will likely fail. Please install the grub2-efi-x64-modules package to fix this."
++)

@@ -1,5 +1,7 @@
 {
  "Signatures": {
-  "gsl-2.6.tar.gz": "b782339fc7a38fe17689cb39966c4d821236c28018b6593ddb6fd59ee40786a8"
+  "gsl-2.7.1.tar.gz": "dcb0fbd43048832b757ff9942691a8dd70026d5da0ff85601e52687f6deeb34b",
+  "gsl-2.7.1.tar.gz.sig": "9d9d6c3a7222d86a6ea8935c75cfcc75b152e13f3a70d9f91d9a0e143aaaa84f",
+  "gsl_key.txt": "754dbbaf2640bb8bc4fc3166918b9ba0f99ae438f5a6888e0ac8a082020eb9d6"
  }
 }

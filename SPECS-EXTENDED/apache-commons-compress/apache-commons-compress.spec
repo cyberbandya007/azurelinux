@@ -7,7 +7,7 @@ Summary:        Java API for working with compressed files and archivers
 License:        Apache-2.0
 URL:            https://commons.apache.org/proper/commons-compress/
 BuildArch:      noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 
 Source0:        https://archive.apache.org/dist/commons/compress/source/commons-compress-%{version}-src.tar.gz
 

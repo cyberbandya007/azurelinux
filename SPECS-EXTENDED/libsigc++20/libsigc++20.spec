@@ -1,21 +1,23 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 # first two digits of version
 %define release_version %(echo %{version} | awk -F. '{print $1"."$2}')
 
 Name:           libsigc++20
-Version:        2.10.3
-Release:        2%{?dist}
+Version:        2.12.1
+Release:        3%{?dist}
 Summary:        Typesafe signal framework for C++
 
-License:        LGPLv2+
-URL:            http://libsigc.sourceforge.net/
-Source0:        http://download.gnome.org/sources/libsigc++/%{release_version}/libsigc++-%{version}.tar.xz
+License:        LGPL-2.1-or-later
+URL:            https://github.com/libsigcplusplus/libsigcplusplus
+Source0:        https://download.gnome.org/sources/libsigc++/%{release_version}/libsigc++-%{version}.tar.xz
 
+BuildRequires:  docbook-style-xsl
+BuildRequires:  doxygen
 BuildRequires:  gcc-c++
+BuildRequires:  libxslt
 BuildRequires:  m4
-BuildRequires:  perl-interpreter
+BuildRequires:  meson
 BuildRequires:  perl(Getopt::Long)
+BuildRequires:  perl-interpreter
 
 %description
 libsigc++ implements a typesafe callback system for standard C++. It
@@ -46,29 +48,30 @@ This package contains the full API documentation for %{name}.
 
 
 %prep
-%setup -q -n libsigc++-%{version}
+%autosetup -n libsigc++-%{version}
+
+chmod -x NEWS
 
 
 %build
-%configure
-make %{?_smp_mflags}
+%meson -Dbuild-documentation=true
+%meson_build
 
 
 %install
-%make_install
-find $RPM_BUILD_ROOT -type f -name "*.la" -exec rm -f {} ';'
+%meson_install
 
 
 %files
 %license COPYING
-%doc AUTHORS README NEWS
-%{_libdir}/*.so.*
+%doc NEWS README.md
+%{_libdir}/libsigc-2.0.so.0*
 
 %files devel
-%{_includedir}/*
+%{_includedir}/sigc++-2.0/
 %{_libdir}/sigc++-2.0/
-%{_libdir}/pkgconfig/*.pc
-%{_libdir}/*.so
+%{_libdir}/pkgconfig/sigc++-2.0.pc
+%{_libdir}/libsigc-2.0.so
 
 %files doc
 %doc %{_datadir}/doc/libsigc++-2.0/
@@ -78,8 +81,53 @@ find $RPM_BUILD_ROOT -type f -name "*.la" -exec rm -f {} ';'
 
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 2.10.3-2
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.12.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.12.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Oct 01 2023 Kalev Lember <klember@redhat.com> - 2.12.1-1
+- Update to 2.12.1
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.10.8-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.10.8-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.10.8-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Fri Mar 25 2022 David King <amigadave@amigadave.com> - 2.10.8-1
+- Update to 2.10.8
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.10.7-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Tue Aug 24 2021 Kalev Lember <klember@redhat.com> - 2.10.7-3
+- Fix NEWS file to not be executable
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.10.7-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Wed May 26 2021 Kalev Lember <klember@redhat.com> - 2.10.7-1
+- Update to 2.10.7
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.10.6-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Wed Nov 25 2020 Kalev Lember <klember@redhat.com> - 2.10.6-1
+- Update to 2.10.6
+
+* Mon Sep 28 2020 Kalev Lember <klember@redhat.com> - 2.10.4-1
+- Update to 2.10.4
+- Switch to meson build system
+- Update upstream URL
+- Tighten soname globs
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.10.3-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Fri Mar 27 2020 Kalev Lember <klember@redhat.com> - 2.10.3-1
 - Update to 2.10.3

@@ -1,0 +1,112 @@
+commit ed4c78d5fe493ea368989d0086a733653692f5cb
+Merge: 3c9398bb 0cdcab02
+Author: pcahyna <pcahyna@users.noreply.github.com>
+Date:   Mon Oct 30 18:31:01 2023 +0100
+
+    Merge pull request #3058 from pcahyna/skip-useless-xfs-mount-options
+    
+    Skip useless xfs mount options when mounting during recovery
+
+    Cherry-picked-by: Lukáš Zaoral <lzaoral@redhat.com>
+
+diff --git a/usr/share/rear/layout/prepare/GNU/Linux/133_include_mount_filesystem_code.sh b/usr/share/rear/layout/prepare/GNU/Linux/133_include_mount_filesystem_code.sh
+index d5707779..f7115f55 100644
+--- a/usr/share/rear/layout/prepare/GNU/Linux/133_include_mount_filesystem_code.sh
++++ b/usr/share/rear/layout/prepare/GNU/Linux/133_include_mount_filesystem_code.sh
+@@ -29,6 +29,7 @@ mount_fs() {
+         case $name in
+             (options)
+                 # Do not mount nodev, as chrooting later on would fail:
++                # FIXME: naive approach, will replace any "nodev" inside longer options/values
+                 value=${value//nodev/dev}
+                 # btrfs mount options like subvolid=259 or subvol=/@/.snapshots/1/snapshot
+                 # from the old system cannot work here for recovery because btrfs subvolumes
+@@ -36,13 +37,8 @@ mount_fs() {
+                 # so that those mount options are removed here. All btrfs subvolume handling
+                 # happens in the btrfs_subvolumes_setup_SLES function in 136_include_btrfs_subvolumes_SLES_code.sh
+                 # or in the btrfs_subvolumes_setup_generic function in 135_include_btrfs_subvolumes_generic_code.sh
+-                # First add a comma at the end so that it is easier to remove a mount option at the end:
+-                value=${value/%/,}
+-                # Remove all subvolid= and subvol= mount options (the extglob shell option is enabled in rear):
+-                value=${value//subvolid=*([^,]),/}
+-                value=${value//subvol=*([^,]),/}
+-                # Remove all commas at the end:
+-                mountopts=${value/%,/}
++                # Remove all subvolid= and subvol= mount options:
++                mountopts="$( remove_mount_options_values $value subvolid subvol )"
+                 ;;
+         esac
+     done
+@@ -147,6 +143,27 @@ mount_fs() {
+             echo "mount $mountopts,remount,user_xattr $device $TARGET_FS_ROOT$mountpoint"
+             ) >> "$LAYOUT_CODE"
+             ;;
++        (xfs)
++            # remove logbsize=... mount option. It is a purely performance/memory usage optimization option,
++            # which can lead to mount failures, because it must be an integer multiple of the log stripe unit
++            # and the log stripe unit can be different in the recreated filesystem from the original filesystem
++            # (for example when using MKFS_XFS_OPTIONS, or in some exotic situations involving an old filesystem,
++            # see GitHub issue #2777 ).
++            # If logbsize is not an integer multiple of the log stripe unit, mount fails with the warning
++            # "XFS (...): logbuf size must be greater than or equal to log stripe size"
++            # in the kernel log
++            # (and a confusing error message
++            # "mount: ...: wrong fs type, bad option, bad superblock on ..., missing codepage or helper program, or other error."
++            # from the mount command), causing the layout restoration in the recovery process to fail.
++            # Wrong sunit/swidth can cause mount to fail as well, with this in the kernel log:
++            # "kernel: XFS (...): alignment check failed: sunit/swidth vs. agsize",
++            # so remove the sunit=.../swidth=... mount options as well.
++            mountopts="$( remove_mount_options_values "$mountopts" logbsize sunit swidth )"
++            (
++            echo "mkdir -p $TARGET_FS_ROOT$mountpoint"
++            echo "mount $mountopts $device $TARGET_FS_ROOT$mountpoint"
++            ) >> "$LAYOUT_CODE"
++            ;;
+         (*)
+             (
+             echo "mkdir -p $TARGET_FS_ROOT$mountpoint"
+diff --git a/usr/share/rear/lib/filesystems-functions.sh b/usr/share/rear/lib/filesystems-functions.sh
+index f459c204..f0547706 100644
+--- a/usr/share/rear/lib/filesystems-functions.sh
++++ b/usr/share/rear/lib/filesystems-functions.sh
+@@ -256,3 +256,40 @@ function total_target_fs_used_disk_space() {
+   # Output xfs options for further use
+   echo "$xfs_opts"
+ }
++
++
++# $1 is a mount command argument (string containing comma-separated
++# mount options). The remaining arguments to the function ($2 ... )
++# specify the mount options to remove from $1, together with a trailing "="
++# and any value that follows each option.
++# For example, the call
++# "remove_mount_options_values nodev,uid=1,rw,gid=1 uid gid"
++# returns "nodev,rw".
++# There is no support for removing a mount option without a value and "=",
++# so "remove_mount_options_values nodev,uid=1,rw,gid=1 rw" will not work.
++# The function will return the modified string on stdout.
++
++function remove_mount_options_values () {
++    local str="$1"
++
++    shift
++    # First add a comma at the end so that it is easier to remove a mount option at the end:
++    str="${str/%/,}"
++    for i in "$@" ; do
++        # FIXME this also removes trailing strings at the end of longer words
++        # For example if one wants to remove any id=... option,
++        # the function will also replace "uid=1" by "u" by removing
++        # the trailing "id=1", which is not intended.
++        # Not easy to fix because $str can contain prefixes which are not
++        # mount options but arguments to the mount command itself
++        # (in particluar, "-o ").
++        # FIXME this simple approach would fail in case of mount options
++        # containing commas, for example the "context" option values,
++        # see mount(8)
++
++        # the extglob shell option is enabled in rear
++        str="${str//$i=*([^,]),/}"
++    done
++    # Remove all commas at the end:
++    echo "${str/%,/}"
++}

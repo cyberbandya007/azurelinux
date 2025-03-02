@@ -1,12 +1,10 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 Name:           perl-Crypt-OpenSSL-RSA
-Version:        0.31
-Release:        6%{?dist}
+Version:        0.33
+Release:        7%{?dist}
 Summary:        Perl interface to OpenSSL for RSA
-License:        GPL+ or Artistic
+License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/Crypt-OpenSSL-RSA
-Source0:        https://cpan.metacpan.org/authors/id/T/TO/TODDR/Crypt-OpenSSL-RSA-%{version}.tar.gz#/perl-Crypt-OpenSSL-RSA-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/T/TO/TODDR/Crypt-OpenSSL-RSA-%{version}.tar.gz
 BuildRequires:  gcc
 BuildRequires:  findutils
 BuildRequires:  make
@@ -31,7 +29,6 @@ BuildRequires:  perl(base)
 BuildRequires:  perl(Test)
 BuildRequires:  perl(Test::More)
 
-Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires:       perl(Crypt::OpenSSL::Random)
 Requires:	perl(Crypt::OpenSSL::Bignum)
 
@@ -39,14 +36,14 @@ Requires:	perl(Crypt::OpenSSL::Bignum)
 Crypt::OpenSSL::RSA - RSA encoding and decoding, using the openSSL libraries
 
 %prep
-%setup -q -n Crypt-OpenSSL-RSA-%{version}
+%autosetup -p1 -n Crypt-OpenSSL-RSA-%{version}
 
 %build
-%{__perl} Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1
-make %{?_smp_mflags}
+perl Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1 NO_PERLLOCAL=1
+%{make_build}
 
 %install
-make pure_install DESTDIR=%{buildroot}
+%{make_install}
 find %{buildroot} -type f -name '*.bs' -size 0 -delete
 %{_fixperms} %{buildroot}/*
 
@@ -61,8 +58,67 @@ make test
 %{_mandir}/man3/*
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.31-6
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.33-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Mon Jun 10 2024 Jitka Plesnikova <jplesnik@redhat.com> - 0.33-6
+- Perl 5.40 rebuild
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.33-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.33-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.33-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Tue Jul 11 2023 Jitka Plesnikova <jplesnik@redhat.com> - 0.33-2
+- Perl 5.38 rebuild
+
+* Wed Jun 07 2023 Jitka Plesnikova <jplesnik@redhat.com> - 0.33-1
+- 0.33 bump
+- Update license to SPDX format
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.32-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.32-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.32-5
+- Perl 5.36 rebuild
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.32-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Fri Nov 26 2021 Petr Pisar <ppisar@redhat.com> - 0.32-3
+- Adapt to OpenSSL 3 (bug #2005979)
+
+* Tue Sep 14 2021 Sahana Prasad <sahana@redhat.com> - 0.32-2
+- Rebuilt with OpenSSL 3.0.0
+
+* Thu Sep  9 2021 Wes Hardaker <wjhns174@hardakers.net> - 0.32-1
+- version bump to upstream
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.31-11
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.31-10
+- Perl 5.34 rebuild
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.31-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.31-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.31-7
+- Perl 5.32 rebuild
+
+* Tue Feb 04 2020 Tom Stellard <tstellar@redhat.com> - 0.31-6
+- Use make_build macro
+- https://docs.fedoraproject.org/en-US/packaging-guidelines/#_parallel_make
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.31-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

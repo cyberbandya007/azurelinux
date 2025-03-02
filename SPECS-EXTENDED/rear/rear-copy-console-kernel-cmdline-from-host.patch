@@ -1,0 +1,587 @@
+commit 88f11d19d748fff3f36357ef1471ee75fbfacabb
+Merge: bca0e7a9 4b4efc58
+Author: Johannes Meixner <jsmeix@suse.com>
+Date:   Wed Aug 3 15:04:20 2022 +0200
+
+    Merge pull request #2844 from rear/jsmeix-overhauled-290_kernel_cmdline
+    
+    Overhauled rescue/GNU/Linux/290_kernel_cmdline.sh
+    in particular to make it possible to add several already existing
+    kernel options by this script with same kernel option keyword
+    for example when /proc/cmdline contains
+    ... console=ttyS0,9600 ... console=tty0 ...
+    then via COPY_KERNEL_PARAMETERS+=( console )
+    cf. https://github.com/rear/rear/pull/2749#issuecomment-1197843273
+
+    Cherry-picked-by: Lukáš Zaoral <lzaoral@redhat.com>
+
+diff --git a/usr/share/rear/rescue/GNU/Linux/290_kernel_cmdline.sh b/usr/share/rear/rescue/GNU/Linux/290_kernel_cmdline.sh
+index 0e11204b..eb6c45de 100644
+--- a/usr/share/rear/rescue/GNU/Linux/290_kernel_cmdline.sh
++++ b/usr/share/rear/rescue/GNU/Linux/290_kernel_cmdline.sh
+@@ -1,8 +1,15 @@
+-# purpose of the script is to detect some important KERNEL CMDLINE options on the current system
+-# we should also use in rescue mode (automatically update KERNEL_CMDLINE array variable).
++# Purpose of the script is to get the COPY_KERNEL_PARAMETERS on the current system
++# to be used in the rescue/recovery system via automated update of KERNEL_CMDLINE.
+ 
+-# Scanning current kernel cmdline to look for important option ($COPY_KERNEL_PARAMETERS) to include in KERNEL_CMDLINE
+-for current_kernel_option in $( cat /proc/cmdline ); do
++# Also protect the rescue/recovery system by removing net.ifnames=0 from KERNEL_CMDLINE
++# if net.ifnames=0 is in KERNEL_CMDLINE but persistent network interface naming is used:
++local persistent_naming='no'
++is_persistent_ethernet_name $( ip route | awk '$2 == "dev" && $8 == "src" { print $3 }' | sort -u | head -n1 ) && persistent_naming='yes'
++
++# Scan current kernel cmdline for options in COPY_KERNEL_PARAMETERS to be included in KERNEL_CMDLINE:
++local current_kernel_option
++local new_kernel_options_to_add=()
++for current_kernel_option in $( cat /proc/cmdline ) ; do
+     # Get the current kernel option name (part before leftmost "=") and
+     # add the whole option (with value) to new_kernel_options_to_add array
+     # if the option name is part of COPY_KERNEL_PARAMETERS array:
+@@ -11,41 +18,45 @@ for current_kernel_option in $( cat /proc/cmdline ); do
+     fi
+ done
+ 
+-# Verify if the kernel option we want to add to KERNEL_CMDLINE are not already set/force by the user in the rear configuration.
+-# If yes, the parameter set in the configuration file have the priority and superseed the current kernel option.
++# Check if the kernel options we want to add to KERNEL_CMDLINE are already set by the user in KERNEL_CMDLINE.
++# If yes, the user setting has priority and superseds the kernel option from the current system.
++# For the check use the existing KERNEL_CMDLINE when this script is started
++# and not the modified KERNEL_CMDLINE with already added kernel options
++# to make it possible to add several kernel options by this script
++# with same kernel option keyword like console=ttyS0,9600 console=tty0
++# see https://github.com/rear/rear/pull/2749#issuecomment-1197843273
++# and https://github.com/rear/rear/pull/2844
++local existing_kernel_cmdline="$KERNEL_CMDLINE"
++local existing_kernel_option new_kernel_option new_kernel_option_keyword
+ for new_kernel_option in "${new_kernel_options_to_add[@]}" ; do
+     new_kernel_option_keyword="${new_kernel_option%%=*}"
+-
+-    for rear_kernel_option in $KERNEL_CMDLINE ; do
+-        # Check if a kernel option key without value parameter (everything before =) is not already present in rear KERNEL_CMDLINE array.
+-        if test "$new_kernel_option_keyword" = "${rear_kernel_option%%=*}" ; then
+-            Log "Current kernel option [$new_kernel_option] supperseeded by [$rear_kernel_option] in your rear configuration: (KERNEL_CMDLINE)"
++    for existing_kernel_option in $existing_kernel_cmdline ; do
++        if test "$new_kernel_option_keyword" = "${existing_kernel_option%%=*}" ; then
++            LogPrint "Not adding '$new_kernel_option' (superseded by existing '$existing_kernel_option' in KERNEL_CMDLINE)"
+             # Continue with the next new_kernel_option (i.e. continue the outer 'for' loop):
+             continue 2
+         fi
+     done
+-
++    # If we are using persistent naming do not add net.ifnames to KERNEL_CMDLINE
++    # see https://github.com/rear/rear/pull/1874
++    # and continue with the next new_kernel_option:
+     if test "net.ifnames" = "$new_kernel_option_keyword" ; then
+-        # If we are using persistent naming do not add net.ifnames to KERNEL_CMDLINE
+-        # see https://github.com/rear/rear/pull/1874
+-        # and continue with the next new_kernel_option:
+-        is_persistent_ethernet_name $( ip r | awk '$2 == "dev" && $8 == "src" { print $3 }' | sort -u | head -1 ) && continue
++        if is_true $persistent_naming ; then
++            LogPrint "Not adding '$new_kernel_option' (persistent network interface naming is used)"
++            continue
++        fi
+     fi
+-
+-    LogPrint "Adding $new_kernel_option to KERNEL_CMDLINE"
+-    KERNEL_CMDLINE="$KERNEL_CMDLINE $new_kernel_option"
++    LogPrint "Adding '$new_kernel_option' to KERNEL_CMDLINE"
++    KERNEL_CMDLINE+=" $new_kernel_option"
+ done
+ 
+-# In case we added 'KERNEL_CMDLINE="$KERNEL_CMDLINE net.ifnames=0"' to /etc/rear/local.conf, but we have no idea if we
+-# are using persistent naming or not then we should protect the rescue image from doing stupid things and remove
+-# the keyword (and value) in a preventive way in case "persistent naming is in use".
+-# And, to be clear the /proc/cmdline did not contain the keyword net.ifnames
+-
+-if is_persistent_ethernet_name $( ip r | awk '$2 == "dev" && $8 == "src" { print $3 }' | sort -u | head -1 ) ; then
+-    # persistent naming is in use
+-    # When the KERNEL_CMDLINE does NOT contain net.ifnames=0 silently return
+-    echo $KERNEL_CMDLINE | grep -q 'net.ifnames=0' || return
+-    # Remove net.ifnames=0 from KERNEL_CMDLINE
+-    KERNEL_CMDLINE=$( echo $KERNEL_CMDLINE | sed -e 's/net.ifnames=0//' )
+-    LogPrint "Removing net.ifnames=0 from KERNEL_CMDLINE"
++# The user may have added 'net.ifnames=0' to KERNEL_CMDLINE in /etc/rear/local.conf
++# but he may not know whether or not persistent naming is used.
++# So we should protect the rescue/recovery system from doing "stupid things"
++# and remove 'net.ifnames=0' in a preventive way when persistent naming is used:
++if is_true $persistent_naming ; then
++    if echo $KERNEL_CMDLINE | grep -q 'net.ifnames=0' ; then
++        KERNEL_CMDLINE=$( echo $KERNEL_CMDLINE | sed -e 's/net.ifnames=0//' )
++        LogPrint "Removed 'net.ifnames=0' from KERNEL_CMDLINE (persistent network interface naming is used)"
++    fi
+ fi
+
+commit 42e04f36f5f8eea0017915bb35e56ee285b394d7
+Merge: 7c6296db 940fede7
+Author: Johannes Meixner <jsmeix@suse.com>
+Date:   Tue Jan 31 13:13:56 2023 +0100
+
+    Merge pull request #2915 from rear/jsmeix-serial-devs-fail-safe
+    
+    In lib/serial-functions.sh make the
+    get_serial_console_devices() function
+    fail-safe if no serial device node exists, see
+    https://github.com/rear/rear/issues/2914
+
+diff --git a/usr/share/rear/lib/serial-functions.sh b/usr/share/rear/lib/serial-functions.sh
+index aac5dc88..3d421b52 100644
+--- a/usr/share/rear/lib/serial-functions.sh
++++ b/usr/share/rear/lib/serial-functions.sh
+@@ -1,13 +1,24 @@
+ 
+ # Get available serial devices:
+ function get_serial_console_devices () {
+-    test "$SERIAL_CONSOLE_DEVICES" && echo $SERIAL_CONSOLE_DEVICES || ls /dev/ttyS[0-9]* /dev/hvsi[0-9]* | sort
++    # Via SERIAL_CONSOLE_DEVICES the user specifies which ones to use (and no others):
++    if test "$SERIAL_CONSOLE_DEVICES" ; then
++        echo $SERIAL_CONSOLE_DEVICES
++        return 0
++    fi
++    # Test if there is /dev/ttyS[0-9]* or /dev/hvsi[0-9]*
++    # because when there is neither /dev/ttyS[0-9]* nor /dev/hvsi[0-9]*
++    # the ls command below would become plain 'ls' because of 'nullglob'
++    # cf. "Beware of the emptiness" in https://github.com/rear/rear/wiki/Coding-Style
++    # see https://github.com/rear/rear/issues/2914#issuecomment-1396659184
++    # and return 0 because it is no error when no serial device node exists
++    test "$( echo -n /dev/ttyS[0-9]* /dev/hvsi[0-9]* )" || return 0
+     # Use plain 'sort' which results /dev/ttyS0 /dev/ttyS1 /dev/ttyS10 ... /dev/ttyS19 /dev/ttyS2 /dev/ttyS20 ...
+     # to get at least /dev/ttyS0 and /dev/ttyS1 before the other /dev/ttyS* devices because
+     # we cannot use "sort -V" which would result /dev/ttyS0 /dev/ttyS1 ... /dev/ttyS9 /dev/ttyS10 ...
+     # because in older Linux distributions 'sort' does not support '-V' e.g. SLES10 with GNU coreutils 5.93
+     # (SLES11 with GNU coreutils 8.12 supports 'sort -V') but if 'sort' fails there is no output at all
+-    # cf. "Maintain backward compatibility" at https://github.com/rear/rear/wiki/Coding-Style
++    # cf. "Maintain backward compatibility" in https://github.com/rear/rear/wiki/Coding-Style
+     # Furthermore 'sort' results that /dev/hvsi* devices appear before /dev/ttyS* devices
+     # so the create_grub2_serial_entry function in lib/bootloader-functions.sh
+     # which uses by default the first one and skips the rest will result that
+@@ -16,7 +27,8 @@ function get_serial_console_devices () {
+     # that have the HVSI driver loaded (a console driver for IBM's p5 servers)
+     # cf. https://lwn.net/Articles/98442/
+     # and it seems right that when special console drivers are loaded
+-    # then their devices should be preferred by default.
++    # then their devices should be preferred by default:
++    ls /dev/ttyS[0-9]* /dev/hvsi[0-9]* | sort
+ }
+ 
+ # Get the serial device speed for those device nodes that belong to actual serial devices.
+
+commit 07da02143b5597b202e66c187e53103561018255
+Merge: 91942f63 75a23e79
+Author: Johannes Meixner <jsmeix@suse.com>
+Date:   Fri Oct 20 14:45:23 2023 +0200
+
+    Merge pull request #2961 from rear/jsmeix-copy-serial-console
+    
+    For the automated serial console setup for the recovery system
+    use only the 'console=...' kernel arguments from the original system
+    which fixes https://github.com/rear/rear/issues/2843
+    and it means that no longer all "real serial devices" get
+    auto-enabled as serial consoles in the recovery system, see
+    https://github.com/rear/rear/pull/2749#issuecomment-1196650631
+    That new default behaviour is described in default.conf.
+    In particular prep/GNU/Linux/200_include_serial_console.sh
+    and lib/serial-functions.sh were overhauled which results
+    that rescue/GNU/Linux/400_use_serial_console.sh is obsolete.
+
+    Cherry-picked-by: Lukáš Zaoral <lzaoral@redhat.com>
+
+diff --git a/usr/share/rear/conf/default.conf b/usr/share/rear/conf/default.conf
+index ec1691b6..76355fb8 100644
+--- a/usr/share/rear/conf/default.conf
++++ b/usr/share/rear/conf/default.conf
+@@ -3320,39 +3320,90 @@ SIMPLIFY_TEAMING=no
+ SIMPLIFY_TEAMING=no
+ 
+ # Serial console support for the ReaR rescue/recovery system:
+-# By default serial consoles get enabled if serial devices are found and
+-# then matching kernel command line parameters like 'console=ttyS0,9600 console=ttyS1,9600'
+-# are set when booting the rescue/recovery system (see KERNEL_CMDLINE above).
+ # IA64 platforms require it and people need it when no VGA console is available.
+-# Specify 'yes' or 'no' or leave it empty to use ReaR's automatism:
++# By default there is serial console support in the ReaR recovery system
++# when 'getty' or 'agetty' and 'stty' can be found,
++# otherwise USE_SERIAL_CONSOLE is automatically set to 'no'.
++# When 'getty' or 'agetty' and 'stty' can be found
++# and there is a 'console=...' option in /proc/cmdline,
++# then USE_SERIAL_CONSOLE is automatically set to 'yes'.
++# With USE_SERIAL_CONSOLE="no" no serial console gets set up,
++# neither for the recovery system kernel nor for the recovery system bootloader.
++# With USE_SERIAL_CONSOLE="yes" plus appropriate SERIAL_CONSOLE_DEVICE... settings
++# serial consoles can be specified for the recovery system kernel and bootloader
++# for example when there is no 'console=...' option in /proc/cmdline
++# or when serial consoles for the recovery system kernel and bootloader
++# should differ from what 'console=...' options in /proc/cmdline tell.
++# By default (when empty) the automatism further described below is used:
+ USE_SERIAL_CONSOLE=
+-# If you do not want to use all serial devices found as console you can specify the ones to use
+-# e.g. SERIAL_CONSOLE_DEVICES="/dev/ttyS0 /dev/ttyS1" provided USE_SERIAL_CONSOLE is turned on.
+-# By default (when empty) all serial devices found are used:
++#
++# Devices to be used in general for serial console setup
++# unless explicitly specified via SERIAL_CONSOLE_DEVICES_KERNEL
++# or SERIAL_CONSOLE_DEVICE_SYSLINUX or SERIAL_CONSOLE_DEVICE_GRUB:
++# E.g. SERIAL_CONSOLE_DEVICES="/dev/ttyS0 /dev/ttyS1"
+ SERIAL_CONSOLE_DEVICES=
+-# Serial consoles for the kernel of the recovery system:
++#
++# Serial consoles for the kernel of the recovery system
++# provided USE_SERIAL_CONSOLE is not 'no':
+ # SERIAL_CONSOLE_DEVICES_KERNEL can be device nodes like "/dev/ttyS0 /dev/ttyS1"
+ # or 'console=...' kernel parameters like "console=ttyS1,9600 console=tty0" or both like
+ # SERIAL_CONSOLE_DEVICES_KERNEL="/dev/ttyS0 console=ttyS1,9600 console=tty0"
+-# provided USE_SERIAL_CONSOLE is turned on.
+-# By default (when empty) the SERIAL_CONSOLE_DEVICES are used for the kernel:
++# When SERIAL_CONSOLE_DEVICES_KERNEL is empty but SERIAL_CONSOLE_DEVICES is specified
++# then the specified SERIAL_CONSOLE_DEVICES are used for the kernel.
++# By default (when SERIAL_CONSOLE_DEVICES_KERNEL and SERIAL_CONSOLE_DEVICES are empty)
++# serial consoles get enabled for the recovery system kernel via COPY_KERNEL_PARAMETERS
++# for all 'console=...' options that are found in /proc/cmdline.
+ SERIAL_CONSOLE_DEVICES_KERNEL=
+-# Serial console for SYSLINUX/EXTLINUX when it is used as bootloader for the recovery system:
++#
++# Serial console for SYSLINUX/EXTLINUX when it is used as bootloader for the recovery system
++# provided USE_SERIAL_CONSOLE is 'yes' (automatically with 'console=...' in /proc/cmdline):
+ # SYSLINUX supports only one serial device (because the last SYSLINUX 'serial' directive wins).
+ # The right /dev/ttyS* can be specified like SERIAL_CONSOLE_DEVICE_SYSLINUX="/dev/ttyS0"
+ # or a whole SYSLINUX 'serial' directive can be specified e.g. for /dev/ttyS1 like
+ # SERIAL_CONSOLE_DEVICE_SYSLINUX="serial 1 9600"
+-# provided USE_SERIAL_CONSOLE is turned on.
+-# By default (when empty) the first one of SERIAL_CONSOLE_DEVICES is used for SYSLINUX:
++# When SERIAL_CONSOLE_DEVICE_SYSLINUX is empty but SERIAL_CONSOLE_DEVICES is specified
++# then the first one of SERIAL_CONSOLE_DEVICES is used for SYSLINUX.
++# By default (when SERIAL_CONSOLE_DEVICE_SYSLINUX and SERIAL_CONSOLE_DEVICES are empty)
++# the devices of the 'console=...' options in /proc/cmdline
++# that exist as /dev/ttyS* or /dev/hvsi* character device nodes are used
++# (which excludes /dev/tty0 when there is 'console=tty0' in /proc/cmdline).
+ SERIAL_CONSOLE_DEVICE_SYSLINUX=
+-# Serial console for GRUB when it is used as bootloader for the recovery system:
++#
++# Serial console for GRUB when it is used as bootloader for the recovery system
++# provided USE_SERIAL_CONSOLE is 'yes' (automatically with 'console=...' in /proc/cmdline):
+ # GRUB supports only one serial device (because the last GRUB 'serial' command wins).
+ # The right /dev/ttyS* can be specified like SERIAL_CONSOLE_DEVICE_GRUB="/dev/ttyS0"
+ # or a whole GRUB 'serial' command can be specified e.g. for /dev/ttyS1 like
+ # SERIAL_CONSOLE_DEVICE_GRUB="serial --unit=1 --speed=9600"
+-# provided USE_SERIAL_CONSOLE is turned on.
+-# By default (when empty) the first one of SERIAL_CONSOLE_DEVICES is used for GRUB:
++# When SERIAL_CONSOLE_DEVICE_GRUB is empty but SERIAL_CONSOLE_DEVICES is specified
++# then the first one of SERIAL_CONSOLE_DEVICES is used for GRUB.
++# By default (when SERIAL_CONSOLE_DEVICE_GRUB and SERIAL_CONSOLE_DEVICES are empty)
++# the devices of the 'console=...' options in /proc/cmdline
++# that exist as /dev/ttyS* or /dev/hvsi* character device nodes are used
++# (which excludes /dev/tty0 when there is 'console=tty0' in /proc/cmdline).
+ SERIAL_CONSOLE_DEVICE_GRUB=
++#
++# Examples
++# (provided USE_SERIAL_CONSOLE is not 'no'
++# and 'getty' or 'agetty' and 'stty' can be found):
++#
++# Default behaviour
++# when there is no 'console=...' option in /proc/cmdline
++# then no serial console is set up for the recovery system.
++#
++# Default behaviour when there are for example
++# 'console=ttyS0,9600' and 'console=tty0' in /proc/cmdline
++# then 'console=ttyS0,9600' and 'console=tty0'
++# are used for the recovery system kernel
++# and only /dev/ttyS0 is used as serial console
++# for the recovery system bootloader (SYSLINUX or GRUB).
++#
++# On a headless machine without VGA card but with serial device /dev/ttyS0
++# the kernel would choose /dev/ttyS0 as its console automatically
++# so no 'console=...' kernel option needs to be used and then the automatism described above
++# would not set up a console for the recovery system (in particular not for the bootloader).
++# In this case USE_SERIAL_CONSOLE="yes" and appropriate SERIAL_CONSOLE_DEVICE... settings
++# are needed to manually specify the right console setup for the recovery system.
+
+ # Say "y", "Yes", etc, to enable or "n", "No" etc. to disable the DHCP client protocol or leave empty to autodetect.
+ # When enabled, lets the rescue/recovery system run dhclient to get an IP address
+ # instead of using the same IP address as the original system:
+diff --git a/usr/share/rear/lib/serial-functions.sh b/usr/share/rear/lib/serial-functions.sh
+index 3d421b52..a586d357 100644
+--- a/usr/share/rear/lib/serial-functions.sh
++++ b/usr/share/rear/lib/serial-functions.sh
+@@ -6,29 +6,34 @@ function get_serial_console_devices () {
+         echo $SERIAL_CONSOLE_DEVICES
+         return 0
+     fi
+-    # Test if there is /dev/ttyS[0-9]* or /dev/hvsi[0-9]*
+-    # because when there is neither /dev/ttyS[0-9]* nor /dev/hvsi[0-9]*
+-    # the ls command below would become plain 'ls' because of 'nullglob'
+-    # cf. "Beware of the emptiness" in https://github.com/rear/rear/wiki/Coding-Style
+-    # see https://github.com/rear/rear/issues/2914#issuecomment-1396659184
+-    # and return 0 because it is no error when no serial device node exists
+-    test "$( echo -n /dev/ttyS[0-9]* /dev/hvsi[0-9]* )" || return 0
+-    # Use plain 'sort' which results /dev/ttyS0 /dev/ttyS1 /dev/ttyS10 ... /dev/ttyS19 /dev/ttyS2 /dev/ttyS20 ...
+-    # to get at least /dev/ttyS0 and /dev/ttyS1 before the other /dev/ttyS* devices because
+-    # we cannot use "sort -V" which would result /dev/ttyS0 /dev/ttyS1 ... /dev/ttyS9 /dev/ttyS10 ...
+-    # because in older Linux distributions 'sort' does not support '-V' e.g. SLES10 with GNU coreutils 5.93
+-    # (SLES11 with GNU coreutils 8.12 supports 'sort -V') but if 'sort' fails there is no output at all
+-    # cf. "Maintain backward compatibility" in https://github.com/rear/rear/wiki/Coding-Style
+-    # Furthermore 'sort' results that /dev/hvsi* devices appear before /dev/ttyS* devices
+-    # so the create_grub2_serial_entry function in lib/bootloader-functions.sh
+-    # which uses by default the first one and skips the rest will result that
+-    # the first /dev/hvsi* device becomes used for the GRUB serial console by default
+-    # which looks right because /dev/hvsi* devices should exist only on systems
+-    # that have the HVSI driver loaded (a console driver for IBM's p5 servers)
+-    # cf. https://lwn.net/Articles/98442/
+-    # and it seems right that when special console drivers are loaded
+-    # then their devices should be preferred by default:
+-    ls /dev/ttyS[0-9]* /dev/hvsi[0-9]* | sort
++    # Scan the kernel command line of the currently running original system
++    # for 'console=<device>[,<options>]' settings e.g. 'console=ttyS1,9600n8 ... console=ttyS3 ... console=tty0'
++    # and extract the specified serial device nodes e.g. ttyS1 -> /dev/ttyS1 ... ttyS3 -> /dev/ttyS3
++    local kernel_option console_option_value console_option_device
++    for kernel_option in $( cat /proc/cmdline ) ; do
++        # Continue with next kernel option when the option name (part before leftmost "=") is not 'console':
++        test "${kernel_option%%=*}" = "console" || continue
++        # Get the console option value (part after leftmost "=") e.g. 'ttyS1,9600n8' 'ttyS3' 'tty0'
++        console_option_value="${kernel_option#*=}"
++        # Get the console option device (part before leftmost optional ',' separator) e.g. 'ttyS1' 'ttyS3' 'tty0'
++        console_option_device="${console_option_value%%,*}"
++        # Continue with next kernel option when the current console option device is no serial device (exclude 'tty0').
++        # The special /dev/hvsi* devices should exist only on systems that have the HVSI driver loaded
++        # (a console driver for IBM's p5 servers) cf. https://lwn.net/Articles/98442/
++        [[ $console_option_device == ttyS* ]] || [[ $console_option_device == hvsi* ]] || continue
++        # Test that the matching serial device node e.g. ttyS1 -> /dev/ttyS1 and ttyS3 -> /dev/ttyS3' exists
++        # to avoid that this automated serial console setup may not work in the ReaR recovery system
++        # when serial device nodes get specified for the recovery system that do not exist
++        # in the currently running original system because the default assumption is
++        # that the replacement system has same hardware as the original system,
++        # cf. https://github.com/rear/rear/pull/2749#issuecomment-1196650631
++        # (if needed the user can specify what he wants via SERIAL_CONSOLE_DEVICES, see above):
++        if ! test -c "/dev/$console_option_device" ; then
++            LogPrintError "Found '$kernel_option' in /proc/cmdline but '/dev/$console_option_device' is no character device"
++            continue
++        fi
++        echo /dev/$console_option_device
++    done
+ }
+ 
+ # Get the serial device speed for those device nodes that belong to actual serial devices.
+@@ -39,64 +44,15 @@ function get_serial_device_speed () {
+     # Run it in a subshell so that 'set -o pipefail' does not affect the current shell and
+     # it can run in a subshell because the caller of this function only needs its stdout
+     # cf. the function get_root_disk_UUID in lib/bootloader-functions.sh
+-    # so when stty fails the get_serial_device_speed return code is the stty exit code and not the awk exit code
+-    # therefore one can call get_serial_device_speed with error checking for example like
++    # so when stty fails the get_serial_device_speed return code is the stty exit code and not the awk exit code.
++    # Therefore one can call get_serial_device_speed with error checking for example like
+     # speed=$( get_serial_device_speed $serial_device ) && COMMAND_WITH_speed || COMMAND_WITHOUT_speed
+-    # because the return code of variable=$( PIPE ) is the return code of the pipe,
+-    # cf. how get_serial_device_speed is called in cmdline_add_console below.
++    # because the return code of variable=$( PIPE ) is the return code of the pipe
++    # cf. how get_serial_device_speed is called in lib/bootloader-functions.sh
++    # and output/USB/Linux-i386/300_create_extlinux.sh
+     # Suppress stty stderr output because for most /dev/ttyS* device nodes the result is
+     #   stty: /dev/ttyS...: Input/output error
+     # when the device node does not belong to an actual serial device (i.e. to real serial hardware)
+     # so get_serial_device_speed is also used to get those device nodes that belong to real serial devices:
+     ( set -o pipefail ; stty -F $devnode 2>/dev/null | awk '/^speed / { print $2 }' )
+ }
+-
+-# Add serial console to kernel cmdline:
+-function cmdline_add_console {
+-    # Nothing to do when using serial console is not wanted:
+-    is_true "$USE_SERIAL_CONSOLE" || return 0
+-
+-    # Strip existing 'console=...' kernel cmd parameters:
+-    local param cmdline=""
+-    for param in $KERNEL_CMDLINE ; do
+-        case "$param" in
+-            (console=*) ;;
+-            (*) cmdline+=" $param";;
+-        esac
+-    done
+-
+-    # Add serial console config to kernel cmd line:
+-    local devnode speed=""
+-    if test "$SERIAL_CONSOLE_DEVICES_KERNEL" ; then
+-        # When the user has specified SERIAL_CONSOLE_DEVICES_KERNEL use only that (no automatisms):
+-        for devnode in $SERIAL_CONSOLE_DEVICES_KERNEL ; do
+-            # devnode can be a character device node like "/dev/ttyS0" or "/dev/lp0" or "/dev/ttyUSB0"
+-            # cf. https://www.kernel.org/doc/html/latest/admin-guide/serial-console.html
+-            # or devnode can be a 'console=...' kernel cmd parameter like "console=ttyS1,9600"
+-            if test -c "$devnode" ; then
+-                if speed=$( get_serial_device_speed $devnode ) ; then
+-                    cmdline+=" console=${devnode##/dev/},$speed"
+-                else
+-                    cmdline+=" console=${devnode##/dev/}"
+-                fi
+-            else
+-                # When devnode is a 'console=...' kernel cmd parameter use it as specified:
+-                cmdline+=" $devnode"
+-            fi
+-        done
+-    else
+-        local real_consoles=""
+-        for devnode in $( get_serial_console_devices ) ; do
+-            # Only add for those device nodes that belong to actual serial devices:
+-            speed=$( get_serial_device_speed $devnode ) && real_consoles+=" console=${devnode##/dev/},$speed"
+-        done
+-        cmdline+=" $real_consoles"
+-
+-        # Add fallback console if no real serial device was found:
+-        test "$real_consoles" || cmdline+=" console=tty0"
+-    fi
+-
+-    # Have a trailing space to be on the safe side
+-    # so that more kernel cmd parameters could be "just appended" by other scripts:
+-    echo "$cmdline "
+-}
+diff --git a/usr/share/rear/prep/GNU/Linux/200_include_serial_console.sh b/usr/share/rear/prep/GNU/Linux/200_include_serial_console.sh
+index 214af3c4..14ec113e 100644
+--- a/usr/share/rear/prep/GNU/Linux/200_include_serial_console.sh
++++ b/usr/share/rear/prep/GNU/Linux/200_include_serial_console.sh
+@@ -1,31 +1,115 @@
+ 
+-# If possible auto-enable serial console when not specified:
+-if [[ -z "$USE_SERIAL_CONSOLE" ]] ; then
+-    local devnode speed=""
+-    for devnode in $( get_serial_console_devices ) ; do
+-        # Enable serial console when there is at least one real serial device:
+-        if speed=$( get_serial_device_speed $devnode ) ; then
+-            USE_SERIAL_CONSOLE="yes"
+-            break
+-        fi
+-    done
+-fi
++# This script prep/GNU/Linux/200_include_serial_console.sh
++# is the first ...console... script that is run for "rear mkrescue/mkbackup".
++#
++# When USE_SERIAL_CONSOLE is empty then this script decides
++# if USE_SERIAL_CONSOLE is kept empty
++# or (provided there is sufficient reason)
++# it sets USE_SERIAL_CONSOLE to 'no' or 'yes'.
++# It sets USE_SERIAL_CONSOLE to 'no'
++# when serial consoles cannot work in the recovery system.
++# It sets USE_SERIAL_CONSOLE to 'yes'
++# when a serial console will be set up for the recovery system kernel.
++# Only when a serial console will be actually set up for the recovery system kernel,
++# then it makes sense to also set up a serial console for the recovery system bootloader.
++# So serial console setup for the recovery system bootloader is only done if USE_SERIAL_CONSOLE="yes"
++# because an empty USE_SERIAL_CONSOLE must not result serial console setup for the recovery system bootloader
++# (without actual serial console setup for the recovery system kernel).
+ 
+-# Always include getty or agetty as we don't know in advance whether they are needed
++# Always try to include getty or agetty as we do not know in advance whether they are needed
+ # (the user may boot the recovery system with manually specified kernel options
+ # to get serial console support in his recovery system).
+-# For serial support we need to include the agetty binary,
+-# but Debian distro's use getty instead of agetty:
+-local getty_binary=""
++# For serial console support we need to include 'getty' or 'agetty'.
++# Debian distributions (in particular Ubuntu) use 'getty'.
++# Fedora, RHEL, SLES,... use 'agetty'.
+ if has_binary getty ; then
+-    # Debian, Ubuntu,...
+-    getty_binary="getty"
++    PROGS+=( getty )
+ elif has_binary agetty ; then
+-    # Fedora, RHEL, SLES,...
+-    getty_binary="agetty"
++    PROGS+=( agetty )
++else
++    is_true "$USE_SERIAL_CONSOLE" && Error "Failed to find 'getty' or 'agetty' (USE_SERIAL_CONSOLE is 'true')"
++    LogPrintError "No serial console support (failed to find 'getty' or 'agetty')"
++    USE_SERIAL_CONSOLE="no"
++fi
++
++# Also try to include 'stty' which is (currently) only needed for serial console support
++# in skel/default/etc/scripts/system-setup.d/45-serial-console.sh
++# and lib/serial-functions.sh
++if has_binary stty ; then
++    PROGS+=( stty )
+ else
+-    # The user must have the programs in REQUIRED_PROGS installed on his system:
+-    Error "Failed to find 'getty' or 'agetty' for serial console"
++    is_true "$USE_SERIAL_CONSOLE" && Error "Failed to find 'stty' (USE_SERIAL_CONSOLE is 'true')"
++    LogPrintError "No serial console support (failed to find 'stty')"
++    USE_SERIAL_CONSOLE="no"
+ fi
+ 
+-REQUIRED_PROGS+=( "$getty_binary" stty )
++# Auto-enable serial console support for the recovery system
++# provided console support is not impossible because there is no getty or agetty and stty
++# and unless the user specified to not have serial console support:
++is_false "$USE_SERIAL_CONSOLE" && return 0
++
++# When the user has specified SERIAL_CONSOLE_DEVICES_KERNEL use only that,
++# otherwise use SERIAL_CONSOLE_DEVICES if the user has specified it:
++local serial_console_devices=""
++test "$SERIAL_CONSOLE_DEVICES" && serial_console_devices="$SERIAL_CONSOLE_DEVICES"
++test "$SERIAL_CONSOLE_DEVICES_KERNEL" && serial_console_devices="$SERIAL_CONSOLE_DEVICES_KERNEL"
++if test "$serial_console_devices" ; then
++    local serial_console speed="" cmdline_add_console=""
++    for serial_console in $serial_console_devices ; do
++        # serial_console can be a character device node like "/dev/ttyS0" or "/dev/lp0" or "/dev/ttyUSB0"
++        # cf. https://www.kernel.org/doc/html/latest/admin-guide/serial-console.html
++        # or serial_console can be a 'console=...' kernel cmd parameter like "console=ttyS1,9600"
++        if test -c "$serial_console" ; then
++            if speed=$( get_serial_device_speed $serial_console ) ; then
++                cmdline_add_console+=" console=${serial_console##/dev/},$speed"
++            else
++                cmdline_add_console+=" console=${serial_console##/dev/}"
++            fi
++        else
++            # When serial_console is not a character device
++            # it should be a 'console=...' kernel cmd parameter
++            # that is used as specified ("final power to the user"):
++            cmdline_add_console+=" $serial_console"
++        fi
++    done
++    if test "$cmdline_add_console" ; then
++        KERNEL_CMDLINE+="$cmdline_add_console"
++        DebugPrint "Appended '$cmdline_add_console' to KERNEL_CMDLINE"
++        USE_SERIAL_CONSOLE="yes"
++        # No further automatisms when a 'console=...' kernel cmd parameter was set
++        # via SERIAL_CONSOLE_DEVICES_KERNEL or SERIAL_CONSOLE_DEVICES:
++        return
++    fi
++    LogPrintError "SERIAL_CONSOLE_DEVICES_KERNEL or SERIAL_CONSOLE_DEVICES specified but none is a character device"
++fi
++
++# Auto-enable serial console support for the recovery system kernel:
++# The below auto-enable serial console support for the recovery system kernel
++# does not auto-enable serial console support for the recovery system bootloader.
++# Currently auto-enable serial console support for the recovery system bootloader
++# happens for the first real serial device from get_serial_console_devices()
++# in lib/bootloader-functions.sh in make_syslinux_config() and create_grub2_cfg() 
++# and in output/USB/Linux-i386/300_create_extlinux.sh
++# The auto-enable serial console support for the recovery system bootloader should be
++# auto-aligned with the auto-enable serial console support for the recovery system kernel.
++# Things are auto-aligned when the first 'console=...' device in /proc/cmdline
++# is also the first real serial device from get_serial_console_devices().
++# When current auto-alignment does not result what the user needs, what is needed can be specified
++# via SERIAL_CONSOLE_DEVICES_KERNEL and SERIAL_CONSOLE_DEVICE_SYSLINUX or SERIAL_CONSOLE_DEVICE_GRUB.
++
++# Scan the kernel command line of the currently running original system
++# and auto-enable serial console for the recovery system kernel
++# only if there is at least one 'console=...' option:
++local kernel_option
++for kernel_option in $( cat /proc/cmdline ) ; do
++    # Get the kernel option name (part before leftmost "="):
++    if test "${kernel_option%%=*}" = "console" ; then
++        USE_SERIAL_CONSOLE="yes"
++        # Get all 'console=...' kernel command line options
++        # copied from the currently running original system
++        # via rescue/GNU/Linux/290_kernel_cmdline.sh that runs later:
++        COPY_KERNEL_PARAMETERS+=( console )
++        return
++    fi
++done
++DebugPrint "No 'console=...' setting for recovery system kernel (none in /proc/cmdline)"
+diff --git a/usr/share/rear/rescue/GNU/Linux/400_use_serial_console.sh b/usr/share/rear/rescue/GNU/Linux/400_use_serial_console.sh
+deleted file mode 100644
+index fc935844..00000000
+--- a/usr/share/rear/rescue/GNU/Linux/400_use_serial_console.sh
++++ /dev/null
+@@ -1,6 +0,0 @@
+-
+-# Nothing to do when using serial console is not wanted:
+-is_true "$USE_SERIAL_CONSOLE" || return 0
+-
+-KERNEL_CMDLINE=$( cmdline_add_console )
+-Log "Modified kernel commandline to: '$KERNEL_CMDLINE'"

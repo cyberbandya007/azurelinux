@@ -1,0 +1,48 @@
+From 477a04b18e8754dc3f75110f0e7e6cdac70217aa Mon Sep 17 00:00:00 2001
+From: Tony Asleson <tasleson@redhat.com>
+Date: Thu, 26 Mar 2020 13:07:49 -0500
+Subject: [PATCH 07/12] test_nvmet.py: test_invalid_input fails for py3
+
+When you run 'make test' using python 3 the unit test
+test_invalid_input fails with:
+
+Traceback (most recent call last):
+  File "/someuser/projects/nvmetcli/nvmet/test_nvmet.py", line 395, in
+test_invalid_input
+    for i in range(l))
+  File "/someuser/projects/nvmetcli/nvmet/test_nvmet.py", line 395, in
+<genexpr>
+    for i in range(l))
+AttributeError: module 'string' has no attribute 'lowercase'
+
+Python 3 does not have 'string.lowercase' ref.
+https://docs.python.org/3/library/string.html
+
+Python 2 does ref.
+https://docs.python.org/2/library/string.html
+
+Both have "string.ascii_lowercase" so lets leverage that to
+support both.
+
+Signed-off-by: Tony Asleson <tasleson@redhat.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ nvmet/test_nvmet.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/nvmet/test_nvmet.py b/nvmet/test_nvmet.py
+index 5caa546..aae4a86 100644
+--- a/nvmet/test_nvmet.py
++++ b/nvmet/test_nvmet.py
+@@ -391,7 +391,7 @@ class TestNvmet(unittest.TestCase):
+                           nqn='/', mode='create')
+ 
+         for l in [ 257, 512, 1024, 2048 ]:
+-            toolong = ''.join(random.choice(string.lowercase)
++            toolong = ''.join(random.choice(string.ascii_lowercase)
+                               for i in range(l))
+             self.assertRaises(nvme.CFSError, nvme.Subsystem,
+                               nqn=toolong, mode='create')
+-- 
+2.29.2
+

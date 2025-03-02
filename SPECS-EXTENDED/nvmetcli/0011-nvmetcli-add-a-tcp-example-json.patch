@@ -1,0 +1,99 @@
+From 73dcf7ef6b6aa80c87c61f08583cba97ad1c626a Mon Sep 17 00:00:00 2001
+From: zhenwei pi <pizhenwei@bytedance.com>
+Date: Thu, 10 Dec 2020 17:06:56 +0800
+Subject: [PATCH 11/12] nvmetcli: add a tcp example json
+
+Run a tcp nvme target on linux-5.10-rc version, and save the config
+as an example.
+
+Signed-off-by: zhenwei pi <pizhenwei@bytedance.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ README   |  5 +++++
+ tcp.json | 58 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 63 insertions(+)
+ create mode 100644 tcp.json
+
+diff --git a/README b/README
+index 44f1c33..6ebe666 100644
+--- a/README
++++ b/README
+@@ -41,6 +41,11 @@ fc.json fits your setup:
+ 
+   ./nvmetcli restore fc.json
+ 
++Or to load the tcp + no host authentication version do the following
++after you've ensured that the IP address in tcp.json fits your setup:
++
++  ./nvmetcli restore tcp.json
++
+ These files can also be edited directly using your favorite editor.
+ 
+ Testing
+diff --git a/tcp.json b/tcp.json
+new file mode 100644
+index 0000000..e6ff029
+--- /dev/null
++++ b/tcp.json
+@@ -0,0 +1,58 @@
++{
++  "hosts": [], 
++  "ports": [
++    {
++      "addr": {
++        "adrfam": "ipv4", 
++        "traddr": "192.168.122.33", 
++        "treq": "not specified", 
++        "trsvcid": "4420", 
++        "trtype": "tcp"
++      }, 
++      "ana_groups": [
++        {
++          "ana": {
++            "state": "optimized"
++          }, 
++          "grpid": 1
++        }
++      ], 
++      "param": {
++        "inline_data_size": "16384", 
++        "pi_enable": "0"
++      }, 
++      "portid": 1, 
++      "referrals": [], 
++      "subsystems": [
++        "nvmet-always"
++      ]
++    }
++  ], 
++  "subsystems": [
++    {
++      "allowed_hosts": [], 
++      "attr": {
++        "allow_any_host": "1", 
++        "cntlid_max": "65519", 
++        "cntlid_min": "1", 
++        "model": "Linux", 
++        "pi_enable": "0", 
++        "serial": "123456789abcdef", 
++        "version": "1.3"
++      }, 
++      "namespaces": [
++        {
++          "ana_grpid": 1, 
++          "device": {
++            "nguid": "00000000-0000-0000-0000-000000000000", 
++            "path": "/dev/nvme0n1", 
++            "uuid": "d592cdf3-5d1c-44e0-8412-3fcf7d99df27"
++          }, 
++          "enable": 1, 
++          "nsid": 1
++        }
++      ], 
++      "nqn": "nvmet-always"
++    }
++  ]
++}
+-- 
+2.29.2
+

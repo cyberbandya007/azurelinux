@@ -1,8 +1,6 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 Name:           python-varlink
-Version:        30.3.0
-Release:        2%{?dist}
+Version:        31.0.0
+Release:        11%{?dist}
 Summary:        Python implementation of Varlink
 License:        ASL 2.0
 URL:            https://github.com/varlink/%{name}
@@ -28,15 +26,22 @@ Obsoletes:     python-varlink <= 3-1.git.61.1bc637d.fc27
 %description -n python3-varlink %_description
 
 %prep
-%autosetup -n python-%{version}
+%autosetup -n varlink-%{version}
+# varlink also supports python-2.7 but python3 is required here
+sed -i -e 's#env python#env python3#' varlink/tests/test_certification.py
+# varlink also supports python-2.7 but python3 is required here
+sed -i -e 's#env python#env python3#' varlink/tests/test_orgexamplemore.py
 
 %build
+export SETUPTOOLS_SCM_PRETEND_VERSION=%{version}
 %py3_build
 
 %check
+export SETUPTOOLS_SCM_PRETEND_VERSION=%{version}
 CFLAGS="%{optflags}" %{__python3} %{py_setup} %{?py_setup_args} check
 
 %install
+export SETUPTOOLS_SCM_PRETEND_VERSION=%{version}
 %py3_install
 
 %files -n python3-varlink
@@ -45,8 +50,54 @@ CFLAGS="%{optflags}" %{__python3} %{py_setup} %{?py_setup_args} check
 %{python3_sitelib}/*
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 30.3.0-2
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 31.0.0-11
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Fri Jun 07 2024 Python Maint <python-maint@redhat.com> - 31.0.0-10
+- Rebuilt for Python 3.13
+
+* Fri Jan 26 2024 Fedora Release Engineering <releng@fedoraproject.org> - 31.0.0-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Mon Jan 22 2024 Fedora Release Engineering <releng@fedoraproject.org> - 31.0.0-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 31.0.0-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Tue Jun 13 2023 Python Maint <python-maint@redhat.com> - 31.0.0-6
+- Rebuilt for Python 3.12
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 31.0.0-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 31.0.0-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Mon Jun 13 2022 Python Maint <python-maint@redhat.com> - 31.0.0-3
+- Rebuilt for Python 3.11
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 31.0.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Tue Dec 07 2021 Harald Hoyer <harald@hoyer.xyz> - 31.0.0-1
+- Update to 31.0.0
+
+* Tue Jul 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 30.3.1-4
+- Second attempt - Rebuilt for
+  https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri Jun 04 2021 Python Maint <python-maint@redhat.com> - 30.3.1-3
+- Rebuilt for Python 3.10
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 30.3.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Fri Oct 02 2020 Harald Hoyer <harald@redhat.com> - 30.3.1-1
+- Update to 30.3.1
+
+* Wed Jul 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 30.3.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Mon Jul 13 2020 Harald Hoyer <harald@redhat.com> - 30.3.0-1
 - add python3-setuptools to BuildRequires

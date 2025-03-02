@@ -4,24 +4,27 @@
 %global soversion_gobject 0
 
 Name: liblangtag
-Version: 0.6.3
-Release: 3%{?dist}
+Version: 0.6.7
+Release: 4%{?dist}
 Summary: An interface library to access tags for identifying languages
 
-License: LGPLv3+ or MPLv2.0
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
-URL: http://tagoh.bitbucket.org/liblangtag/
+License: LGPL-3.0-or-later OR MPL-2.0
+URL: https://bitbucket.org/tagoh/liblangtag/
 Source0: https://bitbucket.org/tagoh/%{name}/downloads/%{name}-%{version}.tar.bz2
+Patch0: liblangtag-noparallel-gir.patch
 
 Requires: %{name}-data = %{version}-%{release}
 
 BuildRequires: glibc-common
+%if ! 0%{?flatpak}
 BuildRequires: gtk-doc
+%endif
 BuildRequires: pkgconfig(check)
 BuildRequires: pkgconfig(gobject-2.0)
 BuildRequires: pkgconfig(gobject-introspection-1.0)
 BuildRequires: pkgconfig(libxml-2.0)
+BuildRequires: make
+BuildRequires: gcc
 
 %description
 %{name} is an interface library to access tags for identifying
@@ -44,7 +47,7 @@ Features:
 
 %package data
 Summary: %{name} data files
-License: UCD
+License: Unicode
 BuildArch: noarch
 
 %description data
@@ -78,16 +81,20 @@ The %{name}-doc package contains documentation files for %{name}.
 %autosetup -p1
 
 %build
-%configure --disable-silent-rules --disable-static --enable-shared --enable-introspection
+%configure \
+%if 0%{?flatpak}
+    --disable-gtk-doc \
+%endif
+    --disable-silent-rules --disable-static --enable-shared --enable-introspection
 sed -i \
     -e 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' \
     -e 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' \
     libtool
 export LD_LIBRARY_PATH=`pwd`/liblangtag/.libs:`pwd`/liblangtag-gobject/.libs${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-make %{?_smp_mflags}
+%make_build
 
 %install
-make install DESTDIR=%{buildroot}
+%make_install
 rm -f %{buildroot}/%{_libdir}/*.la %{buildroot}/%{_libdir}/%{name}/*.la
 
 %ldconfig_scriptlets
@@ -96,7 +103,7 @@ rm -f %{buildroot}/%{_libdir}/*.la %{buildroot}/%{_libdir}/%{name}/*.la
 
 %check
 export LD_LIBRARY_PATH=`pwd`/liblangtag/.libs:`pwd`/liblangtag-gobject/.libs${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-make %{?_smp_mflags} check
+%make_build check
 
 %files
 %doc AUTHORS NEWS README
@@ -127,8 +134,58 @@ make %{?_smp_mflags} check
 %{_datadir}/gtk-doc/html/%{name}
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.6.3-3
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.6.7-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.6.7-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.6.7-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Dec  1 2023 Akira TAGOH <tagoh@redhat.com> - 0.6.7-1
+- New upstream release.
+  Resolves: rhbz#2251364
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.6.4-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Fri Jan 20 2023 Eike Rathke <erack@redhat.com> - 0.6.4-4
+- Migrated to SPDX license IDs
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.6.4-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.6.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Jun 30 2022 Caolán McNamara <caolanm@redhat.com> - 0.6.4-1
+- Resolves: rhbz#2102551 latest available version
+- fix make check by changing canonicalization test of "mo" from "ro-MD" to "ro"
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.6.3-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.6.3-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Wed May 19 2021 Timm Bäder <tbaeder@redhat.com> - 0.6.3-7
+- Add gcc buildrequires
+- Use make macros
+
+* Wed May 19 2021 Akira TAGOH <tagoh@redhat.com> - 0.6.3-6
+- Update License field for liblangtag-data.
+  It is actually Unicode but not UCD.
+
+* Wed Apr 21 2021 Akira TAGOH <tagoh@redhat.com> - 0.6.3-5
+- Suppress documentation in Flatpak builds
+- build gir with non-parallel to avoid strange behavior.
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.6.3-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.6.3-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.6.3-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

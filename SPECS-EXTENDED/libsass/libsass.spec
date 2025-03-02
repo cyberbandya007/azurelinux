@@ -1,19 +1,19 @@
 Name:           libsass
-Version:        3.6.3
-Release:        3%{?dist}
+Version:        3.6.6
+%global soname_version 1
+Release:        2%{?dist}
 Summary:        C/C++ port of the Sass CSS precompiler
 
-License:        MIT
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
-URL:            http://sass-lang.com/libsass
+# src/ast.hpp, src/utf8* is BSL-1.0
+License:        MIT AND BSL-1.0
+URL:            https://sass-lang.com/libsass
 Source0:        https://github.com/sass/libsass/archive/%{version}/%{name}-%{version}.tar.gz
 
 BuildRequires:  automake
 BuildRequires:  autoconf
 BuildRequires:  libtool
-BuildRequires:  pkgconfig
 BuildRequires:  gcc-c++
+BuildRequires:  make
 
 %description
 Libsass is a C/C++ port of the Sass CSS precompiler. The original version was
@@ -43,32 +43,70 @@ autoreconf --force --install
 
 %build
 %configure --disable-static
-make %{?_smp_mflags}
+%make_build
 
 
 %install
-make install DESTDIR=$RPM_BUILD_ROOT
-find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
-
-
-%ldconfig_scriptlets
+%make_install
+find $RPM_BUILD_ROOT -name '*.la' -print -delete
 
 
 %files
 %license LICENSE
 %doc Readme.md SECURITY.md
-%{_libdir}/*.so.*
+%{_libdir}/libsass.so.%{soname_version}{,.*}
+
 
 %files devel
-%license LICENSE
-%{_includedir}/*
-%{_libdir}/*.so
-%{_libdir}/pkgconfig/*.pc
+%{_includedir}/sass.h
+%{_includedir}/sass2scss.h
+%{_includedir}/sass/
+%{_libdir}/libsass.so
+%{_libdir}/pkgconfig/libsass.pc
 
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 3.6.3-3
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.6.6-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Fri Jan 26 2024 Benjamin A. Beasley <code@musicinmybrain.net> - 3.6.6-1
+- Update to 3.6.6 (close RHBZ#1963228)
+
+* Fri Jan 26 2024 Benjamin A. Beasley <code@musicinmybrain.net> - 3.6.5-5
+- Assorted minor packaging enhancements
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.6.5-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.6.5-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.6.5-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Fri May 26 2023 Aurelien Bompard <abompard@fedoraproject.org> - 3.6.5-1
+- Version 3.6.5
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.6.4-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.6.4-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.6.4-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.6.4-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.6.4-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 3.6.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Fri Jul 17 2020 Marcel Plch <marcel.plch@protonmail.com> - 3.6.4-1
+- Update to v3.6.4
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 3.6.3-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

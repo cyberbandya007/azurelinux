@@ -1,12 +1,10 @@
 Name:		perl-ExtUtils-Config
-Version:	0.008
-Release:	19%{?dist}
+Version:	0.010
+Release:	1%{?dist}
 Summary:	A wrapper for perl's configuration
-License:	GPL+ or Artistic
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+License:	GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:		https://metacpan.org/release/ExtUtils-Config
-Source0:	https://cpan.metacpan.org/modules/by-module/ExtUtils/ExtUtils-Config-%{version}.tar.gz#/perl-ExtUtils-Config-%{version}.tar.gz
+Source0:	https://cpan.metacpan.org/modules/by-module/ExtUtils/ExtUtils-Config-%{version}.tar.gz
 BuildArch:	noarch
 # Build
 BuildRequires:	coreutils
@@ -14,17 +12,22 @@ BuildRequires:	findutils
 BuildRequires:	make
 BuildRequires:	perl-generators
 BuildRequires:	perl-interpreter
-BuildRequires:	perl(ExtUtils::MakeMaker) >= 6.30
+BuildRequires:	perl(:VERSION) >= 5.6
+BuildRequires:	perl(ExtUtils::MakeMaker)
+BuildRequires:	perl(strict)
+BuildRequires:	perl(warnings)
 # Module
 BuildRequires:	perl(Config)
 BuildRequires:	perl(Data::Dumper)
+BuildRequires:	perl(ExtUtils::MakeMaker::Config)
 # Test Suite
 BuildRequires:	perl(blib)
-BuildRequires:	perl(File::Find)
-BuildRequires:	perl(File::Temp)
+BuildRequires:	perl(File::Spec)
+BuildRequires:	perl(IO::Handle)
+BuildRequires:	perl(IPC::Open3)
 BuildRequires:	perl(Test::More) >= 0.88
-# Runtime
-Requires:	perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
+# Dependencies
+Requires:	perl(Data::Dumper)
 
 %description
 ExtUtils::Config is an abstraction around the %%Config hash.
@@ -45,22 +48,66 @@ find %{buildroot} -type f -name .packlist -delete
 make test
 
 %files
-%if 0%{?_licensedir:1}
 %license LICENSE
-%else
-%doc LICENSE
-%endif
 %doc Changes README
 %{perl_vendorlib}/ExtUtils/
 %{_mandir}/man3/ExtUtils::Config.3*
+%{_mandir}/man3/ExtUtils::Config::MakeMaker.3*
 
 %changelog
-* Fri Apr 22 2022 Muhammad Falak <mwani@microsoft.com> - 0.008-19
-- Add an explicit BR on `perl(blib)` to enable ptest
-- License verified
+* Sat Aug 17 2024 Paul Howarth <paul@city-fan.org> - 0.010-1
+- Update to 0.010
+  - Fix regression in serialize method
 
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.008-18
-- Initial CBL-Mariner import from Fedora 31 (license: MIT).
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.009-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Fri Apr 26 2024 Paul Howarth <paul@city-fan.org> - 0.009-1
+- Update to 0.009
+  - Add a but method
+  - Add ExtUtils::Config::MakeMaker
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.008-31
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.008-30
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.008-29
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.008-28
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.008-27
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Mon May 30 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.008-26
+- Perl 5.36 rebuild
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.008-25
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.008-24
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.008-23
+- Perl 5.34 rebuild
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.008-22
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.008-21
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Mon Jun 22 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.008-20
+- Perl 5.32 rebuild
+
+* Tue Mar 03 2020 Petr Pisar <ppisar@redhat.com> - 0.008-19
+- Specify all dependencies
+
+* Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.008-18
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
 
 * Fri Aug 23 2019 Paul Howarth <paul@city-fan.org> - 0.008-17
 - Use an author-independent source URL

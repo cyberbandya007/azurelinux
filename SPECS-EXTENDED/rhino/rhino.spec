@@ -14,7 +14,7 @@ Summary:        Rhino
 License:        MPL-2.0 AND LicenseRef-Callaway-BSD
 URL:            https://mozilla.github.io/rhino
 BuildArch:      noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 ExcludeArch:    %{ix86}
 
 Source0:        %{url}/archive/%{scm_release}/%{name}-%{version}.tar.gz

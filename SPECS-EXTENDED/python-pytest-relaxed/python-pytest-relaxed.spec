@@ -1,14 +1,20 @@
 Name:           python-pytest-relaxed
 Version:        2.0.2
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Relaxed test discovery/organization for pytest
 
 License:        BSD-2-Clause
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://github.com/bitprophet/pytest-relaxed
-Source:         %{url}/archive/%{version}/pytest-relaxed-%{version}.tar.gz
+Source:         %{url}/archive/%{version}/pytest-relaxed-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
 BuildArch:      noarch
 BuildRequires:  python3-devel
+BuildRequires: 	python3-pip
+BuildRequires: 	python3-wheel
+BuildRequires:  python3-pytest
+BuildRequires:  python3-decorator
 
 %global _description %{expand:
 This package provides relaxed test discovery for pytest.
@@ -24,35 +30,33 @@ Summary:        %{summary}
 
 %description -n python3-pytest-relaxed %_description
 
-
 %prep
 %autosetup -p1 -n pytest-relaxed-%{version}
-
 
 %generate_buildrequires
 %pyproject_buildrequires
 
-
 %build
 %pyproject_wheel
-
 
 %install
 %pyproject_install
 %pyproject_save_files pytest_relaxed
 
-
 %check
 %pyproject_check_import
 %pytest
-
 
 %files -n python3-pytest-relaxed -f %{pyproject_files}
 %license LICENSE
 %doc README.rst
 
-
 %changelog
+* Wed Feb 19 2025 Akhila Guruju <v-guakhila@microsoft.com> - 2.0.2-4
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+- Added `BuildRequires: python3-pytest python3-decorator` to fix build.
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.2-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

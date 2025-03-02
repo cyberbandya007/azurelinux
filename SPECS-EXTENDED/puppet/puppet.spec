@@ -1,57 +1,60 @@
-%global nm_dispatcher_dir %{_libdir}/NetworkManager
+%global nm_dispatcher_dir %{_prefix}/lib/NetworkManager
 %global puppet_libdir %{ruby_vendorlibdir}
 %global puppet_vendor_mod_dir %{_datadir}/%{name}/vendor_modules
 
-Summary:        Network tool for managing many disparate systems
 Name:           puppet
-Version:        7.34.0
-Release:        1%{?dist}
-License:        ASL 2.0
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+Version:        8.6.0
+Release:        2%{?dist}
+Summary:        Network tool for managing many disparate systems
+License:        Apache-2.0
 URL:            https://puppet.com
 Source0:        https://downloads.puppetlabs.com/puppet/%{name}-%{version}.tar.gz
+Source1:        https://downloads.puppetlabs.com/puppet/%{name}-%{version}.tar.gz.asc
+Source2:        RPM-GPG-KEY-puppet-20250406
 # Get these by checking out the right tag from https://github.com/puppetlabs/puppet-agent and:
-# sed 's|.\+puppetlabs/\([a-z_-]\+\).git.\+tags/\([0-9\.]\+\)"}|https://forge.puppet.com/v3/files/\1-\2.tar.gz|' configs/components/module-puppetlabs-*.json
-Source3:        https://forge.puppet.com/v3/files/puppetlabs-augeas_core-1.5.0.tar.gz
-Source4:        https://forge.puppet.com/v3/files/puppetlabs-cron_core-1.3.0.tar.gz
-Source5:        https://forge.puppet.com/v3/files/puppetlabs-host_core-1.3.0.tar.gz
-Source6:        https://forge.puppet.com/v3/files/puppetlabs-mount_core-1.3.0.tar.gz
+# sed 's|.\+puppetlabs/\([a-z_-]\+\).git.\+tags/v\?\([0-9\.]\+\)"}|https://forge.puppet.com/v3/files/\1-\2.tar.gz|' configs/components/module-puppetlabs-*.json
+Source3:        https://forge.puppet.com/v3/files/puppetlabs-augeas_core-1.4.0.tar.gz
+Source4:        https://forge.puppet.com/v3/files/puppetlabs-cron_core-1.2.1.tar.gz
+Source5:        https://forge.puppet.com/v3/files/puppetlabs-host_core-1.2.0.tar.gz
+Source6:        https://forge.puppet.com/v3/files/puppetlabs-mount_core-1.2.0.tar.gz
 Source7:        https://forge.puppet.com/v3/files/puppetlabs-scheduled_task-3.2.0.tar.gz
-Source8:        https://forge.puppet.com/v3/files/puppetlabs-selinux_core-1.4.0.tar.gz
-Source9:        https://forge.puppet.com/v3/files/puppetlabs-sshkeys_core-2.5.0.tar.gz
-Source10:       https://forge.puppet.com/v3/files/puppetlabs-yumrepo_core-1.2.0.tar.gz
-Source11:       https://forge.puppet.com/v3/files/puppetlabs-zfs_core-1.6.1.tar.gz
-Source12:       https://forge.puppet.com/v3/files/puppetlabs-zone_core-1.2.0.tar.gz
+Source8:        https://forge.puppet.com/v3/files/puppetlabs-selinux_core-1.3.0.tar.gz
+Source9:        https://forge.puppet.com/v3/files/puppetlabs-sshkeys_core-2.4.0.tar.gz
+Source10:       https://forge.puppet.com/v3/files/puppetlabs-yumrepo_core-2.0.0.tar.gz
+Source11:       https://forge.puppet.com/v3/files/puppetlabs-zfs_core-1.4.0.tar.gz
+Source12:       https://forge.puppet.com/v3/files/puppetlabs-zone_core-1.1.0.tar.gz
 Source13:       puppet-nm-dispatcher.systemd
 Source14:       start-puppet-wrapper
 Source15:       logrotate
 
-BuildArch:      noarch
+BuildArch: noarch
 
-BuildRequires:  facter
-BuildRequires:  gnupg2
-BuildRequires:  hiera
 # ruby-devel does not require the base package, but requires -libs instead
-BuildRequires:  ruby
-BuildRequires:  ruby-devel
-BuildRequires:  rubygem-json
-BuildRequires:  systemd
-BuildRequires:  which
-
-Requires:       augeas >= 1.10.1
-Requires:       augeas-libs >= 1.10.1
-Requires:       cpp-hocon >= 0.2.1
-Requires:       facter >= 3.9.6
-Requires:       hiera >= 3.3.1
-Requires:       libselinux-utils
-Requires:       ruby-augeas >= 0.5.0
-Requires:       rubygem(concurrent-ruby) >= 1.0.5
-Requires:       rubygem(deep_merge) >= 1.0
-Requires:       rubygem(facter) >= 3.9.6
-Requires:       rubygem(multi_json) >= 1.10
-Requires:       rubygem(puppet-resource_api) >= 1.5
-Requires:       rubygem(semantic_puppet) >= 1.0.2
+BuildRequires: ruby
+BuildRequires: ruby-devel
+BuildRequires: rubygem-json
+BuildRequires: facter
+BuildRequires: hiera
+BuildRequires: systemd
+BuildRequires: gnupg2
+Requires: hiera >= 3.3.1
+Requires: facter >= 4.3.0
+Requires: rubygem(concurrent-ruby) >= 1.1.9
+Requires: rubygem(deep_merge) >= 1.0
+Requires: rubygem(facter) >= 4.3.0
+Requires: rubygem(multi_json) >= 1.13
+Requires: rubygem(puppet-resource_api) >= 1.5
+Requires: rubygem(semantic_puppet) >= 1.0.2
+Requires: rubygem(scanf) >= 1.0
+Requires: ruby-augeas >= 0.5.0
+# racc was a default gem, is now a bundled gem but shipped as a sepeate package
+Requires: (ruby-default-gems < 3.3 or rubygem(racc))
+Requires: augeas >= 1.10.1
+Requires: augeas-libs >= 1.10.1
+Requires: ruby(selinux) libselinux-utils
+Obsoletes: puppet-headless < 6.0.0
+Obsoletes: puppet-server < 6.0.0
+Obsoletes: puppet < 6.0.0
 
 %description
 Puppet lets you centrally manage every important aspect of your system using a
@@ -60,6 +63,7 @@ normally aggregated in different files, like users, cron jobs, and hosts,
 along with obviously discrete elements like packages, services, and files.
 
 %prep
+%{gpgverify} --keyring='%{SOURCE2}' --signature='%{SOURCE1}' --data='%{SOURCE0}'
 %autosetup
 cp -a %{sources} .
 for f in puppetlabs-*.tar*; do
@@ -100,7 +104,7 @@ done
 
 install -Dp -m0644 %{SOURCE15} %{buildroot}%{_sysconfdir}/logrotate.d/%{name}
 
-install -d -m0755 %{buildroot}%{_unitdir}
+%{__install} -d -m0755 %{buildroot}%{_unitdir}
 install -Dp -m0644 ext/systemd/puppet.service %{buildroot}%{_unitdir}/%{name}.service
 
 # Note(hguemar): Conflicts with config file from hiera package
@@ -133,18 +137,6 @@ echo "D %{_rundir}/%{name} 0755 %{name} %{name} -" > \
 rm -r %{buildroot}%{_datadir}/%{name}/ext/{debian,osx,solaris,suse,windows,systemd,redhat}
 rm %{buildroot}%{_datadir}/%{name}/ext/{build_defaults.yaml,project_data.yaml}
 
-%pre
-getent group puppet &>/dev/null || groupadd -r puppet -g 52 &>/dev/null
-getent passwd puppet &>/dev/null || \
-useradd -r -u 52 -g puppet -s /sbin/nologin \
- -c "Puppet" puppet &>/dev/null
-
-%post
-%systemd_post %{name}.service
-
-%postun
-%systemd_postun_with_restart %{name}.service
-
 %files
 %attr(-, puppet, puppet) %{_localstatedir}/log/%{name}
 %attr(-, root, root) %{_datadir}/%{name}
@@ -164,13 +156,12 @@ useradd -r -u 52 -g puppet -s /sbin/nologin \
 
 %doc README.md examples
 %license LICENSE
-%{ruby_vendorlibdir}/hiera
-%{ruby_vendorlibdir}/hiera_puppet.rb
-%{ruby_vendorlibdir}/puppet
-%{ruby_vendorlibdir}/puppet_pal.rb
-%{ruby_vendorlibdir}/puppet.rb
-%{ruby_vendorlibdir}/puppet_x.rb
-%{ruby_vendorlibdir}/puppet
+%{_datadir}/ruby/vendor_ruby/hiera
+%{_datadir}/ruby/vendor_ruby/hiera_puppet.rb
+%{_datadir}/ruby/vendor_ruby/puppet
+%{_datadir}/ruby/vendor_ruby/puppet_pal.rb
+%{_datadir}/ruby/vendor_ruby/puppet.rb
+%{_datadir}/ruby/vendor_ruby/puppet_x.rb
 %dir %{_sharedstatedir}/%{name}
 %dir %{_sharedstatedir}/%{name}/public
 %{_bindir}/puppet
@@ -206,19 +197,78 @@ useradd -r -u 52 -g puppet -s /sbin/nologin \
 
 %ghost %attr(755, puppet, puppet) %{_rundir}/%{name}
 
+%pre
+getent group puppet &>/dev/null || groupadd -r puppet -g 52 &>/dev/null
+getent passwd puppet &>/dev/null || \
+useradd -r -u 52 -g puppet -s /sbin/nologin \
+ -c "Puppet" puppet &>/dev/null
+
+%post
+%systemd_post %{name}.service
+
+%postun
+%systemd_postun_with_restart %{name}.service
+
 %changelog
-* Tue Dec 10 2024 Sudipta Pandit <sudpandit@microsoft.com> - 7.34.0-1
-- Bump version to 7.34.0 to fix compatibility with concurrent-ruby
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 8.6.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Sun Apr 24 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 7.12.1-4
-- Updating Ruby vendor lib path macro.
+* Sat Apr 20 2024 Breno Brand Fernandes <breno.brandfernandes@achievers.com> - 8.6.0-1
+- Update to 8.6.0 (fixes rhbz#2274550)
 
-* Thu Apr 21 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 7.12.1-3
-- Spec clean-up.
+* Sun Mar 10 2024 Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl> - 8.5.1-1
+- Update to 8.5.1 (fixes rhbz#2259039)
 
-* Thu Dec 30 2021 Suresh Babu Chalamalasetty <schalam@microsoft.com> - 7.12.1-2
-- Initial CBL-Mariner import from Fedora 36 (license: MIT)
-- License verified
+* Fri Jan 26 2024 Fedora Release Engineering <releng@fedoraproject.org> - 8.3.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 8.3.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Tue Nov 14 2023 Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl> - 8.3.1-1
+- Update to 8.3.1 (fixes rhbz#2233957)
+
+* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 8.1.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jun 8 2023 Breno Brand Fernandes <brandfbb@gmail.com> - 8.1.0-1
+- Build 8.1.0
+
+* Thu Jun 8 2023 Breno Brand Fernandes <brandfbb@gmail.com> - 7.24.0-1
+- Build 7.24.0
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 7.21.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Sat Dec 17 2022 Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl> - 7.21.0-1
+- Update to 7.21.0 (fixes rhbz#2151953)
+
+* Thu Oct 20 2022 Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl> - 7.20.0-1
+- Update to 7.20.0 (fixes rhbz#2126546)
+
+* Sat Sep 17 2022 Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl> - 7.19.0-1
+- Update to 7.19.0 (fixes rhbz#2126546)
+
+* Tue Aug 30 2022 Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl> - 7.18.0-1
+- Update to 7.18.0
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 7.17.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Wed Jun 15 2022 Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl> - 7.17.0-2
+- Require at least concurrent-ruby 1.1.9 (fixes rhbz#2077122)
+
+* Wed Jun 01 2022 Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl> - 7.17.0-1
+- Update to 7.17.0
+
+* Wed Apr 20 2022 Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl> - 7.16.0-1
+- Update to 7.16.0
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 7.12.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Sat Nov 27 2021 Igor Raits <ignatenkobrain@fedoraproject.org> - 7.12.1-2
+- Drop obsolete dependency on cpp-hocon
 
 * Thu Nov 18 2021 Breno Brand Fernandes <brandfbb@gmail.com> - 7.12.1-1
 - Update to 7.12.1

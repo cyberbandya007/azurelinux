@@ -1,5 +1,3 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 %global luaminver 5.2
 
 #global commit 76d7c992a22d4481969a977ad36d6d35d3b2ca6f
@@ -7,8 +5,8 @@ Distribution:   Azure Linux
 
 
 Name:           lua-term
-Version:        0.07
-Release:        11%{?dist}
+Version:        0.08
+Release:        4%{?dist}
 Summary:        Terminal functions for Lua
 
 License:        MIT
@@ -17,7 +15,13 @@ Source0:        https://github.com/hoelzro/%{name}/archive/%{version}.tar.gz#/%{
 
 BuildRequires:  gcc
 BuildRequires:  lua-devel >= %{luaminver}
-Requires:       lua(abi) >= %{luaminver}
+%if 0%{?rhel} == 6
+Requires:       lua >= %{luaminver}
+Requires:       lua < 5.2
+%else
+Requires:       lua(abi) = %{lua_version}
+Requires:       lua >= %{lua_version}
+%endif
 
 
 %description
@@ -57,9 +61,41 @@ cp -p core.so %{buildroot}%{lualibdir}/term/
 
 
 %changelog
-* Fri Jan 08 2021 Joe Schmitt <joschmit@microsoft.com> - 0.07-11
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
-- Remove Fedora/RHEL version checks
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.08-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.08-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.08-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Mon Jan 01 2024 Orion Poplawski <orion@nwra.com> - 0.08-1
+- Update to 0.08
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.07-18
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.07-17
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.07-16
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.07-15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.07-14
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.07-13
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.07-12
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jun 30 2020 Björn Esser <besser82@fedoraproject.org> - 0.07-11
+- Rebuilt for Lua 5.4
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.07-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

@@ -1,12 +1,16 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+%if 0%{?rhel} && 0%{?rhel} > 9
+%bcond_with mythes
+%else
+%bcond_without mythes
+%endif
+
 Name: openoffice-lv
 Summary: Latvian linguistic dictionaries
-Version: 1.0.0
-Release: 12%{?dist}
+Version: 1.4.0
+Release: 9%{?dist}
 Source: http://dict.dv.lv/download/lv_LV-%{version}.oxt
 URL: http://dict.dv.lv/
-License: LGPLv2+
+License: LGPL-2.1-or-later
 BuildArch: noarch
 
 %description
@@ -26,12 +30,14 @@ Requires: hyphen
 %description -n hyphen-lv
 Latvian hyphenation rules.
 
+%if %{with mythes}
 %package -n mythes-lv
 Summary: Latvian thesaurus
 Requires: mythes
 
 %description -n mythes-lv
 Latvian thesaurus.
+%endif
 
 %prep
 %autosetup -c
@@ -47,34 +53,77 @@ for i in README_lv_LV.txt README_hyph_lv_LV.txt; do
   touch -r $i $i.new
   mv -f $i.new $i
 done
-chmod -x *.dic
 
 %install
-mkdir -p $RPM_BUILD_ROOT/%{_datadir}/myspell
+mkdir -p $RPM_BUILD_ROOT/%{_datadir}/hunspell
 mkdir -p $RPM_BUILD_ROOT/%{_datadir}/hyphen
-mkdir -p $RPM_BUILD_ROOT/%{_datadir}/mythes
-cp -p lv_LV.dic lv_LV.aff $RPM_BUILD_ROOT/%{_datadir}/myspell
+cp -p lv_LV.dic lv_LV.aff $RPM_BUILD_ROOT/%{_datadir}/hunspell
 cp -p hyph_lv_LV.dic $RPM_BUILD_ROOT/%{_datadir}/hyphen
+
+%if %{with mythes}
+mkdir -p $RPM_BUILD_ROOT/%{_datadir}/mythes
 cp -p th_lv_LV_v2.* $RPM_BUILD_ROOT/%{_datadir}/mythes
+%endif
 
 %files -n hunspell-lv
 %doc README_lv_LV.txt
 %license license.txt
-%{_datadir}/myspell/*
+%{_datadir}/hunspell/*
 
 %files -n hyphen-lv
 %doc README_hyph_lv_LV.txt
 %license license.txt
 %{_datadir}/hyphen/*
 
+%if %{with mythes}
 %files -n mythes-lv
 %doc package-description.txt
 %license license.txt
 %{_datadir}/mythes/*
+%endif
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.0.0-12
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.4.0-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Mon Apr 15 2024 Parag Nemade <pnemade AT redhat DOT com> - 1.4.0-8
+- The mythes package is not present in RHEL10
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.4.0-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.4.0-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.4.0-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Fri Feb 24 2023 Caolán McNamara <caolanm@redhat.com> - 1.4.0-4
+- migrated to SPDX license
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.4.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.4.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Sat Jan 29 2022 Parag Nemade <pnemade AT redhat DOT com> - 1.4.0-1
+- Update to 1.4.0 release
+- Update hunspell dictionary directory path
+  https://fedoraproject.org/wiki/Changes/Hunspell_dictionary_dir_change
+- Added CI tests
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.0.0-15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.0.0-14
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.0.0-13
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.0.0-12
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.0.0-11
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

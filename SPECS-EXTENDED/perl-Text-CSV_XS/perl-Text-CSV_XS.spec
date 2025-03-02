@@ -1,10 +1,8 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 Name:           perl-Text-CSV_XS
-Version:        1.41
-Release:        2%{?dist}
+Version:        1.56
+Release:        1%{?dist}
 Summary:        Comma-separated values manipulation routines
-License:        GPL+ or Artistic
+License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/Text-CSV_XS
 Source0:        https://cpan.metacpan.org/modules/by-module/Text/Text-CSV_XS-%{version}.tgz
 # Build:
@@ -15,11 +13,12 @@ BuildRequires:  make
 BuildRequires:  perl-devel
 BuildRequires:  perl-generators
 BuildRequires:  perl-interpreter
+BuildRequires:  perl(charnames)
 BuildRequires:  perl(Config::Tiny)
 BuildRequires:  perl(ExtUtils::MakeMaker) >= 6.76
 # Run-time:
 BuildRequires:  perl(Carp)
-# Specific version ≥ 2.92 for Encode is recommended but not required
+# Specific version ≥ 3.20 for Encode is recommended but not required
 BuildRequires:  perl(Encode)
 BuildRequires:  perl(Exporter)
 BuildRequires:  perl(IO::Handle)
@@ -30,13 +29,11 @@ BuildRequires:  perl(warnings)
 BuildRequires:  perl(XSLoader)
 # Tests:
 BuildRequires:  perl(base)
-BuildRequires:  perl(charnames)
 BuildRequires:  perl(Config)
 BuildRequires:  perl(Test::More)
 BuildRequires:  perl(Tie::Scalar)
 # Dependencies
-Requires:       perl(:MODULE_COMPAT_%(eval "$(perl -V:version)"; echo $version))
-# Specific version ≥ 2.92 for Encode is recommended but not required
+# Specific version ≥ 3.20 for Encode is recommended but not required
 Requires:       perl(Encode)
 # IO::Handle is loaded by XS code
 Requires:       perl(IO::Handle)
@@ -83,8 +80,166 @@ find %{buildroot} -type f -name '*.bs' -empty -delete
 %{_mandir}/man3/Text::CSV_XS.3*
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.41-2
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Sun Aug 11 2024 Paul Howarth <paul@city-fan.org> - 1.56-1
+- Update to 1.56 (rhbz#2303862)
+  - Yet another strict/comment_str conflict (GH#57)
+  - Strict affected by column_names
+
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.55-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Tue Jun 18 2024 Paul Howarth <paul@city-fan.org> - 1.55-1
+- Update to 1.55 (rhbz#2292859)
+  - More fixes for strict under bind_columns (GH#54)
+  - Strict won't hide previous error (GH#56)
+  - Update to Devel::PPPort-3.72
+
+* Mon Jun 10 2024 Jitka Plesnikova <jplesnik@redhat.com> - 1.54-2
+- Perl 5.40 rebuild
+
+* Fri Apr 19 2024 Paul Howarth <paul@city-fan.org> - 1.54-1
+- Update to 1.54 (rhbz#2275976)
+  - It's 2024
+  - Fix comment_str with strict
+  - Documentation fixes (CPAN RT#150757, CPAN RT#151546)
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.53-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.53-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Nov 23 2023 Paul Howarth <paul@city-fan.org> - 1.53-1
+- Update to 1.53 (rhbz#2251219)
+  - Two casts for -Wformat (GH#50)
+  - Add --skip-empty to csv2xlsx
+  - Add --font and --font-size to csv2xlsx
+  - Fix skip_empty_rows ("skip") and trailing newlines (GH#52)
+  - Fix comment in last line (CPAN RT#150501)
+
+* Thu Sep 21 2023 Paul Howarth <paul@city-fan.org> - 1.52-1
+- Update to 1.52 (rhbz#2240080)
+  - Fix possible coredump in cache on non-IO parse (GH#49)
+
+* Tue Aug  8 2023 Paul Howarth <paul@city-fan.org> - 1.51-1
+- Update to 1.51 (rhbz#2229806)
+  - Contact e-mail update
+  - Attribute skip_empty_rows extended
+  - Fix comments (GH#45)
+  - Fix help (GH#46)
+  - Update to Devel::PPPort-3.71
+  - Fix HTML on Windows
+  - Fix double header-interpretation on bom + headers => "auto" (GH#47)
+
+* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.50-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Tue Jul 11 2023 Jitka Plesnikova <jplesnik@redhat.com> - 1.50-2
+- Perl 5.38 rebuild
+
+* Wed Mar  1 2023 Paul Howarth <paul@city-fan.org> - 1.50-1
+- Update to 1.50 (rhbz#2174402)
+  - Promote sep to sep_set in csv() with auto-headers
+  - Fix bug in set_diag surfaced by PERL_RC_STACK
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.49-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Tue Jan  3 2023 Paul Howarth <paul@city-fan.org> - 1.49-1
+- Update to 1.49
+  - csv2xlsx --split=CxP [--split-label=C]
+  - Full documentation/manual for csv2xlsx
+  - Fix non-integer arguments to getline_all (GH#39)
+  - It's 2023
+- Use SPDX-format license tag
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.48-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.48-2
+- Perl 5.36 rebuild
+
+* Wed May 25 2022 Paul Howarth <paul@city-fan.org> - 1.48-1
+- Update to 1.48
+  - It's 2022
+  - kh => 1 (use internal headers)
+  - Add constants for META flags (CPAN RT#142508)
+  - Update to Devel::PPPort-3.68
+  - Export :CONSTANTS
+  - Fix sep_set typo (GH#37)
+  - Tested against perl-5.36.0
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.47-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Wed Dec 22 2021 Paul Howarth <paul@city-fan.org> - 1.47-1
+- Update to 1.47
+  - Make error 2014 catchable
+  - Suppress empty lines on empty input (GH#34)
+  - Perl 6 → Raku in docs (CPAN RT#136864)
+  - IETF changed their URLs
+  - Add some documentation for Google hist
+
+* Fri Jul 23 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.46-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 1.46-2
+- Perl 5.34 rebuild
+
+* Wed Mar 24 2021 Paul Howarth <paul@city-fan.org> - 1.46-1
+- Update to 1.46
+  - It's 2021
+  - New attribute comment_str (RFC 4180-bis)
+  - New attribute skip_empty_rows (RFC 4180-bis)
+  - http → https in links in docs
+  - Fix several issues with auto-detecting \r as EOL
+  - Tested on perl-5.6.1 .. perl-5.32.1 and perl-5.33.8 (145)
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.45-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Thu Dec 24 2020 Paul Howarth <paul@city-fan.org> - 1.45-1
+- Update to 1.45
+  - Update to Devel::PPPort-3.62
+  - Allow adding to existing data in csv (out => $ref)
+  - examples/csv2xlsx: -L # to limit records to export
+  - examples/csv2xlsx: --de # for possible double-encoding fix
+  - examples/csv2xlsx: Check if .xlsx is creatable before conversion
+  - Add examples/csv-split
+  - Small documentation additions
+  - Fix META issue for bug tracker
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.44-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Thu Jul 23 2020 Paul Howarth <paul@city-fan.org> - 1.44-1
+- Update to 1.44
+  - EBCDIC now fully functional
+  - Prevent false negative CPANTESTERS fail reports
+  - Fully tested on perl-5.32.0 and perl-5.33.0
+  - Fix partly decoded fields in header
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 1.43-2
+- Perl 5.32 rebuild
+
+* Wed May 27 2020 Paul Howarth <paul@city-fan.org> - 1.43-1
+- Update to 1.43
+  - Add --parser-opt[=value] to csv-check
+  - Add -L and -X to csv-check
+  - Fix undef value in attribute setters for strings (GH#24)
+  - Document quote (undef) is not supported
+
+* Tue May 19 2020 Paul Howarth <paul@city-fan.org> - 1.42-1
+- Update to 1.42
+  - Update to Devel::PPPort-3.58
+  - Unicode fixes for csv2xls and csv2xlsx
+  - Add internal buffers to cache diagnostics
+  - Fix positional reporting in examples/csv-check
+  - Allow passing CSV parsing attributes to csv-check
+  - Proof reading - doc fixes by Klaus Baldermann <soonix> (GH#21)
+  - Fix type caching (CPAN RT#132344)
+  - Small doc fix by Nick Tonkin <1nickt> (GH#22)
+  - Fix sep=; being ignored in ->header (GH#23)
 
 * Sun Feb 16 2020 Paul Howarth <paul@city-fan.org> - 1.41-1
 - Update to 1.41

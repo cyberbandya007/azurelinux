@@ -4,55 +4,42 @@
 %else
 %bcond_with java
 %endif
-Summary:        A general purpose library and file format for storing scientific data
-Name:           hdf
-Version:        4.2.15
-Release:        13%{?dist}
-License:        BSD
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
-URL:            https://portal.hdfgroup.org/
-Source0:        https://support.hdfgroup.org/ftp/HDF/releases/HDF%{version}/src/%{name}-%{version}.tar.bz2
-Source1:        h4comp
-Patch1:         hdf-ppc.patch
-Patch2:         hdf-4.2.4-sparc.patch
-Patch3:         hdf-s390.patch
-Patch4:         hdf-arm.patch
+
+Name: hdf
+Version: 4.2.16.2
+Release: 2%{?dist}
+Summary: A general purpose library and file format for storing scientific data
+License: BSD
+URL: https://portal.hdfgroup.org/
+Source0: https://hdf-wordpress-1.s3.amazonaws.com/wp-content/uploads/manual/HDF4/HDF4.2.16-2/src/hdf-4.2.16-2.tar.bz2
+Source1: h4comp
+# Fix type - https://github.com/HDFGroup/hdf4/pull/496
+Patch1: hdf-type.patch
 # Support DESTDIR in install-examples
-Patch5:         hdf-destdir.patch
+Patch5: hdf-destdir.patch
 # Install examples into the right location
-Patch6:         hdf-examplesdir.patch
-# Add AArch64 definitions
-Patch8:         hdf-aarch64.patch
-# ppc64le support
-# https://bugzilla.redhat.com/show_bug.cgi?id=1134385
-Patch9:         hdf-ppc64le.patch
+Patch6: hdf-examplesdir.patch
 # Fix java build
-Patch11:        hdf-build.patch
-BuildRequires:  %{!?el6:libaec-devel}
+Patch11: hdf-build.patch
+
 # For destdir/examplesdir patches
-BuildRequires:  automake
-BuildRequires:  byacc
-BuildRequires:  chrpath
-BuildRequires:  flex
-BuildRequires:  gcc
-BuildRequires:  gcc-c++
-BuildRequires:  gcc-gfortran
-BuildRequires:  hamcrest
-BuildRequires:  junit
-BuildRequires:  libjpeg-devel
-BuildRequires:  libtirpc-devel
-BuildRequires:  libtool
-BuildRequires:  make
-BuildRequires:  slf4j
-BuildRequires:  zlib-devel
-Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
+BuildRequires: automake, libtool, gcc, gcc-c++
+BuildRequires: chrpath
+BuildRequires: flex byacc libjpeg-devel zlib-devel %{!?el6:libaec-devel}
+BuildRequires: libtirpc-devel
+BuildRequires: gcc-gfortran, gcc
 %if %{with java}
-BuildRequires:  java-devel
-BuildRequires:  javapackages-tools
+BuildRequires: java-devel
+BuildRequires: javapackages-tools
+BuildRequires: hamcrest
+BuildRequires: junit
+BuildRequires: slf4j
 %else
-Obsoletes:      java-hdf < %{version}-%{release}
+Obsoletes:     java-hdf < %{version}-%{release}
 %endif
+BuildRequires: make
+Requires: %{name}-libs%{?_isa} = %{version}-%{release}
+
 
 %description
 HDF4 is a general purpose library and file format for storing scientific data.
@@ -63,35 +50,39 @@ objects, one can create and store almost any kind of scientific data
 structure, such as images, arrays of vectors, and structured and unstructured
 grids. You can also mix and match them in HDF4 files according to your needs.
 
+
 %package devel
-Summary:        HDF4 development files
-Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
-Requires:       libjpeg-devel%{?_isa}
-Requires:       libtirpc-devel%{?_isa}
-Requires:       zlib-devel%{?_isa}
-Provides:       %{name}-static = %{version}-%{release}
+Summary: HDF4 development files
+Provides: %{name}-static = %{version}-%{release}
+Requires: %{name}-libs%{?_isa} = %{version}-%{release}
+Requires: libjpeg-devel%{?_isa}
+Requires: libtirpc-devel%{?_isa}
+Requires: zlib-devel%{?_isa}
 
 %description devel
 HDF4 development headers and libraries.
 
+
 %package libs
-Summary:        HDF4 shared libraries
+Summary: HDF4 shared libraries
 
 %description libs
 HDF4 shared libraries.
 
+
 %package static
-Summary:        HDF4 static libraries
-Requires:       %{name}-devel = %{version}-%{release}
+Summary: HDF4 static libraries
+Requires: %{name}-devel = %{version}-%{release}
 
 %description static
 HDF4 static libraries.
 
+
 %if %{with java}
 %package -n java-hdf
-Summary:        HDF4 java library
-Requires:       slf4j
-Obsoletes:      jhdf < 3.3.1-2
+Summary: HDF4 java library
+Requires:  slf4j
+Obsoletes: jhdf < 3.3.1-2
 
 %description -n java-hdf
 HDF4 java library
@@ -99,31 +90,44 @@ HDF4 java library
 
 
 %prep
-%autosetup -p1 -S gendiff
+%setup -q -n hdf-4.2.16-2
+
+%patch -P 1 -p1 -b .type
+%patch -P 5 -p1 -b .destdir
+%patch -P 6 -p1 -b .examplesdir
+%patch -P 11 -p1 -b .build
 
 %if %{with java}
 # Replace jars with system versions
 # hamcrest-core is obsoleted in hamcrest-2.2
 # Junit tests are failing with junit-4.13.1
+%if 0%{?rhel} >= 9 || 0%{?fedora}
+find . ! -name junit.jar -name "*.jar" -delete
+ln -s $(build-classpath hamcrest) java/lib/hamcrest-core.jar
+%else
 find . -name "*.jar" -delete
-ln -s %{_javadir}/hamcrest/core.jar java/lib/hamcrest-core.jar
-ln -s %{_javadir}/junit.jar java/lib/junit.jar
+ln -s $(build-classpath hamcrest/core) java/lib/hamcrest-core.jar
+ln -s $(build-classpath junit) java/lib/junit.jar
 # Fix test output
-junit_ver=$(sed -n '/<version>/{s/^.*>\([0-9]\.[0-9.]*\)<.*/\1/;p;q}' %{_datadir}/maven-poms/junit.pom)
+junit_ver=$(sed -n '/<version>/{s/^.*>\([0-9]\.[0-9.]*\)<.*/\1/;p;q}' /usr/share/maven-poms/junit.pom)
 sed -i -e "s/JUnit version .*/JUnit version $junit_ver/" java/test/testfiles/JUnit-*.txt
-ln -s %{_javadir}/slf4j/api.jar java/lib/slf4j-api-1.7.25.jar
-ln -s %{_javadir}/slf4j/nop.jar java/lib/ext/slf4j-nop-1.7.25.jar
-ln -s %{_javadir}/slf4j/simple.jar java/lib/ext/slf4j-simple-1.7.25.jar
+%endif
+ln -s $(build-classpath slf4j/api) java/lib/slf4j-api-1.7.33.jar
+ln -s $(build-classpath slf4j/nop) java/lib/ext/slf4j-nop-1.7.33.jar
+ln -s $(build-classpath slf4j/simple) java/lib/ext/slf4j-simple-1.7.33.jar
 %endif
 
 find . -type f -name "*.h" -exec chmod 0644 '{}' \;
 find . -type f -name "*.c" -exec chmod 0644 '{}' \;
 
 # restore include file timestamps modified by patching
-touch -c -r ./hdf/src/hdfi.h.1 ./hdf/src/hdfi.h
+#touch -c -r ./hdf/src/hdfi.h.ppc ./hdf/src/hdfi.h
 
 
 %build
+# This should be removed once rebased to an upstream version with
+# C99 compatibility fixes (bug 2167466).
+#global build_type_safety_c 0
 
 # For destdir/examplesdir patches
 autoreconf -vif
@@ -133,7 +137,7 @@ rm config/*linux-gnu
 
 # TODO: upstream fix
 # libmfhdf.so is link to libdf.so
-export CFLAGS="%{optflags} -I%{_includedir}/tirpc"
+export CFLAGS="%{optflags} -I%{_usr}/include/tirpc"
 export LIBS="-ltirpc"
 %global _configure ../configure
 # Java test needs this but doesn't create it
@@ -150,8 +154,10 @@ cd build-static
 # Java requires shared libraries, fortran requires static
 
 # Temporary workaround for compiling on GCC-10
+%if 0%{?fedora} || 0%{?rhel} > 8
 export FCFLAGS="%{build_fflags} -fallow-argument-mismatch"
 export FFLAGS="%{build_fflags} -fallow-argument-mismatch"
+%endif
 %configure --disable-production --disable-java --disable-netcdf \
  --enable-shared=no --enable-static=yes --enable-fortran %{!?el6:--with-szlib} \
  --includedir=%{_includedir}/%{name}
@@ -170,10 +176,10 @@ touch -c -r mfhdf/fortran/mffunc.inc mfhdf/fortran/mffunc.f90
 %make_install -C build-shared
 chrpath --delete --keepgoing %{buildroot}%{_bindir}/* %{buildroot}%{_libdir}/%{name}/*.so.* %{buildroot}%{_libdir}/*.so.* || :
 
-install -pm 644 MANIFEST README.txt release_notes/*.txt %{buildroot}%{_pkgdocdir}/
+#install -pm 644 README.txt release_notes/*.txt %{buildroot}%{_pkgdocdir}/
 
-find %{buildroot} -type f -name "*.la" -delete -print
-find %{buildroot} -type f -name "*.la" -delete -print
+rm -f %{buildroot}%{_libdir}/%{name}/*.la
+rm -f %{buildroot}%{_libdir}/*.la
 
 #Don't conflict with netcdf
 for file in ncdump ncgen; do
@@ -182,49 +188,38 @@ for file in ncdump ncgen; do
   rm %{buildroot}%{_mandir}/man1/${file}.1
 done
 
-# this is done to have the same timestamp on multiarch setups
-touch -c -r README.txt %{buildroot}%{_includedir}/hdf/h4config.h
-
-# Remove an autoconf conditional from the API that is unused and cause
-# the API to be different on x86 and x86_64
-pushd %{buildroot}%{_includedir}/hdf
-grep -v 'H4_SIZEOF_INTP' h4config.h > h4config.h.tmp
-touch -c -r h4config.h h4config.h.tmp
-mv h4config.h.tmp h4config.h
-popd
-
 #Fixup headers and scripts for multiarch
 %if "%{_lib}" == "lib64"
-#sed -i -e s/H5pubconf.h/H5pubconf-64.h/ %{buildroot}%{_includedir}/H5public.h
-#mv %{buildroot}%{_includedir}/H5pubconf.h \
-   #%{buildroot}%{_includedir}/H5pubconf-64.h
 for x in h4cc h4fc
 do
   mv %{buildroot}%{_bindir}/${x} \
      %{buildroot}%{_bindir}/${x}-64
-  install -m 0755 %{SOURCE1} %{buildroot}%{_bindir}/${x}
+  install -m 0755 %SOURCE1 %{buildroot}%{_bindir}/${x}
 done
 %else
-#sed -i -e s/H5pubconf.h/H5pubconf-32.h/ %{buildroot}%{_includedir}/H5public.h
-#mv %{buildroot}%{_includedir}/H5pubconf.h \
-   #%{buildroot}%{_includedir}/H5pubconf-32.h
 for x in h4cc h4fc
 do
   mv %{buildroot}%{_bindir}/${x} \
      %{buildroot}%{_bindir}/${x}-32
-  install -m 0755 %{SOURCE1} %{buildroot}%{_bindir}/${x}
+  install -m 0755 %SOURCE1 %{buildroot}%{_bindir}/${x}
 done
 %endif
 
 
 %check
+# https://github.com/HDFGroup/hdf4/issues/473
+%ifarch ppc64le s390x
+make -j1 -C build-shared check || :
+make -j1 -C build-static check || :
+%else
 make -j1 -C build-shared check
 make -j1 -C build-static check
+%endif
 
 
 %files
 %license COPYING
-%{_pkgdocdir}/
+%doc README.md release_notes/*.txt
 %exclude %{_pkgdocdir}/examples
 %{_bindir}/*
 %exclude %{_bindir}/h4?c*
@@ -252,9 +247,26 @@ make -j1 -C build-static check
 
 
 %changelog
-* Thu Aug 10 2023 Archana Choudhary <archana1@microsoft.com> - 4.2.15-13
-- Initial CBL-Mariner import from Fedora 37 (license: MIT).
-- License verified.
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.2.16.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Tue Jan 30 2024 Orion Poplawski <orion@nwra.com> - 4.2.16.2-1
+- Update to 4.2.16-2
+
+* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.2.15-16
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sat Jan 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.2.15-15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Tue Aug 29 2023 Florian Weimer <fweimer@redhat.com> - 4.2.15-14
+- Set build_type_safety_c to 0 (#2167466)
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 4.2.15-13
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 4.2.15-12
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
 
 * Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 4.2.15-11
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild

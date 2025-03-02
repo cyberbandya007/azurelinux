@@ -1,0 +1,61 @@
+From 48b8f318e0594d7adfec290ae47d9308eb0f65af Mon Sep 17 00:00:00 2001
+From: Tony Asleson <tasleson@redhat.com>
+Date: Thu, 26 Mar 2020 13:07:45 -0500
+Subject: [PATCH 03/12] nvmetcli: Improve IOError handling on restore
+
+Not all IOErrors are caused by specifying a missing configuration
+file.  When the file is present, dump the error exception text too,
+so the user has a better idea what is wrong.
+
+Signed-off-by: Tony Asleson <tasleson@redhat.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ nvmetcli | 19 +++++++++++++++----
+ 1 file changed, 15 insertions(+), 4 deletions(-)
+
+diff --git a/nvmetcli b/nvmetcli
+index 3d8c16e..a646232 100755
+--- a/nvmetcli
++++ b/nvmetcli
+@@ -24,6 +24,7 @@ import os
+ import sys
+ import configshell_fb as configshell
+ import nvmet as nvme
++import errno
+ from string import hexdigits
+ import uuid
+ 
+@@ -674,16 +675,26 @@ def save(to_file):
+ 
+ 
+ def restore(from_file):
++    errors = None
++
+     try:
+         errors = nvme.Root().restore_from_file(from_file)
+-    except IOError:
+-        # Not an error if the restore file is not present
+-        print("No saved config file at %s, ok, exiting" % from_file)
+-    sys.exit(0)
++    except IOError as e:
++        if e.errno == errno.ENOENT:
++            # Not an error if the restore file is not present
++            print("No saved config file at %s, ok, exiting" % from_file)
++            sys.exit(0)
++        else:
++            print("Error processing config file at %s, error %s, exiting" %
++                  (from_file, str(e)))
++            sys.exit(1)
+ 
++    # These errors are non-fatal
+     for error in errors:
+         print(error)
+ 
++    sys.exit(0)
++
+ 
+ def clear(unused):
+     nvme.Root().clear_existing()
+-- 
+2.29.2
+

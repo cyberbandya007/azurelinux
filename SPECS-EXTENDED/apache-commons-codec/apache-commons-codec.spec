@@ -7,7 +7,7 @@ Summary:        Implementations of common encoders and decoders
 License:        Apache-2.0
 URL:            https://commons.apache.org/codec/
 BuildArch:      noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 
 Source0:        https://archive.apache.org/dist/commons/codec/source/commons-codec-%{version}-src.tar.gz
 # Data in DoubleMetaphoneTest.java originally has an inadmissible license.

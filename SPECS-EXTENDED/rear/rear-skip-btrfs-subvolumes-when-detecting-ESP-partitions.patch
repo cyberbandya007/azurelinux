@@ -1,0 +1,62 @@
+From c8409e1f2972e9cd87d9390ca0b52b908d1a872a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Luk=C3=A1=C5=A1=20Zaoral?= <lzaoral@redhat.com>
+Date: Wed, 20 Mar 2024 12:22:46 +0100
+Subject: [PATCH] skip btrfs subvolumes when detecting ESP partitions
+
+The idea is to find all direct partitions that contain the ESP
+mount point and to skip all other transitive `fs:` dependencies.
+
+The `diskdeps.conf` file contains following entries on default Fedora
+installations (the list was shortened to only the relevant ones):
+```
+/dev/vda1 /dev/vda
+/dev/vda4 /dev/vda
+/dev/vda5 /dev/vda
+fs:/boot/efi /dev/vda1
+fs:/boot/efi fs:/boot
+fs:/boot/efi fs:/
+fs:/boot/efi btrfsmountedsubvol:/
+fs:/boot /dev/vda4
+fs:/boot fs:/
+fs:/boot btrfsmountedsubvol:/
+fs:/ /dev/vda5
+btrfsmountedsubvol:/ /dev/vda5
+```
+
+The ESP partition is only on `/dev/vda1`.  However, the `find_partition` call
+was not taking into account the need to skip mounted btrfs subvolumes as well.
+Therefore, `/dev/vda5` was listed as an ESP partition as well.
+
+This change makes sure that only direct ESP partitions are listed and
+fixes a bug where ReaR would create broken BootXXXX entries which point to
+completely unrelated partitions.
+
+Relevant excerpts from logs:
+```
+++ efibootmgr --create --gpt --disk /dev/vda --part 1 --write-signature --label 'RedHatEnterpriseServer 41' --loader '\EFI\fedora\grubx64.efi'
+...
+++ efibootmgr --create --gpt --disk /dev/vda --part 5 --write-signature --label 'RedHatEnterpriseServer 41' --loader '\EFI\fedora\grubx64.efi'
+```
+---
+ usr/share/rear/finalize/Linux-i386/670_run_efibootmgr.sh | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/usr/share/rear/finalize/Linux-i386/670_run_efibootmgr.sh b/usr/share/rear/finalize/Linux-i386/670_run_efibootmgr.sh
+index 33d87767..8b658618 100644
+--- a/usr/share/rear/finalize/Linux-i386/670_run_efibootmgr.sh
++++ b/usr/share/rear/finalize/Linux-i386/670_run_efibootmgr.sh
+@@ -47,7 +47,10 @@ fi
+ # accounting for possible trailing slashes in TARGET_FS_ROOT
+ esp_mountpoint_inside="${esp_mountpoint#${TARGET_FS_ROOT%%*(/)}}"
+ 
+-boot_efi_parts=$( find_partition "fs:$esp_mountpoint_inside" fs )
++# Find all partitions with the ESP mount point and skip all other transitive
++# 'fs' and 'btrfsmountedsubvol' components in LAYOUT_DEPS (var/lib/rear/layout/diskdeps.conf)
++# to support ESP on software RAID (cf. https://github.com/rear/rear/pull/2608).
++boot_efi_parts=$( find_partition "fs:$esp_mountpoint_inside" 'btrfsmountedsubvol fs' )
+ if ! test "$boot_efi_parts" ; then
+     LogPrint "Unable to find ESP $esp_mountpoint_inside in layout"
+     LogPrint "Trying to determine device currently mounted at $esp_mountpoint as fallback"
+-- 
+2.44.0
+

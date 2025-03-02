@@ -1,5 +1,7 @@
 {
  "Signatures": {
-  "pulseaudio-16.1.tar.gz": "027266c62f2a84422ac45fa721a649508f0f1628fb1fd9242315ac54ce2d7c92"
+  "default.pa-for-gdm": "a18ea3a17bf1c52011cb15f500973946625586786ad8f7c7eec1808f80ffd939",
+  "pulseaudio-17.0.tar.xz": "053794d6671a3e397d849e478a80b82a63cb9d8ca296bd35b73317bb5ceb87b5",
+  "pulseaudio-17.0.tar.xz.sha256sum": "212ceacdec35abed7370b0f412f775b9b6784795daa4dc0953cbd18e3acc417e"
  }
 }

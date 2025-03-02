@@ -1,15 +1,16 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+# rmpbuild parameters:
+# --with docs: Build pre-generated documentation.
+
 %global __cmake_in_source_build 1
 
 Name: libipt
-Version: 2.0.5
-Release: 1%{?dist}
+Version: 2.1.1
+Release: 2%{?dist}
 Summary: Intel Processor Trace Decoder Library
-License: BSD
+License: BSD-3-Clause
 URL: https://github.com/intel/libipt
-Source0: https://github.com/intel/libipt/archive/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
-Patch0: libipt-gcc11.patch
+Source0: https://github.com/intel/libipt/archive/v%{version}.tar.gz
+Source1: doc-v%{version}.tar.xz
 # c++ is required only for -DPTUNIT test "ptunit-cpp".
 BuildRequires: gcc-c++ cmake
 %if 0%{?_with_docs:1}
@@ -37,7 +38,6 @@ develop programs that use the Intel Processor Trace (Intel PT) Decoder Library.
 
 %prep
 %setup -q -n libipt-%{version}
-%patch 0 -p1
 
 %build
 %cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
@@ -54,6 +54,16 @@ develop programs that use the Intel Processor Trace (Intel PT) Decoder Library.
 %global develdocs howto_libipt.md
 (cd doc;cp -p %{develdocs} ..)
 
+# If not building documentation, copy the pre-generated man pages
+# to the appropriate place. Otherwise, tar up the generated
+# documentation for use in subsequent builds.
+%if 0%{?_with_docs:1}
+(cd $RPM_BUILD_ROOT%{_mandir}/..; %__tar cJf %{SOURCE1} .)
+%else
+mkdir -p $RPM_BUILD_ROOT%{_mandir}
+(cd $RPM_BUILD_ROOT%{_mandir}/..; %__tar xJf %{SOURCE1})
+%endif
+
 %check
 ctest -V %{?_smp_mflags}
 
@@ -66,18 +76,77 @@ ctest -V %{?_smp_mflags}
 %doc %{develdocs}
 %{_includedir}/*
 %{_libdir}/%{name}.so
-%if 0%{?_with_docs:1}
 %{_mandir}/*/*.gz
-%endif
 
 %changelog
-* Fri Mar 04 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 2.0.5-1
-- Updating to version 2.0.5 using Fedora 36 spec (license: MIT) for guidance.
-- License verified.
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.1.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Thu Jun 17 2021 Thomas Crain <thcrain@microsoft.com> - 2.0.1-3
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
-- Conditionalize building of documentation
+* Fri Mar  8 2024 Keith Seitz <keiths@redhat.com> - 2.1.1-1
+- Update to v2.1.1.
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Wed Oct 18 2023 Keith Seitz <keiths@redhat.com> - 2.1-1
+- Update to v2.1.
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.6-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jul 06 2023 Keith Seitz <keiths@redhat.com> - 2.0.6-1
+- Import v2.0.6 and regenerate documentation.
+
+* Tue Mar 07 2023 Keith Seitz <keiths@redhat.com>
+- migrated to SPDX license
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.5-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.5-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Jan 27 2022 Keith Seitz <keiths@redhat.com> - 2.0.5-1
+- Import v2.0.5 and regenerate documentation.
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.4-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.4-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Mar 30 2021 Keith Seitz <keiths@redhat.com> - 2.0.4-2
+- Add support for pre-generated documenation, allowing removal
+  of pandoc dependency. (RHBZ 1943531, Keith Seitz)
+
+* Wed Mar 10 2021 Kevin Buettner <kevinb@redhat.com> - 2.0.4-1
+- Release v2.0.4.
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.2-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Wed Aug 19 2020 Jeff Law <law@redhat.com> - 2.0.2-2
+- Fix uninitialized variable in testsuite
+
+* Tue Aug 04 2020 Keith Seitz <keiths@redhat.com> - 2.0.2-1
+- Upgrade to 2.0.2.
+
+* Sat Aug 01 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.1-6
+- Second attempt - Rebuilt for
+  https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.1-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Fri Jul 24 2020 Jeff Law <law@redhat.com> - 2.0.1-4
+- Use __cmake_in_source_build
+
+* Wed Jul 22 2020 Tom Stellard <tstellar@redhat.com> - 2.0.1-3
+- Use make macros
+- https://fedoraproject.org/wiki/Changes/UseMakeBuildInstallMacro
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

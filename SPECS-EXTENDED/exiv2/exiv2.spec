@@ -1,25 +1,49 @@
+## START: Set by rpmautospec
+## (rpmautospec version 0.7.2)
+## RPMAUTOSPEC: autorelease, autochangelog
+%define autorelease(e:s:pb:n) %{?-p:0.}%{lua:
+    release_number = 1;
+    base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
+    print(release_number + base_release_number - 1);
+}%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{!?-n:%{?dist}}
+## END: Set by rpmautospec
 
-Summary:        Exif and Iptc metadata manipulation library
 Name:           exiv2
-Version:        0.28.0
-Release:        1%{?dist}
-License:        GPLv2+
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+Version:        0.28.3
+Release:        %autorelease
+Summary:        Exif and Iptc metadata manipulation library
+
+# GPL-2.0-or-later: main library
+# BSD-3-Clause: xmpsdk/ 
+# LicenseRef-Fedora-Public-Domain:
+#  - app/getopt.cpp
+#  - src/properties.cpp
+#  - src/tzfile.h
+#  - xmpsdk/include/MD5.h
+#  - xmpsdk/src/MD5.cpp
+License:        GPL-2.0-or-later AND BSD-3-Clause AND LicenseRef-Fedora-Public-Domain
 URL:            http://www.exiv2.org/
-Source0:        https://github.com/Exiv2/exiv2/archive/refs/tags/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
+VCS:            https://github.com/Exiv2/exiv2/
+%if 0%{?beta:1}
+Source:         %{vcs}/archive/v%{version}-%{beta}/%{name}-%{version}-%{beta}.tar.gz
+%else
+Source:         %{vcs}/archive/v%{version}/%{name}-%{version}.tar.gz
+%endif
+
 BuildRequires:  cmake
-BuildRequires:  curl-devel
-BuildRequires:  doxygen
-BuildRequires:  expat-devel
 BuildRequires:  gcc-c++
 BuildRequires:  gettext
+BuildRequires:  pkgconfig
+BuildRequires:  pkgconfig(expat)
+BuildRequires:  pkgconfig(INIReader)
+BuildRequires:  pkgconfig(libbrotlidec)
+BuildRequires:  pkgconfig(zlib)
+# docs
+BuildRequires:  doxygen
 BuildRequires:  graphviz
-BuildRequires:  libssh2-devel
 BuildRequires:  libxslt
-BuildRequires:  zlib-devel
-BuildRequires:  inih-devel
-Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
+
+Requires:       %{name}-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description
 A command line utility to access image metadata, allowing one to:
@@ -33,54 +57,69 @@ A command line utility to access image metadata, allowing one to:
 * extract, insert and delete Exif metadata (including thumbnails),
   Iptc metadata and Jpeg comments
 
+
 %package      devel
-Summary:        Header files, libraries and development documentation for %{name}
-Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
-# FIXME/TODO: probably overlinking --rex
-# exiv2/exiv2Config.cmake:  INTERFACE_LINK_LIBRARIES "/usr/lib64/libexpat.so"
-Requires:       expat-devel%{?_isa}
+Summary:      Header files, libraries and development documentation for %{name}
+Requires:     %{name}-libs%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description  devel
 %{summary}.
 
+
 %package      libs
-Summary:        Exif and Iptc metadata manipulation library
-Recommends:     %{name} = %{version}-%{release}
+Summary:      Exif and Iptc metadata manipulation library
+# not strictly required, but convenient and expected
+%if 0%{?rhel} && 0%{?rhel} <= 7
+Requires:     %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+%else
+Recommends:   %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+%endif
 
 %description  libs
 A C++ library to access image metadata, supporting full read and write access
 to the Exif and Iptc metadata, Exif MakerNote support, extract and delete
 methods for Exif thumbnails, classes to access Ifd and so on.
 
+
 %package      doc
-Summary:        Api documentation for %{name}
-BuildArch:      noarch
+Summary:      API documentation for %{name}
+# MIT:
+# - clipboard.js
+# - cookie.js
+# - dynsections.js
+# - jquery.js
+# - menu.js
+# - menudata.js
+# - resize.js
+# GPL-2.0-only:
+# - css and icons from Doxygen
+License:      MIT AND GPL-2.0-only
+BuildArch:    noarch
 
 %description  doc
 %{summary}.
 
+API documentation for %{name}.
+
+
 %prep
-%autosetup -p1
+%autosetup -n %{name}-%{version}%{?beta:-%{beta}} -p1
+
 
 %build
-
-%{cmake} . \
+%cmake \
   -DCMAKE_INSTALL_DOCDIR="%{_pkgdocdir}" \
   -DEXIV2_BUILD_DOC:BOOL=ON \
-  -DEXIV2_ENABLE_NLS:BOOL=ON \
-  -DEXIV2_BUILD_SAMPLES:BOOL=OFF
-
-%make_build
-%make_build doc
+  -DEXIV2_BUILD_SAMPLES:BOOL=OFF \
+  -DEXIV2_ENABLE_NLS:BOOL=ON
+%cmake_build
+%cmake_build --target doc
 
 
 %install
-make install/fast DESTDIR=%{buildroot}
-
+%cmake_install
 %find_lang exiv2 --with-man
 
-## unpackaged files
-rm -fv %{buildroot}%{_libdir}/libexiv2.la
 
 %check
 export PKG_CONFIG_PATH="%{buildroot}%{_libdir}/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
@@ -90,47 +129,115 @@ test -x %{buildroot}%{_libdir}/libexiv2.so
 
 
 %files -f exiv2.lang
-%license COPYING
-%doc doc/ChangeLog
-# README is mostly installation instructions
-#doc README.md
+%license COPYING doc/COPYING-XMPSDK
+%doc doc/ChangeLog exiv2.md SECURITY.md
 %{_bindir}/exiv2
 %{_mandir}/man1/exiv2*.1*
 
-%ldconfig_scriptlets libs
 
 %files libs
 %{_libdir}/libexiv2.so.28*
 %{_libdir}/libexiv2.so.%{version}
 
+
 %files devel
 %{_includedir}/exiv2/
+%{_libdir}/cmake/exiv2/
 %{_libdir}/libexiv2.so
 %{_libdir}/pkgconfig/exiv2.pc
-%{_libdir}/cmake/exiv2/
+
 
 %files doc
 %{_pkgdocdir}/
 
 
 %changelog
-* Mon Sep 18 2023 Muhammad Falak R Wani <mwani@microsoft.com> - 0.28.0-1
-- Upgrade version to address 24 CVE:
-  CVE-2019-13504, CVE-2019-17402, CVE-2019-20421, 
-  CVE-2021-3482, CVE-2021-29457, CVE-2021-29458, 
-  CVE-2021-29463, CVE-2021-29464, CVE-2021-29470,
-  CVE-2021-29473, CVE-2021-29623, CVE-2021-32617,
-  CVE-2021-32815, CVE-2021-34334, CVE-2021-34335,
-  CVE-2021-37615, CVE-2021-37616, CVE-2021-37617,
-  CVE-2021-37618, CVE-2021-37619, CVE-2021-37620,
-  CVE-2021-37621, CVE-2021-37622, CVE-2021-37623,
+## START: Generated by rpmautospec
+* Mon Aug 05 2024 Jan Grulich <jgrulich@redhat.com> - 0.28.3-1
+- 0.28.3
 
-* Thu Jun 09 2022 Jon Slobodzian <joslobo@microsoft.com> - 0.27.5-1
-- Fixing CVEs
-- License Verified.
+* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.28.2-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.27.2-3
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jun 13 2024 Robert-André Mauchin <zebob.m@gmail.com> - 0.28.2-4
+- Fix sources file
+
+* Thu Jun 13 2024 Robert-André Mauchin <zebob.m@gmail.com> - 0.28.2-3
+- Licensing reanalysis and correction
+
+* Thu Jun 13 2024 Robert-André Mauchin <zebob.m@gmail.com> - 0.28.2-2
+- Enable libjxl handling
+
+* Thu Jun 13 2024 Robert-André Mauchin <zebob.m@gmail.com> - 0.28.2-1
+- Update to 0.28.2
+
+
+* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.27.6-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jan 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.27.6-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Wed Jul 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.27.6-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Tue Jan 31 2023 Jan Grulich <jgrulich@redhat.com> - 0.27.6-1
+- 0.27.6
+- migrated to SPDX license
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.27.5-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.27.5-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.27.5-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Wed Oct 27 2021 Rex Dieter <rdieter@fedoraproject.org> - 0.27.5-1
+- 0.27.5 (final)
+
+* Mon Oct 04 2021 Rex Dieter <rdieter@fedoraproject.org> - 0.27.5-0.3.RC3
+- 0.27-5-RC3
+
+* Fri Sep 10 2021 Rex Dieter <rdieter@fedoraproject.org> - 0.27.5-0.2.RC2
+- 0.27.5-RC2 (#2003208)
+
+* Wed Aug 11 2021 Rex Dieter <rdieter@fedoraproject.org> - 0.27.5-0.1.RC1
+- 0.27.5-RC1 (#1992344)
+
+* Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.27.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri Jun 18 2021 Rex Dieter <rdieter@fedoraproject.org> - 0.27.4-1
+- 0.27.4 (#1941230)
+
+* Tue May 25 2021 Jan Grulich <jgrulich@redhat.com> - 0.27.3-6
+- CVE-2021-29623 exiv2: a read of uninitialized memory may lead to information leak
+  CVE-2021-32617 exiv2: DoS due to quadratic complexity in ProcessUTF8Portion
+
+* Thu Apr 29 2021 Jan Grulich <jgrulich@redhat.com> - 0.27.3-6
+- CVE-2021-3482: Fix heap-based buffer overflow in Jp2Image::readMetadata()
+  CVE-2021-29458 exiv2: out-of-bounds read in Exiv2::Internal::CrwMap::encode
+  CVE-2021-29457 exiv2: heap-based buffer overflow in Exiv2::Jp2Image::doWriteMetadata
+  CVE-2021-29470 exiv2: out-of-bounds read in Exiv2::Jp2Image::encodeJp2Header
+  CVE-2021-29473 exiv2: out-of-bounds read in Exiv2::Jp2Image::doWriteMetadata
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.27.3-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Wed Aug 26 2020 Rex Dieter <rdieter@fedoraproject.org> - 0.27.3-4
+- support new cmake macro semantics
+
+* Sat Aug 01 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.27.3-3
+- Second attempt - Rebuilt for
+  https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.27.3-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jun 30 2020 Rex Dieter <rdieter@fedoraproject.org> - 0.27.3-1
+- 0.27.3
 
 * Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.27.2-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
@@ -376,3 +483,5 @@ test -x %{buildroot}%{_libdir}/libexiv2.so
 
 * Tue May 16 2006 Rex Dieter <rexdieter[AT]users.sf.net> 0.9.1-1
 - first try
+
+## END: Generated by rpmautospec

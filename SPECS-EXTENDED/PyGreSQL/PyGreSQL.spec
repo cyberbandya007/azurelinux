@@ -1,25 +1,31 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 %global srcname	PyGreSQL
+%global uversion 6.0.1
+
+%{!?runselftest:%global runselftest 1}
 
 Name:		%{srcname}
-Version:	5.2.2
+Version:	6.0.1
 Release:	3%{?dist}
 Summary:	Python client library for PostgreSQL
 
 URL:		http://www.pygresql.org/
-License:	PostgreSQL
+# Author states his intention is to dual license under PostgreSQL or Python
+# licenses --- this is not too clear from the current tarball documentation,
+# but hopefully will be clearer in future releases.
+# The PostgreSQL license is very similar to other MIT licenses, but the OSI
+# recognizes it as an independent license, so we do as well.
+License:	PostgreSQL or Python
 
-Source0:	https://github.com/PyGreSQL/%{name}/archive/%{version}/%{name}-%{version}.tar.gz
+Source0:	https://github.com/PyGreSQL/%{name}/archive/%{uversion}/%{name}-%{uversion}.tar.gz#/%{name}-%{uversion}.tar.gz
 
-BuildRequires:  gcc
+BuildRequires:	gcc
 BuildRequires:	libpq-devel
 BuildRequires:	python3-devel
+BuildRequires:	python3-setuptools
 
 # For testsuite
-%if 0%{?with_check}
-# Missing test dependencies:
-# BuildRequires:	postgresql-test-rpm-macros
+%if 0%{?runselftest:1}
+BuildRequires:	postgresql-test-rpm-macros
 %endif
 
 %global _description\
@@ -33,15 +39,15 @@ Python code for accessing a PostgreSQL database.
 Summary:	%summary
 %{?python_provide:%python_provide python3-pygresql}
 # Remove before F30
-Provides: python3-PyGreSQL = %{version}-%{release}
-Provides: python3-PyGreSQL%{?_isa} = %{version}-%{release}
-Obsoletes: python3-PyGreSQL < %{version}-%{release}
+Provides: python3-PyGreSQL = %{uversion}-%{release}
+Provides: python3-PyGreSQL%{?_isa} = %{uversion}-%{release}
+Obsoletes: python3-PyGreSQL < %{uversion}-%{release}
 
 %description -n python3-pygresql
 
 
 %prep
-%autosetup -n %{srcname}-%{version} -p1
+%autosetup -n %{srcname}-%{uversion} -p1
 
 # PyGreSQL releases have execute bits on all files
 find -type f -exec chmod 644 {} +
@@ -58,13 +64,22 @@ find -type f -exec chmod 644 {} +
 %files -n python3-pygresql
 %license docs/copyright.rst
 %doc docs/*.rst
-%{python3_sitearch}/*.so
-%{python3_sitearch}/*.py
-%{python3_sitearch}/__pycache__/*.py{c,o}
+%{python3_sitearch}/pg/*.so
+%{python3_sitearch}/pg/*.py
+%{python3_sitearch}/pg/__pycache__/*.py{c,o}
+%{python3_sitearch}/pg/py.typed
+%{python3_sitearch}/pg/_pg.pyi
+%{python3_sitearch}/pgdb/*.py
+%{python3_sitearch}/pgdb/__pycache__/*.py{c,o}
+%{python3_sitearch}/pgdb/py.typed
 %{python3_sitearch}/*.egg-info
 
 
 %check
+%if %runselftest == 0
+exit 0
+%endif
+
 %postgresql_tests_run
 
 cat > LOCAL_PyGreSQL.py <<EOF
@@ -75,23 +90,81 @@ dbhost = ''
 dbport = $PGPORT
 EOF
 
-%{__python3} setup.py test
+%{python3} setup.py test
 
 
 %changelog
-* Thu Aug 31 2023 Pawel Winogrodzki <pawelwi@microsoft.com> - 5.2.2-3
-- Disabling missing test dependency.
-- License verified.
+* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 6.0.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Sat Jul 24 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 5.2.2-2
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
-- Disabling BR on 'postgresql-test-rpm-macros' for non-test builds.
+* Fri Jun 07 2024 Python Maint <python-maint@redhat.com> - 6.0.1-2
+- Rebuilt for Python 3.13
+
+* Sun Apr 21 2024 Ondrej Sloup <osloup@redhat.com> - 6.0.1-1
+- Rebase to the latest upstream version (rhbz#2276157)
+
+* Fri Jan 26 2024 Ondrej Sloup <osloup@redhat.com> - 6.0-1
+- Rebase to the latest upstream version
+- Enable testsuite
+
+* Mon Jan 22 2024 Fedora Release Engineering <releng@fedoraproject.org> - 6.0~b1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jan 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 6.0~b1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Mon Sep 11 2023 Ondrej Sloup <osloup@redhat.com> - 6.0~b1-1
+- Rebase to the pre-release upstream version (rhbz#2237758)
+
+* Mon Sep 04 2023 Ondrej Sloup <osloup@redhat.com> - 5.2.5-1
+- Rebase to the latest upstream version (rhbz#2235341)
+
+* Wed Jul 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 5.2.4-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Tue Jun 13 2023 Python Maint <python-maint@redhat.com> - 5.2.4-5
+- Rebuilt for Python 3.12
+
+* Wed Jan 18 2023 Fedora Release Engineering <releng@fedoraproject.org> - 5.2.4-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Wed Jul 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 5.2.4-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Mon Jun 13 2022 Python Maint <python-maint@redhat.com> - 5.2.4-2
+- Rebuilt for Python 3.11
+
+* Thu May 05 2022 Ondrej Sloup <osloup@redhat.com> - 5.2.4-1
+- Fixed mixed spaces and tabs
+- Rebase to the latest upstream version (rhbz#2048322)
+
+* Wed Jan 19 2022 Fedora Release Engineering <releng@fedoraproject.org> - 5.2.2-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 5.2.2-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri Jun 04 2021 Python Maint <python-maint@redhat.com> - 5.2.2-4
+- Rebuilt for Python 3.10
+
+* Mon Feb 08 2021 Pavel Raiskup <praiskup@redhat.com> - 5.2.2-3
+- rebuild for libpq ABI fix rhbz#1908268
+
+* Mon Jan 25 2021 Fedora Release Engineering <releng@fedoraproject.org> - 5.2.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
 * Thu Dec 10 2020 Ondrej Dubaj <odubaj@redhat.com> - 5.2.2-1
 - rebase to the latest upstream version (rhbz#1906008)
 
 * Thu Oct 01 2020 Ondrej Dubaj <odubaj@redhat.com> - 5.2.1-1
 - rebase to the latest upstream version (rhbz#1882813)
+
+* Sat Aug 01 2020 Fedora Release Engineering <releng@fedoraproject.org> - 5.2-3
+- Second attempt - Rebuilt for
+  https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 5.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Wed Jul 15 2020 Patrik Novotný <panovotn@redhat.com> - 5.2-1
 - Rebase to upstream release 5.2

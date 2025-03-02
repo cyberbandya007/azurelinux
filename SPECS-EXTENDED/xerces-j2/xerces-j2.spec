@@ -33,7 +33,7 @@ Patch0:        %{name}-build.patch
 Patch1:        %{name}-manifest.patch
 
 BuildArch:     noarch
-ExclusiveArch: %{java_arches} noarch
+#ExclusiveArch: %{java_arches} noarch
 
 BuildRequires: javapackages-local
 BuildRequires: ant

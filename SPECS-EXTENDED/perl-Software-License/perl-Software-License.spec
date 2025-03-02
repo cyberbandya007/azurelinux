@@ -1,9 +1,9 @@
 # Run extra tests
-
+%if 0%{?fedora} || 0%{?rhel} > 6
 %bcond_without perl_Software_License_enables_extra_test
-
-
-
+%else
+%bcond_with perl_Software_License_enables_extra_test
+%endif
 # Run optional tests
 %if 0%{!?perl_bootstrap:1} && 0%{?fedora}
 %bcond_without perl_Software_License_enables_optional_test
@@ -12,14 +12,12 @@
 %endif
 
 Name:           perl-Software-License
-Version:        0.103014
-Release:        7%{?dist}
+Version:        0.104006
+Release:        2%{?dist}
 Summary:        Package that provides templated software licenses
-License:        GPL+ or Artistic
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/Software-License
-Source0:        https://cpan.metacpan.org/authors/id/L/LE/LEONT/Software-License-%{version}.tar.gz#/perl-Software-License-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/L/LE/LEONT/Software-License-%{version}.tar.gz
 BuildArch:      noarch
 # Module Build
 BuildRequires:  coreutils
@@ -27,7 +25,7 @@ BuildRequires:  findutils
 BuildRequires:  make
 BuildRequires:  perl-generators
 BuildRequires:  perl-interpreter
-BuildRequires:  perl(ExtUtils::MakeMaker)
+BuildRequires:  perl(ExtUtils::MakeMaker) >= 6.78
 # Module Runtime
 BuildRequires:  perl(Carp)
 BuildRequires:  perl(Data::Section)
@@ -53,8 +51,8 @@ BuildRequires:  perl(Software::License::CCpack)
 BuildRequires:  perl(Encode)
 BuildRequires:  perl(Test::Pod)
 %endif
-# Runtime
-Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
+# Dependencies
+# (none)
 
 %description
 Software-License contains templates for common open source software licenses.
@@ -63,26 +61,21 @@ Software-License contains templates for common open source software licenses.
 %setup -q -n Software-License-%{version}
 
 %build
-perl Makefile.PL INSTALLDIRS=vendor
-make %{?_smp_mflags}
+/usr/bin/perl Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1 NO_PERLLOCAL=1
+%{make_build}
 
 %install
-make pure_install DESTDIR=%{buildroot}
-find %{buildroot} -type f -name .packlist -delete
+%{make_install}
 %{_fixperms} -c %{buildroot}
 
 %check
-make test
+%{make_build} test
 %if %{with perl_Software_License_enables_extra_test}
-make test TEST_FILES="$(echo $(find xt/ -name '*.t'))"
+%{make_build} test TEST_FILES="$(echo $(find xt/ -name '*.t'))"
 %endif
 
 %files
-%if 0%{?_licensedir:1}
 %license LICENSE
-%else
-%doc LICENSE
-%endif
 %doc Changes README
 %{perl_vendorlib}/Software/
 %{_mandir}/man3/Software::License.3*
@@ -90,8 +83,89 @@ make test TEST_FILES="$(echo $(find xt/ -name '*.t'))"
 %{_mandir}/man3/Software::LicenseUtils.3*
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.103014-7
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.104006-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Sun Feb 11 2024 Emmanuel Seyman <emmanuel@seyman.fr> - 0.104006-1
+- Update to 0.104006
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.104005-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.104005-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Nov 26 2023 Emmanuel Seyman <emmanuel@seyman.fr> - 0.104005-1
+- Update to 0.104005
+- Use %%{make_build} and %%{make_install} where appropriate
+
+* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.104004-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Wed May 24 2023 Paul Howarth <paul@city-fan.org> - 0.104004-1
+- Update to 0.104004 (rhbz#2209461)
+  - Rename Perl Artistic License to avoid confusion in detecting license
+
+* Fri May 19 2023 Paul Howarth <paul@city-fan.org> - 0.104003-1
+- Update to 0.104003 (rhbz#2208530)
+  - Add Artistic 1.0 Perl license and make Perl license use it
+  - Remove extra "59" from LGPL-2.1
+- Use SPDX-format license tag
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.104002-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.104002-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Wed Jun 15 2022 Paul Howarth <paul@city-fan.org> - 0.104002-1
+- Update to 0.104002
+  - Add support for ISC license
+  - Add guesser for Apache license and no license
+- This release by LEONT ⇒ update source URL
+
+* Fri Jun 03 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.104001-4
+- Perl 5.36 re-rebuild of bootstrapped packages
+
+* Wed Jun 01 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.104001-3
+- Perl 5.36 rebuild
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.104001-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Tue Aug  3 2021 Paul Howarth <paul@city-fan.org> - 0.104001-1
+- Update to 0.104001
+  - Update the text of Artistic License 1.0 to match upstream source
+  - When using Apache 2.0, replace year and copyright holder
+  - Improve guessing at CC0
+  - Update author contact info
+  - Documentation tweaks about non-core licenses and the use of
+    guess_license_from_pod
+  - Add "program" and "Program" arguments; this allows text generation like
+    "CoolClient is license..." instead of "This software is..."
+- This release by RJBS ⇒ update source URL
+- Use %%license unconditionally
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.103014-13
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Mon May 24 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.103014-12
+- Perl 5.34 re-rebuild of bootstrapped packages
+
+* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.103014-11
+- Perl 5.34 rebuild
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.103014-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.103014-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Fri Jun 26 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.103014-8
+- Perl 5.32 re-rebuild of bootstrapped packages
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.103014-7
+- Perl 5.32 rebuild
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.103014-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

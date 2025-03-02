@@ -1,0 +1,1542 @@
+commit 8a10135bf958c03b4b5077fc7ae7761ad2a71eec
+Merge: eb574592 b496f860
+Author: pcahyna <pcahyna@users.noreply.github.com>
+Date:   Tue Jun 18 14:38:23 2024 +0200
+
+    Merge pull request #3242 from rmetrich/ipv6
+    
+    Fix IPv6 address support in OUTPUT_URL/BACKUP_URL
+
+    Cherry-picked-by: Lukáš Zaoral <lzaoral@redhat.com>
+
+diff --git a/usr/share/rear/backup/BLOCKCLONE/default/400_copy_disk_struct_files.sh b/usr/share/rear/backup/BLOCKCLONE/default/400_copy_disk_struct_files.sh
+index a5257278..dea78074 100644
+--- a/usr/share/rear/backup/BLOCKCLONE/default/400_copy_disk_struct_files.sh
++++ b/usr/share/rear/backup/BLOCKCLONE/default/400_copy_disk_struct_files.sh
+@@ -7,17 +7,17 @@ if [ -z "$BLOCKCLONE_SAVE_MBR_DEV" ]; then
+     return
+ fi
+ 
+-local backup_path=$( url_path $BACKUP_URL )
+-local opath=$(backup_path $scheme $path)
++local backup_path="$( url_path "$BACKUP_URL" )"
++local opath="$( backup_path "$scheme" "$path" )"
+ 
+ LogPrint "Copying $VAR_DIR/layout/$BLOCKCLONE_PARTITIONS_CONF_FILE to $opath"
+ 
+-cp $v $VAR_DIR/layout/$BLOCKCLONE_PARTITIONS_CONF_FILE $opath
++cp $v "$VAR_DIR/layout/$BLOCKCLONE_PARTITIONS_CONF_FILE" "$opath"
+ StopIfError "Failed to copy \
+ $VAR_DIR/layout/$BLOCKCLONE_PARTITIONS_CONF_FILE to $opath"
+ 
+ LogPrint "Copying $VAR_DIR/layout/$BLOCKCLONE_MBR_FILE to $opath"
+ 
+-cp $v $VAR_DIR/layout/$BLOCKCLONE_MBR_FILE $opath
++cp $v "$VAR_DIR/layout/$BLOCKCLONE_MBR_FILE" "$opath"
+ 
+ StopIfError "Failed to copy $VAR_DIR/layout/$BLOCKCLONE_MBR_FILE to $opath"
+diff --git a/usr/share/rear/backup/DUPLICITY/default/100_mount_duplicity_path.sh b/usr/share/rear/backup/DUPLICITY/default/100_mount_duplicity_path.sh
+index 6ba7d543..991cde86 100644
+--- a/usr/share/rear/backup/DUPLICITY/default/100_mount_duplicity_path.sh
++++ b/usr/share/rear/backup/DUPLICITY/default/100_mount_duplicity_path.sh
+@@ -3,7 +3,7 @@ if [ -n "$BACKUP_DUPLICITY_NETFS_URL" -o -n "$BACKUP_DUPLICITY_NETFS_MOUNTCMD" ]
+ 		BACKUP_DUPLICITY_NETFS_URL="var://BACKUP_DUPLICITY_NETFS_MOUNTCMD"
+ 	fi
+ 
+-	mount_url $BACKUP_DUPLICITY_NETFS_URL $BUILD_DIR/outputfs $BACKUP_DUPLICITY_NETFS_OPTIONS
++	mount_url "$BACKUP_DUPLICITY_NETFS_URL" "$BUILD_DIR/outputfs" $BACKUP_DUPLICITY_NETFS_OPTIONS
+ 	
+ 	BACKUP_DUPLICITY_URL="file://$BUILD_DIR/outputfs"
+ fi
+diff --git a/usr/share/rear/backup/DUPLICITY/default/980_unmount_duplicity_path.sh b/usr/share/rear/backup/DUPLICITY/default/980_unmount_duplicity_path.sh
+index 8525ab1d..1331c36e 100644
+--- a/usr/share/rear/backup/DUPLICITY/default/980_unmount_duplicity_path.sh
++++ b/usr/share/rear/backup/DUPLICITY/default/980_unmount_duplicity_path.sh
+@@ -5,5 +5,5 @@ if [  -n "$BACKUP_DUPLICITY_NETFS_URL" -o -n "$BACKUP_DUPLICITY_NETFS_UMOUNTCMD"
+ 		BACKUP_DUPLICITY_NETFS_URL="var://BACKUP_DUPLICITY_NETFS_UMOUNTCMD"
+ 	fi
+ 
+-	umount_url $BACKUP_DUPLICITY_NETFS_URL $BUILD_DIR/outputfs
++	umount_url "$BACKUP_DUPLICITY_NETFS_URL" "$BUILD_DIR/outputfs"
+ fi
+diff --git a/usr/share/rear/backup/NETFS/GNU/Linux/600_start_selinux.sh b/usr/share/rear/backup/NETFS/GNU/Linux/600_start_selinux.sh
+index 59e497d7..4ed6f4f0 100644
+--- a/usr/share/rear/backup/NETFS/GNU/Linux/600_start_selinux.sh
++++ b/usr/share/rear/backup/NETFS/GNU/Linux/600_start_selinux.sh
+@@ -1,8 +1,8 @@
+ # Start SELinux if it was stopped - check presence of $TMP_DIR/selinux.mode
+ [[ -f $TMP_DIR/selinux.mode ]] && {
+-    local scheme=$(url_scheme $BACKUP_URL)
+-    local path=$(url_path $BACKUP_URL)
+-    local opath=$(backup_path $scheme $path)
++    local scheme="$( url_scheme "$BACKUP_URL" )"
++    local path="$( url_path "$BACKUP_URL" )"
++    local opath="$( backup_path "$scheme" "$path" )"
+     cat $TMP_DIR/selinux.mode > $SELINUX_ENFORCE
+     Log "Restored original SELinux mode"
+     touch "${opath}/selinux.autorelabel"
+diff --git a/usr/share/rear/backup/NETFS/default/100_mount_NETFS_path.sh b/usr/share/rear/backup/NETFS/default/100_mount_NETFS_path.sh
+index b6a955db..8287582f 100644
+--- a/usr/share/rear/backup/NETFS/default/100_mount_NETFS_path.sh
++++ b/usr/share/rear/backup/NETFS/default/100_mount_NETFS_path.sh
+@@ -2,4 +2,4 @@ if [[ "$BACKUP_MOUNTCMD" ]] ; then
+     BACKUP_URL="var://BACKUP_MOUNTCMD"
+ fi
+ 
+-mount_url $BACKUP_URL $BUILD_DIR/outputfs $BACKUP_OPTIONS
++mount_url "$BACKUP_URL" "$BUILD_DIR/outputfs" $BACKUP_OPTIONS
+diff --git a/usr/share/rear/backup/NETFS/default/150_save_copy_of_prefix_dir.sh b/usr/share/rear/backup/NETFS/default/150_save_copy_of_prefix_dir.sh
+index 9bf8f76a..20740a26 100644
+--- a/usr/share/rear/backup/NETFS/default/150_save_copy_of_prefix_dir.sh
++++ b/usr/share/rear/backup/NETFS/default/150_save_copy_of_prefix_dir.sh
+@@ -3,9 +3,9 @@
+ [ -z "${NETFS_KEEP_OLD_BACKUP_COPY}" ] && return
+ 
+ # do not do this for tapes and special attention for file:///path
+-local scheme=$( url_scheme $BACKUP_URL )
+-local path=$( url_path $BACKUP_URL )
+-local opath=$( backup_path $scheme $path )
++local scheme="$( url_scheme "$BACKUP_URL" )"
++local path="$( url_path "$BACKUP_URL" )"
++local opath="$( backup_path "$scheme" "$path" )"
+ 
+ # if $opath is empty return silently (e.g. scheme tape)
+ [ -z "$opath" ] && return 0
+diff --git a/usr/share/rear/backup/NETFS/default/200_make_prefix_dir.sh b/usr/share/rear/backup/NETFS/default/200_make_prefix_dir.sh
+index 43f5b651..ccdf6515 100644
+--- a/usr/share/rear/backup/NETFS/default/200_make_prefix_dir.sh
++++ b/usr/share/rear/backup/NETFS/default/200_make_prefix_dir.sh
+@@ -2,9 +2,9 @@
+ # to $HOSTNAME
+ 
+ # do not do this for tapes and special attention for file:///path
+-local scheme=$( url_scheme $BACKUP_URL )
+-local path=$( url_path $BACKUP_URL )
+-local opath=$( backup_path $scheme $path )
++local scheme="$( url_scheme "$BACKUP_URL" )"
++local path="$( url_path "$BACKUP_URL" )"
++local opath="$( backup_path "$scheme" "$path" )"
+ 
+ # if $opath is empty return silently (e.g. scheme tape)
+ [ -z "$opath" ] && return 0
+diff --git a/usr/share/rear/backup/NETFS/default/250_create_lock.sh b/usr/share/rear/backup/NETFS/default/250_create_lock.sh
+index 36d547ec..5526018c 100644
+--- a/usr/share/rear/backup/NETFS/default/250_create_lock.sh
++++ b/usr/share/rear/backup/NETFS/default/250_create_lock.sh
+@@ -2,9 +2,9 @@
+ # made by a previous mkbackup run when the variable NETFS_KEEP_OLD_BACKUP_COPY has been set
+ 
+ # do not do this for tapes and special attention for file:///path
+-local scheme=$( url_scheme $BACKUP_URL )
+-local path=$( url_path $BACKUP_URL )
+-local opath=$( backup_path $scheme $path )
++local scheme="$( url_scheme "$BACKUP_URL" )"
++local path="$( url_path "$BACKUP_URL" )"
++local opath="$( backup_path "$scheme" "$path" )"
+ 
+ # if $opath is empty return silently (e.g. scheme tape)
+ [ -z "$opath" ] && return 0
+diff --git a/usr/share/rear/backup/NETFS/default/500_make_backup.sh b/usr/share/rear/backup/NETFS/default/500_make_backup.sh
+index 884774fd..740c2004 100644
+--- a/usr/share/rear/backup/NETFS/default/500_make_backup.sh
++++ b/usr/share/rear/backup/NETFS/default/500_make_backup.sh
+@@ -8,7 +8,7 @@ function set_tar_features () {
+     # Test for features in tar
+     # true if at supports the --warning option (v1.23+)
+     FEATURE_TAR_WARNINGS=
+-    local tar_version=$( get_version tar --version )
++    local tar_version="$( get_version tar --version )"
+     if version_newer "$tar_version" 1.23 ; then
+         FEATURE_TAR_WARNINGS="y"
+         TAR_OPTIONS="$TAR_OPTIONS --warning=no-xdev"
+@@ -18,9 +18,9 @@ function set_tar_features () {
+ 
+ local backup_prog_rc
+ 
+-local scheme=$( url_scheme $BACKUP_URL )
+-local path=$( url_path $BACKUP_URL )
+-local opath=$( backup_path $scheme $path )
++local scheme="$( url_scheme "$BACKUP_URL" )"
++local path="$( url_path "$BACKUP_URL" )"
++local opath="$( backup_path "$scheme" "$path" )"
+ test "$opath" && mkdir $v -p "$opath"
+ 
+ # In any case show an initial basic info what is currently done
+@@ -222,12 +222,12 @@ case "$(basename ${BACKUP_PROG})" in
+         Log "Using unsupported backup program '$BACKUP_PROG'"
+         Log $BACKUP_PROG "${BACKUP_PROG_COMPRESS_OPTIONS[@]}" \
+             $BACKUP_PROG_OPTIONS_CREATE_ARCHIVE $TMP_DIR/backup-exclude.txt \
+-            "${BACKUP_PROG_OPTIONS[@]}" $backuparchive \
+-            $(cat $TMP_DIR/backup-include.txt) $RUNTIME_LOGFILE > $backuparchive
++            "${BACKUP_PROG_OPTIONS[@]}" "$backuparchive" \
++            $(cat $TMP_DIR/backup-include.txt) $RUNTIME_LOGFILE > "$backuparchive"
+         $BACKUP_PROG "${BACKUP_PROG_COMPRESS_OPTIONS[@]}" \
+             $BACKUP_PROG_OPTIONS_CREATE_ARCHIVE $TMP_DIR/backup-exclude.txt \
+-            "${BACKUP_PROG_OPTIONS[@]}" $backuparchive \
+-            $(cat $TMP_DIR/backup-include.txt) $RUNTIME_LOGFILE > $backuparchive
++            "${BACKUP_PROG_OPTIONS[@]}" "$backuparchive" \
++            $(cat $TMP_DIR/backup-include.txt) $RUNTIME_LOGFILE > "$backuparchive"
+     ;;
+ esac 2> "${TMP_DIR}/${BACKUP_PROG_ARCHIVE}.log"
+ # For the rsync and default case the backup prog is the last in the case entry
+@@ -292,7 +292,7 @@ wait $BackupPID
+ backup_prog_rc=$?
+ 
+ if [[ $BACKUP_INTEGRITY_CHECK =~ ^[yY1] && "$(basename ${BACKUP_PROG})" = "tar" ]] ; then
+-    (cd $(dirname $backuparchive) && md5sum $(basename $backuparchive) > ${backuparchive}.md5 || md5sum $(basename $backuparchive).?? > ${backuparchive}.md5)
++    (cd $(dirname "$backuparchive") && md5sum $(basename "$backuparchive") > "${backuparchive}".md5 || md5sum $(basename "$backuparchive").?? > "${backuparchive}".md5)
+ fi
+ 
+ # TODO: Why do we sleep here after 'wait $BackupPID'?
+diff --git a/usr/share/rear/backup/NETFS/default/970_remove_lock.sh b/usr/share/rear/backup/NETFS/default/970_remove_lock.sh
+index 7038f5b9..90c00758 100644
+--- a/usr/share/rear/backup/NETFS/default/970_remove_lock.sh
++++ b/usr/share/rear/backup/NETFS/default/970_remove_lock.sh
+@@ -1,7 +1,7 @@
+ # remove the lockfile
+-local scheme=$( url_scheme $BACKUP_URL )
+-local path=$( url_path $BACKUP_URL )
+-local opath=$( backup_path $scheme $path )
++local scheme="$( url_scheme "$BACKUP_URL" )"
++local path="$( url_path "$BACKUP_URL" )"
++local opath="$( backup_path "$scheme" "$path" )"
+ 
+ # if $opath is empty return silently (e.g. scheme tape)
+ [ -z "$opath" ] && return 0
+diff --git a/usr/share/rear/backup/NETFS/default/980_umount_NETFS_dir.sh b/usr/share/rear/backup/NETFS/default/980_umount_NETFS_dir.sh
+index e1954dc5..f15e3951 100644
+--- a/usr/share/rear/backup/NETFS/default/980_umount_NETFS_dir.sh
++++ b/usr/share/rear/backup/NETFS/default/980_umount_NETFS_dir.sh
+@@ -4,4 +4,4 @@ if [[ "$BACKUP_UMOUNTCMD" ]] ; then
+     BACKUP_URL="var://BACKUP_UMOUNTCMD"
+ fi
+ 
+-umount_url $BACKUP_URL $BUILD_DIR/outputfs
++umount_url "$BACKUP_URL" "$BUILD_DIR/outputfs"
+diff --git a/usr/share/rear/backup/RSYNC/GNU/Linux/620_force_autorelabel.sh b/usr/share/rear/backup/RSYNC/GNU/Linux/620_force_autorelabel.sh
+index de57d571..f1b598c9 100644
+--- a/usr/share/rear/backup/RSYNC/GNU/Linux/620_force_autorelabel.sh
++++ b/usr/share/rear/backup/RSYNC/GNU/Linux/620_force_autorelabel.sh
+@@ -31,9 +31,9 @@ local backup_prog_rc
+ 		;;
+ 
+ 	(*)
+-		local scheme=$(url_scheme $BACKUP_URL)
+-		local path=$(url_path $BACKUP_URL)
+-		local opath=$(backup_path $scheme $path)
++		local scheme="$(url_scheme "$BACKUP_URL")"
++		local path="$(url_path "$BACKUP_URL")"
++		local opath="$(backup_path "$scheme" "$path")"
+ 		# probably using the BACKUP=NETFS workflow instead
+ 		if [ -d "${opath}" ]; then
+ 			if [ ! -f "${opath}/selinux.autorelabel" ]; then
+diff --git a/usr/share/rear/layout/save/FDRUPSTREAM/Linux-s390/990_copy_disklayout_file.sh b/usr/share/rear/layout/save/FDRUPSTREAM/Linux-s390/990_copy_disklayout_file.sh
+index 5df7e7b8..5040ec30 100644
+--- a/usr/share/rear/layout/save/FDRUPSTREAM/Linux-s390/990_copy_disklayout_file.sh
++++ b/usr/share/rear/layout/save/FDRUPSTREAM/Linux-s390/990_copy_disklayout_file.sh
+@@ -24,11 +24,11 @@ is_true "$ZVM_NAMING" || return 0
+ VM_UID=( $( vmcp q userid ) )
+ test $VM_UID || Error "Could not set VM_UID ('vmcp q userid' did not return the VM user id)"
+ 
+-scheme=$( url_scheme $OUTPUT_URL )
+-path=$( url_path $OUTPUT_URL )
+-opath=$( output_path $scheme $path )
++scheme="$( url_scheme "$OUTPUT_URL" )"
++path="$( url_path "$OUTPUT_URL" )"
++opath="$( output_path "$scheme" "$path" )"
+ test $opath || Error "Could not determine output path from OUTPUT_URL='$OUTPUT_URL'"
+ 
+ LogPrint "s390 disklayout.conf will be saved as $opath/$VM_UID.disklayout.conf"
+-mkdir $v -p $opath
++mkdir $v -p "$opath"
+ cp $v $DISKLAYOUT_FILE $opath/$VM_UID.disklayout.conf || Error "Failed to copy '$DISKLAYOUT_FILE' to $opath/$VM_UID.disklayout.conf"
+diff --git a/usr/share/rear/layout/save/default/310_autoexclude_usb.sh b/usr/share/rear/layout/save/default/310_autoexclude_usb.sh
+index f40c4efd..11581700 100644
+--- a/usr/share/rear/layout/save/default/310_autoexclude_usb.sh
++++ b/usr/share/rear/layout/save/default/310_autoexclude_usb.sh
+@@ -6,9 +6,9 @@
+ 
+ for URL in "$OUTPUT_URL" "$BACKUP_URL" ; do
+     if [[ ! -z "$URL" ]] ; then
+-        local host=$(url_host $URL)
+-        local scheme=$(url_scheme $URL)
+-        local path=$(url_path $URL)
++        local host="$(url_host "$URL")"
++        local scheme="$(url_scheme "$URL")"
++        local path="$(url_path "$URL")"
+ 
+         case $scheme in
+             (usb)
+@@ -35,9 +35,9 @@ for URL in "$OUTPUT_URL" "$BACKUP_URL" ; do
+ 
+     grep -q "^$REAL_USB_DEVICE " /proc/mounts
+     if [[ $? -eq 0 ]] ; then
+-        local usb_mntpt=$( grep "^$REAL_USB_DEVICE " /proc/mounts | cut -d" " -f2 | tail -1 )
++        local usb_mntpt="$( grep "^$REAL_USB_DEVICE " /proc/mounts | cut -d" " -f2 | tail -1 )"
+         if ! IsInArray "$usb_mntpt" "${AUTOEXCLUDE_USB_PATH[@]}" ; then
+-            AUTOEXCLUDE_USB_PATH+=( $usb_mntpt )
++            AUTOEXCLUDE_USB_PATH+=( "$usb_mntpt" )
+             Log "Auto-excluding USB path $usb_mntpt [device $REAL_USB_DEVICE]"
+         fi
+     fi
+diff --git a/usr/share/rear/lib/_input-output-functions.sh b/usr/share/rear/lib/_input-output-functions.sh
+index d189ca24..5c853282 100644
+--- a/usr/share/rear/lib/_input-output-functions.sh
++++ b/usr/share/rear/lib/_input-output-functions.sh
+@@ -1024,7 +1024,7 @@ function cleanup_build_area_and_end_program () {
+             sleep 2
+             # umount_mountpoint_lazy is in lib/global-functions.sh
+             # which is not yet sourced in case of early Error() in usr/sbin/rear
+-            has_binary umount_mountpoint_lazy && umount_mountpoint_lazy $BUILD_DIR/outputfs
++            has_binary umount_mountpoint_lazy && umount_mountpoint_lazy "$BUILD_DIR/outputfs"
+         fi
+         # remove_temporary_mountpoint is in lib/global-functions.sh
+         # which is not yet sourced in case of early Error() in usr/sbin/rear
+diff --git a/usr/share/rear/lib/global-functions.sh b/usr/share/rear/lib/global-functions.sh
+index 1fc083b4..bd4624aa 100644
+--- a/usr/share/rear/lib/global-functions.sh
++++ b/usr/share/rear/lib/global-functions.sh
+@@ -299,17 +299,17 @@ function percent_decode() {
+ # cf. http://bugzilla.opensuse.org/show_bug.cgi?id=561626#c7
+ 
+ function url_scheme() {
+-    local url=$1
++    local url="$1"
+     # the scheme is the leading part up to '://'
+-    local scheme=${url%%://*}
++    local scheme="${url%%://*}"
+     # rsync scheme does not have to start with rsync:// it can also be scp style
+     # see the comments in usr/share/rear/lib/rsync-functions.sh
+-    echo $scheme | grep -q ":" && echo rsync || echo $scheme
++    echo "$scheme" | grep -q ":" && echo rsync || echo "$scheme"
+ }
+ 
+ function url_host() {
+-    local url=$1
+-    local url_without_scheme=${url#*//}
++    local url="$1"
++    local url_without_scheme="${url#*//}"
+     # the authority part is the part after the scheme (e.g. 'host' or 'user@host')
+     # i.e. after 'scheme://' all up to but excluding the next '/'
+     # which means it breaks if there is a username that contains a '/'
+@@ -317,73 +317,73 @@ function url_host() {
+     # should have only characters from the portable filename character set
+     # which is ASCII letters, digits, dot, hyphen, and underscore
+     # (a hostname must not contain a '/' see RFC 952 and RFC 1123)
+-    local authority_part=${url_without_scheme%%/*}
++    local authority_part="${url_without_scheme%%/*}"
+     # for backward compatibility the url_host function returns the whole authority part
+     # see https://github.com/rear/rear/issues/856
+     # to get only hostname or username use the url_hostname and url_username functions
+-    echo $authority_part
++    echo "$authority_part"
+ }
+ 
+ function url_hostname() {
+-    local url=$1
+-    local url_without_scheme=${url#*//}
+-    local authority_part=${url_without_scheme%%/*}
++    local url="$1"
++    local url_without_scheme="${url#*//}"
++    local authority_part="${url_without_scheme%%/*}"
+     # if authority_part contains a '@' we assume the 'user@host' format and
+     # then we remove the 'user@' part (i.e. all up to and including the last '@')
+     # so that it also works when the username contains a '@'
+     # like 'john@doe' in BACKUP_URL=sshfs://john@doe@host/G/rear/
+     # (a hostname must not contain a '@' see RFC 952 and RFC 1123)
+-    local host_and_port=${authority_part##*@}
++    local host_and_port="${authority_part##*@}"
+     # if host_and_port contains a ':' we assume the 'host:port' format and
+     # then we remove the ':port' part (i.e. all from and including the last ':')
+     # so that it even works when the hostname contains a ':' (in spite of RFC 952 and RFC 1123)
+-    echo ${host_and_port%:*}
++    echo "${host_and_port%:*}"
+ }
+ 
+ function url_username() {
+-    local url=$1
+-    local url_without_scheme=${url#*//}
+-    local authority_part=${url_without_scheme%%/*}
++    local url="$1"
++    local url_without_scheme="${url#*//}"
++    local authority_part="${url_without_scheme%%/*}"
+     # authority_part must contain a '@' when a username is specified
+-    echo $authority_part | grep -q '@' || return 0
++    echo "$authority_part" | grep -q '@' || return 0
+     # we remove the '@host' part (i.e. all from and including the last '@')
+     # so that it also works when the username contains a '@'
+     # like 'john@doe' in BACKUP_URL=sshfs://john@doe@host/G/rear/
+     # (a hostname must not contain a '@' see RFC 952 and RFC 1123)
+-    local user_and_password=${authority_part%@*}
++    local user_and_password="${authority_part%@*}"
+     # if user_and_password contains a ':' we assume the 'user:password' format and
+     # then we remove the ':password' part (i.e. all from and including the first ':')
+     # so that it works when the password contains a ':'
+     # (a POSIX-compliant username should not contain a ':')
+-    echo $user_and_password | grep -q ':' && echo ${user_and_password%%:*} || echo $user_and_password
++    echo "$user_and_password" | grep -q ':' && echo "${user_and_password%%:*}" || echo "$user_and_password"
+ }
+ 
+ function url_password() {
+-    local url=$1
+-    local url_without_scheme=${url#*//}
+-    local authority_part=${url_without_scheme%%/*}
++    local url="$1"
++    local url_without_scheme="${url#*//}"
++    local authority_part="${url_without_scheme%%/*}"
+     # authority_part must contain a '@' when a username is specified
+-    echo $authority_part | grep -q '@' || return 0
++    echo "$authority_part" | grep -q '@' || return 0
+     # we remove the '@host' part (i.e. all from and including the last '@')
+     # so that it also works when the username contains a '@'
+     # like 'john@doe' in BACKUP_URL=sshfs://john@doe@host/G/rear/
+     # (a hostname must not contain a '@' see RFC 952 and RFC 1123)
+-    local user_and_password=${authority_part%@*}
++    local user_and_password="${authority_part%@*}"
+     # user_and_password must contain a ':' when a password is specified
+-    echo $user_and_password | grep -q ':' || return 0
++    echo "$user_and_password" | grep -q ':' || return 0
+     # we remove the 'user:' part (i.e. all up to and including the first ':')
+     # so that it works when the password contains a ':'
+     # (a POSIX-compliant username should not contain a ':')
+-    echo ${user_and_password#*:}
++    echo "${user_and_password#*:}"
+ }
+ 
+ function url_path() {
+-    local url=$1
+-    local url_without_scheme=${url#*//}
++    local url="$1"
++    local url_without_scheme="${url#*//}"
+     # the path is all from and including the first '/' in url_without_scheme
+     # i.e. the whole rest after the authority part so that
+     # it may contain an optional trailing '?query' and '#fragment'
+-    echo /${url_without_scheme#*/}
++    echo "/${url_without_scheme#*/}"
+ }
+ 
+ ### Returns true if one can upload files to the URL
+@@ -395,14 +395,14 @@ function scheme_accepts_files() {
+     # (then it would still exit with "bash: $1: cannot assign in this way")
+     # but using a default value is practicable here because $1 is used only once
+     # cf. https://github.com/rear/rear/pull/2675#discussion_r705018956
+-    local scheme=${1:-}
++    local scheme="${1:-}"
+     # Return false if scheme is empty or blank (e.g. when OUTPUT_URL is unset or empty or blank)
+     # cf. https://github.com/rear/rear/issues/2676
+     # and https://github.com/rear/rear/issues/2667#issuecomment-914447326
+     # also return false if scheme is more than one word (so no quoted "$scheme" here)
+     # cf. https://github.com/rear/rear/pull/2675#discussion_r704401462
+-    test $scheme || return 1
+-    case $scheme in
++    test "$scheme" || return 1
++    case "$scheme" in
+         (null|tape|obdr)
+             # tapes do not support uploading arbitrary files, one has to handle them
+             # as special case (usually passing the tape device as argument to tar)
+@@ -426,10 +426,10 @@ function scheme_accepts_files() {
+ ### only that it can be mounted (use mount_url() first)
+ function scheme_supports_filesystem() {
+     # Be safe against 'set -eu' exit if scheme_supports_filesystem is called without argument
+-    local scheme=${1:-}
++    local scheme="${1:-}"
+     # Return false if scheme is empty or blank or more than one word, cf. scheme_accepts_files() above
+-    test $scheme || return 1
+-    case $scheme in
++    test "$scheme" || return 1
++    case "$scheme" in
+         (null|tape|obdr|rsync|fish|ftp|ftps|hftp|http|https|sftp)
+             return 1
+             ;;
+@@ -440,9 +440,9 @@ function scheme_supports_filesystem() {
+ }
+ 
+ function backup_path() {
+-    local scheme=$1
+-    local path=$2
+-    case $scheme in
++    local scheme="$1"
++    local path="$2"
++    case "$scheme" in
+        (tape)  # no path for tape required
+            path=""
+            ;;
+@@ -466,8 +466,8 @@ function backup_path() {
+ }
+ 
+ function output_path() {
+-    local scheme=$1
+-    local path=$2
++    local scheme="$1"
++    local path="$2"
+ 
+     # Abort for unmountable schemes ("tape-like" or "ftp-like" schemes).
+     # Returning an empty string for them is not satisfactory: it could lead to caller putting its files
+@@ -477,9 +477,9 @@ function output_path() {
+     # but if the directory is not a mountpoint, they would get silently lost.
+     # The caller needs to check the URL/scheme using scheme_supports_filesystem()
+     # before calling this function.
+-    scheme_supports_filesystem $scheme || BugError "output_path() called with scheme $scheme that does not support filesystem access"
++    scheme_supports_filesystem "$scheme" || BugError "output_path() called with scheme $scheme that does not support filesystem access"
+ 
+-    case $scheme in
++    case "$scheme" in
+        (file)  # type file needs a local path (must be mounted by user)
+            path="$path/${OUTPUT_PREFIX}"
+            ;;
+@@ -493,19 +493,19 @@ function output_path() {
+ 
+ ### Mount URL $1 at mountpoint $2[, with options $3]
+ function mount_url() {
+-    local url=$1
+-    local mountpoint=$2
++    local url="$1"
++    local mountpoint="$2"
+     local defaultoptions="rw,noatime"
+-    local options=${3:-"$defaultoptions"}
++    local options="${3:-"$defaultoptions"}"
+     local scheme
+ 
+-    scheme=$( url_scheme $url )
++    scheme="$( url_scheme "$url" )"
+ 
+     # The cases where we return 0 are those that do not need umount and also do not need ExitTask handling.
+     # They thus need to be kept in sync with umount_url() so that RemoveExitTasks is used
+     # iff AddExitTask was used in mount_url().
+ 
+-    if ! scheme_supports_filesystem $scheme ; then
++    if ! scheme_supports_filesystem "$scheme" ; then
+         ### Stuff like null|tape|rsync|fish|ftp|ftps|hftp|http|https|sftp
+         ### Don't need to umount anything for these.
+         ### file: supports filesystem access, but is not mounted and unmounted,
+@@ -516,7 +516,7 @@ function mount_url() {
+ 
+     ### Generate a mount command
+     local mount_cmd
+-    case $scheme in
++    case "$scheme" in
+         (file)
+             ### Don't need to mount anything for file:, it is already mounted by user
+             return 0
+@@ -626,39 +626,39 @@ function mount_url() {
+             ;;
+         (var)
+             ### The mount command is given by variable in the url host
+-            local var=$(url_host $url)
++            local var="$(url_host "$url")"
+             mount_cmd="${!var} $mountpoint"
+             ;;
+         (cifs)
+             if [ x"$options" = x"$defaultoptions" ];then
+                 # defaultoptions contains noatime which is not valid for cifs (issue #752)
+-                mount_cmd="mount $v -o rw,guest //$(url_host $url)$(url_path $url) $mountpoint"
++                mount_cmd="mount $v -o rw,guest //$(url_host "$url")$(url_path "$url") $mountpoint"
+             else
+-                mount_cmd="mount $v -o $options //$(url_host $url)$(url_path $url) $mountpoint"
++                mount_cmd="mount $v -o $options //$(url_host "$url")$(url_path "$url") $mountpoint"
+             fi
+             ;;
+         (usb)
+-            mount_cmd="mount $v -o $options $(url_path $url) $mountpoint"
++            mount_cmd="mount $v -o $options $(url_path "$url") $mountpoint"
+             ;;
+         (sshfs)
+-            local authority=$( url_host $url )
++            local authority="$( url_host "$url" )"
+             test "$authority" || Error "Cannot run 'sshfs' because no authority '[user@]host' found in URL '$url'."
+-            local path=$( url_path $url )
++            local path="$( url_path "$url" )"
+             test "$path" || Error "Cannot run 'sshfs' because no path found in URL '$url'."
+             # ensure the fuse kernel module is loaded because sshfs is based on FUSE
+             lsmod | grep -q '^fuse' || modprobe $verbose fuse || Error "Cannot run 'sshfs' because 'fuse' kernel module is not loadable."
+-            mount_cmd="sshfs $authority:$path $mountpoint -o $options"
++            mount_cmd="sshfs \"$authority\":\"$path\" $mountpoint -o $options"
+             ;;
+         (ftpfs)
+-            local hostname=$( url_hostname $url )
++            local hostname="$( url_hostname "$url" )"
+             test "$hostname" || Error "Cannot run 'curlftpfs' because no hostname found in URL '$url'."
+-            local path=$( url_path $url )
++            local path="$( url_path "$url" )"
+             test "$path" || Error "Cannot run 'curlftpfs' because no path found in URL '$url'."
+-            local username=$( url_username $url )
++            local username="$( url_username "$url" )"
+             # ensure the fuse kernel module is loaded because ftpfs (via CurlFtpFS) is based on FUSE
+             lsmod | grep -q '^fuse' || modprobe $verbose fuse || Error "Cannot run 'curlftpfs' because 'fuse' kernel module is not loadable."
+             if test "$username" ; then
+-                local password=$( url_password $url )
++                local password="$( url_password "$url" )"
+                 if test "$password" ; then
+                     # single quoting is a must for the password
+                     mount_cmd="curlftpfs $verbose -o user='$username:$password' ftp://$hostname$path $mountpoint"
+@@ -672,10 +672,10 @@ function mount_url() {
+             fi
+             ;;
+         (davfs)
+-            mount_cmd="mount $v -t davfs http://$(url_host $url)$(url_path $url) $mountpoint"
++            mount_cmd="mount $v -t davfs http://$(url_host "$url")$(url_path "$url") $mountpoint"
+             ;;
+         (*)
+-            mount_cmd="mount $v -t $(url_scheme $url) -o $options $(url_host $url):$(url_path $url) $mountpoint"
++            mount_cmd="mount $v -t $(url_scheme "$url") -o $options \"$(url_host "$url")\":\"$(url_path "$url")\" $mountpoint"
+             ;;
+     esac
+ 
+@@ -685,7 +685,7 @@ function mount_url() {
+ 
+     Log "Mounting with '$mount_cmd'"
+     # eval is required when mount_cmd contains single quoted stuff (e.g. see the above mount_cmd for curlftpfs)
+-    eval $mount_cmd || Error "Mount command '$mount_cmd' failed."
++    eval "$mount_cmd" || Error "Mount command '$mount_cmd' failed."
+ 
+     AddExitTask "perform_umount_url '$url' '$mountpoint' lazy"
+     return 0
+@@ -699,17 +699,17 @@ function remove_temporary_mountpoint() {
+ 
+ ### Unmount url $1 at mountpoint $2, perform mountpoint cleanup and exit task + error handling
+ function umount_url() {
+-    local url=$1
+-    local mountpoint=$2
++    local url="$1"
++    local mountpoint="$2"
+     local scheme
+ 
+-    scheme=$( url_scheme $url )
++    scheme="$( url_scheme "$url" )"
+ 
+     # The cases where we return 0 are those that do not need umount and also do not need ExitTask handling.
+     # They thus need to be kept in sync with mount_url() so that RemoveExitTasks is used
+     # iff AddExitTask was used in mount_url().
+ 
+-    if ! scheme_supports_filesystem $scheme ; then
++    if ! scheme_supports_filesystem "$scheme" ; then
+         ### Stuff like null|tape|rsync|fish|ftp|ftps|hftp|http|https|sftp
+         ### Don't need to umount anything for these.
+         ### file: supports filesystem access, but is not mounted and unmounted,
+@@ -718,7 +718,7 @@ function umount_url() {
+         return 0
+     fi
+ 
+-    case $scheme in
++    case "$scheme" in
+         (file)
+             return 0
+             ;;
+@@ -738,7 +738,7 @@ function umount_url() {
+     # Therefore it also determines if exit task and mountpoint handling is required and returns early if not.
+     # The actual umount job is performed inside perform_umount_url().
+     # We do not request lazy umount here because we want umount errors to be reliably reported.
+-    perform_umount_url $url $mountpoint || Error "Unmounting '$mountpoint' failed."
++    perform_umount_url "$url" "$mountpoint" || Error "Unmounting '$mountpoint' failed."
+ 
+     RemoveExitTask "perform_umount_url '$url' '$mountpoint' lazy"
+ 
+@@ -748,9 +748,9 @@ function umount_url() {
+ 
+ ### Unmount url $1 at mountpoint $2 [ lazily if $3 is set to 'lazy' and normal unmount fails ]
+ function perform_umount_url() {
+-    local url=$1
+-    local mountpoint=$2
+-    local lazy=${3:-}
++    local url="$1"
++    local mountpoint="$2"
++    local lazy="${3:-}"
+ 
+     if test $lazy ; then
+         if test $lazy != "lazy" ; then
+@@ -758,24 +758,24 @@ function perform_umount_url() {
+         fi
+     fi
+ 
+-    case $(url_scheme $url) in
++    case "$(url_scheme "$url")" in
+         (sshfs)
+             # does ftpfs need this special case as well?
+-            fusermount -u ${lazy:+'-z'} $mountpoint
++            fusermount -u ${lazy:+'-z'} "$mountpoint"
+             ;;
+         (davfs)
+-            umount_davfs $mountpoint $lazy
++            umount_davfs "$mountpoint" $lazy
+             ;;
+         (var)
+             local var
+-            var=$(url_host $url)
++            var="$(url_host "$url")"
+             Log "Unmounting with '${!var} $mountpoint'"
+             # lazy unmount not supported with custom umount command
+-            ${!var} $mountpoint
++            ${!var} "$mountpoint"
+             ;;
+         (*)
+             # usual umount command
+-            umount_mountpoint $mountpoint $lazy
++            umount_mountpoint "$mountpoint" $lazy
+     esac
+     # The switch above must be the last statement in this function and the umount commands must be
+     # the last commands (or part of) in each branch. This ensures proper exit code propagation
+@@ -785,7 +785,7 @@ function perform_umount_url() {
+ ### Helper which unmounts davfs mountpoint $1 and cleans up the cache,
+ ### performing lazy unmount if $2 = 'lazy' and normal unmount fails.
+ function umount_davfs() {
+-    local mountpoint=$1
++    local mountpoint="$1"
+     local lazy="${2:-}"
+ 
+     if test $lazy ; then
+@@ -794,7 +794,7 @@ function umount_davfs() {
+         fi
+     fi
+ 
+-    if umount_mountpoint $mountpoint ; then
++    if umount_mountpoint "$mountpoint" ; then
+         # Wait for 3 sek. then remove the cache-dir /var/cache/davfs
+         sleep 30
+         # TODO: put in here the cache-dir from /etc/davfs2/davfs.conf
+@@ -807,7 +807,7 @@ function umount_davfs() {
+         if test $lazy ; then
+             # try again to unmount lazily and this time do not delete the cache, it is still in use.
+             LogPrintError "davfs cache /var/cache/davfs2/*outputfs* needs to be cleaned up manually after the lazy unmount finishes"
+-            umount_mountpoint_lazy $mountpoint
++            umount_mountpoint_lazy "$mountpoint"
+         else
+             # propagate errors from umount
+             return $retval
+@@ -819,8 +819,8 @@ function umount_davfs() {
+ ### Default implementation for filesystems that don't need anything fancy
+ ### For special umount commands use perform_umount_url()
+ function umount_mountpoint() {
+-    local mountpoint=$1
+-    local lazy=${2:-}
++    local mountpoint="$1"
++    local lazy="${2:-}"
+ 
+     if test $lazy ; then
+         if test $lazy != "lazy" ; then
+@@ -830,7 +830,7 @@ function umount_mountpoint() {
+ 
+     ### First, try a normal unmount,
+     Log "Unmounting '$mountpoint'"
+-    umount $v $mountpoint >&2
++    umount $v "$mountpoint" >&2
+     if [[ $? -eq 0 ]] ; then
+         return 0
+     fi
+@@ -840,7 +840,7 @@ function umount_mountpoint() {
+ 
+     ### If that still fails, force unmount.
+     Log "Forced unmount of '$mountpoint'"
+-    umount $v -f $mountpoint >&2
++    umount $v -f "$mountpoint" >&2
+     if [[ $? -eq 0 ]] ; then
+         return 0
+     fi
+@@ -848,7 +848,7 @@ function umount_mountpoint() {
+     Log "Unmounting '$mountpoint' failed."
+ 
+     if test $lazy ; then
+-        umount_mountpoint_lazy $mountpoint
++        umount_mountpoint_lazy "$mountpoint"
+     else
+         return 1
+     fi
+@@ -857,10 +857,10 @@ function umount_mountpoint() {
+ ### Unmount mountpoint $1 lazily
+ ### Preferably use "umount_mountpoint $mountpoint lazy", which attempts non-lazy unmount first.
+ function umount_mountpoint_lazy() {
+-    local mountpoint=$1
++    local mountpoint="$1"
+ 
+     LogPrint "Directory $mountpoint still mounted - trying lazy umount"
+-    umount $v -f -l $mountpoint >&2
++    umount $v -f -l "$mountpoint" >&2
+ }
+ 
+ # Change $1 to user input or leave default value on empty input
+@@ -884,9 +884,9 @@ function is_device_mounted()
+    local disk=$1
+    [ -z "$disk" ] && echo 0 && return
+ 
+-   local m=$(lsblk -n -o MOUNTPOINT $disk 2> /dev/null)
++   local m="$(lsblk -n -o MOUNTPOINT $disk 2> /dev/null)"
+ 
+-   if [ -z $m ]; then
++   if [ -z "$m" ]; then
+       echo 0
+    else
+       echo 1
+@@ -900,7 +900,7 @@ function get_mountpoint()
+    local disk=$1
+    [ -z "$disk" ] && return 1
+ 
+-   local mp=$(lsblk -n -o MOUNTPOINT $disk 2> /dev/null)
++   local mp="$(lsblk -n -o MOUNTPOINT $disk 2> /dev/null)"
+ 
+    echo $mp
+ }
+@@ -909,12 +909,12 @@ function get_mountpoint()
+ # to re-mount the given mountpoint
+ function build_remount_cmd()
+ {
+-   local mp=$1
++   local mp="$1"
+    [ -z "$mp" ] && return 1
+   
+    local -a allopts=()
+    # Get: device, mountpoint, FS type, mount options as string
+-   local opt_string=$(mount | grep " $mp " | awk '{ print $1 " " $3 " " $5 " " $6 }')
++   local opt_string="$(mount | grep " $mp " | awk '{ print $1 " " $3 " " $5 " " $6 }')"
+    [ -z "$opt_string" ] && return 1
+ 
+    # Split string, store in array
+diff --git a/usr/share/rear/lib/mkbackup-workflow.sh b/usr/share/rear/lib/mkbackup-workflow.sh
+index ea8498a2..ae0ad7e3 100644
+--- a/usr/share/rear/lib/mkbackup-workflow.sh
++++ b/usr/share/rear/lib/mkbackup-workflow.sh
+@@ -4,7 +4,7 @@
+ WORKFLOW_mkbackup_DESCRIPTION="create rescue media and backup system"
+ WORKFLOWS+=( mkbackup )
+ WORKFLOW_mkbackup () {
+-	local scheme=$(url_scheme $BACKUP_URL)
++	local scheme="$( url_scheme "$BACKUP_URL" )"
+ 
+ 	SourceStage "prep"
+ 
+diff --git a/usr/share/rear/lib/rsync-functions.sh b/usr/share/rear/lib/rsync-functions.sh
+index 862c8777..51983737 100644
+--- a/usr/share/rear/lib/rsync-functions.sh
++++ b/usr/share/rear/lib/rsync-functions.sh
+@@ -39,7 +39,7 @@ function rsync_user () {
+     local url="$1"
+     local host
+ 
+-    host=$(url_host "$url")
++    host="$(url_host "$url")"
+ 
+     if grep -q '@' <<< $host ; then
+         echo "${host%%@*}"    # grab user name
+@@ -53,8 +53,8 @@ function rsync_host () {
+     local host
+     local path
+ 
+-    host=$(url_host "$url")
+-    path=$(url_path "$url")
++    host="$(url_host "$url")"
++    path="$(url_path "$url")"
+     # remove USER@ if present
+     local tmp2="${host#*@}"
+ 
+@@ -77,8 +77,8 @@ function rsync_path () {
+     local url_without_scheme
+     local url_without_scheme_user
+ 
+-    host=$(url_host "$url")
+-    path=$(url_path "$url")
++    host="$(url_host "$url")"
++    path="$(url_path "$url")"
+     local tmp2="${host#*@}"
+ 
+     url_without_scheme="${url#*//}"
+diff --git a/usr/share/rear/output/ISO/Linux-i386/810_prepare_multiple_iso.sh b/usr/share/rear/output/ISO/Linux-i386/810_prepare_multiple_iso.sh
+index 76cfb802..2639d039 100644
+--- a/usr/share/rear/output/ISO/Linux-i386/810_prepare_multiple_iso.sh
++++ b/usr/share/rear/output/ISO/Linux-i386/810_prepare_multiple_iso.sh
+@@ -25,13 +25,13 @@ test "$ISO_MAX_SIZE" || return 0
+ # a "rear mkrescue" would overwrite an existing ISO that contains a backup.
+ test "mkrescue" = "$WORKFLOW" && Error "The mkrescue workflow is forbidden when ISO_MAX_SIZE is set"
+ 
+-local backup_path=$( url_path $BACKUP_URL )
++local backup_path="$( url_path "$BACKUP_URL" )"
+ 
+ # The backuparchive variable value is set in prep/NETFS/default/070_set_backup_archive.sh
+ # which is skipped in case of the mkrescue workflow but the mkrescue workflow is forbidden
+ # when ISO_MAX_SIZE is set and this script is skipped when ISO_MAX_SIZE is not set
+ # see https://github.com/rear/rear/pull/2063#issuecomment-469222487
+-local isofs_path=$( dirname $backuparchive )
++local isofs_path="$( dirname "$backuparchive" )"
+ 
+ # Because usr/sbin/rear sets 'shopt -s nullglob' the 'echo -n' command
+ # outputs nothing if nothing matches the bash globbing pattern '$backuparchive.??'
+diff --git a/usr/share/rear/output/PXE/default/800_copy_to_tftp.sh b/usr/share/rear/output/PXE/default/800_copy_to_tftp.sh
+index 70c1be48..aa649f47 100644
+--- a/usr/share/rear/output/PXE/default/800_copy_to_tftp.sh
++++ b/usr/share/rear/output/PXE/default/800_copy_to_tftp.sh
+@@ -8,16 +8,16 @@
+
+ if [[ ! -z "$PXE_TFTP_URL" ]] ; then
+     # E.g. PXE_TFTP_URL=nfs://server/export/nfs/tftpboot
+-    local scheme=$( url_scheme $PXE_TFTP_URL )
++    local scheme="$( url_scheme "$PXE_TFTP_URL" )"
+ 
+     # We need filesystem access to the destination (schemes like ftp:// are not supported)
+-    if ! scheme_supports_filesystem $scheme ; then
++    if ! scheme_supports_filesystem "$scheme" ; then
+         Error "Scheme $scheme for PXE output not supported, use a scheme that supports mounting (like nfs: )"
+     fi
+ 
+-    mount_url $PXE_TFTP_URL $BUILD_DIR/tftpbootfs $BACKUP_OPTIONS
++    mount_url "$PXE_TFTP_URL" "$BUILD_DIR/tftpbootfs" $BACKUP_OPTIONS
+     # However, we copy under $OUTPUT_PREFIX_PXE directory (usually HOSTNAME) to have different clients on one pxe server
+-    PXE_TFTP_LOCAL_PATH=$BUILD_DIR/tftpbootfs
++    PXE_TFTP_LOCAL_PATH="$BUILD_DIR/tftpbootfs"
+     # mode must readable for others for pxe and we copy under the client HOSTNAME (=OUTPUT_PREFIX_PXE)
+     mkdir -m 755 -p $v "$BUILD_DIR/tftpbootfs/$OUTPUT_PREFIX_PXE" >&2
+     StopIfError "Could not mkdir '$BUILD_DIR/tftpbootfs/$OUTPUT_PREFIX_PXE'"
+@@ -45,27 +45,27 @@ if [[ "$PXE_TFTP_UPLOAD_URL" ]] && [[ "$PXE_RECOVER_MODE" = "unattended" ]] ; th
+     # required pxe modules (and we assume that the PXE server run the same OS)
+     # copy pxelinux.0 and friends
+     # RHEL/SLES and friends
+-    PXELINUX_BIN=$( find_syslinux_file pxelinux.0 )
++    PXELINUX_BIN="$( find_syslinux_file pxelinux.0 )"
+     if [[ -z "$PXELINUX_BIN" ]] ; then
+         # perhaps Debian/Ubuntu and friends
+         [[ -f /usr/lib/PXELINUX/pxelinux.0 ]] && PXELINUX_BIN=/usr/lib/PXELINUX/pxelinux.0
+     fi
+     if [[ ! -z "$PXELINUX_BIN" ]] ; then
+-        cp $v "$PXELINUX_BIN" $BUILD_DIR/tftpbootfs >&2
++        cp $v "$PXELINUX_BIN" "$BUILD_DIR/tftpbootfs" >&2
+     fi
+-    syslinux_modules_dir=$( find_syslinux_modules_dir menu.c32 )
+-    [[ -z "$syslinux_modules_dir" ]] && syslinux_modules_dir=$(dirname $PXELINUX_BIN)
+-    cp $v $syslinux_modules_dir/ldlinux.c32 $BUILD_DIR/tftpbootfs >&2
+-    cp $v $syslinux_modules_dir/libcom32.c32 $BUILD_DIR/tftpbootfs >&2
+-    cp $v $syslinux_modules_dir/libutil.c32 $BUILD_DIR/tftpbootfs >&2
+-    cp $v $syslinux_modules_dir/menu.c32 $BUILD_DIR/tftpbootfs >&2
+-    cp $v $syslinux_modules_dir/chain.c32 $BUILD_DIR/tftpbootfs >&2
+-    cp $v $syslinux_modules_dir/hdt.c32 $BUILD_DIR/tftpbootfs >&2
+-    cp $v $syslinux_modules_dir/reboot.c32 $BUILD_DIR/tftpbootfs >&2
++    syslinux_modules_dir="$( find_syslinux_modules_dir menu.c32 )"
++    [[ -z "$syslinux_modules_dir" ]] && syslinux_modules_dir="$(dirname $PXELINUX_BIN)"
++    cp $v $syslinux_modules_dir/ldlinux.c32 "$BUILD_DIR/tftpbootfs" >&2
++    cp $v $syslinux_modules_dir/libcom32.c32 "$BUILD_DIR/tftpbootfs" >&2
++    cp $v $syslinux_modules_dir/libutil.c32 "$BUILD_DIR/tftpbootfs" >&2
++    cp $v $syslinux_modules_dir/menu.c32 "$BUILD_DIR/tftpbootfs" >&2
++    cp $v $syslinux_modules_dir/chain.c32 "$BUILD_DIR/tftpbootfs" >&2
++    cp $v $syslinux_modules_dir/hdt.c32 "$BUILD_DIR/tftpbootfs" >&2
++    cp $v $syslinux_modules_dir/reboot.c32 "$BUILD_DIR/tftpbootfs" >&2
+     if [[ -r "$syslinux_modules_dir/poweroff.com" ]] ; then
+-        cp $v $syslinux_modules_dir/poweroff.com $BUILD_DIR/tftpbootfs >&2
++        cp $v $syslinux_modules_dir/poweroff.com "$BUILD_DIR/tftpbootfs" >&2
+     elif [[ -r "$syslinux_modules_dir/poweroff.c32" ]] ; then
+-        cp $v $syslinux_modules_dir/poweroff.c32 $BUILD_DIR/tftpbootfs >&2
++        cp $v $syslinux_modules_dir/poweroff.c32 "$BUILD_DIR/tftpbootfs" >&2
+     fi
+     chmod 644 $BUILD_DIR/tftpbootfs/*.c32
+     chmod 644 $BUILD_DIR/tftpbootfs/*.0
+@@ -74,7 +74,7 @@ fi
+ 
+ if [[ ! -z "$PXE_TFTP_URL" ]] ; then
+     LogPrint "Copied kernel+initrd $( du -shc $KERNEL_FILE "$TMP_DIR/$REAR_INITRD_FILENAME" | tail -n 1 | tr -s "\t " " " | cut -d " " -f 1 ) to $PXE_TFTP_URL/$OUTPUT_PREFIX_PXE"
+-    umount_url $PXE_TFTP_URL $BUILD_DIR/tftpbootfs
++    umount_url "$PXE_TFTP_URL" "$BUILD_DIR/tftpbootfs"
+ else
+     # legacy way PXE_TFTP_PATH
+     LogPrint "Copied kernel+initrd $( du -shc $KERNEL_FILE "$TMP_DIR/$REAR_INITRD_FILENAME" | tail -n 1 | tr -s "\t " " " | cut -d " " -f 1 ) to $PXE_TFTP_PATH"
+diff --git a/usr/share/rear/output/PXE/default/810_create_pxelinux_cfg.sh b/usr/share/rear/output/PXE/default/810_create_pxelinux_cfg.sh
+index 113428d4..1ed1cb0a 100644
+--- a/usr/share/rear/output/PXE/default/810_create_pxelinux_cfg.sh
++++ b/usr/share/rear/output/PXE/default/810_create_pxelinux_cfg.sh
+@@ -11,18 +11,18 @@ local pxe_local_path
+ if [[ ! -z "$PXE_CONFIG_URL" ]] ; then
+     # E.g. PXE_CONFIG_URL=nfs://server/export/nfs/tftpboot/pxelinux.cfg
+     # Better be sure that on 'server' the directory /export/nfs/tftpboot/pxelinux.cfg exists
+-    local scheme=$( url_scheme $PXE_CONFIG_URL )
++    local scheme="$( url_scheme "$PXE_CONFIG_URL" )"
+
+     # We need filesystem access to the destination (schemes like ftp:// are not supported)
+-    if ! scheme_supports_filesystem $scheme ; then
++    if ! scheme_supports_filesystem "$scheme" ; then
+         Error "Scheme $scheme for PXE output not supported, use a scheme that supports mounting (like nfs: )"
+     fi
+
+-    mount_url $PXE_CONFIG_URL $BUILD_DIR/tftpbootfs $BACKUP_OPTIONS
+-    PXE_LOCAL_PATH=$BUILD_DIR/tftpbootfs
++    mount_url "$PXE_CONFIG_URL" "$BUILD_DIR/tftpbootfs" $BACKUP_OPTIONS
++    PXE_LOCAL_PATH="$BUILD_DIR/tftpbootfs"
+ else
+     # legacy way using PXE_LOCAL_PATH default
+-    PXE_LOCAL_PATH=$PXE_CONFIG_PATH
++    PXE_LOCAL_PATH="$PXE_CONFIG_PATH"
+ fi
+ 
+ # PXE_CONFIG_PREFIX is a "string" (by default rear-) - is the name of PXE boot configuration of $HOSTNAME
+@@ -35,7 +35,7 @@ if [[ ! -z "$PXE_CONFIG_URL" ]] ; then
+ else
+     # legacy way using PXE_LOCAL_PATH default
+     cat >"$PXE_LOCAL_PATH/$PXE_CONFIG_FILE" <<EOF
+-    $(test -s $(get_template "PXE_pxelinux.cfg") && cat $(get_template "PXE_pxelinux.cfg"))
++    $(test -s "$(get_template "PXE_pxelinux.cfg")" && cat "$(get_template "PXE_pxelinux.cfg")")
+     display $OUTPUT_PREFIX_PXE/$PXE_MESSAGE
+     say ----------------------------------------------------------
+     say rear = disaster recover this system with Relax-and-Recover
+@@ -102,7 +102,7 @@ popd >/dev/null
+ 
+ if [[ ! -z "$PXE_CONFIG_URL" ]] ; then
+     LogPrint "Created pxelinux config '${PXE_CONFIG_PREFIX}$HOSTNAME' and symlinks for $PXE_CREATE_LINKS adresses in $PXE_CONFIG_URL"
+-    umount_url $PXE_TFTP_URL $BUILD_DIR/tftpbootfs
++    umount_url "$PXE_TFTP_URL" "$BUILD_DIR/tftpbootfs"
+ else
+     LogPrint "Created pxelinux config '${PXE_CONFIG_PREFIX}$HOSTNAME' and symlinks for $PXE_CREATE_LINKS adresses in $PXE_CONFIG_PATH"
+     # Add to result files
+diff --git a/usr/share/rear/output/default/100_mount_output_path.sh b/usr/share/rear/output/default/100_mount_output_path.sh
+index 34ea8e5e..765e47f7 100644
+--- a/usr/share/rear/output/default/100_mount_output_path.sh
++++ b/usr/share/rear/output/default/100_mount_output_path.sh
+@@ -6,4 +6,4 @@ if [[ -z "$OUTPUT_URL" ]] ; then
+     return
+ fi
+ 
+-mount_url $OUTPUT_URL $BUILD_DIR/outputfs $OUTPUT_OPTIONS
++mount_url "$OUTPUT_URL" "$BUILD_DIR/outputfs" $OUTPUT_OPTIONS
+diff --git a/usr/share/rear/output/default/150_save_copy_of_prefix_dir.sh b/usr/share/rear/output/default/150_save_copy_of_prefix_dir.sh
+index 06326114..5d34f93d 100644
+--- a/usr/share/rear/output/default/150_save_copy_of_prefix_dir.sh
++++ b/usr/share/rear/output/default/150_save_copy_of_prefix_dir.sh
+@@ -3,16 +3,16 @@
+ [ -z "${KEEP_OLD_OUTPUT_COPY}" ] && return
+ 
+ # do not do this for tapes and special attention for file:///path
+-local scheme=$( url_scheme $OUTPUT_URL )
+-local path=$( url_path $OUTPUT_URL )
++local scheme="$( url_scheme "$OUTPUT_URL" )"
++local path="$( url_path "$OUTPUT_URL" )"
+ 
+ # if filesystem access to url is unsupported return silently (e.g. scheme tape)
+ scheme_supports_filesystem $scheme || return 0
+ 
+-local opath=$( output_path $scheme $path )
++local opath="$( output_path "$scheme" "$path" )"
+ 
+ # an old lockfile from a previous run not cleaned up by output is possible
+-[[ -f ${opath}/.lockfile ]] && rm -f ${opath}/.lockfile >&2
++[[ -f "${opath}/.lockfile" ]] && rm -f "${opath}/.lockfile" >&2
+ 
+ if test -d "${opath}" ; then
+     rm -rf $v "${opath}.old" || Error "Could not remove '${opath}.old'"
+diff --git a/usr/share/rear/output/default/200_make_prefix_dir.sh b/usr/share/rear/output/default/200_make_prefix_dir.sh
+index 42ade4b0..f28fbbbd 100644
+--- a/usr/share/rear/output/default/200_make_prefix_dir.sh
++++ b/usr/share/rear/output/default/200_make_prefix_dir.sh
+@@ -7,13 +7,13 @@
+ # but it is also happens for local stuff like OUTPUT_URL=usb:///dev/disk/by-label/REAR-000
+ 
+ # Do not do this for tapes and special attention for file:///path
+-local scheme=$( url_scheme $OUTPUT_URL )
+-local path=$( url_path $OUTPUT_URL )
++local scheme="$( url_scheme "$OUTPUT_URL" )"
++local path="$( url_path "$OUTPUT_URL" )"
+ 
+ # If filesystem access to url is unsupported return silently (e.g. scheme tape)
+ scheme_supports_filesystem $scheme || return 0
+ 
+-local opath=$( output_path $scheme $path )
++local opath="$( output_path "$scheme" "$path" )"
+ 
+ # Create $OUTPUT_PREFIX sub-directory.
+ # That directory should be neither world-readable nor world-writable
+diff --git a/usr/share/rear/output/default/250_create_lock.sh b/usr/share/rear/output/default/250_create_lock.sh
+index d792b036..5e17a48e 100644
+--- a/usr/share/rear/output/default/250_create_lock.sh
++++ b/usr/share/rear/output/default/250_create_lock.sh
+@@ -2,13 +2,13 @@
+ # made by a previous mkrescue run when the variable KEEP_OLD_OUTPUT_COPY has been set
+ 
+ # do not do this for tapes and special attention for file:///path
+-local scheme=$( url_scheme $OUTPUT_URL )
+-local path=$( url_path $OUTPUT_URL )
++local scheme="$( url_scheme "$OUTPUT_URL" )"
++local path="$( url_path "$OUTPUT_URL" )"
+ 
+ # if filesystem access to url is unsupported return silently (e.g. scheme tape)
+ scheme_supports_filesystem $scheme || return 0
+ 
+-local opath=$( output_path $scheme $path )
++local opath="$( output_path "$scheme" "$path" )"
+ 
+ if test -d "${opath}" ; then
+     > "${opath}/.lockfile" || Error "Could not create '${opath}/.lockfile'"
+diff --git a/usr/share/rear/output/default/950_copy_result_files.sh b/usr/share/rear/output/default/950_copy_result_files.sh
+index a44542df..6a0062e7 100644
+--- a/usr/share/rear/output/default/950_copy_result_files.sh
++++ b/usr/share/rear/output/default/950_copy_result_files.sh
+@@ -7,11 +7,11 @@
+ # that would need to be copied here to the output location:
+ test "${RESULT_FILES[*]:-}" || return 0
+ 
+-local scheme=$( url_scheme $OUTPUT_URL )
+-local host=$( url_host $OUTPUT_URL )
+-local path=$( url_path $OUTPUT_URL )
++local scheme="$( url_scheme "$OUTPUT_URL" )"
++local host="$( url_host "$OUTPUT_URL" )"
++local path="$( url_path "$OUTPUT_URL" )"
+ 
+-if [ -z "$OUTPUT_URL" ] || ! scheme_accepts_files $scheme ; then
++if [ -z "$OUTPUT_URL" ] || ! scheme_accepts_files "$scheme" ; then
+     if [ "$scheme" == "null" -o -z "$OUTPUT_URL" ] ; then
+         # There are result files to copy, but OUTPUT_URL=null indicates that we are not interested in them
+         # TODO: empty OUTPUT_URL seems to be equivalent to null, should we continue to allow that,
+diff --git a/usr/share/rear/output/default/970_remove_lock.sh b/usr/share/rear/output/default/970_remove_lock.sh
+index 3b1b97cc..255afeda 100644
+--- a/usr/share/rear/output/default/970_remove_lock.sh
++++ b/usr/share/rear/output/default/970_remove_lock.sh
+@@ -1,11 +1,11 @@
+ # remove the lockfile
+-local scheme=$(url_scheme $OUTPUT_URL)
+-local path=$(url_path $OUTPUT_URL)
++local scheme="$( url_scheme "$OUTPUT_URL" )"
++local path="$( url_path "$OUTPUT_URL" )"
+ 
+ # if filesystem access to url is unsupported return silently (e.g. scheme tape)
+-scheme_supports_filesystem $scheme || return 0
++scheme_supports_filesystem "$scheme" || return 0
+ 
+-local opath=$( output_path $scheme $path )
++local opath="$( output_path "$scheme" "$path" )"
+ 
+ # when OUTPUT_URL=BACKUP_URL we keep the lockfile to avoid double moves of the directory
+ [[ "$OUTPUT_URL" != "$BACKUP_URL" ]] && rm -f $v "${opath}/.lockfile" >&2
+diff --git a/usr/share/rear/output/default/980_umount_output_dir.sh b/usr/share/rear/output/default/980_umount_output_dir.sh
+index abf0cd53..1ea42dbe 100644
+--- a/usr/share/rear/output/default/980_umount_output_dir.sh
++++ b/usr/share/rear/output/default/980_umount_output_dir.sh
+@@ -8,4 +8,4 @@ if [[ -z "$OUTPUT_URL" ]] ; then
+     return
+ fi
+ 
+-umount_url $OUTPUT_URL $BUILD_DIR/outputfs
++umount_url "$OUTPUT_URL" "$BUILD_DIR/outputfs"
+diff --git a/usr/share/rear/prep/DUPLICITY/default/200_find_duply_profile.sh b/usr/share/rear/prep/DUPLICITY/default/200_find_duply_profile.sh
+index 0461d643..f5e6f4bd 100644
+--- a/usr/share/rear/prep/DUPLICITY/default/200_find_duply_profile.sh
++++ b/usr/share/rear/prep/DUPLICITY/default/200_find_duply_profile.sh
+@@ -27,7 +27,7 @@ if [ "$BACKUP_PROG" = "duplicity" ] && has_binary duply; then
+             # still here?
+             if [[ "$SOURCE" = "/" ]]; then
+                 DUPLY_PROFILE_FILE=$CONF
+-                DUPLY_PROFILE=$( dirname $CONF  )   # /root/.duply/mycloud/conf -> /root/.duply/mycloud
++                DUPLY_PROFILE="$( dirname "$CONF"  )"   # /root/.duply/mycloud/conf -> /root/.duply/mycloud
+                 DUPLY_PROFILE=${DUPLY_PROFILE##*/}  # /root/.duply/mycloud      -> mycloud
+                 break # the loop
+             else
+@@ -40,7 +40,7 @@ if [ "$BACKUP_PROG" = "duplicity" ] && has_binary duply; then
+     # we found the duply program; check if we can find a profile defined in ReaR config file
+     if [[ -z "$DUPLY_PROFILE" ]]; then
+         # no profile pre-set in local.conf; let's try to find one
+-        DUPLY_PROFILE=$( find /etc/duply $ROOT_HOME_DIR/.duply -name conf 2>&1)
++        DUPLY_PROFILE="$( find /etc/duply $ROOT_HOME_DIR/.duply -name conf 2>&1)"
+         # above result could contain more than one profile
+         [[ -z "$DUPLY_PROFILE" ]] && return
+         find_duply_profile "$DUPLY_PROFILE"
+@@ -50,7 +50,7 @@ if [ "$BACKUP_PROG" = "duplicity" ] && has_binary duply; then
+     [[ -z "$DUPLY_PROFILE" ]] && return
+ 
+     # retrieve the real path of DUPLY_PROFILE in case DUPLY_PROFILE was defined local.conf
+-    DUPLY_PROFILE_FILE=$( ls /etc/duply/$DUPLY_PROFILE/conf $ROOT_HOME_DIR/.duply/$DUPLY_PROFILE/conf 2>/dev/null )
++    DUPLY_PROFILE_FILE="$( ls /etc/duply/$DUPLY_PROFILE/conf $ROOT_HOME_DIR/.duply/$DUPLY_PROFILE/conf 2>/dev/null )"
+     # Assuming we have a duply configuration we must have a path, right?
+     [[ -z "$DUPLY_PROFILE_FILE" ]] && return
+     find_duply_profile "$DUPLY_PROFILE_FILE"
+@@ -71,10 +71,10 @@ if [ "$BACKUP_PROG" = "duplicity" ] && has_binary duply; then
+     # check the scheme of the TARGET variable in DUPLY_PROFILE ($CONF has full path)  to be
+     # sure we have all executables we need in the rescue image
+     source $DUPLY_PROFILE_FILE
+-    local scheme=$( url_scheme $TARGET )
+-    case $scheme in
++    local scheme="$( url_scheme "$TARGET" )"
++    case "$scheme" in
+        (sftp|rsync|scp)
+-           PROGS+=( $scheme )
++           PROGS+=( "$scheme" )
+     esac
+ fi
+ 
+diff --git a/usr/share/rear/prep/DUPLICITY/default/210_check_NETFS_URL_requirements.sh b/usr/share/rear/prep/DUPLICITY/default/210_check_NETFS_URL_requirements.sh
+index 3b4dc7b7..1a4856fd 100644
+--- a/usr/share/rear/prep/DUPLICITY/default/210_check_NETFS_URL_requirements.sh
++++ b/usr/share/rear/prep/DUPLICITY/default/210_check_NETFS_URL_requirements.sh
+@@ -19,9 +19,9 @@
+ StopIfError "You must specify either BACKUP_DUPLICITY_URL or BACKUP_DUPLICITY_NETFS_URL or BACKUP_DUPLICITY_NETFS_MOUNTCMD and BACKUP_DUPLICITY_NETFS_UMOUNTCMD !"
+ 
+ if [[ "$BACKUP_DUPLICITY_NETFS_URL" ]] ; then
+-    local scheme=$( url_scheme $BACKUP_DUPLICITY_NETFS_URL )
+-    local hostname=$( url_hostname $BACKUP_DUPLICITY_NETFS_URL )
+-    local path=$( url_path $BACKUP_DUPLICITY_NETFS_URL )
++    local scheme="$( url_scheme "$BACKUP_DUPLICITY_NETFS_URL" )"
++    local hostname="$( url_hostname "$BACKUP_DUPLICITY_NETFS_URL" )"
++    local path="$( url_path "$BACKUP_DUPLICITY_NETFS_URL" )"
+ 
+     ### check for vaild BACKUP_DUPLICITY_NETFS_URL schemes
+     ### see https://github.com/rear/rear/issues/842
+diff --git a/usr/share/rear/prep/GNU/Linux/300_check_backup_and_output_url.sh b/usr/share/rear/prep/GNU/Linux/300_check_backup_and_output_url.sh
+index ebf8315b..4819292d 100644
+--- a/usr/share/rear/prep/GNU/Linux/300_check_backup_and_output_url.sh
++++ b/usr/share/rear/prep/GNU/Linux/300_check_backup_and_output_url.sh
+@@ -16,9 +16,9 @@
+ local url=""
+ for url in "$BACKUP_URL" "$OUTPUT_URL" ; do
+     test "$url" || continue
+-    local scheme=$( url_scheme $url )
+-    local authority=$( url_host $url )
+-    local path=$( url_path $url )
++    local scheme="$( url_scheme "$url" )"
++    local authority="$( url_host "$url" )"
++    local path="$( url_path "$url" )"
+     case "$scheme" in
+         (file|tape|usb)
+             # file:// tape:// usb:// URLs must not have an authority part (scheme://authority/path)
+diff --git a/usr/share/rear/prep/ISO/GNU/Linux/340_add_isofs_module.sh b/usr/share/rear/prep/ISO/GNU/Linux/340_add_isofs_module.sh
+index 3e705e34..0187a62e 100644
+--- a/usr/share/rear/prep/ISO/GNU/Linux/340_add_isofs_module.sh
++++ b/usr/share/rear/prep/ISO/GNU/Linux/340_add_isofs_module.sh
+@@ -2,7 +2,7 @@
+ # loopback mount the ISO containing the backup
+ # BACKUP_URL=iso://backup
+ 
+-local scheme=$(url_scheme $BACKUP_URL)
++local scheme="$( url_scheme "$BACKUP_URL" )"
+ 
+ case "$scheme" in
+     (iso)
+diff --git a/usr/share/rear/prep/NETFS/default/050_check_NETFS_requirements.sh b/usr/share/rear/prep/NETFS/default/050_check_NETFS_requirements.sh
+index bcee8e96..65ea9609 100644
+--- a/usr/share/rear/prep/NETFS/default/050_check_NETFS_requirements.sh
++++ b/usr/share/rear/prep/NETFS/default/050_check_NETFS_requirements.sh
+@@ -16,16 +16,16 @@
+ StopIfError "You must specify either BACKUP_URL or BACKUP_MOUNTCMD and BACKUP_UMOUNTCMD !"
+ 
+ # url_scheme results the empty string when $BACKUP_URL is empty:
+-local scheme=$( url_scheme $BACKUP_URL )
++local scheme="$( url_scheme "$BACKUP_URL" )"
+ 
+ if [[ "$BACKUP_URL" ]] ; then
+ 
+-    local hostname=$( url_hostname $BACKUP_URL )
+-    local path=$( url_path $BACKUP_URL )
++    local hostname="$( url_hostname "$BACKUP_URL" )"
++    local path="$( url_path "$BACKUP_URL" )"
+ 
+     ### check for vaild BACKUP_URL schemes
+     ### see https://github.com/rear/rear/issues/842
+-    case $scheme in
++    case "$scheme" in
+         (nfs|cifs|usb|tape|file|iso|sshfs|ftpfs)
+             # do nothing for vaild BACKUP_URL schemes
+             :
+diff --git a/usr/share/rear/prep/NETFS/default/070_set_backup_archive.sh b/usr/share/rear/prep/NETFS/default/070_set_backup_archive.sh
+index b7cd8b42..3d1cb7a4 100644
+--- a/usr/share/rear/prep/NETFS/default/070_set_backup_archive.sh
++++ b/usr/share/rear/prep/NETFS/default/070_set_backup_archive.sh
+@@ -22,12 +22,12 @@ fi
+ local backup_file_suffix="$BACKUP_PROG_SUFFIX$BACKUP_PROG_COMPRESS_SUFFIX"
+ local backup_file_name="$BACKUP_PROG_ARCHIVE$backup_file_suffix"
+ 
+-local scheme=$( url_scheme $BACKUP_URL )
+-local path=$( url_path $BACKUP_URL )
++local scheme="$( url_scheme "$BACKUP_URL" )"
++local path="$( url_path "$BACKUP_URL" )"
+ case "$scheme" in
+     (file|iso)
+         # Define the output path according to the scheme
+-        local outputpath=$( backup_path $scheme $path )
++        local outputpath="$( backup_path "$scheme" "$path" )"
+         backuparchive="$outputpath/$backup_file_name"
+         LogPrint "Using backup archive '$backuparchive'"
+         return
+@@ -35,7 +35,7 @@ case "$scheme" in
+     (tape)
+         # TODO: Check if that case is really needed.
+         # Perhaps prep/default/030_translate_tape.sh does already all what is needed.
+-        backuparchive=$path
++        backuparchive="$path"
+         LogPrint "Using backup archive '$backuparchive'"
+         return
+         ;;
+diff --git a/usr/share/rear/prep/NETFS/default/400_automatic_exclude_recreate.sh b/usr/share/rear/prep/NETFS/default/400_automatic_exclude_recreate.sh
+index 2c59ad07..4bf38fa0 100644
+--- a/usr/share/rear/prep/NETFS/default/400_automatic_exclude_recreate.sh
++++ b/usr/share/rear/prep/NETFS/default/400_automatic_exclude_recreate.sh
+@@ -5,8 +5,8 @@
+ # Verify a local backup directory in BACKUP_URL=file:///path and
+ # add its mountpoint to the EXCLUDE_RECREATE array (if necessary).
+ 
+-local scheme=$( url_scheme $BACKUP_URL )
+-local backup_directory=$( url_path $BACKUP_URL )
++local scheme="$( url_scheme "$BACKUP_URL" )"
++local backup_directory="$( url_path "$BACKUP_URL" )"
+ local backup_directory_mountpoint=""
+ 
+ case $scheme in
+@@ -28,7 +28,7 @@ case $scheme in
+             mkdir $v -p "$backup_directory" >&2 || Error "Could not create backup directory '$backup_directory' (from URL '$BACKUP_URL')."
+         fi
+         test -d "$backup_directory" || Error "URL '$BACKUP_URL' specifies '$backup_directory' which is not a directory."
+-        backup_directory_mountpoint=$( df -P "$backup_directory" | tail -1 | awk '{print $6}' )
++        backup_directory_mountpoint="$( df -P "$backup_directory" | tail -1 | awk '{print $6}' )"
+         test "/" = "$backup_directory_mountpoint" && Error "URL '$BACKUP_URL' has the backup directory '$backup_directory' in the '/' filesystem which is forbidden."
+         # When the mountpoint of the backup directory is not yet excluded add its mountpoint to the EXCLUDE_RECREATE array:
+         if ! grep -q "$backup_directory_mountpoint" <<< "${EXCLUDE_RECREATE[*]}" ; then
+diff --git a/usr/share/rear/prep/RBME/default/050_include_rbme_requirements.sh b/usr/share/rear/prep/RBME/default/050_include_rbme_requirements.sh
+index 556d2e5f..06c41987 100644
+--- a/usr/share/rear/prep/RBME/default/050_include_rbme_requirements.sh
++++ b/usr/share/rear/prep/RBME/default/050_include_rbme_requirements.sh
+@@ -1,11 +1,11 @@
+ 
+-scheme=$(url_scheme "$BACKUP_URL")
++scheme="$(url_scheme "$BACKUP_URL")"
+ case $scheme in
+     (nfs)
+         PROGS+=(
+         showmount
+-        mount.$(url_scheme $BACKUP_URL)
+-        umount.$(url_scheme $BACKUP_URL)
++        mount.$(url_scheme "$BACKUP_URL")
++        umount.$(url_scheme "$BACKUP_URL")
+         )
+         ;;
+     (*)
+diff --git a/usr/share/rear/prep/RSYNC/default/100_check_rsync.sh b/usr/share/rear/prep/RSYNC/default/100_check_rsync.sh
+index 448a1b1a..64d18800 100644
+--- a/usr/share/rear/prep/RSYNC/default/100_check_rsync.sh
++++ b/usr/share/rear/prep/RSYNC/default/100_check_rsync.sh
+@@ -7,7 +7,7 @@ if test -z "$BACKUP_URL" ; then
+     Error "Missing BACKUP_URL=rsync://[USER@]HOST[:PORT][::]/PATH !"
+ fi
+ 
+-local scheme=$(url_scheme $BACKUP_URL)  # url_scheme still recognizes old style
++local scheme="$(url_scheme "$BACKUP_URL")"  # url_scheme still recognizes old style
+ 
+ if [[ "$scheme" != "rsync" ]]; then
+     Error "Missing BACKUP_URL=rsync://[USER@]HOST[:PORT][::]/PATH !"
+diff --git a/usr/share/rear/prep/USB/default/060_set_usb_device.sh b/usr/share/rear/prep/USB/default/060_set_usb_device.sh
+index aac579e1..9fdbdcfb 100644
+--- a/usr/share/rear/prep/USB/default/060_set_usb_device.sh
++++ b/usr/share/rear/prep/USB/default/060_set_usb_device.sh
+@@ -1,8 +1,8 @@
+ ### set USB device from OUTPUT_URL
+ if [[ -z "$USB_DEVICE" ]] && [[ "$OUTPUT_URL" ]]; then
+-    local scheme=$(url_scheme $OUTPUT_URL)
+-    local path=$(url_path $OUTPUT_URL)
+-    case $scheme in
++    local scheme="$( url_scheme "$OUTPUT_URL" )"
++    local path="$( url_path "$OUTPUT_URL" )"
++    case "$scheme" in
+         (usb)
+             USB_DEVICE="$path"
+             ;;
+@@ -30,8 +30,8 @@ test "$USB_PREFIX" || USB_PREFIX="rear/$HOSTNAME/$(date +%Y%m%d.%H%M)"
+ 
+ ### Change NETFS_PREFIX to USB_PREFIX if our backup URL is on USB
+ if [[ "$BACKUP_URL" ]] ; then
+-    local scheme=$(url_scheme $BACKUP_URL)
+-    case $scheme in
++    local scheme="$( url_scheme "$BACKUP_URL" )"
++    case "$scheme" in
+         (usb)
+             NETFS_PREFIX="$USB_PREFIX"
+             ;;
+diff --git a/usr/share/rear/prep/default/030_translate_tape.sh b/usr/share/rear/prep/default/030_translate_tape.sh
+index 7efb6603..b992683a 100644
+--- a/usr/share/rear/prep/default/030_translate_tape.sh
++++ b/usr/share/rear/prep/default/030_translate_tape.sh
+@@ -1,9 +1,9 @@
+ # Provide the necessary variables to use tape/obdr information
+ 
+ if [[ "$BACKUP_URL" ]] ; then
+-    backup_scheme=$(url_scheme "$BACKUP_URL")
++    backup_scheme="$(url_scheme "$BACKUP_URL")"
+     if [[ "$backup_scheme" == tape || "$backup_scheme" == obdr ]] ; then
+-        testdevice=$(url_path "$BACKUP_URL")
++        testdevice="$(url_path "$BACKUP_URL")"
+         ### Complain when both are specified, but don't match
+         if [[ "$TAPE_DEVICE" && "$TAPE_DEVICE" != "$testdevice" ]]; then
+             Error "Tape device in BACKUP_URL '$BACKUP_URL' and TAPE_DEVICE '$TAPE_DEVICE' is not the same"
+diff --git a/usr/share/rear/prep/default/040_check_backup_and_output_scheme.sh b/usr/share/rear/prep/default/040_check_backup_and_output_scheme.sh
+index 8d34d305..09461509 100644
+--- a/usr/share/rear/prep/default/040_check_backup_and_output_scheme.sh
++++ b/usr/share/rear/prep/default/040_check_backup_and_output_scheme.sh
+@@ -4,8 +4,8 @@
+ #
+ 
+ if test "$BACKUP_URL" ; then
+-    local backup_scheme=$( url_scheme "$BACKUP_URL" )
+-    case $backup_scheme in
++    local backup_scheme="$( url_scheme "$BACKUP_URL" )"
++    case "$backup_scheme" in
+        (iso)
+            case $WORKFLOW in
+                (mkrescue|mkbackuponly)
+@@ -52,8 +52,8 @@ else
+ fi
+ 
+ if test "$OUTPUT_URL" ; then
+-    local output_scheme=$( url_scheme "$OUTPUT_URL" )
+-    case $output_scheme in
++    local output_scheme="$( url_scheme "$OUTPUT_URL" )"
++    case "$output_scheme" in
+         (fish|ftp|ftps|hftp|http|https|sftp)
+             local required_prog='lftp'
+             has_binary $required_prog || Error "The OUTPUT_URL scheme '$output_scheme' requires the '$required_prog' command which is missing"
+diff --git a/usr/share/rear/restore/BLOCKCLONE/default/390_create_partitions.sh b/usr/share/rear/restore/BLOCKCLONE/default/390_create_partitions.sh
+index eb1cbdce..35993506 100644
+--- a/usr/share/rear/restore/BLOCKCLONE/default/390_create_partitions.sh
++++ b/usr/share/rear/restore/BLOCKCLONE/default/390_create_partitions.sh
+@@ -9,8 +9,8 @@ if [ -z "$BLOCKCLONE_SAVE_MBR_DEV" ]; then
+     return
+ fi
+ 
+-local backup_path=$( url_path $BACKUP_URL )
+-local opath=$( backup_path $scheme $path )
++local backup_path="$( url_path "$BACKUP_URL" )"
++local opath="$( backup_path "$scheme" "$path" )"
+ 
+ # Destination partition is not present, try to recreate.
+ if [ ! -b "$BLOCKCLONE_SOURCE_DEV" ]; then
+diff --git a/usr/share/rear/restore/NETFS/default/380_prepare_multiple_isos.sh b/usr/share/rear/restore/NETFS/default/380_prepare_multiple_isos.sh
+index 458e9728..d8de8d37 100644
+--- a/usr/share/rear/restore/NETFS/default/380_prepare_multiple_isos.sh
++++ b/usr/share/rear/restore/NETFS/default/380_prepare_multiple_isos.sh
+@@ -1,9 +1,9 @@
+ # 380_prepare_multiple_isos
+ #
+ 
+-local scheme=$(url_scheme $BACKUP_URL)
+-local path=$(url_path $BACKUP_URL)
+-local opath=$(backup_path $scheme $path)
++local scheme="$( url_scheme "$BACKUP_URL" )"
++local path="$( url_path "$BACKUP_URL" )"
++local opath="$( backup_path "$scheme" "$path" )"
+ 
+ [[ -f "${opath}/backup.splitted" ]] || return 0
+ 
+diff --git a/usr/share/rear/restore/NETFS/default/400_restore_backup.sh b/usr/share/rear/restore/NETFS/default/400_restore_backup.sh
+index f0bb8671..9daede32 100644
+--- a/usr/share/rear/restore/NETFS/default/400_restore_backup.sh
++++ b/usr/share/rear/restore/NETFS/default/400_restore_backup.sh
+@@ -2,9 +2,9 @@
+ # 400_restore_backup.sh
+ #
+ 
+-local scheme=$( url_scheme $BACKUP_URL )
+-local path=$( url_path $BACKUP_URL )
+-local opath=$( backup_path $scheme $path )
++local scheme="$( url_scheme "$BACKUP_URL" )"
++local path="$( url_path "$BACKUP_URL" )"
++local opath="$( backup_path "$scheme" "$path" )"
+ 
+ # Create backup restore log file name:
+ local backup_restore_log_dir="$VAR_DIR/restore"
+@@ -54,7 +54,7 @@ if test -f $TMP_DIR/backup.splitted ; then
+             touch $waiting_for_medium_flag_file
+             while ! test -f "$backup_file_path" ; do
+                 umount "$BUILD_DIR/outputfs"
+-                cdrom_drive_names=$( cat /proc/sys/dev/cdrom/info | grep -i "drive name:" | awk '{print $3 " " $4}' )
++                cdrom_drive_names="$( cat /proc/sys/dev/cdrom/info | grep -i "drive name:" | awk '{print $3 " " $4}' )"
+                 ProgressInfo "Insert medium labelled $vol_name (containing $backup_file_name) in a CD-ROM drive ($cdrom_drive_names) ..."
+                 sleep 3
+                 for cdrom_dev in $cdrom_drive_names ; do
+@@ -107,7 +107,7 @@ fi
+ for restore_input in "${RESTORE_ARCHIVES[@]}" ; do
+     # Create backup restore log file name (a different one for each restore_input).
+     # Each restore_input is a path like '/tmp/rear.XXXX/outputfs/f121/backup.tar.gz':
+-    restore_input_basename=$( basename $restore_input )
++    restore_input_basename="$( basename "$restore_input" )"
+     backup_restore_log_file=$backup_restore_log_dir/$backup_restore_log_prefix.$restore_input_basename.$MASTER_PID.$backup_restore_log_suffix
+     cat /dev/null >$backup_restore_log_file
+     LogPrint "Restoring from '$restore_input' (restore log in $backup_restore_log_file) ..."
+diff --git a/usr/share/rear/restore/NETFS/default/500_selinux_autorelabel.sh b/usr/share/rear/restore/NETFS/default/500_selinux_autorelabel.sh
+index e212b681..0dabc9ef 100644
+--- a/usr/share/rear/restore/NETFS/default/500_selinux_autorelabel.sh
++++ b/usr/share/rear/restore/NETFS/default/500_selinux_autorelabel.sh
+@@ -8,9 +8,9 @@
+ # answer is yes force auto relabeling the files after the reboot to have a correct SELinux labeled system.
+ 
+ # If selinux was turned off for the backup we have to label the
+-local scheme=$( url_scheme $BACKUP_URL )
+-local path=$( url_path $BACKUP_URL )
+-local opath=$( backup_path $scheme $path )
++local scheme="$( url_scheme "$BACKUP_URL" )"
++local path="$( url_path "$BACKUP_URL" )"
++local opath="$( backup_path "$scheme" "$path" )"
+ 
+ if test -f "$opath/selinux.autorelabel" ; then
+     touch $TARGET_FS_ROOT/.autorelabel
+diff --git a/usr/share/rear/restore/RBME/default/400_restore_backup.sh b/usr/share/rear/restore/RBME/default/400_restore_backup.sh
+index 3e97e16b..210d84b2 100644
+--- a/usr/share/rear/restore/RBME/default/400_restore_backup.sh
++++ b/usr/share/rear/restore/RBME/default/400_restore_backup.sh
+@@ -4,7 +4,7 @@ fi
+ 
+ local backup_prog_rc
+ 
+-scheme=$(url_scheme "$BACKUP_URL")
++scheme="$( url_scheme "$BACKUP_URL" )"
+ 
+ LogPrint "Restoring from backup $RBME_BACKUP."
+ ProgressStart "Preparing restore operation"
+diff --git a/usr/share/rear/restore/YUM/default/410_restore_backup.sh b/usr/share/rear/restore/YUM/default/410_restore_backup.sh
+index a114c5f6..0149475b 100644
+--- a/usr/share/rear/restore/YUM/default/410_restore_backup.sh
++++ b/usr/share/rear/restore/YUM/default/410_restore_backup.sh
+@@ -12,9 +12,9 @@ LogPrint "Restoring system files (YUM_BACKUP_FILES=$YUM_BACKUP_FILES)"
+ # see https://github.com/rear/rear/wiki/Coding-Style
+ set -e -u -o pipefail
+ 
+-local scheme=$(url_scheme $BACKUP_URL)
+-local path=$(url_path $BACKUP_URL)
+-local opath=$(backup_path $scheme $path)
++local scheme="$( url_scheme "$BACKUP_URL" )"
++local path="$( url_path "$BACKUP_URL" )"
++local opath="$( backup_path "$scheme" "$path" )"
+ 
+ # The RESTORE_ARCHIVES array contains the restore input files.
+ # If it is not set, RESTORE_ARCHIVES is only one element which is the backup archive:
+diff --git a/usr/share/rear/verify/NETFS/default/050_start_required_nfs_daemons.sh b/usr/share/rear/verify/NETFS/default/050_start_required_nfs_daemons.sh
+index d4894219..a47712d8 100644
+--- a/usr/share/rear/verify/NETFS/default/050_start_required_nfs_daemons.sh
++++ b/usr/share/rear/verify/NETFS/default/050_start_required_nfs_daemons.sh
+@@ -31,7 +31,7 @@
+ # and predefining all used variables
+ # see https://github.com/rear/rear/wiki/Coding-Style
+ #
+-local backup_url_scheme=$( url_scheme "$BACKUP_URL" )
++local backup_url_scheme="$( url_scheme "$BACKUP_URL" )"
+ # nothing to do when backup_url_scheme is not "nfs"
+ test "nfs" = "$backup_url_scheme" || return 0
+ # predefine all used variables
+diff --git a/usr/share/rear/verify/RBME/default/150_check_nobody_uid_nfs.sh b/usr/share/rear/verify/RBME/default/150_check_nobody_uid_nfs.sh
+index edf15154..7a24da1d 100644
+--- a/usr/share/rear/verify/RBME/default/150_check_nobody_uid_nfs.sh
++++ b/usr/share/rear/verify/RBME/default/150_check_nobody_uid_nfs.sh
+@@ -1,5 +1,5 @@
+ # check if NFS user is nobody - for rsync restore this is a NOGO
+-nfs_uid=$(ls -l $BUILD_DIR/outputfs | tail -1 | awk '{print $3}')
++nfs_uid=$(ls -l "$BUILD_DIR/outputfs" | tail -1 | awk '{print $3}')
+ case "$nfs_uid" in
+     "nobody"|"-1"|"-2"|"4294967294")
+         Error "RBME rsync restore will result in a broken system (owner=$nfs_uid).
+diff --git a/usr/share/rear/verify/RBME/default/540_choose_backup.sh b/usr/share/rear/verify/RBME/default/540_choose_backup.sh
+index a67f1df3..ee81f271 100644
+--- a/usr/share/rear/verify/RBME/default/540_choose_backup.sh
++++ b/usr/share/rear/verify/RBME/default/540_choose_backup.sh
+@@ -1,6 +1,6 @@
+ 
+-scheme=$(url_scheme "$BACKUP_URL")
+-case $scheme in
++scheme="$( url_scheme "$BACKUP_URL" )"
++case "$scheme" in
+     (local|nfs)
+         :
+         ;;
+diff --git a/usr/share/rear/verify/USB/NETFS/default/540_choose_backup_archive.sh b/usr/share/rear/verify/USB/NETFS/default/540_choose_backup_archive.sh
+index 4cbc782c..a90dfd6e 100644
+--- a/usr/share/rear/verify/USB/NETFS/default/540_choose_backup_archive.sh
++++ b/usr/share/rear/verify/USB/NETFS/default/540_choose_backup_archive.sh
+@@ -3,7 +3,7 @@
+ # This script is only run during a backup restore workflow (recover/restoreoly)
+ # so that RESTORE_ARCHIVES is set in this script.
+ 
+-scheme=$( url_scheme "$BACKUP_URL" )
++scheme="$( url_scheme "$BACKUP_URL" )"
+ # Skip if not backup on USB:
+ test "usb" = "$scheme" || return 0
+ 

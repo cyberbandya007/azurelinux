@@ -1,0 +1,35 @@
+From 75c178f6c2943490ef2c13df5863d6ac308f6ef1 Mon Sep 17 00:00:00 2001
+From: Tony Asleson <tasleson@redhat.com>
+Date: Thu, 26 Mar 2020 13:07:48 -0500
+Subject: [PATCH 06/12] nvme.py: Make modprobe work for kmod lib too
+
+The python library 'kmod' is included with libkmod, lets try to use that
+if the user isn't utilizing kmodpy.
+
+Signed-off-by: Tony Asleson <tasleson@redhat.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ nvmet/nvme.py | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/nvmet/nvme.py b/nvmet/nvme.py
+index 04659de..db8a03c 100644
+--- a/nvmet/nvme.py
++++ b/nvmet/nvme.py
+@@ -253,7 +253,12 @@ class Root(CFSNode):
+             except kmod.KmodError:
+                 pass
+         except ImportError:
+-            pass
++            # Try the ctypes library included with the libkmod itself.
++            try:
++                import kmod
++                kmod.Kmod().modprobe(modname)
++            except Exception as e:
++                pass
+ 
+     def _list_subsystems(self):
+         self._check_self()
+-- 
+2.29.2
+

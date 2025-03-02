@@ -1,0 +1,343 @@
+commit 283efdaea10ff62dc94e968f74e1136b8384a954
+Merge: 41c2d9b1 70a39382
+Author: Johannes Meixner <jsmeix@suse.com>
+Date:   Fri Jul 21 14:56:34 2023 +0200
+
+    Merge pull request #3025 from rear/jsmeix-create_grub2_cfg
+    
+    Fixed create_grub2_cfg function usage:
+    Introduced GRUB2_SET_ROOT_COMMAND config variable
+    in addition to the existing GRUB2_SEARCH_ROOT_COMMAND
+    to get consistency how GRUB2 sets and/or searches its 'root' device
+    and adapted the create_grub2_cfg function calls accordingly.
+    Furthermore enhanced some messages regarding Secure Boot setup.
+
+    Cherry-picked-by: Lukáš Zaoral <lzaoral@redhat.com>
+
+diff --git a/usr/share/rear/conf/default.conf b/usr/share/rear/conf/default.conf
+index 3e29280f..5ec89049 100644
+--- a/usr/share/rear/conf/default.conf
++++ b/usr/share/rear/conf/default.conf
+@@ -1210,15 +1210,6 @@ USB_BIOS_BOOT_DEFAULT=""
+ # Default is using GRUB2 for EFI other then elilo, extlinux for ext, syslinux otherwise:
+ USB_BOOTLOADER=
+ #
+-# USB EFI booting can benefit with a better search string than the default:
+-# GRUB2_SEARCH_ROOT_COMMAND="search --no-floppy --set=root --label REAR-EFI
+-# as hardcoded in script output/USB/Linux-i386/100_create_efiboot.sh
+-# Only to be used by experts. An example of a different setup could be:
+-# GRUB2_SEARCH_ROOT_COMMAND="search --no-floppy --set=root --label REAR-EFI --hint hd0,msdos1"
+-# or
+-# GRUB2_SEARCH_ROOT_COMMAND="search --no-floppy --set=root --file /EFI/BOOT/BOOTX64.efi"
+-GRUB2_SEARCH_ROOT_COMMAND=""
+-#
+ # Resulting files that should be copied onto the USB stick:
+ USB_FILES=()
+ #
+@@ -3550,12 +3541,12 @@ GRUB2_INSTALL_DEVICES="${GRUB2_INSTALL_DEVICES:-}"
+ # and /boot/efi, if applicable.
+ # More modules can be installed into the Grub2 standalone image ramdisk without
+ # being included in the core image, see GRUB2_MODULES_UEFI.
+-# This variable currently applies when building Grub2 boot loader for UEFI in two scenarios:
++# This variable currently applies when building GRUB2 boot loader for UEFI in two scenarios:
+ # 1. UEFI boot without secure boot (SECURE_BOOT_BOOTLOADER="")
+ # and / or
+ # 2. UEFI boot with GRUB_RESCUE="y"
+-# Incorrect use of this variable can lead to unusable ReaR recovery system.
+-# When you modify this variable, verify that your ReaR recovery system works.
++# Incorrect use of this variable can lead to an unusable ReaR recovery system.
++# When you specify it, verify that your ReaR recovery system works.
+ GRUB2_MODULES_UEFI_LOAD=()
+ 
+ ##
+@@ -3565,8 +3556,8 @@ GRUB2_MODULES_UEFI_LOAD=()
+ # When empty ReaR will use the defaults of grub-mkstandalone
+ # (install all modules in the standalone image ramdisk)
+ # This variable currently applies in the same scenarios as GRUB2_MODULES_UEFI_LOAD.
+-# Incorrect use of this variable can lead to unusable ReaR recovery system.
+-# When you modify this variable, verify that your ReaR recovery system works.
++# Incorrect use of this variable can lead to an unusable ReaR recovery system.
++# When you specify it, verify that your ReaR recovery system works.
+ GRUB2_MODULES_UEFI=()
+ 
+ ##
+@@ -3587,6 +3578,29 @@ GRUB2_DEFAULT_BOOT="chainloader"
+ # The timeout in seconds to automatically boot GRUB2_DEFAULT_BOOT
+ # when GRUB2 is used as bootloader for the ReaR recovery system.
+ GRUB2_TIMEOUT="$USER_INPUT_TIMEOUT"
++#
++# GRUB2_SET_ROOT_COMMAND
++# GRUB2_SEARCH_ROOT_COMMAND
++# Incorrect use of those variables can lead to an unusable ReaR recovery system.
++# When you specify one of them, verify that your ReaR recovery system works.
++# GRUB2_SET_ROOT_COMMAND is a GRUB2 command to set the 'root' device in GRUB2.
++# For example to set the first CDROM device to be used as 'root' device in GRUB2 use
++# GRUB2_SET_ROOT_COMMAND="set root=cd0"
++# GRUB2_SEARCH_ROOT_COMMAND is a GRUB2 command to let GRUB2 search for its 'root' device.
++# For example USB EFI booting may need a different search string than the default like
++# GRUB2_SEARCH_ROOT_COMMAND="search --no-floppy --set=root --label REAR-EFI"
++# cf. the script output/USB/Linux-i386/100_create_efiboot.sh
++# Other examples of a different setup could be like
++# GRUB2_SEARCH_ROOT_COMMAND="search --no-floppy --set=root --label REAR-EFI --hint hd0,msdos1"
++# or
++# GRUB2_SEARCH_ROOT_COMMAND="search --no-floppy --set=root --file /EFI/BOOT/BOOTX64.efi"
++# When both GRUB2_SET_ROOT_COMMAND and GRUB2_SEARCH_ROOT_COMMAND are specified
++# then GRUB2_SET_ROOT_COMMAND is done before GRUB2_SEARCH_ROOT_COMMAND
++# so GRUB2_SET_ROOT_COMMAND sets a default 'root' device and
++# then GRUB2 searches for a 'root' device via GRUB2_SEARCH_ROOT_COMMAND
++# which is used if one is found - otherwise the default 'root' device is used as fallback.
++GRUB2_SET_ROOT_COMMAND=""
++GRUB2_SEARCH_ROOT_COMMAND=""
+ 
+ ##
+ # USING_UEFI_BOOTLOADER
+@@ -3625,13 +3639,18 @@ USING_UEFI_BOOTLOADER=
+ ##
+ # SECURE_BOOT_BOOTLOADER
+ #
+-# When using Secure Boot set full path of your signed boot loader here.
+-# e. g.
+-# SECURE_BOOT_BOOTLOADER="/boot/efi/EFI/BOOT/shim.efi"
+-#
+-# SECURE_BOOT_BOOTLOADER overrides UEFI_BOOTLOADER
+-#
+-# c.f. https://github.com/rear/rear/pull/1385
++# When using Secure Boot specify the full path of the Secure Boot bootloader.
++# For example: SECURE_BOOT_BOOTLOADER="/boot/efi/EFI/BOOT/shim.efi"
++# SECURE_BOOT_BOOTLOADER overrides UEFI_BOOTLOADER.
++# Normally Shim is the only used Secure Boot bootloader.
++# For a technical description of Shim see https://mjg59.dreamwidth.org/19448.html
++# Shim is a first stage bootloader that loads and executes a second stage bootloader
++# which normally is GRUB that is usually available as a grub*.efi file.
++# When Shim is used, its second stage bootloader can be actually anything
++# named grub*.efi (second stage bootloader is Shim compile time option)
++# so when for example SECURE_BOOT_BOOTLOADER="/boot/efi/EFI/BOOT/shim.efi" is specified
++# then all /boot/efi/EFI/BOOT/grub*.efi files are made available as second stage bootloader.
++# For more details see the output/ISO/Linux-i386/250_populate_efibootimg.sh script.
+ SECURE_BOOT_BOOTLOADER=""
+ 
+ ##
+diff --git a/usr/share/rear/lib/bootloader-functions.sh b/usr/share/rear/lib/bootloader-functions.sh
+index 5f18d2ad..f3e27937 100644
+--- a/usr/share/rear/lib/bootloader-functions.sh
++++ b/usr/share/rear/lib/bootloader-functions.sh
+@@ -536,25 +536,25 @@ function get_root_disk_UUID {
+ # so that kernel and initrd are /boot_mountpoint/path/to/kernel and /boot_mountpoint/path/to/initrd
+ # and that boot partition gets set as root device name for GRUB2's
+ # then $1 would have to be /path/to/kernel and $2 would have to be /path/to/initrd
+-# $3 is an appropriate GRUB2 command to set its root device (usually via GRUB2's 'root' environment variable)
+-# e.g. when the filesystem that contains kernel and initrd has the filesystem label REARBOOT
+-# then $3 could be something like 'search --no-floppy --set root --label REARBOOT'
+ function create_grub2_cfg {
+     local grub2_kernel="$1"
+     test "$grub2_kernel" || BugError "create_grub2_cfg function called without grub2_kernel argument"
+-    DebugPrint "Configuring GRUB2 kernel $grub2_kernel"
++    DebugPrint "Let GRUB2 load kernel $grub2_kernel"
+     local grub2_initrd="$2"
+     test "$grub2_initrd" || BugError "create_grub2_cfg function called without grub2_initrd argument"
+-    DebugPrint "Configuring GRUB2 initrd $grub2_initrd"
+-    local grub2_search_root_command="$3"
+-    if ! test "$grub2_search_root_command" ; then
+-        test "$grub2_set_root" && grub2_search_root_command="set root=$grub2_set_root"
+-    fi
+-    if ! test "$grub2_search_root_command" ; then
+-        test "$GRUB2_SEARCH_ROOT_COMMAND" && grub2_search_root_command="$GRUB2_SEARCH_ROOT_COMMAND"
++    DebugPrint "Let GRUB2 load initrd $grub2_initrd"
++
++    # Before https://github.com/rear/rear/pull/3025 it was possible to call create_grub2_cfg()
++    # with a third argument that is a "search GRUB2 'root' device command" string:
++    test "$3" && BugError "create_grub2_cfg function must not be called with a third argument"
++    # Since https://github.com/rear/rear/pull/3025 GRUB2_SET_ROOT_COMMAND and/or GRUB2_SEARCH_ROOT_COMMAND must be specified:
++    if contains_visible_char "$GRUB2_SEARCH_ROOT_COMMAND" ; then
++        contains_visible_char "$GRUB2_SET_ROOT_COMMAND" && DebugPrint "Set GRUB2 default root device via '$GRUB2_SET_ROOT_COMMAND'"
++        DebugPrint "Let GRUB2 search root device via '$GRUB2_SEARCH_ROOT_COMMAND'"
++    else
++        contains_visible_char "$GRUB2_SET_ROOT_COMMAND" || BugError "create_grub2_cfg function called but neither GRUB2_SET_ROOT_COMMAND nor GRUB2_SEARCH_ROOT_COMMAND is specified"
++        DebugPrint "Set GRUB2 root device via '$GRUB2_SET_ROOT_COMMAND'"
+     fi
+-    test "$grub2_search_root_command" || grub2_search_root_command="search --no-floppy --set=root --file /boot/efiboot.img"
+-    DebugPrint "Configuring GRUB2 root device as '$grub2_search_root_command'"
+ 
+     local grub2_default_menu_entry="$GRUB2_DEFAULT_BOOT"
+     test "$grub2_default_menu_entry" || grub2_default_menu_entry="chainloader"
+@@ -613,6 +613,9 @@ function create_grub2_cfg {
+                 echo "terminal_input serial"
+                 echo "terminal_output serial"
+             fi
++        else
++            DebugPrint "No serial console in GRUB2 (USE_SERIAL_CONSOLE is not true)"
++            echo "echo 'No serial console (USE_SERIAL_CONSOLE was not true)'"
+         fi
+     }
+ 
+@@ -632,7 +635,6 @@ menuentry "Relax-and-Recover (BIOS or UEFI without Secure Boot)" --id=rear {
+     echo 'Loading initial ramdisk $grub2_initrd ...'
+     initrd $grub2_initrd
+ }
+-
+ menuentry "Relax-and-Recover (UEFI and Secure Boot)" --id=rear_secure_boot {
+     insmod gzio
+     insmod xzio
+@@ -714,10 +716,14 @@ EOF
+ 
+     # The actual work starts here.
+     # Create and output GRUB2 configuration.
+-    # Sleep 3 seconds before the GRUB2 menu replaces what there is on the screen
+-    # so that the user has a chance to see possible (error) messages on the screen.
++    # Sleep (interruptible) USER_INPUT_INTERRUPT_TIMEOUT seconds (by default 30 seconds)
++    # before the GRUB2 menu replaces what there is on the screen
++    # so that the user can read and understand possible (error) messages on the screen.
+     cat << EOF
+-$grub2_search_root_command
++$GRUB2_SET_ROOT_COMMAND
++$GRUB2_SEARCH_ROOT_COMMAND
++echo "Using root device (\$root) - available devices are:"
++ls
+ insmod all_video
+ set gfxpayload=keep
+ insmod part_gpt
+@@ -727,8 +733,8 @@ $( create_grub2_serial_entry )
+ set timeout="$grub2_timeout"
+ set default="$grub2_default_menu_entry"
+ set fallback="chainloader"
+-echo 'Switching to GRUB2 boot menu...'
+-sleep --verbose --interruptible 3
++echo 'Switching to GRUB boot menu...'
++sleep --verbose --interruptible $USER_INPUT_INTERRUPT_TIMEOUT
+ $( create_grub2_rear_boot_entry )
+ $( create_grub2_boot_next_entry )
+ $( create_grub2_reboot_entry )
+diff --git a/usr/share/rear/output/ISO/Linux-i386/250_populate_efibootimg.sh b/usr/share/rear/output/ISO/Linux-i386/250_populate_efibootimg.sh
+index c0fc5834..ff97dbd1 100644
+--- a/usr/share/rear/output/ISO/Linux-i386/250_populate_efibootimg.sh
++++ b/usr/share/rear/output/ISO/Linux-i386/250_populate_efibootimg.sh
+@@ -13,22 +13,32 @@ mkdir $v -p $efi_boot_tmp_dir || Error "Could not create $efi_boot_tmp_dir"
+ mkdir $v -p $efi_boot_tmp_dir/fonts || Error "Could not create $efi_boot_tmp_dir/fonts"
+ mkdir $v -p $efi_boot_tmp_dir/locale || Error "Could not create $efi_boot_tmp_dir/locale"
+ 
+-# Copy the grub*.efi executable to EFI/BOOT/BOOTX64.efi
++# Copy the grub*.efi or shim.efi executable to EFI/BOOT/BOOTX64.efi
+ # Intentionally an empty UEFI_BOOTLOADER results an invalid "cp -v /tmp/.../mnt/EFI/BOOT/BOOTX64.efi" command that fails:
+ cp $v "$UEFI_BOOTLOADER" $efi_boot_tmp_dir/BOOTX64.efi || Error "Could not find UEFI_BOOTLOADER '$UEFI_BOOTLOADER'"
+ local uefi_bootloader_dirname="$( dirname $UEFI_BOOTLOADER )"
+ if test -f "$SECURE_BOOT_BOOTLOADER" ; then
+-    # FIXME: Explain why it tests that a SECURE_BOOT_BOOTLOADER file exists
+-    #        but then it copies any grub*.efi files and ignores if there are none.
+-    #        Why does it not copy SECURE_BOOT_BOOTLOADER and errors out if that fails?
+-    # If shim is used, bootloader can be actually anything
+-    # named as grub*.efi (follow-up loader is shim compile time option), see
++    # For a technical description of Shim see https://mjg59.dreamwidth.org/19448.html
++    # Shim is a signed EFI binary that is a first stage bootloader
++    # that loads and executes another (signed) EFI binary
++    # which normally is a second stage bootloader
++    # which normally is a GRUB EFI binary
++    # which normally is available as a file named grub*.efi
++    # so when SECURE_BOOT_BOOTLOADER is used as UEFI_BOOTLOADER
++    # (cf. rescue/default/850_save_sysfs_uefi_vars.sh)
++    # then Shim (usually shim.efi) was copied above as efi_boot_tmp_dir/BOOTX64.efi
++    # and Shim's second stage bootloader must be also copied where Shim already is.
++    DebugPrint "Using Shim '$SECURE_BOOT_BOOTLOADER' as first stage UEFI bootloader BOOTX64.efi"
++    # When Shim is used, its second stage bootloader can be actually anything
++    # named grub*.efi (second stage bootloader is Shim compile time option), see
+     # http://www.rodsbooks.com/efi-bootloaders/secureboot.html#initial_shim
++    local second_stage_UEFI_bootloader_files="$( echo $uefi_bootloader_dirname/grub*.efi )"
+     # Avoid 'nullglob' pitfall when nothing matches .../grub*.efi which results
+     # an invalid "cp -v /tmp/.../mnt/EFI/BOOT/" command that fails
+     # cf. https://github.com/rear/rear/issues/1921
+-    local shim_files="$( echo $uefi_bootloader_dirname/grub*.efi )"
+-    test "$shim_files" && cp $v $shim_files $efi_boot_tmp_dir/
++    test "$second_stage_UEFI_bootloader_files" || Error "Could not find second stage bootloader '$uefi_bootloader_dirname/grub*.efi' for Shim"
++    DebugPrint "Using second stage UEFI bootloader files for Shim: $second_stage_UEFI_bootloader_files"
++    cp $v $second_stage_UEFI_bootloader_files $efi_boot_tmp_dir/ || Error "Failed to copy second stage bootloader files for Shim"
+ fi
+ 
+ # FIXME: Do we need to test if we are ebiso at all?
+@@ -47,6 +57,12 @@ if test "ebiso" = "$( basename $ISO_MKISOFS_BIN )" ; then
+         cp -pL $v $KERNEL_FILE $efi_boot_tmp_dir/kernel || Error "Failed to copy KERNEL_FILE '$KERNEL_FILE' to $efi_boot_tmp_dir/kernel"
+         cp $v $TMP_DIR/$REAR_INITRD_FILENAME $efi_boot_tmp_dir/$REAR_INITRD_FILENAME || Error "Failed to copy initrd '$REAR_INITRD_FILENAME' into $efi_boot_tmp_dir"
+         create_ebiso_elilo_conf > $efi_boot_tmp_dir/elilo.conf
++        # We need to set the GRUB environment variable 'root' to a reasonable default/fallback value
++        # because GRUB's default 'root' (or GRUB's 'root' identifcation heuristics) would point to the ramdisk
++        # but neither kernel nor initrd are located on the ramdisk but on the device where the recovery system was booted from.
++        # GRUB2_SET_ROOT_COMMAND and/or GRUB2_SEARCH_ROOT_COMMAND is needed by the create_grub2_cfg() function.
++        # Set GRUB2_SET_ROOT_COMMAND if not specified by the user:
++        contains_visible_char "$GRUB2_SET_ROOT_COMMAND" || GRUB2_SET_ROOT_COMMAND="set root=cd0"
+         create_grub2_cfg /isolinux/kernel /isolinux/$REAR_INITRD_FILENAME > $efi_boot_tmp_dir/grub.cfg
+     fi
+ fi
+@@ -67,10 +83,12 @@ else
+     # This was seen at least in Debian Buster running in Qemu
+     # (VirtualBox works fine, RHEL/CentOS in Qemu works fine as well).
+     # The GRUB2 image created by grub-mkstandalone has 'root' set to memdisk, which can't work.
+-    # To make ReaR work in this case, set 'root' to a sensible value 'cd0' before trying search
+-    # (via ${grub2_set_root:+"set root=$grub2_set_root"} in the create_grub2_cfg function)
++    # To make ReaR work in this case, set 'root' to a sensible default value 'cd0'
++    # before trying to search via GRUB2_SEARCH_ROOT_COMMAND in the create_grub2_cfg function
+     # cf. https://github.com/rear/rear/issues/2434 and https://github.com/rear/rear/pull/2453
+-    grub2_set_root=cd0
++    # Set GRUB2_SET_ROOT_COMMAND and GRUB2_SEARCH_ROOT_COMMAND if not specified by the user:
++    contains_visible_char "$GRUB2_SET_ROOT_COMMAND" || GRUB2_SET_ROOT_COMMAND="set root=cd0"
++    contains_visible_char "$GRUB2_SEARCH_ROOT_COMMAND" || GRUB2_SEARCH_ROOT_COMMAND="search --no-floppy --set=root --file /boot/efiboot.img"
+     create_grub2_cfg /isolinux/kernel /isolinux/$REAR_INITRD_FILENAME > $efi_boot_tmp_dir/grub.cfg
+ fi
+ 
+diff --git a/usr/share/rear/output/USB/Linux-i386/100_create_efiboot.sh b/usr/share/rear/output/USB/Linux-i386/100_create_efiboot.sh
+index 1f6ca069..8ad4d97e 100644
+--- a/usr/share/rear/output/USB/Linux-i386/100_create_efiboot.sh
++++ b/usr/share/rear/output/USB/Linux-i386/100_create_efiboot.sh
+@@ -93,11 +93,13 @@ EOF
+         ;;
+         (2)
+             DebugPrint "Configuring GRUB2 for EFI boot"
+-            # We need to explicitly set GRUB 2 'root' variable to $efi_label (hardcoded "REAR-EFI")
+-            # because default $root would point to memdisk, where kernel and initrd are NOT present.
+-            # GRUB2_SEARCH_ROOT_COMMAND is used in the create_grub2_cfg() function:
+-            [[ -z "$GRUB2_SEARCH_ROOT_COMMAND" ]] && GRUB2_SEARCH_ROOT_COMMAND="search --no-floppy --set=root --label $efi_label"
+-            # Create config for GRUB 2
++            # We need to set the GRUB environment variable 'root' to the partition device with label $efi_label (hardcoded "REAR-EFI")
++            # because GRUB's default 'root' (or GRUB's 'root' identifcation heuristics) would point to the ramdisk but neither kernel
++            # nor initrd are located on the ramdisk but on the partition device with label $efi_label.
++            # GRUB2_SET_ROOT_COMMAND and/or GRUB2_SEARCH_ROOT_COMMAND is needed by the create_grub2_cfg() function.
++            # Set GRUB2_SEARCH_ROOT_COMMAND if not specified by the user:
++            contains_visible_char "$GRUB2_SEARCH_ROOT_COMMAND" || GRUB2_SEARCH_ROOT_COMMAND="search --no-floppy --set=root --label $efi_label"
++            # Create config for GRUB2:
+             create_grub2_cfg $efi_dir/kernel $efi_dir/$REAR_INITRD_FILENAME > $efi_dst/grub.cfg
+             # Create BOOTX86.efi but only if we are NOT secure booting.
+             # We are not able to create signed boot loader
+diff --git a/usr/share/rear/output/USB/Linux-i386/300_create_grub.sh b/usr/share/rear/output/USB/Linux-i386/300_create_grub.sh
+index c2566bc5..1dbfe1de 100644
+--- a/usr/share/rear/output/USB/Linux-i386/300_create_grub.sh
++++ b/usr/share/rear/output/USB/Linux-i386/300_create_grub.sh
+@@ -70,10 +70,11 @@ if is_true $USING_UEFI_BOOTLOADER ; then
+ # grub[2]-install creates the $BUILD_DIR/outputfs/boot/grub[2] sub-directory that is needed
+ # to create the GRUB2 config $BUILD_DIR/outputfs/boot/grub[2].cfg in the next step:
+ DebugPrint "Creating GRUB2 config for legacy BIOS boot as USB bootloader"
+-test "$USB_DEVICE_BOOT_LABEL" || USB_DEVICE_BOOT_LABEL="REARBOOT"
++contains_visible_char "$USB_DEVICE_BOOT_LABEL" || USB_DEVICE_BOOT_LABEL="REARBOOT"
+ # We need to set the GRUB environment variable 'root' to the partition device with filesystem label USB_DEVICE_BOOT_LABEL
+ # because GRUB's default 'root' (or GRUB's 'root' identifcation heuristics) would point to the ramdisk but neither kernel
+ # nor initrd are located on the ramdisk but on the partition device with filesystem label USB_DEVICE_BOOT_LABEL.
+-# GRUB2_SEARCH_ROOT_COMMAND is used in the create_grub2_cfg() function:
+-GRUB2_SEARCH_ROOT_COMMAND="search --no-floppy --set=root --label $USB_DEVICE_BOOT_LABEL"
+-create_grub2_cfg /$USB_PREFIX/kernel /$USB_PREFIX/$REAR_INITRD_FILENAME > $usb_boot_dir/$grub_cfg || Error "Failed to create $usb_boot_dir/$grub_cfg"
++# GRUB2_SET_ROOT_COMMAND and/or GRUB2_SEARCH_ROOT_COMMAND is needed by the create_grub2_cfg() function.
++# Set GRUB2_SEARCH_ROOT_COMMAND if not specified by the user:
++contains_visible_char "$GRUB2_SEARCH_ROOT_COMMAND" || GRUB2_SEARCH_ROOT_COMMAND="search --no-floppy --set=root --label $USB_DEVICE_BOOT_LABEL"
++create_grub2_cfg /$USB_PREFIX/kernel /$USB_PREFIX/$REAR_INITRD_FILENAME > $usb_boot_dir/$grub_cfg
+diff --git a/usr/share/rear/rescue/default/850_save_sysfs_uefi_vars.sh b/usr/share/rear/rescue/default/850_save_sysfs_uefi_vars.sh
+index a1af17fa..051f2755 100644
+--- a/usr/share/rear/rescue/default/850_save_sysfs_uefi_vars.sh
++++ b/usr/share/rear/rescue/default/850_save_sysfs_uefi_vars.sh
+@@ -135,7 +135,11 @@ for dummy in "once" ; do
+ done
+ 
+ # Show to the user what will actually be used as UEFI bootloader file:
+-LogPrint "Using '$UEFI_BOOTLOADER' as UEFI bootloader file"
++if test -f "$SECURE_BOOT_BOOTLOADER" ; then
++    LogPrint "Using '$UEFI_BOOTLOADER' as UEFI Secure Boot bootloader file"
++else
++    LogPrint "Using '$UEFI_BOOTLOADER' as UEFI bootloader file (non Secure Boot)"
++fi
+ 
+ # Save the variables we need in recover mode into the rescue.conf file:
+ cat - <<EOF >> "$ROOTFS_DIR/etc/rear/rescue.conf"

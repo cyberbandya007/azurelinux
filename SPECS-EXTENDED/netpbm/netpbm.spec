@@ -1,9 +1,9 @@
 Summary:         A library for handling different graphics file formats
 Name:            netpbm
-Version:         11.09.00
-Release:         2%{?dist}
+Version:         11.02.00
+Release:         7%{?dist}
 # See copyright_summary for details
-License:         BSD-3-Clause AND GPL-2.0-only AND LGPL-2.1-or-later AND GPL-3.0-or-later AND IJG AND MIT AND NTP AND PostgreSQL AND LicenseRef-MIT-CRL-Xim AND LicenseRef-Fedora-Public-Domain
+License:         BSD and GPLv2 and IJG and MIT and Public Domain
 URL: http://netpbm.sourceforge.net/
 # Source0 is prepared by
 # svn checkout https://svn.code.sf.net/p/netpbm/code/advanced netpbm-%%{version}
@@ -11,6 +11,7 @@ URL: http://netpbm.sourceforge.net/
 # svn checkout https://svn.code.sf.net/p/netpbm/code/trunk/test netpbm-%%{version}/test
 # and removing the .svn directories ( find -name "\.svn" -type d -print0 | xargs -0 rm -rf )
 Source0:         netpbm-%{version}.tar.xz
+Patch0:          netpbm-security-scripts.patch
 Patch1:          netpbm-security-code.patch
 Patch2:          netpbm-ppmfadeusage.patch
 Patch3:          netpbm-CVE-2017-2587.patch
@@ -23,14 +24,14 @@ Patch9:          netpbm-xwdfix.patch
 Patch10:         netpbm-multilib.patch
 Patch11:         netpbm-glibc.patch
 Patch12:         netpbm-docfix.patch
-Patch13:         netpbm-pamtojpeg2k.patch
-Patch14:         netpbm-manfix.patch
-Patch15:         netpbm-jasper.patch
-Patch16:         netpbm-libdir-so.patch
-Patch17:         netpbm-c99.patch
-Patch18:         netpbm-shlib-ldflags.patch
+Patch14:         netpbm-pamtojpeg2k.patch
+Patch15:         netpbm-manfix.patch
+Patch16:         netpbm-jasper.patch
+Patch17:         netpbm-libdir-so.patch
+Patch18:         netpbm-c99.patch
+Patch19: netpbm-c99-2.patch
 
-BuildRequires:   make
+BuildRequires: make
 BuildRequires:   libjpeg-devel, libpng-devel, libtiff-devel, flex, gcc, jbigkit-devel
 BuildRequires:   libX11-devel, perl-generators, python3, jasper-devel, libxml2-devel
 BuildRequires:   perl(Config), perl(Cwd), perl(English), perl(Fcntl), perl(File::Basename)
@@ -119,7 +120,7 @@ TOP=`pwd`
 
 make \
 	CC="%{__cc}" \
-	LDFLAGS="$LDFLAGS -L$TOP/pbm -L$TOP/pgm -L$TOP/pnm -L$TOP/ppm" \
+	LDFLAGS="$LD_FLAGS -L$TOP/pbm -L$TOP/pgm -L$TOP/pnm -L$TOP/ppm" \
 	CFLAGS="$CFLAGS -fPIC -flax-vector-conversions -fno-strict-aliasing" \
 	CFLAGS_CONFIG="$CFLAGS" \
 	LADD="-lm" \
@@ -229,22 +230,6 @@ popd
 %doc userguide/*
 
 %changelog
-* Thu Feb 06 2025 Josef Ridky <jridky@redhat.com> - 11.09.00-2
-- add LDFLAGS patch (RHEL-70899)
-
-* Tue Jan 28 2025 Josef Ridky <jridky@redhat.com> - 11.09.00-1
-- New upstream release 11.09.00 (#2218312)
-- Review and update license field
-
-* Fri Jan 17 2025 Fedora Release Engineering <releng@fedoraproject.org> - 11.02.00-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_42_Mass_Rebuild
-
-* Fri Dec 13 2024 Lukáš Zaoral <lzaoral@redhat.com> - 11.02.00-9
-- build netpbm with correct LDFLAGS (RHEL-70899)
-
-* Mon Sep 02 2024 Miroslav Suchý <msuchy@redhat.com> - 11.02.00-8
-- convert license to SPDX
-
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 11.02.00-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

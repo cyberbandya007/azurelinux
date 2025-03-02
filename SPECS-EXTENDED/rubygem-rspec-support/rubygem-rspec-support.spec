@@ -1,29 +1,39 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 %global	gem_name	rspec-support
 
-%global	mainver	3.12.0
+%global	mainver	3.13.1
 %undefine	prever
 
-%global	need_bootstrap_set	0
+%global	baserelease	2
+%global	prerpmver	%(echo "%{?prever}" | sed -e 's|\\.||g')
+
+%bcond_with bootstrap
 
 %undefine __brp_mangle_shebangs
 
 Name:		rubygem-%{gem_name}
 Version:	%{mainver}
-Release:	1%{?dist}
+Release:	%{?prever:0.}%{baserelease}%{?prever:.%{prerpmver}}%{?dist}
 
 Summary:	Common functionality to Rspec series
+# SPDX confirmed
 License:	MIT
 URL:		https://github.com/rspec/rspec-support
-Source0:	https://github.com/rspec/rspec-support/archive/refs/tags/v%{version}.tar.gz#/rubygem-%{gem_name}-%{version}.tar.gz
+Source0:	https://rubygems.org/gems/%{gem_name}-%{mainver}%{?prever}.gem
+# %%{SOURCE2} %%{name} %%{version}
+Source1:	rubygem-%{gem_name}-%{version}-full.tar.gz
+Source2:	rspec-related-create-full-tarball.sh
+# tweak regex for search path
+Patch100:	rubygem-rspec-support-3.2.1-callerfilter-searchpath-regex.patch
 
 #BuildRequires:	ruby(release)
 BuildRequires:	rubygems-devel
-%if 0%{?need_bootstrap_set} < 1
+%if %{without bootstrap}
 BuildRequires:	rubygem(rspec)
 BuildRequires:	rubygem(thread_order)
 BuildRequires:	rubygem(bigdecimal)
+# spec/rspec/support/spec/shell_out_spec.rb -> lib/rspec/support/spec/library_wide_checks.rb
+# -> rake (%%check)
+BuildRequires:	rubygem(rake)
 BuildRequires:	git
 %endif
 
@@ -46,7 +56,10 @@ Documentation for %{name}
 %global	version	%{version_orig}%{?prever}
 
 %prep
-%autosetup -S git -n %{gem_name}-%{version}
+%setup -q -T -n %{gem_name}-%{version} -b 1
+gem spec %{SOURCE0} -l --ruby > %{gem_name}.gemspec
+
+%patch -P100 -p1
 
 %build
 gem build %{gem_name}.gemspec
@@ -57,8 +70,9 @@ mkdir -p %{buildroot}%{gem_dir}
 cp -pa .%{gem_dir}/* \
 	%{buildroot}%{gem_dir}/
 
-%if 0%{?need_bootstrap_set} < 1
 %check
+%if %{without bootstrap}
+# UTF-8 is needed
 LANG=C.UTF-8
 
 # Test failure needs investigation...
@@ -75,8 +89,8 @@ for ((i = 0; i < ${#FAILFILE[@]}; i++)) {
 		${FAILFILE[$i]}
 }
 
-ruby -rrubygems -Ilib/ -S rspec spec/ || \
-	ruby -rrubygems -Ilib/ -S rspec --tag ~broken
+export RUBYLIB=$(pwd)/lib
+rspec spec/ || rspec --tag ~broken
 %endif
 
 %files
@@ -93,13 +107,75 @@ ruby -rrubygems -Ilib/ -S rspec spec/ || \
 %doc	%{gem_docdir}
 
 %changelog
-* Mon Nov 28 2022 Muhammad Falak <mwani@microsoft.com> - 3.12.0-1
-- Switch to build from .tar.gz
-- License verified
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.13.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Thu Oct 14 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 3.9.3-2
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
-- Converting the 'Release' tag to the '[number].[distribution]' format.
+* Sun Feb 25 2024 Mamoru TASAKA <mtasaka@fedoraproject.org> - 3.13.1-1
+- 3.13.1
+
+* Fri Feb 09 2024 Mamoru TASAKA <mtasaka@fedoraproject.org> - 3.13.0-1
+- 3.13.0
+
+* Fri Jan 26 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.12.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.12.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Sat Jul  1 2023 Mamoru TASAKA <mtasaka@fedoraproject.org> - 3.12.1-1
+- 3.12.1
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.12.0-3.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Sun Dec 11 2022 Mamoru TASAKA <mtasaka@fedoraproject.org> - 3.12.0-3
+- Backport upstrem patch for pending broken test with ruby >= 3.1.3
+
+* Fri Dec  2 2022 Mamoru TASAKA <mtasaka@fedoraproject.org> - 3.12.0-2
+- Pull upstream patch (under review) for ruby filer deadlock treatment
+
+* Thu Oct 27 2022 Mamoru TASAKA <mtasaka@fedoraproject.org> - 3.12.0-1
+- 3.12.0
+
+* Thu Sep 15 2022 Mamoru TASAKA <mtasaka@fedoraproject.org> - 3.11.1-1
+- 3.11.1
+
+* Sat Jul 23 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.11.0-1.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Feb 10 2022 Mamoru TASAKA <mtasaka@fedoraproject.org> - 3.11.0-1
+- 3.11.0
+
+* Sat Jan 29 2022 Mamoru TASAKA <mtasaka@fedoraproject.org> - 3.10.3-2
+- BR: rubygem(rake) for %%check
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.10.3-1.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Nov  4 2021 Mamoru TASAKA <mtasaka@fedoraproject.org> - 3.10.3-1
+- 3.10.3
+
+* Fri Jul 23 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.10.2-1.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Mon Feb  1 2021 Mamoru TASAKA <mtasaka@fedoraproject.org> - 3.10.2-1
+- 3.10.2
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.10.1-1.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Dec 29 2020 Mamoru TASAKA <mtasaka@fedoraproject.org> - 3.10.1-1
+- 3.10.1
+
+* Fri Dec 11 2020 Mamoru TASAKA <mtasaka@fedoraproject.org> - 3.10.0-1
+- Enable tests again
+
+* Fri Dec 11 2020 Mamoru TASAKA <mtasaka@fedoraproject.org> - 3.10.0-0.1
+- 3.10.0
+- Once disable test for bootstrap
+
+* Wed Jul 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 3.9.3-1.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Sun May  3 2020 Mamoru TASAKA <mtasaka@fedoraproject.org> - 3.9.3-1
 - 3.9.3

@@ -1,18 +1,18 @@
 Summary:	A tiny replacement for Module::Build
 Name:		perl-Module-Build-Tiny
-Version:	0.039
-Release:	17%{?dist}
-License:	GPL+ or Artistic
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+Version:	0.051
+Release:	1%{?dist}
+License:	GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:		https://metacpan.org/release/Module-Build-Tiny
-Source0:	https://cpan.metacpan.org/modules/by-module/Module/Module-Build-Tiny-%{version}.tar.gz#/perl-Module-Build-Tiny-%{version}.tar.gz
+Source0:	https://cpan.metacpan.org/modules/by-module/Module/Module-Build-Tiny-%{version}.tar.gz
 BuildArch:	noarch
 # Module Build
+BuildRequires:	coreutils
 BuildRequires:	perl-generators
 BuildRequires:	perl-interpreter
 # Module
 BuildRequires:	perl(CPAN::Meta)
+BuildRequires:	perl(CPAN::Requirements::Dynamic)
 BuildRequires:	perl(DynaLoader)
 BuildRequires:	perl(Exporter) >= 5.57
 BuildRequires:	perl(ExtUtils::CBuilder)
@@ -36,14 +36,12 @@ BuildRequires:	perl(File::ShareDir)
 BuildRequires:	perl(File::Spec)
 BuildRequires:	perl(File::Temp)
 BuildRequires:	perl(IO::File)
-BuildRequires:	perl(IO::Handle)
 BuildRequires:	perl(IPC::Open2)
-BuildRequires:	perl(IPC::Open3)
-BuildRequires:	perl(Test::More)
+BuildRequires:	perl(Test::More) >= 0.88
 BuildRequires:	perl(Test::Pod) >= 1.41
 BuildRequires:	perl(XSLoader)
-# Runtime
-Requires:	perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
+# Dependencies
+Requires:	perl(CPAN::Requirements::Dynamic)
 Requires:	perl(DynaLoader)
 Requires:	perl(ExtUtils::CBuilder)
 Requires:	perl(ExtUtils::ParseXS)
@@ -75,9 +73,10 @@ perl Build.PL --installdirs=vendor
 
 %install
 ./Build install --destdir=%{buildroot} --create_packlist=0
+%{_fixperms} -c %{buildroot}
 
 %check
-AUTHOR_TESTING=1 RELEASE_TESTING=1 ./Build test
+./Build test --verbose
 
 %files
 %license LICENSE
@@ -86,8 +85,96 @@ AUTHOR_TESTING=1 RELEASE_TESTING=1 ./Build test
 %{_mandir}/man3/Module::Build::Tiny.3*
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.039-17
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Fri Sep  6 2024 Paul Howarth <paul@city-fan.org> - 0.051-1
+- Update to 0.051
+  - Make CPAN::Requirements::Dynamic an optional dependency
+- This package retains hard dependency for consistency of use
+- Run tests verbosely
+
+* Wed Sep  4 2024 Paul Howarth <paul@city-fan.org> - 0.050-1
+- Update to 0.050 (rhbz#2309692)
+  - Revert "Make CPAN::Requirements::Dynamic an optional dependency"
+    (GH#36)
+
+* Wed Sep  4 2024 Paul Howarth <paul@city-fan.org> - 0.049-1
+- Update to 0.049
+  - Make CPAN::Requirements::Dynamic an optional dependency
+- This package retains hard dependency for consistency of use
+
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.048-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Mon Apr 29 2024 Paul Howarth <paul@city-fan.org> - 0.048-1
+- Update to 0.048
+  - Implement dynamic prerequisites
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.047-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.047-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Sep 29 2023 Paul Howarth <paul@city-fan.org> - 0.047-1
+- Update to 0.047
+  - Avoid using empty regex for backwards compatability
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.046-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Fri Jun  2 2023 Paul Howarth <paul@city-fan.org> - 0.046-1
+- Update to 0.046
+  - Add src/ to include paths
+
+* Mon May  1 2023 Paul Howarth <paul@city-fan.org> - 0.045-1
+- Update to 0.045
+  - Fix compilation issue on Windows
+
+* Fri Apr 28 2023 Paul Howarth <paul@city-fan.org> - 0.044-1
+- Update to 0.044
+  - Add module sharedirs
+  - Only add src/*.c files to primary XS file
+
+* Wed Apr 19 2023 Paul Howarth <paul@city-fan.org> - 0.043-1
+- Update to 0.043
+  - Restore manpage generation
+  - Add include/ to include paths
+  - Compile all .c files in src/
+
+* Tue Apr 18 2023 Paul Howarth <paul@city-fan.org> - 0.041-1
+- Update to 0.041
+  - Manify .pod after .pm
+  - Filter out script documentation from scripts
+  - Don't manify podless modules/scripts
+- Use SPDX-format license tag
+- Standardize permissions of packaged files
+- Add fix for POD generation (GH#29)
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.039-25
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.039-24
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Wed Jun 01 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.039-23
+- Perl 5.36 rebuild
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.039-22
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.039-21
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.039-20
+- Perl 5.34 rebuild
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.039-19
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.039-18
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.039-17
+- Perl 5.32 rebuild
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.039-16
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

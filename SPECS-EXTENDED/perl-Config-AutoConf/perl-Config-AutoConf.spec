@@ -1,15 +1,19 @@
+# Use File::Slurper for reading file content
+%bcond_without perl_Config_AutoConf_enables_File_Slurper
+# Use Scalar::Util for detecting numbers
+%bcond_without perl_Config_AutoConf_enables_Scalar_Util
+
 Name:           perl-Config-AutoConf
-Version:        0.318
-Release:        3%{?dist}
+Version:        0.320
+Release:        11%{?dist}
 Summary:        A module to implement some of AutoConf macros in pure Perl
-License:        GPL+ or Artistic
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/Config-AutoConf
-Source0:        https://cpan.metacpan.org/authors/id/R/RE/REHSACK/Config-AutoConf-%{version}.tar.gz#/perl-Config-AutoConf-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/A/AM/AMBS/Config-AutoConf-%{version}.tar.gz
 BuildArch:      noarch
 # Build
 BuildRequires:  gcc
+BuildRequires:  make
 BuildRequires:  perl-interpreter
 BuildRequires:  perl-generators
 BuildRequires:  perl(ExtUtils::MakeMaker) >= 6.76
@@ -23,16 +27,26 @@ BuildRequires:  perl(Config)
 BuildRequires:  perl(constant)
 BuildRequires:  perl(Exporter)
 BuildRequires:  perl(File::Basename)
+%if %{with perl_Config_AutoConf_enables_File_Slurper}
 BuildRequires:  perl(File::Slurper)
+%endif
 BuildRequires:  perl(File::Spec)
 BuildRequires:  perl(File::Temp)
+%if %{with perl_Config_AutoConf_enables_Scalar_Util}
+BuildRequires:  perl(Scalar::Util) >= 1.18
+%endif
 BuildRequires:  perl(Text::ParseWords)
 # Tests only
 BuildRequires:  perl(Cwd)
 BuildRequires:  perl(ExtUtils::CBuilder)
 # Unused BuildRequires:  perl(IO::String)
 BuildRequires:  perl(Test::More)
-Requires:       perl(:MODULE_COMPAT_%(eval "$(/usr/bin/perl -V:version)"; echo $version))
+%if %{with perl_Config_AutoConf_enables_File_Slurper}
+Suggests:       perl(File::Slurper)
+%endif
+%if %{with perl_Config_AutoConf_enables_Scalar_Util}
+Suggests:       perl(Scalar::Util) >= 1.18
+%endif
 
 %description
 This module simulates some of the tasks autoconf macros do.  To detect
@@ -58,8 +72,57 @@ a command, a library and similar.
 %{_mandir}/man3/*
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.318-3
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.320-11
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.320-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.320-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.320-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Fri Mar 03 2023 Michal Josef Špaček <mspacek@redhat.com> - 0.320-7
+- Update license to SPDX format
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.320-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.320-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.320-4
+- Perl 5.36 rebuild
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.320-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.320-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Sun Jun 27 2021 Emmanuel Seyman <emmanuel@seyman.fr> - 0.320-1
+- Update to 0.320
+
+* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.319-4
+- Perl 5.34 rebuild
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.319-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jan 12 2021 Petr Pisar <ppisar@redhat.com> - 0.319-2
+- Suggest File::Slurper for reading file content
+- Suggest Scalar::Util for detecting numbers
+
+* Sun Oct 04 2020 Emmanuel Seyman <emmanuel@seyman.fr> - 0.319-1
+- Update to 0.319
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.318-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.318-3
+- Perl 5.32 rebuild
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.318-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

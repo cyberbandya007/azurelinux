@@ -1,15 +1,16 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 
 ## admin gui build currently busted, FIXME?
 #define _enable_gui --enable-gui
 
 Summary: iODBC Driver Manager
 Name: libiodbc
-Version: 3.52.13
+Version: 3.52.15
 Release: 4%{?dist}
 License: LGPLv2 or BSD
 URL: http://www.iodbc.org/
+#URL: https://github.com/openlink/iODBC
+#Source0: http://www.iodbc.org/downloads/iODBC/libiodbc-%{version}.tar.gz
+#Source0: http://downloads.sf.net/iodbc/libiodbc-%{version}.tar.gz
 Source0: https://github.com/openlink/iODBC/archive/v%{version}/%{name}-%{version}.tar.gz
 
 ## upstream patches
@@ -22,6 +23,7 @@ BuildRequires: gcc
 BuildRequires: chrpath
 # Needed for autogen.sh
 BuildRequires: libtool
+BuildRequires: make
 
 %description
 The iODBC Driver Manager is a free implementation of the SAG CLI and
@@ -110,12 +112,32 @@ rm -rfv %{buildroot}%{_datadir}/libiodbc/samples
 
 
 %changelog
-* Fri Apr 29 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 3.52.13-4
-- Updating source URL.
-- License verified.
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.52.15-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
 
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 3.52.13-3
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.52.15-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.52.15-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Wed Jun 01 2022 Rex Dieter <rdieter@fedoraproject.org> - 3.52.15-1
+- 3.52.15
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.52.13-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.52.13-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.52.13-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 3.52.13-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jun 30 2020 Jeff Law <law@redhat.com> - 3.52.13-3
+- Ignore annobin symbols in configure test
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 3.52.13-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

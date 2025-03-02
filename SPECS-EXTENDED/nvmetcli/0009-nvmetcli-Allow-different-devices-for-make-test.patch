@@ -1,0 +1,146 @@
+From 35e92a1bfedf28868112165892b3eb2cd7f750ce Mon Sep 17 00:00:00 2001
+From: Tony Asleson <tasleson@redhat.com>
+Date: Thu, 2 Apr 2020 10:54:43 -0500
+Subject: [PATCH 09/12] nvmetcli: Allow different devices for make test
+
+The test_nvmet.py by default uses /dev/ram0 and /dev/ram1 for 2 of the
+unit tests.  Add env. variable to allow user to specify different devices
+or files.  Additionally, skip these unit tests that require devices/files
+if they are not present.  Update README too.
+
+$ sudo make test
+......s...s.
+----------------------------------------------------------------------
+Ran 12 tests in 0.043s
+
+OK (skipped=2)
+Name                  Stmts   Miss  Cover
+-----------------------------------------
+nvmet/__init__.py         1      0   100%
+nvmet/nvme.py           517    237    54%
+nvmet/test_nvmet.py     276     63    77%
+-----------------------------------------
+TOTAL                   794    300    62%
+
+$ sudo NVMET_TEST_DEVICES="/dev/sdc,/dev/sdd" make test
+............
+----------------------------------------------------------------------
+Ran 12 tests in 0.124s
+
+OK
+Name                  Stmts   Miss  Cover
+-----------------------------------------
+nvmet/__init__.py         1      0   100%
+nvmet/nvme.py           517    100    81%
+nvmet/test_nvmet.py     276      4    99%
+-----------------------------------------
+TOTAL                   794    104    87%
+
+Signed-off-by: Tony Asleson <tasleson@redhat.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ README              |  5 ++++-
+ nvmet/test_nvmet.py | 26 ++++++++++++++++++++++----
+ 2 files changed, 26 insertions(+), 5 deletions(-)
+
+diff --git a/README b/README
+index 5a4ecd1..44f1c33 100644
+--- a/README
++++ b/README
+@@ -47,7 +47,10 @@ Testing
+ -------
+ nvmetcli comes with a testsuite that tests itself and the kernel configfs
+ interface for the NVMe target.  To run it make sure you have nose2 and
+-the coverage plugin for it installed and simple run 'make test'.
++the coverage plugin for it installed and simple run 'make test'.  To run all
++the tests you also need some test block devices or files.  Default is to
++use /dev/ram0 and /dev/ram1.  You can override default with environmental
++variable eg. NVMET_TEST_DEVICES="/dev/sdk,/dev/sdj" make test .
+ 
+ Development
+ -----------------
+diff --git a/nvmet/test_nvmet.py b/nvmet/test_nvmet.py
+index aae4a86..f8ec232 100644
+--- a/nvmet/test_nvmet.py
++++ b/nvmet/test_nvmet.py
+@@ -1,9 +1,22 @@
+ 
++import os
+ import random
++import stat
+ import string
+ import unittest
+ import nvmet.nvme as nvme
+ 
++# Default test devices are ram disks, but allow user to specify different
++# block devices or files.
++NVMET_TEST_DEVICES = os.getenv("NVMET_TEST_DEVICES",
++                               "/dev/ram0,/dev/ram1").split(',')
++
++
++def test_devices_present():
++    return len([x for x in NVMET_TEST_DEVICES
++                if os.path.exists(x) and
++                (stat.S_ISBLK(os.stat(x).st_mode) or os.path.isfile(x))]) >= 2
++
+ 
+ class TestNvmet(unittest.TestCase):
+     def test_subsystem(self):
+@@ -101,6 +114,8 @@ class TestNvmet(unittest.TestCase):
+             n.delete()
+         self.assertEqual(len(list(s.namespaces)), 0)
+ 
++    @unittest.skipUnless(test_devices_present(),
++                         "Devices %s not available or suitable" % ','.join(NVMET_TEST_DEVICES))
+     def test_namespace_attrs(self):
+         root = nvme.Root()
+         root.clear_existing()
+@@ -116,7 +131,7 @@ class TestNvmet(unittest.TestCase):
+         self.assertRaises(nvme.CFSError, n.set_enable, 1)
+ 
+         # now set a path and enable
+-        n.set_attr('device', 'path', '/dev/ram0')
++        n.set_attr('device', 'path', NVMET_TEST_DEVICES[0])
+         n.set_enable(1)
+         self.assertTrue(n.get_enable())
+ 
+@@ -125,7 +140,7 @@ class TestNvmet(unittest.TestCase):
+ 
+         # test that we can't write to attrs while enabled
+         self.assertRaises(nvme.CFSError, n.set_attr, 'device', 'path',
+-                          '/dev/ram1')
++                          NVMET_TEST_DEVICES[1])
+         self.assertRaises(nvme.CFSError, n.set_attr, 'device', 'nguid',
+                           '15f7767b-50e7-4441-949c-75b99153dea7')
+ 
+@@ -403,6 +418,9 @@ class TestNvmet(unittest.TestCase):
+         self.assertRaises(nvme.CFSError, nvme.Port,
+                           portid=1 << 17, mode='create')
+ 
++    @unittest.skipUnless(test_devices_present(),
++                         "Devices %s not available or suitable" % ','.join(
++                             NVMET_TEST_DEVICES))
+     def test_save_restore(self):
+         root = nvme.Root()
+         root.clear_existing()
+@@ -416,7 +434,7 @@ class TestNvmet(unittest.TestCase):
+         s2.set_attr('attr', 'allow_any_host', 1)
+ 
+         n = nvme.Namespace(s, nsid=42, mode='create')
+-        n.set_attr('device', 'path', '/dev/ram0')
++        n.set_attr('device', 'path', NVMET_TEST_DEVICES[0])
+         n.set_enable(1)
+ 
+         nguid = n.get_attr('device', 'nguid')
+@@ -454,7 +472,7 @@ class TestNvmet(unittest.TestCase):
+ 
+         # and check everything is still the same
+         self.assertTrue(n.get_enable())
+-        self.assertEqual(n.get_attr('device', 'path'), '/dev/ram0')
++        self.assertEqual(n.get_attr('device', 'path'), NVMET_TEST_DEVICES[0])
+         self.assertEqual(n.get_attr('device', 'nguid'), nguid)
+ 
+         self.assertEqual(p.get_attr('addr', 'trtype'), 'loop')
+-- 
+2.29.2
+

@@ -1,17 +1,11 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 Name: dropwatch
-Version: 1.5.3
-Release: 6%{?dist}
+Version: 1.5.4
+Release: 8%{?dist}
 Summary: Kernel dropped packet monitor
 
-License: GPLv2+
+License: GPL-2.0-or-later
 URL: https://github.com/nhorman/dropwatch
 Source0: https://github.com/nhorman/dropwatch/archive/v%{version}/%{name}-%{version}.tar.gz
-Patch0: %{name}-gcc11.patch
-Patch1: %{name}-install-dwdump-manpage.patch
-Patch2: %{name}-configure-update-obsoleted-m4-macros.patch
-Patch3: %{name}-Fix-license-specifiers.patch
 
 BuildRequires: autoconf
 BuildRequires: automake
@@ -52,8 +46,48 @@ network packets.
 %license COPYING
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.5.3-6
-- Initial CBL-Mariner import from Fedora 34 (license: MIT).
+* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.4-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.4-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jan 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.4-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Tue Nov 14 2023 Hangbin Liu <haliu@redhat.com> - 1.5.4-5
+- Update License to SPDX format
+
+* Wed Jul 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.4-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.4-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu May 5 2022 Hangbin Liu <haliu@redhat.com> - 1.5.4-1
+- Update to version 1.5.4
+- Support packet drop reason reporting when included in netlink message
+- fix some minor compilation warnings/errors
+- clean up some comments about deadline support
+- convert configure.ac to use AM_PROG_LIBTOOL from outdated LT_INIT
+- Fix missing SOL_NETLINK define in glibc < 2.24
+- Fix licensing issues that didn't make sense
+- ignore ENOBUFS errors on data socket
+- adding arm64 travis ci testing
+- man page updates
+- move to libnl3 from libnl
+
+* Sat Jan 29 2022 Hangbin Liu <haliu@redhat.com> - 1.5.3-8
+- Fix compilation error with gcc 12
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.3-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.3-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
 
 * Mon Jul 12 2021 Hangbin Liu <haliu@redhat.com> - 1.5.3-5
 - Update spec file

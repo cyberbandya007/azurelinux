@@ -1,12 +1,13 @@
+# Store keys in a temp directory
+%global gnupghome %(mktemp --directory)
+
 Name:           perl-Module-Signature
-Version:        0.83
-Release:        8%{?dist}
+Version:        0.89
+Release:        1%{?dist}
 Summary:        CPAN signature management utilities and modules
-License:        CC0 and (GPL+ or Artistic)
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+License:        CC0-1.0
 URL:            https://metacpan.org/release/Module-Signature
-Source0:        https://cpan.metacpan.org/modules/by-module/Module/Module-Signature-%{version}.tar.gz#/perl-Module-Signature-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/modules/by-module/Module/Module-Signature-%{version}.tar.gz
 BuildArch:      noarch
 # Module build
 BuildRequires:  coreutils
@@ -14,9 +15,8 @@ BuildRequires:  findutils
 BuildRequires:  make
 BuildRequires:  perl-generators
 BuildRequires:  perl-interpreter
-BuildRequires:  perl(FindBin)
 BuildRequires:  perl(inc::Module::Install) >= 0.92
-BuildRequires:  perl(Module::CoreList)
+BuildRequires:  perl(lib)
 BuildRequires:  perl(Module::Install::Can)
 BuildRequires:  perl(Module::Install::External)
 BuildRequires:  perl(Module::Install::Makefile)
@@ -28,7 +28,6 @@ BuildRequires:  sed
 BuildRequires:  gnupg2
 BuildRequires:  perl(constant)
 BuildRequires:  perl(Digest::SHA)
-BuildRequires:  perl(Digest::SHA1)
 BuildRequires:  perl(Exporter)
 BuildRequires:  perl(ExtUtils::Manifest)
 BuildRequires:  perl(File::Spec)
@@ -41,14 +40,11 @@ BuildRequires:  perl(Data::Dumper)
 BuildRequires:  perl(File::Path)
 BuildRequires:  perl(Getopt::Long)
 BuildRequires:  perl(IPC::Run)
-BuildRequires:  perl(lib)
 BuildRequires:  perl(Pod::Usage)
 BuildRequires:  perl(Test::More)
-# Module runtime
-Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
+# Dependencies
 Requires:       gnupg2
 Requires:       perl(Digest::SHA)
-Requires:       perl(Digest::SHA1)
 Requires:       perl(File::Temp)
 Requires:       perl(IO::Socket::INET)
 Requires:       perl(Text::Diff)
@@ -61,15 +57,13 @@ SIGNATURE files for Perl CPAN distributions.
 
 %prep
 %setup -q -n Module-Signature-%{version}
+
 # Remove bundled modules
 rm -r ./inc/*
 sed -i -e '/^inc\//d' MANIFEST
 
-# Create a GPG directory for testing, to avoid using ~/.gnupg
-mkdir --mode=0700 gnupghome
-
 %build
-export GNUPGHOME=$(pwd)/gnupghome
+export GNUPGHOME=%{gnupghome}
 perl Makefile.PL INSTALLDIRS=vendor --skipdeps </dev/null
 make %{?_smp_mflags}
 
@@ -79,23 +73,84 @@ find %{buildroot} -type f -name .packlist -delete
 %{_fixperms} -c %{buildroot}
 
 %check
-export GNUPGHOME=$(pwd)/gnupghome
+export GNUPGHOME=%{gnupghome}
 make test
 
+%clean
+rm -rf %{buildroot} %{gnupghome}
+
 %files
-%license README
-%doc AUTHORS Changes *.pub
+%doc AUTHORS Changes README *.pub
 %{_bindir}/cpansign
 %{perl_vendorlib}/Module/
 %{_mandir}/man1/cpansign.1*
 %{_mandir}/man3/Module::Signature.3*
 
 %changelog
-* Thu Jan 13 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.83-8
-- License verified.
+* Mon Sep 16 2024 Paul Howarth <paul@city-fan.org> - 0.89-1
+- Update to 0.89 (rhbz#2312488)
+  - Replace keyserver with keyserver.ubuntu.com (GH#34, GH#38)
 
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.83-7
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.88-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.88-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.88-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Oct 13 2023 Michal Josef Špaček <mspacek@redhat.com> - 0.88-7
+- Drop redundant dependency of Digest::SHA1; implementation from Digest::SHA
+  is used instead
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.88-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.88-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.88-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Wed Jun 01 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.88-3
+- Perl 5.36 rebuild
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.88-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Sat Dec 18 2021 Paul Howarth <paul@city-fan.org> - 0.88-1
+- Update to 0.88
+  - Update PAUSE keys to 2022
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.87-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.87-4
+- Perl 5.34 rebuild
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.87-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.87-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Sat Jul  4 2020 Paul Howarth <paul@city-fan.org> - 0.87-1
+- Update to 0.87
+  - Skip 3-verify.t on Crypt::OpenPGP installations
+
+* Sat Jun 27 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.86-2
+- Perl 5.32 re-rebuild updated packages
+
+* Thu Jun 25 2020 Paul Howarth <paul@city-fan.org> - 0.86-1
+- Update to 0.86
+  - Update PAUSE and ANDK keys to 2020
+  - Update documentation pertaining to SHA1
+  - Fix compatibility with Crypt::OpenPGP
+- Use mktemp to create temporary GPG directory
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.83-7
+- Perl 5.32 rebuild
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.83-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

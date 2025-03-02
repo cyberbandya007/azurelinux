@@ -1,34 +1,43 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 %global genname superlu
-%global libver 5
 
-## The RPM macro for the linker flags does not exist on EPEL
-%if 0%{?rhel} && 0%{?rhel} < 7
-%{!?__global_ldflags: %global __global_ldflags -Wl,-z,relro}
+Name:		SuperLU
+Version:	6.0.1
+Release:	6%{?dist}
+Summary:	Subroutines to solve sparse linear systems
+License:	BSD-2-Clause AND GPL-2.0-or-later
+URL:		https://portal.nersc.gov/project/sparse/superlu/
+Source0:	https://github.com/xiaoyeli/superlu/archive/v%{version}/%{genname}-%{version}.tar.gz
+
+# Use a pre-made configuration file for Make
+Source1:        %{name}-fedora-make.inc.in
+
+Patch0:		%{genname}-removemc64.patch
+
+# Fix ldflags of example files
+Patch1:         %{name}-fix_example_builds.patch
+
+Patch2:         %{name}-c99.patch
+
+Patch3:         %{name}-%{version}-Update_prototypes_of_BLAS_routines.patch
+
+%if 0%{?fedora} || 0%{?rhel} >= 9
+BuildRequires: pkgconfig(flexiblas)
+%else
+%ifarch %{openblas_arches}
+BuildRequires:	openblas-devel, openblas-srpm-macros
+%else
+BuildRequires:	blas-devel
 %endif
-
-Name:			SuperLU
-Version:		5.2.1
-Release:		10%{?dist}
-Summary:		Subroutines to solve sparse linear systems
-License:		BSD and GPLv2+
-URL:			http://crd-legacy.lbl.gov/~xiaoye/SuperLU/
-Source0:		http://crd-legacy.lbl.gov/~xiaoye/SuperLU/%{genname}_%{version}.tar.gz#/%{genname}-%{version}.tar.gz
-Patch0:			%{genname}-cmake-includedir.patch
-Patch1:			%{genname}-removemc64.patch
-
-# Patch soname (5 -> 5.2) of shared library
-Patch2:                 %{name}-%{version}-set_soname.patch
-
-BuildRequires:    openblas-devel, openblas-srpm-macros
-BuildRequires:		gcc
-%if 0%{?rhel}
-BuildRequires:          epel-rpm-macros
+BuildRequires:	atlas-devel
+%if 0%{?epel}
+BuildRequires:	epel-rpm-macros
 %endif
-BuildRequires:          cmake3
-BuildRequires:		gcc-gfortran
-BuildRequires:		csh
+%endif
+BuildRequires:	metis-devel
+BuildRequires:	make
+BuildRequires:	cmake
+BuildRequires:	gcc, gcc-gfortran
+BuildRequires:	csh
 
 %description
 SuperLU contains a set of subroutines to solve a sparse linear system 
@@ -37,26 +46,36 @@ The columns of A may be preordered before factorization; the
 preordering for sparsity is completely separate from the factorization.
 
 %package devel
-Summary:		Header files and libraries for SuperLU development
-Requires:		%{name}%{?_isa}		=  %{version}-%{release}
+Summary:	Header files and libraries for SuperLU development
+Requires:	%{name}%{?_isa} = %{version}-%{release}
 
 %description devel 
 The %{name}-devel package contains the header files
 and libraries for use with %{name} package.
 
 %package doc
-Summary:		Documentation and Examples for SuperLU
-Requires:		%{name}%{?_isa} = %{version}-%{release}
-
+Summary:	Documentation and Examples for SuperLU
+BuildArch:	noarch
 %description doc
-The %{name}-doc package contains all the help documentation along with C
-and FORTRAN examples.
+The %{name}-doc package contains all the help HTML documentation.
 
 %prep
-%autosetup -n %{name}_%{version} -p1
+%autosetup -n %{genname}-%{version} -N
+
+%patch -P 0 -p1 -b .backup
+%patch -P 1 -p1 -b .backup
+%patch -P 2 -p1 -b .backup
+%patch -P 3 -p1 -b .backup
+
+rm -f make.inc
+cp -pf %{SOURCE1} make.inc.in
+
+# Remove bundled BLAS
+rm -rf CBLAS
 
 rm -fr SRC/mc64ad.f.bak
 find . -type f | sed -e "/TESTING/d" | xargs chmod a-x
+
 # Remove the shippped executables from EXAMPLE
 find EXAMPLE -type f | while read file
 do
@@ -64,44 +83,115 @@ do
 done
 
 # Change optimization level
-sed -i.bak '/NOOPTS/d' make.inc.in
 sed -e 's|-O0|-O2|g' -i SRC/CMakeLists.txt
 
 %build
-mkdir -p build; cd build
-
-# Do not use bundled CBLAS code
-%cmake3 -Denable_blaslib:BOOL=OFF -DCMAKE_BUILD_TYPE:STRING=Release ..
-%make_build
+%cmake \
+   -Denable_internal_blaslib:BOOL=NO \
+   -DXSDK_ENABLE_Fortran:BOOL=OFF \
+   -DCMAKE_Fortran_FLAGS_RELEASE:STRING="%{__global_fflags}" \
+%if 0%{?fedora} || 0%{?rhel} >= 9
+   -DTPL_BLAS_LIBRARIES="`pkg-config --libs flexiblas`" \
+%else
+   -DTPL_BLAS_LIBRARIES=-lopenblas \
+%endif
+   -DTPL_ENABLE_METISLIB:BOOL=ON \
+   -DTPL_METIS_INCLUDE_DIRS:PATH=%{_includedir} \
+   -DTPL_METIS_LIBRARIES:FILEPATH=%{_libdir}/libmetis.so \
+   -DCMAKE_BUILD_TYPE:STRING=Release \
+   -DCMAKE_INSTALL_INCLUDEDIR:PATH=include/%{name} \
+   -DCMAKE_INSTALL_LIBDIR:PATH=%{_lib} \
+   -DCMAKE_SKIP_RPATH:BOOL=YES -DCMAKE_SKIP_INSTALL_RPATH:BOOL=YES
+%cmake_build
 
 %install
-%make_install -C build
+%cmake_install
 
 %check
-pushd build
-ctest3 -V %{?_smp_mflags}
-popd
-
-%ldconfig_scriptlets
+%ctest
 
 %files
 %license License.txt
-%{_libdir}/libsuperlu.so.%{libver}*
+%{_libdir}/libsuperlu.so.6
+%{_libdir}/libsuperlu.so.%{version}
 
 %files devel
 %{_includedir}/%{name}/
 %{_libdir}/libsuperlu.so
+%{_libdir}/cmake/%{genname}/
+%{_libdir}/pkgconfig/%{genname}.pc
 
 %files doc
-%doc DOC EXAMPLE FORTRAN
+%license License.txt
+%doc DOC
 
 %changelog
-* Sat Jul 24 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 5.2.1-10
-- Removing unused BR on "atlas".
+* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 6.0.1-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Mon Jun 14 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 5.2.1-9
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
-- Removing BR on "blas-devel".
+* Wed Apr 10 2024 Antonio Trande <sagitter@fedoraproject.org> - 6.0.1-5
+- Release umber bump
+
+* Sun Mar 31 2024 Antonio Trande <sagitter@fedoraproject.org> - 6.0.1-4
+- Rebuild against Flexiblas on EPEL9 (rhbz#2257325)
+
+* Mon Jan 22 2024 Fedora Release Engineering <releng@fedoraproject.org> - 6.0.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jan 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 6.0.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Wed Aug 09 2023 Antonio Trande <sagitter@fedoraproject.org> - 6.0.1-1
+- Release 6.0.1
+
+* Sat Apr 22 2023 Antonio Trande <sagitter@fedoraproject.org> - 6.0.0-1
+- Release 6.0.0
+
+* Tue Feb 21 2023 Florian Weimer <fweimer@redhat.com> - 5.3.0-5
+- Port to C99
+
+* Wed Jan 18 2023 Fedora Release Engineering <releng@fedoraproject.org> - 5.3.0-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Wed Jul 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 5.3.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Wed Jan 19 2022 Fedora Release Engineering <releng@fedoraproject.org> - 5.3.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Sat Oct 30 2021 Antonio Trande <sagitter@fedoraproject.org> - 5.3.0-1
+- Release 5.3.0
+
+* Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 5.2.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Thu Jan 28 2021 Antonio Trande <sagitter@fedoraproject.org> - 5.2.2-1
+- Release 5.2.2
+
+* Mon Jan 25 2021 Fedora Release Engineering <releng@fedoraproject.org> - 5.2.1-15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Sat Aug 01 2020 Fedora Release Engineering <releng@fedoraproject.org> - 5.2.1-14
+- Second attempt - Rebuilt for
+  https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 5.2.1-13
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Sat Jul 25 2020 Iñaki Úcar <iucar@fedoraproject.org> - 5.2.1-12
+- https://fedoraproject.org/wiki/Changes/FlexiBLAS_as_BLAS/LAPACK_manager
+
+* Tue Jul 21 2020 Merlin Mathesius <mmathesi@redhat.com> - 5.2.1-11
+- Minor conditional fix for ELN
+- Stick to cmake in-source building
+
+* Sun Apr 19 2020 Antonio Trande <sagitter@fedoraproject.org> - 5.2.1-10
+- Doc sub-package provides its own license file
+
+* Sat Apr 18 2020 Antonio Trande <sagitter@fedoraproject.org> - 5.2.1-9
+- Some minor fixes
+- Compile/execute Fortran tests and examples
+- Do not pack example's source code
 
 * Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 5.2.1-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
@@ -112,16 +202,16 @@ popd
 * Thu Jan 31 2019 Fedora Release Engineering <releng@fedoraproject.org> - 5.2.1-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
-* Fri Sep 14 2018 Antonio Trande <sagitterATfedoraproject.org> - 5.2.1-5
+* Fri Sep 14 2018 Antonio Trande <sagitter@fedoraproject.org> - 5.2.1-5
 - Remove gcc-gfortran as required package
 
 * Thu Jul 12 2018 Fedora Release Engineering <releng@fedoraproject.org> - 5.2.1-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
-* Wed Apr 25 2018 Antonio Trande <sagitterATfedoraproject.org> - 5.2.1-3
+* Wed Apr 25 2018 Antonio Trande <sagitter@fedoraproject.org> - 5.2.1-3
 - Patch soname (5 -> 5.2) of shared library
 
-* Sun Apr 15 2018 Antonio Trande <sagitterATfedoraproject.org> - 5.2.1-2
+* Sun Apr 15 2018 Antonio Trande <sagitter@fedoraproject.org> - 5.2.1-2
 - Use cmake3 on rhel
 - Use blas from system
 
@@ -131,11 +221,11 @@ popd
 - Drop obsolete patches
 - Resolves #1547494 - build with standard Fedora flags
 
-* Wed Feb 21 2018 Antonio Trande <sagitterATfedoraproject.org> - 5.2.0-8
+* Wed Feb 21 2018 Antonio Trande <sagitter@fedoraproject.org> - 5.2.0-8
 - Add gcc BR
 - Remove el5 bits
 
-* Thu Feb 15 2018 Antonio Trande <sagitterATfedoraproject.org> - 5.2.0-7
+* Thu Feb 15 2018 Antonio Trande <sagitter@fedoraproject.org> - 5.2.0-7
 - Use %%ldconfig_scriptlets
 
 * Wed Feb 07 2018 Fedora Release Engineering <releng@fedoraproject.org> - 5.2.0-6

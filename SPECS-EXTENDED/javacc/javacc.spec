@@ -57,7 +57,7 @@ BuildRequires:  javapackages-bootstrap
 %else
 BuildRequires:  javapackages-local
 BuildRequires:  ant
-BuildRequires:  javacc
+#BuildRequires:  javacc
 %endif
 
 # Explicit javapackages-tools requires since scripts use
@@ -65,7 +65,7 @@ BuildRequires:  javacc
 Requires:       javapackages-tools
 
 BuildArch:      noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 
 %description
 Java Compiler Compiler (JavaCC) is the most popular parser generator for use

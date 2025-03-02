@@ -22,7 +22,7 @@ Source2: MANIFEST.MF
 Patch0: 0001-Always-generate-bytecode-debuginfo.patch
 
 BuildArch: noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 
 BuildRequires: ant
 BuildRequires: javapackages-local

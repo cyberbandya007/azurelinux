@@ -1,5 +1,3 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 # Conditionals
 # Invoke "rpmbuild --without <feature>" or "rpmbuild --with <feature>"
 # to disable or enable specific features
@@ -7,13 +5,14 @@ Distribution:   Azure Linux
 %bcond_with runautogen
 %bcond_without systemd
 
+%global gitver %{?numcomm:.%{numcomm}}%{?alphatag:.%{alphatag}}%{?dirty:.%{dirty}}
 %global gittarver %{?numcomm:.%{numcomm}}%{?alphatag:-%{alphatag}}%{?dirty:-%{dirty}}
 
 Name: corosync-qdevice
 Summary: The Corosync Cluster Engine Qdevice
-Version: 3.0.1
-Release: 3%{?dist}
-License: BSD
+Version: 3.0.3
+Release: 6%{?gitver}%{?dist}
+License: BSD-3-Clause
 URL: https://github.com/corosync/corosync-qdevice
 Source0: https://github.com/corosync/corosync-qdevice/releases/download/v%{version}%{?gittarver}/%{name}-%{version}%{?gittarver}.tar.gz
 
@@ -42,6 +41,7 @@ BuildRequires: nss-devel
 %if %{with runautogen}
 BuildRequires: autoconf automake libtool
 %endif
+BuildRequires: make
 
 %prep
 %setup -q -n %{name}-%{version}%{?gittarver}
@@ -64,10 +64,10 @@ BuildRequires: autoconf automake libtool
 	--with-systemddir=%{_unitdir} \
 	--docdir=%{_docdir}
 
-make %{_smp_mflags}
+%make_build
 
 %install
-make install DESTDIR=%{buildroot}
+%make_install
 
 ## tree fixup
 # drop docs and html docs for now
@@ -162,7 +162,7 @@ script for creating NSS certificates and an init script.
 %pre -n corosync-qnetd
 getent group coroqnetd >/dev/null || groupadd -r coroqnetd
 getent passwd coroqnetd >/dev/null || \
-    useradd -r -g coroqnetd -d / -s /usr/sbin/nologin -c "User for corosync-qnetd" coroqnetd
+    useradd -r -g coroqnetd -d / -s /sbin/nologin -c "User for corosync-qnetd" coroqnetd
 exit 0
 
 %post -n corosync-qnetd
@@ -207,15 +207,58 @@ fi
 %{_mandir}/man8/corosync-qnetd.8*
 
 %changelog
-* Thu Oct 14 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 3.0.1-3
-- Converting the 'Release' tag to the '[number].[distribution]' format.
+* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.3-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Fri Apr 30 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 3.0.1-2
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
-- Making binaries paths compatible with CBL-Mariner's paths.
+* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.3-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jan 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.3-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Wed Jul 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.3-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Tue Jun 06 2023 Jan Friesse <jfriesse@redhat.com> - 3.0.3-2
+- migrated to SPDX license
+
+* Wed Mar 22 2023 Jan Friesse <jfriesse@redhat.com> - 3.0.3-1
+- New upstream release
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Nov 03 2022 Jan Friesse <jfriesse@redhat.com> - 3.0.2-1
+- New upstream release
+
+* Wed Jul 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.1-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Wed Jan 19 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
 * Mon Nov 23 2020 Jan Friesse <jfriesse@redhat.com> - 3.0.1-1
 - New upstream release
+
+* Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.0-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Wed Jul 22 2020 Jan Friesse <jfriesse@redhat.com> - 3.0.0-9
+- Use make macros
+- https://fedoraproject.org/wiki/Changes/UseMakeBuildInstallMacro
+
+* Wed May 13 2020 Jan Friesse <jfriesse@redhat.com> - 3.0.0-8
+- Really rebuild for the new libqb
+
+* Wed May 13 2020 Jan Friesse <jfriesse@redhat.com> - 3.0.0-7
+- Rebuild for new libqb
+
+* Thu Mar 26 2020 Jan Friesse <jfriesse@redhat.com> - 3.0.0-6
+- Add CI tests
+- Enable gating
 
 * Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.0-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

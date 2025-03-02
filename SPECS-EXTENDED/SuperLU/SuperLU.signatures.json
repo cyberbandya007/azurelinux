@@ -1,5 +1,6 @@
 {
  "Signatures": {
-  "superlu-5.2.1.tar.gz": "28fb66d6107ee66248d5cf508c79de03d0621852a0ddeba7301801d3d859f463"
+  "SuperLU-fedora-make.inc.in": "e918165e7039b02bb5e67896aed16875f8d6946e0e9aed2f6dfbd9618fad3a5e",
+  "superlu-6.0.1.tar.gz": "6c5a3a9a224cb2658e9da15a6034eed44e45f6963f5a771a6b4562f7afb8f549"
  }
 }

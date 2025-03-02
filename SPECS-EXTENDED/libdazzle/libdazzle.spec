@@ -1,18 +1,16 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 %global glib2_version 2.57.2
 %global gtk3_version 3.24.0
 
 Name:           libdazzle
-Version:        3.36.0
-Release:        3%{?dist}
+Version:        3.44.0
+Release:        7%{?dist}
 Summary:        Experimental new features for GTK+ and GLib
 
 License:        GPLv3+
-URL:            https://git.gnome.org/browse/libdazzle/
-Source0:        https://download.gnome.org/sources/%{name}/3.36/%{name}-%{version}.tar.xz
+URL:            https://gitlab.gnome.org/GNOME/libdazzle
+Source0:        https://download.gnome.org/sources/%{name}/3.42/%{name}-%{version}.tar.xz
 
-BuildRequires:  %{_bindir}/xsltproc
+BuildRequires:  gtk-doc
 BuildRequires:  meson
 BuildRequires:  vala
 
@@ -23,7 +21,7 @@ BuildRequires:  pkgconfig(gobject-introspection-1.0)
 BuildRequires:  pkgconfig(gtk+-3.0) >= %{gtk3_version}
 
 # for tests
-BuildRequires:  xorg-x11-server-Xvfb
+BuildRequires:  tigervnc-server-minimal
 BuildRequires:  words
 
 Requires:       glib2%{?_isa} >= %{glib2_version}
@@ -50,19 +48,23 @@ developing applications that use %{name}.
 
 
 %build
-%meson -D enable_gtk_doc=false
+%meson -D enable_gtk_doc=true
 %meson_build
 
 
 %install
 %meson_install
 
+%find_lang libdazzle-1.0
+
 
 %check
-xvfb-run -w 10 ninja test %{__ninja_common_opts} -C %{_vpath_builddir}
+Xvnc :99 -nolisten tcp &
+export DISPLAY=:99
+%meson_test
 
 
-%files
+%files -f libdazzle-1.0.lang
 %license COPYING
 %doc AUTHORS NEWS README.md
 %{_bindir}/dazzle-list-counters
@@ -74,6 +76,9 @@ xvfb-run -w 10 ninja test %{__ninja_common_opts} -C %{_vpath_builddir}
 %doc CONTRIBUTING.md examples
 %dir %{_datadir}/gir-1.0
 %{_datadir}/gir-1.0/Dazzle-1.0.gir
+%dir %{_datadir}/gtk-doc
+%dir %{_datadir}/gtk-doc/html
+%{_datadir}/gtk-doc/html/libdazzle
 %dir %{_datadir}/vala
 %dir %{_datadir}/vala/vapi
 %{_datadir}/vala/vapi/libdazzle-1.0.*
@@ -83,13 +88,61 @@ xvfb-run -w 10 ninja test %{__ninja_common_opts} -C %{_vpath_builddir}
 
 
 %changelog
-* Mon Mar 21 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 3.36.0-3
-- Adding BR on '%%{_bindir}/xsltproc'.
-- Disabled gtk doc generation to remove network dependency during build-time.
-- License verified.
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.44.0-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 3.36.0-2
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.44.0-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.44.0-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.44.0-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.44.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.44.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Sat Mar 19 2022 David King <amigadave@amigadave.com> - 3.44.0-1
+- Update to 3.44.0
+
+* Wed Mar 09 2022 David King <amigadave@amigadave.com> - 3.43.90-1
+- Update to 3.43.90
+
+* Fri Jan 21 2022 Yanko Kaneti <yaneti@declera.com> - 3.42.0-4
+- Switch to running tests under Xvnc instead of xvfb
+
+* Fri Jan 21 2022 Yanko Kaneti <yaneti@declera.com> - 3.42.0-3
+- Run test one at a time to tyy to fix FTBFS
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.42.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Wed Sep 08 2021 Kalev Lember <klember@redhat.com> - 3.42.0-1
+- Update to 3.42.0
+- Include translations
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.40.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Mon Mar 22 2021 Kalev Lember <klember@redhat.com> - 3.40.0-1
+- Update to 3.40.0
+- Update upstream URL
+
+* Tue Jan 26 2021 Kalev Lember <klember@redhat.com> - 3.38.0-2
+- Use meson_test macro instead of 'ninja test'
+
+* Sat Sep 12 2020 Kalev Lember <klember@redhat.com> - 3.38.0-1
+- Update to 3.38.0
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 3.37.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Mon Jul 20 2020 Kalev Lember <klember@redhat.com> - 3.37.1-1
+- Update to 3.37.1
 
 * Fri Mar 06 2020 Kalev Lember <klember@redhat.com> - 3.36.0-1
 - Update to 3.36.0

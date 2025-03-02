@@ -1,0 +1,321 @@
+commit ec9080664303165799a215cef062826b65f6a6f8
+Author: Johannes Meixner <jsmeix@suse.com>
+Date:   Fri Apr 12 15:25:28 2024 +0200
+
+    New unique_unsorted() function (#3177)
+    
+    In lib/global-functions.sh added a
+    new unique_unsorted() function
+    that outputs lines in a file or from STDIN
+    without subsequent duplicate lines
+    which keeps the ordering of the lines, see
+    https://github.com/rear/rear/pull/3177
+    In backup/NETFS/default/500_make_backup.sh use
+    unique_unsorted $TMP_DIR/backup-include.txt
+    to ignore duplicate arguments provided
+    to 'tar' and 'rsync' what should be archived
+    to avoid that 'tar' and 'rsync' archive
+    exact same things multiple times
+    which needlessly increases backup time and
+    in case of 'tar' the backup archive size and
+    storage space and backup restore time, cf.
+    https://github.com/rear/rear/pull/3175#issuecomment-1985306750
+
+    Cherry-picked-by: Lukáš Zaoral <lzaoral@redhat.com>
+
+diff --git a/usr/share/rear/backup/NETFS/default/500_make_backup.sh b/usr/share/rear/backup/NETFS/default/500_make_backup.sh
+index feb4d322..fba03338 100644
+--- a/usr/share/rear/backup/NETFS/default/500_make_backup.sh
++++ b/usr/share/rear/backup/NETFS/default/500_make_backup.sh
+@@ -42,10 +42,10 @@ fi
+ 
+ # Log what is included in the backup and what is excluded from the backup
+ # cf. backup/NETFS/default/400_create_include_exclude_files.sh
+-Log "Backup include list (backup-include.txt contents):"
++Log "Backup include list (backup-include.txt contents without subsequent duplicates):"
+ while read -r backup_include_item ; do
+     test "$backup_include_item" && Log "  $backup_include_item"
+-done < $TMP_DIR/backup-include.txt
++done < <( unique_unsorted $TMP_DIR/backup-include.txt )
+ Log "Backup exclude list (backup-exclude.txt contents):"
+ while read -r backup_exclude_item ; do
+     test "$backup_exclude_item" && Log "  $backup_exclude_item"
+@@ -127,7 +127,7 @@ case "$(basename ${BACKUP_PROG})" in
+                 $BACKUP_PROG_CREATE_NEWER_OPTIONS \
+                 ${BACKUP_PROG_BLOCKS:+-b $BACKUP_PROG_BLOCKS} "${BACKUP_PROG_COMPRESS_OPTIONS[@]}" \
+                 -X $TMP_DIR/backup-exclude.txt -C / -c -f - \
+-                $(cat $TMP_DIR/backup-include.txt) $RUNTIME_LOGFILE \| $BACKUP_PROG_CRYPT_OPTIONS BACKUP_PROG_CRYPT_KEY \| $SPLIT_COMMAND
++                $(unique_unsorted $TMP_DIR/backup-include.txt) $RUNTIME_LOGFILE \| $BACKUP_PROG_CRYPT_OPTIONS BACKUP_PROG_CRYPT_KEY \| $SPLIT_COMMAND
+         else
+             Log $BACKUP_PROG $TAR_OPTIONS --sparse --block-number --totals --verbose \
+                 --no-wildcards-match-slash --one-file-system \
+@@ -135,7 +135,7 @@ case "$(basename ${BACKUP_PROG})" in
+                 $BACKUP_PROG_CREATE_NEWER_OPTIONS \
+                 ${BACKUP_PROG_BLOCKS:+-b $BACKUP_PROG_BLOCKS} "${BACKUP_PROG_COMPRESS_OPTIONS[@]}" \
+                 -X $TMP_DIR/backup-exclude.txt -C / -c -f - \
+-                $(cat $TMP_DIR/backup-include.txt) $RUNTIME_LOGFILE \| $SPLIT_COMMAND
++                $(unique_unsorted $TMP_DIR/backup-include.txt) $RUNTIME_LOGFILE \| $SPLIT_COMMAND
+         fi
+ 
+         if is_true "$BACKUP_PROG_CRYPT_ENABLED" ; then
+@@ -151,7 +151,7 @@ case "$(basename ${BACKUP_PROG})" in
+                 ${BACKUP_PROG_BLOCKS:+-b $BACKUP_PROG_BLOCKS}                       \
+                 "${BACKUP_PROG_COMPRESS_OPTIONS[@]}"                                \
+                 -X $TMP_DIR/backup-exclude.txt -C / -c -f -                         \
+-                $(cat $TMP_DIR/backup-include.txt) $RUNTIME_LOGFILE |               \
++                $(unique_unsorted $TMP_DIR/backup-include.txt) $RUNTIME_LOGFILE |   \
+             { $BACKUP_PROG_CRYPT_OPTIONS "$BACKUP_PROG_CRYPT_KEY" ; } 2>/dev/null | \
+             $SPLIT_COMMAND
+             pipes_rc=( ${PIPESTATUS[@]} )
+@@ -160,14 +160,14 @@ case "$(basename ${BACKUP_PROG})" in
+                 "$(basename $(echo "$BACKUP_PROG" | awk '{ print $1 }'))"
+                 "$(basename $(echo "$SPLIT_COMMAND" | awk '{ print $1 }'))"
+             )
+-            $BACKUP_PROG $TAR_OPTIONS --sparse --block-number --totals --verbose    \
+-                --no-wildcards-match-slash --one-file-system                        \
+-                --ignore-failed-read "${BACKUP_PROG_OPTIONS[@]}"                    \
+-                $BACKUP_PROG_CREATE_NEWER_OPTIONS                                   \
+-                ${BACKUP_PROG_BLOCKS:+-b $BACKUP_PROG_BLOCKS}                       \
+-                "${BACKUP_PROG_COMPRESS_OPTIONS[@]}"                                \
+-                -X $TMP_DIR/backup-exclude.txt -C / -c -f -                         \
+-                $(cat $TMP_DIR/backup-include.txt) $RUNTIME_LOGFILE |               \
++            $BACKUP_PROG $TAR_OPTIONS --sparse --block-number --totals --verbose    \
++                --no-wildcards-match-slash --one-file-system                        \
++                --ignore-failed-read "${BACKUP_PROG_OPTIONS[@]}"                    \
++                $BACKUP_PROG_CREATE_NEWER_OPTIONS                                   \
++                ${BACKUP_PROG_BLOCKS:+-b $BACKUP_PROG_BLOCKS}                       \
++                "${BACKUP_PROG_COMPRESS_OPTIONS[@]}"                                \
++                -X $TMP_DIR/backup-exclude.txt -C / -c -f -                         \
++                $(unique_unsorted $TMP_DIR/backup-include.txt) $RUNTIME_LOGFILE |   \
+             $SPLIT_COMMAND
+             pipes_rc=( ${PIPESTATUS[@]} )
+         fi
+@@ -213,21 +213,21 @@ case "$(basename ${BACKUP_PROG})" in
+         mkdir -p $v "$backuparchive" >&2
+         Log $BACKUP_PROG --verbose "${BACKUP_RSYNC_OPTIONS[@]}" --one-file-system --delete \
+             --exclude-from=$TMP_DIR/backup-exclude.txt --delete-excluded \
+-            $(cat $TMP_DIR/backup-include.txt) "$backuparchive"
++            $(unique_unsorted $TMP_DIR/backup-include.txt) "$backuparchive"
+         $BACKUP_PROG --verbose "${BACKUP_RSYNC_OPTIONS[@]}" --one-file-system --delete \
+             --exclude-from=$TMP_DIR/backup-exclude.txt --delete-excluded \
+-            $(cat $TMP_DIR/backup-include.txt) "$backuparchive" >&2
++            $(unique_unsorted $TMP_DIR/backup-include.txt) "$backuparchive" >&2
+     ;;
+     (*)
+         Log "Using unsupported backup program '$BACKUP_PROG'"
+         Log $BACKUP_PROG "${BACKUP_PROG_COMPRESS_OPTIONS[@]}" \
+             $BACKUP_PROG_OPTIONS_CREATE_ARCHIVE $TMP_DIR/backup-exclude.txt \
+             "${BACKUP_PROG_OPTIONS[@]}" "$backuparchive" \
+-            $(cat $TMP_DIR/backup-include.txt) $RUNTIME_LOGFILE > "$backuparchive"
++            $(unique_unsorted $TMP_DIR/backup-include.txt) $RUNTIME_LOGFILE > "$backuparchive"
+         $BACKUP_PROG "${BACKUP_PROG_COMPRESS_OPTIONS[@]}" \
+             $BACKUP_PROG_OPTIONS_CREATE_ARCHIVE $TMP_DIR/backup-exclude.txt \
+             "${BACKUP_PROG_OPTIONS[@]}" "$backuparchive" \
+-            $(cat $TMP_DIR/backup-include.txt) $RUNTIME_LOGFILE > "$backuparchive"
++            $(unique_unsorted $TMP_DIR/backup-include.txt) $RUNTIME_LOGFILE > "$backuparchive"
+     ;;
+ esac 2> "${TMP_DIR}/${BACKUP_PROG_ARCHIVE}.log"
+ # For the rsync and default case the backup prog is the last in the case entry
+diff --git a/usr/share/rear/lib/global-functions.sh b/usr/share/rear/lib/global-functions.sh
+index 77263cb1..1fc083b4 100644
+--- a/usr/share/rear/lib/global-functions.sh
++++ b/usr/share/rear/lib/global-functions.sh
+@@ -14,6 +14,35 @@ function read_and_strip_file () {
+     sed -e '/^[[:space:]]/d;/^$/d;/^#/d' "$filename"
+ }
+ 
++# Output lines in STDIN or in a file without subsequent duplicate lines
++# i.e. for each line that was seen (and output) do not output subsequent duplicates of that line.
++# This keeps the ordering of the lines so the input
++#   one
++#   two
++#   one
++#   three
++#   two
++#   one
++# gets output as
++#   one
++#   two
++#   three
++# To remove duplicate lines and keep the ordering one could use ... | cat -n | sort -uk2 | sort -nk1 | cut -f2-
++# cf. https://stackoverflow.com/questions/11532157/remove-duplicate-lines-without-sorting/11532197#11532197
++# that also explains an awk command that prints each line provided the line was not seen before.
++# The awk variable $0 holds an entire line and square brackets is associative array access in awk.
++# For each line the node of the associative array 'seen' is incremented and the line is printed
++# if the content of that node was not '!' previously set (i.e. if the line was not previously seen)
++# cf. https://www.thegeekstuff.com/2010/03/awk-arrays-explained-with-5-practical-examples/
++function unique_unsorted () {
++    local filename="$1"
++    if test "$filename" ; then
++        test -r "$filename" && awk '!seen[$0]++' "$filename"
++    else
++        awk '!seen[$0]++'
++    fi
++}
++
+ # Three functions to test
+ #   if the argument is an integer
+ #   if the argument is a positive integer (i.e. test for '> 0')
+
+commit 2da70f54936e5c558c9f607b1526b9b17f6501b1
+Author: Lukáš Zaoral <lzaoral@redhat.com>
+Date:   Fri Jul 12 10:44:04 2024 +0200
+
+    Automatically include mounted btrfs subvolumes in NETFS backups  (#3175)
+    
+    * automatically exclude btrfs snapshot subvolumes from 'btrfsmountedsubvol'
+    
+    Related: https://github.com/rear/rear/pull/3175#issuecomment-1983498175
+    
+    * automatically include mounted btrfs subvolumes in NETFS backups
+    
+    ... unless they are explicitly excluded.
+    
+    Resolves: https://github.com/rear/rear/issues/2928
+    
+    * always add the excluded component in RESTORE_EXCLUDE_FILE
+    
+    Otherwise, the component itself would not be included if it had any child
+    components of the `fs` type.
+    
+    * automatically exclude btrfs subvolume children of excluded components
+
+    Cherry-picked-by: Lukáš Zaoral <lzaoral@redhat.com>
+
+diff --git a/usr/share/rear/layout/prepare/default/610_exclude_from_restore.sh b/usr/share/rear/layout/prepare/default/610_exclude_from_restore.sh
+index 0a902041..1e7522b2 100644
+--- a/usr/share/rear/layout/prepare/default/610_exclude_from_restore.sh
++++ b/usr/share/rear/layout/prepare/default/610_exclude_from_restore.sh
+@@ -7,24 +7,33 @@ RESTORE_EXCLUDE_FILE="$TMP_DIR/restore-exclude-list.txt"
+ 
+ : >"$RESTORE_EXCLUDE_FILE"
+ 
++local component
++
+ for component in "${EXCLUDE_RECREATE[@]}" ; do
+     if ! IsInArray "$component" "${EXCLUDE_RESTORE[@]}" ; then
+         EXCLUDE_RESTORE+=( "$component" )
+     fi
+ done
+ 
++local comp_type children child
++local comp_types=( "btrfsmountedsubvol" "fs" )
++
+ for component in "${EXCLUDE_RESTORE[@]}" ; do
+-    fs_children=$(get_child_components "$component" "fs" | sort -u)
+-    if [ -n "$fs_children" ] ; then
+-        for child in $fs_children ; do
+-            child=${child#fs:}
+-            echo "${child#/}" >> "$RESTORE_EXCLUDE_FILE"
+-            echo "${child#/}/*" >> "$RESTORE_EXCLUDE_FILE"
+-        done
+-    else
+-        # if there are no fs deps, assume it is a wildcard path
+-        component=${component#fs:}
+-        echo "${component#/}" >> "$RESTORE_EXCLUDE_FILE"
+-        echo "${component#/}/*" >> "$RESTORE_EXCLUDE_FILE"
+-    fi
++    for comp_type in "${comp_types[@]}"; do
++        children=$(get_child_components "$component" "$comp_type" | sort -u)
++        if [ -n "$children" ] ; then
++            for child in $children ; do
++                child=${child#$comp_type:}
++                echo "${child#/}" >> "$RESTORE_EXCLUDE_FILE"
++                echo "${child#/}/*" >> "$RESTORE_EXCLUDE_FILE"
++            done
++        fi
++    done
++
++    # exclude the component itself
++    for comp_type in "${comp_types[@]}"; do
++        component=${component#$comp_type:}
++    done
++    echo "${component#/}" >> "$RESTORE_EXCLUDE_FILE"
++    echo "${component#/}/*" >> "$RESTORE_EXCLUDE_FILE"
+ done
+diff --git a/usr/share/rear/layout/save/GNU/Linux/230_filesystem_layout.sh b/usr/share/rear/layout/save/GNU/Linux/230_filesystem_layout.sh
+index 7990c055..166b9cd2 100644
+--- a/usr/share/rear/layout/save/GNU/Linux/230_filesystem_layout.sh
++++ b/usr/share/rear/layout/save/GNU/Linux/230_filesystem_layout.sh
+@@ -434,6 +434,7 @@ fi
+                     # Output header only once:
+                     btrfsmountedsubvol_entry_exists="yes"
+                     echo "# All mounted btrfs subvolumes (including mounted btrfs default subvolumes and mounted btrfs snapshot subvolumes)."
++                    echo "# Mounted btrfs snapshot subvolumes are autoexcluded."
+                     if test "$findmnt_FSROOT_works" ; then
+                         echo "# Determined by the findmnt command that shows the mounted btrfs_subvolume_path."
+                         echo "# Format: btrfsmountedsubvol <device> <subvolume_mountpoint> <mount_options> <btrfs_subvolume_path>"
+@@ -469,7 +470,10 @@ fi
+                 # Finally, test whether the btrfs subvolume listed as mounted actually exists. A running docker
+                 # daemon apparently can convince the system to list a non-existing btrfs volume as mounted.
+                 # See https://github.com/rear/rear/issues/1496
+-                if btrfs_subvolume_exists "$subvolume_mountpoint" "$btrfs_subvolume_path"; then
++                if btrfs_snapshot_subvolume_exists "$subvolume_mountpoint" "$btrfs_subvolume_path"; then
++                    # Exclude mounted snapshot subvolumes
++                    echo "#btrfsmountedsubvol $device $subvolume_mountpoint $mount_options $btrfs_subvolume_path"
++                elif btrfs_subvolume_exists "$subvolume_mountpoint" "$btrfs_subvolume_path"; then
+                     echo "btrfsmountedsubvol $device $subvolume_mountpoint $mount_options $btrfs_subvolume_path"
+                 else
+                     LogPrintError "Ignoring non-existing btrfs subvolume listed as mounted: $subvolume_mountpoint"
+diff --git a/usr/share/rear/layout/save/default/340_generate_mountpoint_device.sh b/usr/share/rear/layout/save/default/340_generate_mountpoint_device.sh
+index 2b58922b..fb358ccf 100644
+--- a/usr/share/rear/layout/save/default/340_generate_mountpoint_device.sh
++++ b/usr/share/rear/layout/save/default/340_generate_mountpoint_device.sh
+@@ -7,15 +7,15 @@
+ # EXCLUDE_RECREATE is handled automatically (commented out in LAYOUT_FILE)
+ excluded_mountpoints=()
+ while read fs device mountpoint junk ; do
+-    if IsInArray "fs:$mountpoint" "${EXCLUDE_BACKUP[@]}" ; then
++    if IsInArray "$fs:$mountpoint" "${EXCLUDE_BACKUP[@]}" ; then
+         excluded_mountpoints+=( $mountpoint )
+     fi
+-    for component in $(get_parent_components "fs:$mountpoint" | sort -u) ; do
++    for component in $(get_parent_components "$fs:$mountpoint" | sort -u) ; do
+         if IsInArray "$component" "${EXCLUDE_BACKUP[@]}" ; then
+             excluded_mountpoints+=( $mountpoint )
+         fi
+     done
+-done < <(grep ^fs $LAYOUT_FILE)
++done < <(grep -E '^(fs|btrfsmountedsubvol)' $LAYOUT_FILE)
+ 
+ # Generate the list of mountpoints and devices to exclude from backup
+ while read fs device mountpoint junk ; do
+@@ -25,4 +25,4 @@ while read fs device mountpoint junk ; do
+         continue
+     fi
+     echo "$mountpoint $device"
+-done < <(grep '^fs' $LAYOUT_FILE) > $VAR_DIR/recovery/mountpoint_device
++done < <(grep -E '^(fs|btrfsmountedsubvol)' $LAYOUT_FILE) | unique_unsorted > $VAR_DIR/recovery/mountpoint_device
+diff --git a/usr/share/rear/lib/filesystems-functions.sh b/usr/share/rear/lib/filesystems-functions.sh
+index f0547706..826571be 100644
+--- a/usr/share/rear/lib/filesystems-functions.sh
++++ b/usr/share/rear/lib/filesystems-functions.sh
+@@ -3,16 +3,27 @@
+ #
+ # File system support functions
+ 
++function btrfs_snapshot_subvolume_exists() {
++    # returns true if the btrfs snapshot subvolume ($2) exists in the Btrfs
++    # file system at the mount point ($1).
++
++    # Use -s so that btrfs subvolume list considers snapshots only
++    btrfs_subvolume_exists "$1" "$2" "-s"
++}
++
+ function btrfs_subvolume_exists() {
+     # returns true if the btrfs subvolume ($2) exists in the Btrfs file system at the mount point ($1).
+     local subvolume_mountpoint="$1" btrfs_subvolume_path="$2"
+ 
++    # extra options for the btrfs subvolume list command ($3)
++    local btrfs_extra_opts="$3"
++
+     # A root subvolume can be assumed to always exist
+     [ "$btrfs_subvolume_path" == "/" ] && return 0
+ 
+     # A non-root subvolume exists if the btrfs subvolume list contains its complete path at the end of one line.
+     # This code deliberately uses a plain string comparison rather than a regexp.
+-    btrfs subvolume list -a "$subvolume_mountpoint" | sed -e 's; path <FS_TREE>/; path ;' |
++    btrfs subvolume list -a $btrfs_extra_opts "$subvolume_mountpoint" | sed -e 's; path <FS_TREE>/; path ;' |
+     awk -v path="$btrfs_subvolume_path" '
+         BEGIN {
+             match_string = " path " path;

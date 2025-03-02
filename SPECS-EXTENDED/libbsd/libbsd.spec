@@ -1,17 +1,23 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 Name:           libbsd
-Version:        0.10.0
-Release:        3%{?dist}
+Version:        0.12.2
+Release:        4%{?dist}
 Summary:        Library providing BSD-compatible functions for portability
-URL:            http://libbsd.freedesktop.org/
-License:        BSD and ISC and Copyright only and Public Domain
+URL:            https://libbsd.freedesktop.org/
+# Breakdown in COPYING file of libbsd release tarball, see also:
+# - https://gitlab.com/fedora/legal/fedora-license-data/-/issues/71
+# - https://gitlab.com/fedora/legal/fedora-license-data/-/issues/73
+License:        Beerware AND BSD-2-Clause AND BSD-3-Clause AND ISC AND libutil-David-Nugent AND MIT AND LicenseRef-Fedora-Public-Domain
 
-Source0:        http://libbsd.freedesktop.org/releases/libbsd-%{version}.tar.xz
-Patch1:         %{name}-0.8.3-deprecated.patch
-Patch2:         %{name}-0.8.6-compat.patch
+Source0:        https://libbsd.freedesktop.org/releases/libbsd-%{version}.tar.xz
+Source1:        https://libbsd.freedesktop.org/releases/libbsd-%{version}.tar.xz.asc
+Source2:        https://keys.openpgp.org/vks/v1/by-fingerprint/4F3E74F436050C10F5696574B972BF3EA4AE57A3
+Source3:        libbsd-cdefs.h
 
 BuildRequires:  gcc
+BuildRequires:  gnupg2
+BuildRequires:  libmd-devel
+BuildRequires:  make
+
 %description
 libbsd provides useful functions commonly found on BSD systems, and
 lacking on others like GNU systems, thus making it easier to port
@@ -21,6 +27,7 @@ code over and over again on each project.
 %package devel
 Summary:        Development files for libbsd
 Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       libmd-devel
 
 %description devel
 Development files for the libbsd library.
@@ -38,35 +45,32 @@ configured using "pkg-config --libs libbsd-ctor".
 
 %prep
 %setup -q
-%if 0%{?rhel} && 0%{?rhel} < 7
-%patch 1 -p1 -b .deprecated
-%patch 2 -p1 -b .compat
-%endif
+%{gpgverify} --keyring='%{SOURCE2}' --signature='%{SOURCE1}' --data='%{SOURCE0}'
 
 %build
 %configure
-%make_build V=1
+%make_build
 
 %check
-%make_build check V=1
+%make_build check
 
 %install
-%make_install V=1
+%make_install
 
 # don't want static library or libtool archive
 rm %{buildroot}%{_libdir}/%{name}.a
 rm %{buildroot}%{_libdir}/%{name}.la
 
-# remove manual pages that conflict with man-pages package
-rm %{buildroot}%{_mandir}/man3/explicit_bzero.3bsd
-
+# avoid file conflicts in multilib installations of -devel subpackage
+mv -f %{buildroot}%{_includedir}/bsd/sys/cdefs{,-%{__isa_bits}}.h
+install -p -m 0644 %{SOURCE3} %{buildroot}%{_includedir}/bsd/sys/cdefs.h
 
 %ldconfig_scriptlets
 
 %files
 %license COPYING
-%doc README TODO ChangeLog
-%{_libdir}/%{name}.so.*
+%doc README ChangeLog
+%{_libdir}/%{name}.so.0*
 
 %files devel
 %{_mandir}/man3/*.3bsd.*
@@ -81,8 +85,62 @@ rm %{buildroot}%{_mandir}/man3/explicit_bzero.3bsd
 %{_libdir}/pkgconfig/%{name}-ctor.pc
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.10.0-3
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.12.2-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Fri Apr 19 2024 Robert Scheck <robert@fedoraproject.org> - 0.12.2-3
+- Avoid infinite include loop when using libbsd-overlay (#2275197)
+
+* Fri Apr 12 2024 Robert Scheck <robert@fedoraproject.org> - 0.12.2-2
+- Avoid multilib conflict on /usr/include/bsd/sys/cdefs.h (#2273347)
+
+* Mon Mar 25 2024 Robert Scheck <robert@fedoraproject.org> - 0.12.2-1
+- Update to 0.12.2 (#2257217)
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.11.7-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.11.7-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.11.7-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.11.7-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Mon Dec 12 2022 Florian Weimer <fweimer@redhat.com> - 0.11.7-3
+- Port configure script to C99
+
+* Sun Dec 04 2022 Mikel Olasagasti Uranga <mikel@olasagasti.info> - 0.11.7-2
+- Add runtime requirement on libmd-devel to libbsd-devel (#2148612)
+
+* Thu Nov 24 2022 Robert Scheck <robert@fedoraproject.org> - 0.11.7-1
+- Update to 0.11.7 (#1742611)
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.10.0-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.10.0-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.10.0-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.10.0-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Wed Sep 09 2020 Jeff Law <law@redhat.com> - 0.10.0-5
+- Use symver attribute for symbol versioning
+  Fix configure test compromised by LTO
+  Fix nlist test compromised by LTO
+  Re-enable LTO
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.10.0-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Wed Jul  1 2020 Jeff Law <law@redhat.com> - 0.10.0-3
+- Disable LTO
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.10.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

@@ -1,14 +1,11 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 Name:           perl-GD
-Version:        2.71
-Release:        5%{?dist}
+Version:        2.83
+Release:        2%{?dist}
 Summary:        Perl interface to the GD graphics library
-License:        GPL+ or Artistic 2.0
+License:        GPL-1.0-or-later OR Artistic-2.0
 URL:            https://metacpan.org/release/GD
-Source0:        https://cpan.metacpan.org/modules/by-module/GD/GD-%{version}.tar.gz#/perl-GD-%{version}.tar.gz
-Patch0:         GD-2.56-utf8.patch
-Patch1:         GD-2.70-cflags.patch
+Source0:        https://cpan.metacpan.org/modules/by-module/GD/GD-%{version}.tar.gz
+Patch1:         GD-2.77-cflags.patch
 # Module Build
 BuildRequires:  coreutils
 BuildRequires:  findutils
@@ -19,9 +16,12 @@ BuildRequires:  perl-devel
 BuildRequires:  perl-generators
 BuildRequires:  perl-interpreter
 BuildRequires:  perl(Config)
-BuildRequires:  perl(ExtUtils::Constant)
+BuildRequires:  perl(ExtUtils::Constant) >= 0.23
 BuildRequires:  perl(ExtUtils::MakeMaker)
 BuildRequires:  perl(ExtUtils::PkgConfig)
+BuildRequires:  perl(File::Basename)
+BuildRequires:  perl(File::Spec)
+BuildRequires:  perl(File::Which)
 BuildRequires:  perl(Getopt::Long)
 # Module Runtime
 BuildRequires:  perl(AutoLoader)
@@ -40,10 +40,10 @@ BuildRequires:  perl(FindBin)
 BuildRequires:  perl(IO::Dir)
 BuildRequires:  perl(lib)
 BuildRequires:  perl(Test)
-BuildRequires:  perl(Test::More)
+BuildRequires:  perl(Test::More) >= 0.88
+BuildRequires:  perl(Test::NoWarnings) >= 1.00
 BuildRequires:  perl(warnings)
-# Runtime
-Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
+# Dependencies
 Requires:       gd >= 2.0.28
 
 %global __provides_exclude %{?__provides_exclude:__provides_exclude|}^perl\\(GD::Polygon\\)$
@@ -57,11 +57,8 @@ create PNG images on the fly or modify existing files.
 %prep
 %setup -q -n GD-%{version}
 
-# Re-code documentation as UTF8
-%patch 0
-
 # Upstream wants -Wformat=1 but we don't
-%patch 1
+%patch -P 1
 
 # Fix shellbangs in sample scripts
 perl -pi -e 's|/usr/local/bin/perl\b|%{__perl}|' \
@@ -96,8 +93,141 @@ make test TEST_VERBOSE=1
 %{_mandir}/man3/GD::Simple.3*
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 2.71-5
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.83-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Tue Jun 25 2024 Paul Howarth <paul@city-fan.org> - 2.83-1
+- Update to 2.83
+  - Fix missing PNG regression (CPAN RT#153923) on old systems without the .pc,
+    but gdlib-config (the check was too strict)
+
+* Mon Jun 10 2024 Jitka Plesnikova <jplesnik@redhat.com> - 2.82-2
+- Perl 5.40 rebuild
+
+* Mon May 27 2024 Paul Howarth <paul@city-fan.org> - 2.82-1
+- Update to 2.82
+  - Improve HEIF/AVIF autodetection (CPAN RT#153305)
+  - Fix Strawberry Perl default libgd path (GH#54)
+  - Fix AVIF and Webp autodetection in tests (GH#54)
+
+* Tue May  7 2024 Paul Howarth <paul@city-fan.org> - 2.81-1
+- Update to 2.81
+  - Change GD::Polygon::transform to match old demos (CPAN RT#140043) and
+    GD::Polyline
+  - Add GD::Polygon::rotate(cw-radian) helper
+  - Allow GD::Polygon::scale(2.0)
+
+* Fri May  3 2024 Paul Howarth <paul@city-fan.org> - 2.80-1
+- Update to 2.80
+  - Fix broken copyTranspose and copyReverseTranspose (CPAN RT#153300)
+  - Add transformation tests
+  - Fix wrong WBMP name and detection
+  - Fix wrong filename extension auto-detection for gd, gd2, wbmp
+  - Fix wrong filename extension auto-detection for xpm; newFromXpm needs the
+    filename, not handle
+  - Fix wrong libgd doc link (GH#52)
+
+* Wed May  1 2024 Paul Howarth <paul@city-fan.org> - 2.79-1
+- Update to 2.79
+  - Improve image type autodetection (CPAN RT#153212) and add a test
+  - Fix Avif without Heif config
+  - Improve gdlib.pc reader for supported library features
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.78-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.78-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.78-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Tue Jul 11 2023 Jitka Plesnikova <jplesnik@redhat.com> - 2.78-2
+- Perl 5.38 rebuild
+
+* Tue Jul  4 2023 Paul Howarth <paul@city-fan.org> - 2.78-1
+- Update to 2.78
+  - Fix Use of uninitialized value $pkg in concatenation warning
+    (CPAN RT#148899, GH#47)
+  - Add a new hard Test::NoWarnings test requirement
+
+* Mon May 29 2023 Paul Howarth <paul@city-fan.org> - 2.77-1
+- Update to 2.77
+  - Add BMP support with libgd 2.1.0 (GH#49J
+  - Don't link to -lXPM without XPM nor X11 (GH#45)
+  - Rename ANIMGIF feature to GIFANIM
+  - Fix unused variable failure in GH CI (CPAN RT#141125)
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.76-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.76-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 2.76-2
+- Perl 5.36 rebuild
+
+* Tue Feb  1 2022 Paul Howarth <paul@city-fan.org> - 2.76-1
+- Update to 2.76
+  - Fix broken TIFF and AVIF support (GH#43)
+  - Re-enable XBM support (always on)
+  - Provide xbm magic support (a hack, for GD::Graph)
+
+* Tue Feb  1 2022 Paul Howarth <paul@city-fan.org> - 2.75-2
+- Fix copy and paste errors introduced in GD 2.75
+  (#2048953, CPAN RT#140910, GH#43)
+
+* Wed Jan 26 2022 Paul Howarth <paul@city-fan.org> - 2.75-1
+- Update to 2.75
+  - Add experimental support for TIFF and RAQM (with freetype)
+  - Improve GD2 tests (GH#42, CPAN RT#140856)
+  - Also list the unsupported image formats in the GD::Image pod
+  - Fix copyRotated pod (it rotates CCW) (GH#36)
+  - Fix GD::Simple->fontMetrics docs and implementation (GH#37)
+    - Fix lineheight calculation according to the docs; you might need to fix
+      your code!
+  - Add image methods tiff, webp, heif, avif, and its documentation
+  - Fix the fix for the poly->transform documentation (CPAN RT#140043)
+
+* Sun Jan 23 2022 Paul Howarth <paul@city-fan.org> - 2.74-1
+- Update to 2.74
+  - Add experimental support for WEBP, HEIF and AVIF
+  - Document all supported image formats in the GD::Image lib
+  - Added GitHub actions (for PR's)
+  - Fix poly->transform documentation (CPAN RT#140043)
+  - Fix GD, GD2 detection and tests (CPAN RT#139399 - since libgd 2.3.3)
+  - POD: Remove indirect object constructors from example code snippet (GH#39)
+  - Fix incorrect behaviour of GD::Simple->fontMetrics
+  - Fix cross-compilation if gdlib.pc has no cflags
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.73-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.73-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 2.73-3
+- Perl 5.34 rebuild
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.73-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Thu Sep 24 2020 Paul Howarth <paul@city-fan.org> - 2.73-1
+- Update to 2.73
+  - Allow Makefile.PL --options to override the libgd options; not recommended
+    (see GH#33 and CPAN RT#130045)
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.72-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Sat Jul 18 2020 Paul Howarth <paul@city-fan.org> - 2.72-1
+- Update to 2.72
+  - Fix for colorMatch with older unpatched libgd versions, which has an
+    exploitable heap overflow (CVE-2019-6977)
+- Note: libgd in Fedora is already patched for CVE-2019-6977
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 2.71-5
+- Perl 5.32 rebuild
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.71-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

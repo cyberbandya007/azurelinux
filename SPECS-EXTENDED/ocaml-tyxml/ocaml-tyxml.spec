@@ -1,38 +1,27 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
-%ifnarch %{ocaml_native_compiler}
-%global debug_package %{nil}
-%endif
+# OCaml packages not built on i686 since OCaml 5 / Fedora 39.
+ExcludeArch: %{ix86}
 
-%global srcname tyxml
+%global giturl  https://github.com/ocsigen/tyxml
 
-# This package is needed to build ocaml-odoc, but ocaml-odoc is needed to build
-# documentation for this package.  Skip building documentation for now until we
-# develop a strategy for handling dependency loops.
-
-Name:           ocaml-%{srcname}
-Version:        4.5.0
-Release:        2%{?dist}
+Name:           ocaml-tyxml
+Version:        4.6.0
+Release:        12%{?dist}
 Summary:        Build valid HTML and SVG documents
 
-License:        LGPLv2 with exceptions
+License:        LGPL-2.1-only WITH OCaml-LGPL-linking-exception
 URL:            https://ocsigen.org/tyxml/
-Source0:        https://github.com/ocsigen/tyxml/releases/download/%{version}/%{srcname}-%{version}.tbz
+VCS:            git:%{giturl}.git
+Source:         %{giturl}/releases/download/%{version}/tyxml-%{version}.tbz
+# Fedora's OCaml is new enough that we do not need the seq shim
+Patch:          %{name}-seq.patch
 
 BuildRequires:  ocaml >= 4.04
 BuildRequires:  ocaml-alcotest-devel
-BuildRequires:  ocaml-astring-devel
-BuildRequires:  ocaml-dune >= 2.0
+BuildRequires:  ocaml-dune >= 2.7
 BuildRequires:  ocaml-markup-devel >= 0.7.2
-BuildRequires:  ocaml-ppxlib-devel
+BuildRequires:  ocaml-ppxlib-devel >= 0.18
 BuildRequires:  ocaml-re-devel >= 1.5.0
-BuildRequires:  ocaml-seq-devel
 BuildRequires:  ocaml-uutf-devel >= 1.0.0
-
-# See comment above about dependency loops.  If the issue is not resolved by
-# Fedora 36, this can be removed.
-Obsoletes:      %{name}-doc < 4.4.0-1
-Provides:       %{name}-doc = %{version}-%{release}
 
 %description
 TyXML provides a set of convenient combinators that uses the OCaml type
@@ -47,7 +36,6 @@ combinators.
 Summary:        Development files for %{name}
 Requires:       %{name}%{?_isa} = %{version}-%{release}
 Requires:       ocaml-re-devel%{?_isa}
-Requires:       ocaml-seq-devel%{?_isa}
 Requires:       ocaml-uutf-devel%{?_isa}
 
 %description    devel
@@ -65,6 +53,8 @@ syntaxes for TyXML.
 Summary:        Development files for %{name}-syntax
 Requires:       %{name}-syntax%{?_isa} = %{version}-%{release}
 Requires:       ocaml-ppxlib-devel%{?_isa}
+Requires:       ocaml-re-devel%{?_isa}
+Requires:       ocaml-uutf-devel%{?_isa}
 
 %description    syntax-devel
 The %{name}-syntax-devel package contains libraries and signature files
@@ -114,142 +104,146 @@ Requires:       %{name}-syntax-devel%{?_isa} = %{version}-%{release}
 Requires:       %{name}-ppx%{?_isa} = %{version}-%{release}
 Requires:       ocaml-markup-devel%{?_isa}
 Requires:       ocaml-ppxlib-devel%{?_isa}
+Requires:       ocaml-re-devel%{?_isa}
 
 %description    ppx-devel
 The %{name}-ppx-devel package contains libraries and signature files for
 developing applications that use %{name}-ppx.
 
 %prep
-%autosetup -n %{srcname}-%{version} -p1
+%autosetup -n tyxml-%{version} -p1
 
 %build
-dune build %{?_smp_mflags} @install
+%dune_build
 
 %install
-dune install --destdir=%{buildroot}
-
-# We do not want the ml files
-find %{buildroot}%{_libdir}/ocaml -name \*.ml -delete
-
-# We install the documentation with the doc macro
-rm -fr %{buildroot}%{_prefix}/doc
+%dune_install -s
 
 %check
 # As of version 4.4.0, the tyxml-jsx tests fail due to lack of the reason
 # package in Fedora.
-dune runtest -p tyxml,tyxml-syntax,tyxml-ppx
+%dune_check -p tyxml,tyxml-syntax,tyxml-ppx
 
-%files
+%files -f .ofiles-tyxml
 %doc CHANGES.md README.md
 %license LICENSE
-%dir %{_libdir}/ocaml/%{srcname}/
-%dir %{_libdir}/ocaml/%{srcname}/functor/
-%{_libdir}/ocaml/%{srcname}/META
-%{_libdir}/ocaml/%{srcname}/%{srcname}*.cma
-%{_libdir}/ocaml/%{srcname}/%{srcname}*.cmi
-%{_libdir}/ocaml/%{srcname}/functor/*.cma
-%{_libdir}/ocaml/%{srcname}/functor/*.cmi
-%ifarch %{ocaml_native_compiler}
-%{_libdir}/ocaml/%{srcname}/%{srcname}*.cmxs
-%{_libdir}/ocaml/%{srcname}/functor/*.cmxs
-%endif
 
-%files devel
-%{_libdir}/ocaml/%{srcname}/dune-package
-%{_libdir}/ocaml/%{srcname}/opam
-%ifarch %{ocaml_native_compiler}
-%{_libdir}/ocaml/%{srcname}/%{srcname}*.a
-%{_libdir}/ocaml/%{srcname}/%{srcname}*.cmx
-%{_libdir}/ocaml/%{srcname}/%{srcname}*.cmxa
-%{_libdir}/ocaml/%{srcname}/functor/*.a
-%{_libdir}/ocaml/%{srcname}/functor/*.cmx
-%{_libdir}/ocaml/%{srcname}/functor/*.cmxa
-%endif
-%{_libdir}/ocaml/%{srcname}/%{srcname}*.cmt
-%{_libdir}/ocaml/%{srcname}/%{srcname}*.cmti
-%{_libdir}/ocaml/%{srcname}/%{srcname}*.mli
-%{_libdir}/ocaml/%{srcname}/functor/*.cmt
-%{_libdir}/ocaml/%{srcname}/functor/*.cmti
-%{_libdir}/ocaml/%{srcname}/functor/*.mli
+%files devel -f .ofiles-tyxml-devel
 
-%files syntax
-%dir %{_libdir}/ocaml/%{srcname}-syntax/
-%{_libdir}/ocaml/%{srcname}-syntax/META
-%{_libdir}/ocaml/%{srcname}-syntax/%{srcname}*.cma
-%{_libdir}/ocaml/%{srcname}-syntax/%{srcname}*.cmi
-%ifarch %{ocaml_native_compiler}
-%{_libdir}/ocaml/%{srcname}-syntax/%{srcname}*.cmxs
-%endif
+%files syntax -f .ofiles-tyxml-syntax
 
-%files syntax-devel
-%{_libdir}/ocaml/%{srcname}-syntax/dune-package
-%{_libdir}/ocaml/%{srcname}-syntax/opam
-%ifarch %{ocaml_native_compiler}
-%{_libdir}/ocaml/%{srcname}-syntax/%{srcname}*.a
-%{_libdir}/ocaml/%{srcname}-syntax/%{srcname}*.cmx
-%{_libdir}/ocaml/%{srcname}-syntax/%{srcname}*.cmxa
-%endif
-%{_libdir}/ocaml/%{srcname}-syntax/%{srcname}*.cmt
-%{_libdir}/ocaml/%{srcname}-syntax/%{srcname}*.cmti
-%{_libdir}/ocaml/%{srcname}-syntax/*.mli
+%files syntax-devel -f .ofiles-tyxml-syntax-devel
 
-%files jsx
-%dir %{_libdir}/ocaml/%{srcname}-jsx/
-%{_libdir}/ocaml/%{srcname}-jsx/META
-%{_libdir}/ocaml/%{srcname}-jsx/ppx.exe
-%{_libdir}/ocaml/%{srcname}-jsx/%{srcname}*.cma
-%{_libdir}/ocaml/%{srcname}-jsx/%{srcname}*.cmi
-%ifarch %{ocaml_native_compiler}
-%{_libdir}/ocaml/%{srcname}-jsx/%{srcname}*.cmxs
-%endif
+%files jsx -f .ofiles-tyxml-jsx
 
-%files jsx-devel
-%{_libdir}/ocaml/%{srcname}-jsx/dune-package
-%{_libdir}/ocaml/%{srcname}-jsx/opam
-%ifarch %{ocaml_native_compiler}
-%{_libdir}/ocaml/%{srcname}-jsx/%{srcname}*.a
-%{_libdir}/ocaml/%{srcname}-jsx/%{srcname}*.cmx
-%{_libdir}/ocaml/%{srcname}-jsx/%{srcname}*.cmxa
-%endif
-%{_libdir}/ocaml/%{srcname}-jsx/%{srcname}*.cmt
+%files jsx-devel -f .ofiles-tyxml-jsx-devel
 
-%files ppx
-%dir %{_libdir}/ocaml/%{srcname}-ppx/
-%dir %{_libdir}/ocaml/%{srcname}-ppx/internal/
-%{_libdir}/ocaml/%{srcname}-ppx/META
-%{_libdir}/ocaml/%{srcname}-ppx/ppx.exe
-%{_libdir}/ocaml/%{srcname}-ppx/%{srcname}*.cma
-%{_libdir}/ocaml/%{srcname}-ppx/%{srcname}*.cmi
-%{_libdir}/ocaml/%{srcname}-ppx/internal/*.cma
-%{_libdir}/ocaml/%{srcname}-ppx/internal/*.cmi
-%ifarch %{ocaml_native_compiler}
-%{_libdir}/ocaml/%{srcname}-ppx/%{srcname}*.cmxs
-%{_libdir}/ocaml/%{srcname}-ppx/internal/*.cmxs
-%endif
+%files ppx -f .ofiles-tyxml-ppx
 
-%files ppx-devel
-%{_libdir}/ocaml/%{srcname}-ppx/dune-package
-%{_libdir}/ocaml/%{srcname}-ppx/opam
-%ifarch %{ocaml_native_compiler}
-%{_libdir}/ocaml/%{srcname}-ppx/%{srcname}*.a
-%{_libdir}/ocaml/%{srcname}-ppx/%{srcname}*.cmx
-%{_libdir}/ocaml/%{srcname}-ppx/%{srcname}*.cmxa
-%{_libdir}/ocaml/%{srcname}-ppx/internal/*.a
-%{_libdir}/ocaml/%{srcname}-ppx/internal/*.cmx
-%{_libdir}/ocaml/%{srcname}-ppx/internal/*.cmxa
-%endif
-%{_libdir}/ocaml/%{srcname}-ppx/%{srcname}*.cmt
-%{_libdir}/ocaml/%{srcname}-ppx/internal/*.cmt
-%{_libdir}/ocaml/%{srcname}-ppx/internal/*.cmti
-%{_libdir}/ocaml/%{srcname}-ppx/internal/*.mli
+%files ppx-devel -f .ofiles-tyxml-ppx-devel
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 4.5.0-2
-- Initial CBL-Mariner import from Fedora 34 (license: MIT).
+* Mon Aug  5 2024 Jerry James <loganjerry@gmail.com> - 4.6.0-12
+- Rebuild for ocaml-ppxlib 0.33.0
+
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.6.0-11
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Wed Jul  3 2024 Jerry James <loganjerry@gmail.com> - 4.6.0-10
+- Rebuild for ocaml-sexplib0 0.17.0
+
+* Wed Jun 19 2024 Richard W.M. Jones <rjones@redhat.com> - 4.6.0-9
+- OCaml 5.2.0 ppc64le fix
+
+* Wed May 29 2024 Richard W.M. Jones <rjones@redhat.com> - 4.6.0-8
+- OCaml 5.2.0 for Fedora 41
+
+* Fri Feb  2 2024 Jerry James <loganjerry@gmail.com> - 4.6.0-7
+- Rebuild for changed ocamlx(Location) hash
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.6.0-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.6.0-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Mon Dec 18 2023 Richard W.M. Jones <rjones@redhat.com> - 4.6.0-4
+- OCaml 5.1.1 + s390x code gen fix for Fedora 40
+
+* Tue Dec 12 2023 Richard W.M. Jones <rjones@redhat.com> - 4.6.0-3
+- OCaml 5.1.1 rebuild for Fedora 40
+
+* Thu Oct 05 2023 Richard W.M. Jones <rjones@redhat.com> - 4.6.0-2
+- OCaml 5.1 rebuild for Fedora 40
+
+* Wed Oct  4 2023 Jerry James <loganjerry@gmail.com> - 4.6.0-1
+- Version 4.6.0
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 4.5.0-19
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Wed Jul 12 2023 Richard W.M. Jones <rjones@redhat.com> - 4.5.0-18
+- OCaml 5.0 rebuild for Fedora 39
+
+* Mon Jul 10 2023 Jerry James <loganjerry@gmail.com> - 4.5.0-17.20230622git407f41b
+- Build from git HEAD for OCaml 5.0.0
+
+* Tue Jan 24 2023 Richard W.M. Jones <rjones@redhat.com> - 4.5.0-16
+- Rebuild OCaml packages for F38
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 4.5.0-15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Tue Nov  1 2022 Jerry James <loganjerry@gmail.com> - 4.5.0-14
+- Rebuild for ocaml-ppxlib 0.28.0
+
+* Thu Aug 18 2022 Jerry James <loganjerry@gmail.com> - 4.5.0-13
+- Rebuild for ocaml-ppxlib 0.27.0
+- Convert License tag to SPDX
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 4.5.0-12
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Wed Jul 20 2022 Jerry James <loganjerry@gmail.com> - 4.5.0-11
+- Use new OCaml macros
+
+* Sun Jun 19 2022 Richard W.M. Jones <rjones@redhat.com> - 4.5.0-11
+- OCaml 4.14.0 rebuild
+
+* Mon Feb 28 2022 Jerry James <loganjerry@gmail.com> - 4.5.0-10
+- Rebuild for ocaml-uutf 1.0.3
+- Build in release mode
+
+* Fri Feb 04 2022 Richard W.M. Jones <rjones@redhat.com> - 4.5.0-9
+- OCaml 4.13.1 rebuild to remove package notes
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 4.5.0-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Mon Dec 27 2021 Jerry James <loganjerry@gmail.com> - 4.5.0-7
+- Rebuild for ocaml-ppxlib 0.24.0
+
+* Tue Oct 05 2021 Richard W.M. Jones <rjones@redhat.com> - 4.5.0-6
+- OCaml 4.13.1 build
+
+* Wed Sep  1 2021 Jerry James <loganjerry@gmail.com> - 4.5.0-5
+- Rebuild for ocaml-ppxlib 0.23.0
+
+* Thu Jul 29 2021 Jerry James <loganjerry@gmail.com> - 4.5.0-4
+- Rebuild for ocaml-ppxlib 0.22.2
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 4.5.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jun 22 2021 Jerry James <loganjerry@gmail.com> - 4.5.0-2
+- Rebuild for ocaml-markup 1.0.1
 
 * Fri Apr 23 2021 Jerry James <loganjerry@gmail.com> - 4.5.0-1
 - Version 4.5.0
 - Drop all patches
+
+* Mon Mar  1 21:39:52 GMT 2021 Richard W.M. Jones <rjones@redhat.com> - 4.4.0-10
+- OCaml 4.12.0 build
 
 * Sat Feb 20 2021 Jerry James <loganjerry@gmail.com> - 4.4.0-9
 - Apply upstream merge request to migrate to ppxlib

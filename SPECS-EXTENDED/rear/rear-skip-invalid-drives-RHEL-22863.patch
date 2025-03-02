@@ -1,0 +1,90 @@
+commit c08658d5a0260c3242bb817e77b9c6dadecd14f6
+Merge: 879e173f db191aaf
+Author: pcahyna <pcahyna@users.noreply.github.com>
+Date:   Wed Sep 13 12:46:54 2023 +0200
+
+    Merge pull request #3047 from pcahyna/skip-invalid-drives
+    
+    Skip invalid disk drives (zero sized, no media) when saving layout
+
+    Cherry-picked-by: Lukáš Zaoral <lzaoral@redhat.com>
+
+diff --git a/usr/share/rear/layout/save/GNU/Linux/200_partition_layout.sh b/usr/share/rear/layout/save/GNU/Linux/200_partition_layout.sh
+index 9d6e0bc6..b2dc743a 100644
+--- a/usr/share/rear/layout/save/GNU/Linux/200_partition_layout.sh
++++ b/usr/share/rear/layout/save/GNU/Linux/200_partition_layout.sh
+@@ -413,17 +413,21 @@ Log "Saving disks and their partitions"
+             elif [[ ! ($blockd = *rpmb || $blockd = *[0-9]boot[0-9]) ]]; then # Silently skip Replay Protected Memory Blocks and others  
+                 devname=$(get_device_name $disk)
+                 devsize=$(get_disk_size ${disk#/sys/block/})
+-                disktype=$(parted -s $devname print | grep -E "Partition Table|Disk label" | cut -d ":" -f "2" | tr -d " ")
+                 # Ensure syntactically correct 'disk' entries:
+                 # Each value must exist and each value must be a single non-blank word so we 'test' without quoting the value:
+                 test $devname || Error "Invalid 'disk' entry (no disk device name for '$disk')"
+                 test $devsize || Error "Invalid 'disk $devname' entry (no device size for '$devname')"
+-                # We do not error out when there is no partition label type value because
+-                # "rear recover" works in a special case without partition label type value when there is
+-                # only a 'disk' entry but nothing else for this disk exists in disklayout.conf
+-                # which can happen when /dev/sdX is an empty SD card slot without medium,
+-                # see https://github.com/rear/rear/issues/2810
+-                test $disktype || LogPrintError "No partition label type for 'disk $devname' (may cause 'rear recover' failure)"
++                # Validation error can happen when /dev/sdX is an empty SD card slot without medium,
++                # see https://github.com/rear/rear/issues/2810 https://github.com/rear/rear/issues/2958
++                # this is normal, but such device must be skipped and not be added to the layout
++                # - it does not contain any data anyway.
++                # See https://github.com/rear/rear/pull/3047
++                if ! validation_error=$(is_disk_valid $devname) ; then
++                    LogPrintError "Ignoring $blockd: $validation_error"
++                    continue
++                fi
++                disktype=$(parted -s $devname print | grep -E "Partition Table|Disk label" | cut -d ":" -f "2" | tr -d " ")
++                test $disktype || Error "Invalid 'disk $devname' entry (no partition table type for '$devname')"
+                 if [ "$disktype" != "dasd" ]; then
+                     echo "# Disk $devname"
+                     echo "# Format: disk <devname> <size(bytes)> <partition label type>"
+diff --git a/usr/share/rear/lib/layout-functions.sh b/usr/share/rear/lib/layout-functions.sh
+index 6dd43313..e46478d6 100644
+--- a/usr/share/rear/lib/layout-functions.sh
++++ b/usr/share/rear/lib/layout-functions.sh
+@@ -819,6 +819,41 @@ is_disk_a_pv() {
+     return 1
+ }
+ 
++# Check whether disk is suitable for being added to layout
++# Can be used to skip obviously unsuitable/broken devices
++# (missing device node, zero size, device can't be opened).
++# Should not be used to skip potential mapping targets before layout restoration
++# - an invalid disk may become valid later, for example if it is a DASD that needs
++# low-level formatting (see 090_include_dasd_code.sh and 360_generate_dasd_format_code.sh),
++# unformatted DASDs show zero size.
++# Returns 0 if the device is ok
++# Returns nonzero code if it should be skipped, and a text describing the error
++# on stdout
++# usage example:
++# local err
++# if ! err=$(is_disk_valid /dev/sda); then
++
++function is_disk_valid {
++    local disk="$1"
++    local size
++
++    if ! test -b "$disk" ; then
++        echo "$disk is not a block device"
++        return 1
++    fi
++    # capture stdout in a variable and redirect stderr to stdout - the error message
++    # will be our output
++    if { size=$(blockdev --getsize64 "$disk") ; } 2>&1 ; then
++        if ! test "$size" -gt 0 2>/dev/null ; then
++            echo "$disk has invalid size $size"
++            return 1
++        fi
++        return 0
++    else
++        return 1
++    fi
++}
++
+ function is_multipath_used {
+     # Return 'false' if there is no multipath command:
+     type multipath &>/dev/null || return 1

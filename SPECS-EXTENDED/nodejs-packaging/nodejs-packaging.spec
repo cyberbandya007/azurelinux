@@ -1,28 +1,69 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+## START: Set by rpmautospec
+## (rpmautospec version 0.6.5)
+## RPMAUTOSPEC: autorelease
+%define autorelease(e:s:pb:n) %{?-p:0.}%{lua:
+    release_number = 6;
+    base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
+    print(release_number + base_release_number - 1);
+}%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{!?-n:%{?dist}}
+## END: Set by rpmautospec
+
 %global macrosdir %(d=%{_rpmconfigdir}/macros.d; [ -d $d ] || d=%{_sysconfdir}/rpm; echo $d)
 
 Name:           nodejs-packaging
-Version:        25
-Release:        2%{?dist}
+Version:        2023.10
+Release:        %autorelease
 Summary:        RPM Macros and Utilities for Node.js Packaging
 BuildArch:      noarch
 License:        MIT
 URL:            https://fedoraproject.org/wiki/Node.js/Packagers
-Source0:        https://releases.pagure.org/%{name}/%{name}-fedora-%{version}.tar.xz
 ExclusiveArch:  %{nodejs_arches} noarch
+
+Source0001: LICENSE
+Source0002: README.md
+Source0003: macros.nodejs
+Source0004: multiver_modules
+Source0005: nodejs-fixdep
+Source0006: nodejs-setversion
+Source0007: nodejs-symlink-deps
+Source0008: nodejs.attr
+Source0009: nodejs.prov
+Source0010: nodejs.req
+Source0011: nodejs_abi.attr
+Source0012: nodejs_abi.req
+
+Source0111: nodejs-packaging-bundler
+
+# Created with `tar cfz test.tar.gz test`
+Source0101: test.tar.gz
 
 BuildRequires:  python3
 
+# Several of the macros require the /usr/bin/node command, so we need to
+# ensure that it is present when packaging.
+Requires:       /usr/bin/node
 Requires:       redhat-rpm-config
 
 %description
 This package contains RPM macros and other utilities useful for packaging
 Node.js modules and applications in RPM-based distributions.
 
+%package bundler
+Summary:      Bundle a node.js application dependencies
+Requires:       npm
+Requires:       coreutils, findutils, jq
+
+%description bundler
+nodejs-packaging-bundler bundles a node.js application node_module dependencies
+It gathers the application tarball.
+It generates a runtime (prod) tarball with runtime node_module dependencies
+It generates a testing (dev) tarball with node_module dependencies for testing
+It generates a bundled license file that gets the licenses in the runtime
+dependency tarball
 
 %prep
-%autosetup -p 1 -n %{name}-fedora-%{version}
+cp -da %{_sourcedir}/* .
+tar xvf test.tar.gz
 
 
 %build
@@ -32,12 +73,15 @@ Node.js modules and applications in RPM-based distributions.
 %install
 install -Dpm0644 macros.nodejs %{buildroot}%{macrosdir}/macros.nodejs
 install -Dpm0644 nodejs.attr %{buildroot}%{_rpmconfigdir}/fileattrs/nodejs.attr
+install -Dpm0644 nodejs_abi.attr %{buildroot}%{_rpmconfigdir}/fileattrs/nodejs_abi.attr
 install -pm0755 nodejs.prov %{buildroot}%{_rpmconfigdir}/nodejs.prov
 install -pm0755 nodejs.req %{buildroot}%{_rpmconfigdir}/nodejs.req
+install -pm0755 nodejs_abi.req %{buildroot}%{_rpmconfigdir}/nodejs_abi.req
 install -pm0755 nodejs-symlink-deps %{buildroot}%{_rpmconfigdir}/nodejs-symlink-deps
 install -pm0755 nodejs-fixdep %{buildroot}%{_rpmconfigdir}/nodejs-fixdep
 install -pm0755 nodejs-setversion %{buildroot}%{_rpmconfigdir}/nodejs-setversion
 install -Dpm0644 multiver_modules %{buildroot}%{_datadir}/node/multiver_modules
+install -Dpm0755 nodejs-packaging-bundler %{buildroot}%{_bindir}/nodejs-packaging-bundler
 
 
 %check
@@ -51,10 +95,52 @@ install -Dpm0644 multiver_modules %{buildroot}%{_datadir}/node/multiver_modules
 %{_rpmconfigdir}/nodejs*
 %{_datadir}/node/multiver_modules
 
+%files bundler
+%{_bindir}/nodejs-packaging-bundler
+
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 25-2
-- Initial CBL-Mariner import from Fedora 33 (license: MIT).
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2022.10-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Oct 20 2022 Stephen Gallagher <sgallagh@redhat.com> - 2022.10-1
+- Move native module building tools here from Node.js
+- Add `Requires: /usr/bin/node`
+
+* Tue Oct 18 2022 Davide Cavalca <dcavalca@fedoraproject.org> - 2021.06-7
+- NPM bundler: recursively bundle modules for all packages found
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2021.06-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Sun May 01 2022 Davide Cavalca <dcavalca@fedoraproject.org> - 2021.06-5
+- NPM bundler: optionally use a local tarball instead of npm
+
+* Thu Jan 20 2022 Stephen Gallagher <sgallagh@redhat.com> - 2021.06-4
+- NPM bundler: also find namespaced bundled dependencies
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2021.06-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jun 22 2021 Stephen Gallagher <sgallagh@redhat.com> - 2021.06-2
+- Fix hard-coded output directory in the bundler
+
+* Wed Jun 02 2021 Stephen Gallagher <sgallagh@redhat.com> - 2021.06-1
+- Update to 2021.06-1
+- bundler: Handle archaic license metadata
+- bundler: Warn about bundled dependencies with no license metadata
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2021.01-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Wed Jan 20 2021 Stephen Gallagher <sgallagh@redhat.com> - 2021.01-2
+- nodejs-packaging-bundler improvements to handle uncommon characters
+
+* Wed Jan 06 2021 Troy Dawson <tdawson@redhat.com> - 2021.01
+- Add nodejs-packaging-bundler and update README.md
+
+* Fri Sep 18 2020 Stephen Gallagher <sgallagh@redhat.com> - 2020.09-1
+- Move to dist-git as the upstream
 
 * Wed Sep 02 2020 Stephen Gallagher <sgallagh@redhat.com> - 25-1
 - Fix incorrect bundled library detection for Requires

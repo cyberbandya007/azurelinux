@@ -1,12 +1,10 @@
 Name:           perl-Test-Warn
-Version:        0.36
-Release:        9%{?dist}
+Version:        0.37
+Release:        6%{?dist}
 Summary:        Perl extension to test methods for warnings
-License:        GPL+ or Artistic
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/Test-Warn
-Source0:        https://cpan.metacpan.org/authors/id/B/BI/BIGJ/Test-Warn-%{version}.tar.gz#/perl-Test-Warn-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/modules/by-module/Test/Test-Warn-%{version}.tar.gz
 BuildArch:      noarch
 # Build
 BuildRequires:  coreutils
@@ -24,13 +22,12 @@ BuildRequires:  perl(Sub::Uplevel) >= 0.12
 BuildRequires:  perl(Test::Builder) >= 0.13
 BuildRequires:  perl(warnings)
 # Test Suite
-BuildRequires:  perl(constant)
 BuildRequires:  perl(blib)
+BuildRequires:  perl(constant)
 BuildRequires:  perl(Test)
 BuildRequires:  perl(Test::Builder::Tester) >= 1.02
 BuildRequires:  perl(Test::More)
 # Dependencies
-Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 Requires:       perl(Test::Builder) >= 0.13
 
 # Filter under-specified dependencies
@@ -64,12 +61,53 @@ make test
 %{_mandir}/man3/Test::Warn.3*
 
 %changelog
-* Mon Apr 25 2022 Muhammad Falak <mwani@microsoft.com> - 0.36-9
-- Add an explicit BR on `perl(blib)` to enable ptest
-- License verified
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.37-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.36-8
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.37-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.37-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.37-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.37-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Sat Aug 13 2022 Paul Howarth <paul@city-fan.org> - 0.37-1
+- Update to 0.37 (#2118006)
+  - Allow duplicate warnings when using warnings_exist (GH#8)
+- Use author-independent source URL
+- Use SPDX license expression
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.36-16
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.36-15
+- Perl 5.36 rebuild
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.36-14
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Fri Jul 23 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.36-13
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.36-12
+- Perl 5.34 rebuild
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.36-11
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.36-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.36-9
+- Perl 5.32 rebuild
+
+* Tue Mar 03 2020 Petr Pisar <ppisar@redhat.com> - 0.36-8
+- Build-require blib module for the tests
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.36-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

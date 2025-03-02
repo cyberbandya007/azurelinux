@@ -2,8 +2,8 @@ diff --git a/usr/share/rear/conf/default.conf b/usr/share/rear/conf/default.conf
 index b14525da..23a83b71 100644
 --- a/usr/share/rear/conf/default.conf
 +++ b/usr/share/rear/conf/default.conf
-@@ -2483,10 +2483,10 @@ OBDR_BLOCKSIZE=2048
- # BACKUP=NBU (Symantec/Veritas NetBackup)
+@@ -1841,10 +1841,10 @@ OBDR_BLOCKSIZE=2048
+ # BACKUP=NBU stuff (Symantec/Veritas NetBackup)
  ##
  #
 -COPY_AS_IS_NBU=( /usr/openv/bin/vnetd /usr/openv/bin/vopied /usr/openv/lib /usr/openv/netbackup /usr/openv/var/auth/[mn]*.txt /opt/VRTSpbx /etc/vx/VxICS /etc/vx/vrtslog.conf )
@@ -14,5 +14,5 @@ index b14525da..23a83b71 100644
 -NBU_LD_LIBRARY_PATH="/usr/openv/lib:/usr/openv/netbackup/sec/at/lib/"
 +NBU_LD_LIBRARY_PATH="/usr/openv/lib:/usr/openv/netbackup/sec/at/lib/:/usr/openv/lib/boost"
  PROGS_NBU=( )
- ####
  
+ ##

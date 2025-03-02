@@ -1,51 +1,49 @@
-Summary:        Image meta information extraction module for Perl
 Name:           perl-Image-Info
-Version:        1.42
+Version:        1.44
 Release:        4%{?dist}
-License:        GPL+ OR Artistic
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+Summary:        Image meta information extraction module for Perl
+License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/Image-Info
-Source0:        https://cpan.metacpan.org/authors/id/S/SR/SREZIC/Image-Info-%{version}.tar.gz#/%{name}-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/S/SR/SREZIC/Image-Info-%{version}.tar.gz
+BuildArch:      noarch
 BuildRequires:  coreutils
+BuildRequires:  findutils
 BuildRequires:  make
-BuildRequires:  perl-generators
 BuildRequires:  perl-interpreter
+BuildRequires:  perl-generators
 BuildRequires:  perl(Carp)
 BuildRequires:  perl(Compress::Zlib)
 BuildRequires:  perl(Config)
+BuildRequires:  perl(constant)
 BuildRequires:  perl(Exporter)
 BuildRequires:  perl(ExtUtils::MakeMaker)
 BuildRequires:  perl(File::Basename)
 BuildRequires:  perl(File::Spec)
 BuildRequires:  perl(FindBin)
 BuildRequires:  perl(Getopt::Long)
-BuildRequires:  perl(IO::Scalar)
-BuildRequires:  perl(IO::String)
 BuildRequires:  perl(Image::Xbm)
 BuildRequires:  perl(Image::Xpm)
-BuildRequires:  perl(Test::More)
-BuildRequires:  perl(Test::Pod)
-BuildRequires:  perl(Test::Pod::Coverage) >= 1.00
-BuildRequires:  perl(XML::LibXML::Reader)
-BuildRequires:  perl(XML::Simple)
-BuildRequires:  perl(constant)
+BuildRequires:  perl(IO::Scalar)
+BuildRequires:  perl(IO::String)
 BuildRequires:  perl(lib)
 BuildRequires:  perl(overload)
 BuildRequires:  perl(strict)
+BuildRequires:  perl(Test::More)
+BuildRequires:  perl(Test::Pod)
+BuildRequires:  perl(Test::Pod::Coverage) >= 1.00
 BuildRequires:  perl(vars)
+BuildRequires:  perl(XML::LibXML::Reader)
+BuildRequires:  perl(XML::Simple)
 Requires:       rgb
-Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 Requires:       perl(Compress::Zlib)
 Requires:       perl(IO::Scalar)
-BuildArch:      noarch
 
 %description
 This Perl extension allows you to extract meta information from
 various types of image files.
 
 %prep
-%autosetup -n Image-Info-%{version}
+%setup -q -n Image-Info-%{version}
 chmod -c 644 exifdump imgdump
 
 %build
@@ -61,18 +59,57 @@ find %{buildroot} -type f -name .packlist -delete
 make test
 
 %files
-%license README
-%doc CHANGES CREDITS TODO exifdump imgdump
+%doc CHANGES CREDITS README TODO exifdump imgdump
 %{perl_vendorlib}/Bundle/
 %{perl_vendorlib}/Image/
 %{_mandir}/man3/*.3pm*
 
 %changelog
-* Tue Mar 07 2023 Muhammad Falak <mwani@microsoft.com> - 1.42-4
-- License verified
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.44-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.42-3
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.44-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.44-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Aug 20 2023 Xavier Bachelot <xavier@bachellot.org> - 1.44-1
+- Update to 1.44
+- Convert License to SPDX
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.43-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.43-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Oct 13 2022 Tom Callaway <spot@fedoraproject.org> - 1.43-1
+- update to 1.43
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.42-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Wed Jun 01 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.42-9
+- Perl 5.36 rebuild
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.42-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.42-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Sun May 23 2021 Jitka Plesnikova <jplesnik@redhat.com> - 1.42-6
+- Perl 5.34 rebuild
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.42-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.42-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 1.42-3
+- Perl 5.32 rebuild
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.42-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

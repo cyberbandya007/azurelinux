@@ -2,13 +2,15 @@
 
 Name:           python-%{pypi_name}
 Version:        0.12.1
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Support for unittest subTest() and subtests fixture
 
 # SPDX
 License:        MIT
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://github.com/pytest-dev/pytest-subtests
-Source0:        %{pypi_source}
+Source0:        https://files.pythonhosted.org/packages/source/p/pytest-subtests/pytest-subtests-0.12.1.tar.gz#/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 
 %description
@@ -19,6 +21,9 @@ Summary:        %{summary}
 
 BuildRequires:  python3-devel
 BuildRequires:  python3dist(pytest)
+BuildRequires: 	python3-wheel
+BuildRequires: 	python3-pip
+BuildRequires: 	python3-setuptools_scm
 
 %{?python_provide:%python_provide python3-%{pypi_name}}
  
@@ -41,7 +46,7 @@ pytest-subtests unittest subTest() support and subtests fixture.
 %check
 # https://github.com/pytest-dev/pytest-subtests/issues/21
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=%{buildroot}%{python3_sitelib} \
-  pytest-%{python3_version} -v tests \
+  %{python3} -m pytest -v tests \
   -k "not TestFixture and not TestCapture and not test_simple_terminal"
 
 %files -n python3-%{pypi_name} -f %{pyproject_files}
@@ -49,6 +54,11 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=%{buildroot}%{python3_sitelib} \
 %license LICENSE
 
 %changelog
+* Thu Feb 20 2025 Akhila Guruju <v-guakhila@microsoft.com> - 0.12.1-4
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+- Added `BuildRequires: python3-setuptools_scm` to fix build
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.12.1-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

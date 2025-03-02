@@ -1,19 +1,24 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 Summary: The GNU Scientific Library for numerical analysis
 Name: gsl
-Version: 2.6
-Release: 3%{?dist}
-URL: http://www.gnu.org/software/gsl/
-License: GPLv3+
-Source: http://ftp.gnu.org/gnu/gsl/%{name}-%{version}.tar.gz
+Version: 2.7.1
+Release: 11%{?dist}
+URL: https://www.gnu.org/software/gsl/
+VCS: git://git.savannah.gnu.org/gsl.git
+# Automatically converted from old format: GPLv3+ - review is highly recommended.
+License: GPL-3.0-or-later
+Source0: https://ftp.gnu.org/gnu/gsl/%{name}-%{version}.tar.gz
+Source1: https://ftp.gnu.org/gnu/gsl/%{name}-%{version}.tar.gz.sig
+Source2: https://www.gnu.org/software/gsl/key/gsl_key.txt
 Patch0: gsl-1.10-lib64.patch
 # http://lists.gnu.org/archive/html/bug-gsl/2015-12/msg00012.html
 Patch1: gsl-tol.patch
 Patch2: gsl-test.patch
+Patch3: gsl-configure-c99.patch
 
 BuildRequires: gcc
+BuildRequires: gnupg2
 BuildRequires: pkgconfig
+BuildRequires: make
 
 %description
 The GNU Scientific Library (GSL) is a collection of routines for
@@ -31,20 +36,18 @@ developing programs using the GSL (GNU Scientific Library).
 
 %prep
 %setup -q
-%patch 0 -p1 -b .lib64
-%patch 1 -p1 -b .tol
-%patch 2 -p1 -b .test
-
-iconv -f windows-1252 -t utf-8 THANKS  > THANKS.aux
-touch -r THANKS THANKS.aux
-mv THANKS.aux THANKS
+%{gpgverify} --data=%{SOURCE0} --signature=%{SOURCE1} --keyring=%{SOURCE2}
+%patch -P0 -p1 -b .lib64
+%patch -P1 -p1 -b .tol
+%patch -P2 -p1 -b .test
+%patch -P3 -p1
 
 %build
 # disable FMA
-%ifarch aarch64 ppc64 ppc64le s390 s390x
+%ifarch aarch64 ppc64 ppc64le s390 s390x x86_64 riscv64
 export CFLAGS="%{optflags} -ffp-contract=off"
 %endif
-%configure
+%configure --disable-silent-rules --disable-static
 %make_build
 
 %check
@@ -55,17 +58,13 @@ make check || ( cat */test-suite.log && exit 1 )
 # remove unpackaged files from the buildroot
 rm -rf %{buildroot}%{_infodir}/dir
 rm -f %{buildroot}%{_libdir}/*.la
-# remove static libraries
-rm -r %{buildroot}%{_libdir}/*.a
-
-%ldconfig_scriptlets
 
 %files
 %license COPYING
 %doc AUTHORS ChangeLog NEWS README THANKS TODO
 %{_bindir}/gsl-histogram
 %{_bindir}/gsl-randist
-%{_libdir}/libgsl.so.25*
+%{_libdir}/libgsl.so.27*
 %{_libdir}/libgslcblas.so.0*
 %{_mandir}/man1/gsl-histogram.1*
 %{_mandir}/man1/gsl-randist.1*
@@ -82,8 +81,55 @@ rm -r %{buildroot}%{_libdir}/*.a
 %{_includedir}/gsl/
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 2.6-3
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Aug  8 2024 Jerry James <loganjerry@gmail.com> - 2.7.1-11
+- Verify the source tarball
+- Stop converting THANKS to UTF-8; it already is
+- Minor spec file cleanups
+
+* Thu Jul 25 2024 Miroslav Suchý <msuchy@redhat.com> - 2.7.1-10
+- convert license to SPDX
+
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.7.1-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Mon Feb 26 2024 David Abdurachmanov <davidlt@rivosinc.com> - 2.7.1-8
+- Disable FMA on riscv64
+
+* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.7.1-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sat Jan 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.7.1-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.7.1-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.7.1-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Wed Jan 18 2023 Florian Weimer <fweimer@redhat.com> - 2.7.1-3
+- Port configure script to C99
+
+* Tue Aug 23 2022 Mamoru TASAKA <mtasaka@fedoraproject.org> - 2.7.1-2
+- Rebuild again for bodhi issue
+
+* Thu Aug 11 2022 Susi Lehtola <jussilehtola@fedoraproject.org> - 2.7.1-1
+- Update to 2.7.1.
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.6-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.6-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.6-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.6-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.6-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.6-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

@@ -19,7 +19,7 @@ Release:        %autorelease
 Summary:        Commons Virtual File System
 License:        Apache-2.0
 BuildArch:      noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 
 URL:            https://commons.apache.org/proper/commons-vfs/
 VCS:            git:https://github.com/apache/commons-vfs.git

@@ -11,7 +11,7 @@ Patch1:         0001-Port-to-mockito-2.patch
 Patch2:         0002-Port-to-Mockito-5.patch
 
 BuildArch:      noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 
 %if %{with bootstrap}
 BuildRequires:  javapackages-bootstrap

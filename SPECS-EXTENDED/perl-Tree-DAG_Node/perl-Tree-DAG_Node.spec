@@ -1,12 +1,10 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 Name:           perl-Tree-DAG_Node
-Version:        1.31
-Release:        8%{?dist}
+Version:        1.32
+Release:        11%{?dist}
 Summary:        Class for representing nodes in a tree
-License:        (GPL+ or Artistic)
+License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/Tree-DAG_Node
-Source0:        https://cpan.metacpan.org/authors/id/R/RS/RSAVAGE/Tree-DAG_Node-%{version}.tgz
+Source0:        https://cpan.metacpan.org/modules/by-module/Tree/Tree-DAG_Node-%{version}.tgz
 BuildArch:      noarch
 # Module Build ---------------------------------------------------------------
 BuildRequires:  coreutils
@@ -26,8 +24,8 @@ BuildRequires:  perl(File::Temp) >= 0.19
 BuildRequires:  perl(Test::More) >= 1.001002
 BuildRequires:  perl(Test::Pod) >= 1.48
 BuildRequires:  perl(utf8)
-# Runtime --------------------------------------------------------------------
-Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
+# Dependencies ---------------------------------------------------------------
+# (none)
 
 %description
 This class encapsulates/makes/manipulates objects that represent nodes in a
@@ -58,18 +56,57 @@ make test
 make test TEST_FILES="$(echo $(find xt/ -name '*.t'))"
 
 %files
-%if 0%{?_licensedir:1}
 %license LICENSE
-%else
-%doc LICENSE
-%endif
 %doc Changes README scripts/
 %{perl_vendorlib}/Tree/
 %{_mandir}/man3/Tree::DAG_Node.3*
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.31-8
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.32-11
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.32-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.32-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.32-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.32-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.32-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.32-5
+- Perl 5.36 rebuild
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.32-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Tue Jul 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.32-3
+- Second attempt - Rebuilt for
+  https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 1.32-2
+- Perl 5.34 rebuild
+
+* Tue Feb  2 2021 Paul Howarth <paul@city-fan.org> - 1.32-1
+- Update to 1.32
+  - Update Makefile.PL and POD to change RT to GitHub
+- Use author-independent source URL
+- Use %%license unconditionally
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.31-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.31-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 1.31-8
+- Perl 5.32 rebuild
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.31-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

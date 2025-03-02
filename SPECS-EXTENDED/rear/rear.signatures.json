@@ -1,5 +1,9 @@
 {
  "Signatures": {
-  "rear-2.4.tar.gz": "5177e938b696faeb3558221c0a9aec8e1e73b85e66aa26753f85426ed4d5bd17"
+  "Makefile": "cf0099b5e3e770b7cfe63537479ce27773fd8d85c14bf75b361c29f390b488de",
+  "rear-2.7-clean.tar.gz": "942b140de8a3e7104252c8d3c450b0d82e8006523aab6e7a45cd31d06c8ef63e",
+  "rear.cron": "434d64ceef48cb7a1f47d443cad4ba4702e5bd8b2e4ec6045de6c8071627569f",
+  "rear.service": "59886591787bc23878e45953699ce427448d89dbd957bc6c9b1667f1cd4cd2fa",
+  "rear.timer": "87aeb8a4c13f600d9d348b4158e2558d94fdd196cb5dae17105645dedbd58cd5"
  }
 }

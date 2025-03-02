@@ -1,20 +1,22 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 Name:          gupnp-av
-Version:       0.12.11
-Release:       4%{?dist}
+Version:       0.14.1
+Release:       7%{?dist}
 Summary:       A collection of helpers for building UPnP AV applications
 
 License:       LGPLv2+
 URL:           http://www.gupnp.org/
-Source0:       http://download.gnome.org/sources/gupnp-av/0.12/%{name}-%{version}.tar.xz
+Source0:       http://download.gnome.org/sources/gupnp-av/0.14/%{name}-%{version}.tar.xz
+# https://gitlab.gnome.org/GNOME/gupnp-av/-/commit/9557768121d54fdcedabe7544863515d6a813354
+Patch0:        0001-Remove-deprecates-xmlRecoverMemory.patch
+# https://gitlab.gnome.org/GNOME/gupnp-av/-/commit/1e10a41fcef6ae0d3e89958db89bc22398f3b4f1
+Patch1:        0002-xml-Fix-compatibility-libxml2-2-12-x.patch
 
-BuildRequires: glib2-devel
+BuildRequires: gobject-introspection-devel
 BuildRequires: gtk-doc
-BuildRequires: gobject-introspection-devel >= 1.36.0
-BuildRequires: libxml2-devel
-BuildRequires: libsoup-devel
+BuildRequires: meson
 BuildRequires: vala
+BuildRequires: pkgconfig(glib-2.0)
+BuildRequires: pkgconfig(libxml-2.0)
 
 %description
 GUPnP is an object-oriented open source framework for creating UPnP
@@ -40,44 +42,83 @@ BuildArch: noarch
 This package contains developer documentation for %{name}.
 
 %prep
-%setup -q
+%autosetup -p1
 
 %build
-%configure --disable-static
-make %{?_smp_mflags} V=1
+%meson -Dgtk_doc=true
+%meson_build
 
 %install
-%make_install
-
-#Remove libtool archives.
-find %{buildroot} -name '*.la' -delete
+%meson_install
 
 %check
-make check %{?_smp_mflags} V=1
-
-%ldconfig_scriptlets
+%meson_test
 
 %files
-%{!?_licensedir:%global license %%doc}
 %license COPYING
-%doc AUTHORS README
-%{_libdir}/libgupnp-av-1.0.so.*
+%doc AUTHORS NEWS README.md
+%{_libdir}/libgupnp-av-1.0.so.3*
+%dir %{_libdir}/girepository-1.0
 %{_libdir}/girepository-1.0/GUPnPAV-1.0.typelib
-%{_datadir}/%{name}
+%{_datadir}/gupnp-av/
 
 %files devel
-%{_includedir}/gupnp-av-1.0
+%{_includedir}/gupnp-av-1.0/
 %{_libdir}/pkgconfig/gupnp-av-1.0.pc
 %{_libdir}/libgupnp-av-1.0.so
+%dir %{_datadir}/gir-1.0
 %{_datadir}/gir-1.0/GUPnPAV-1.0.gir
-%{_datadir}/vala/vapi/%{name}*
+%dir %{_datadir}/vala
+%dir %{_datadir}/vala/vapi
+%{_datadir}/vala/vapi/gupnp-av*
 
 %files docs
-%{_datadir}/gtk-doc/html/%{name}
+%dir %{_datadir}/gtk-doc
+%dir %{_datadir}/gtk-doc/html
+%{_datadir}/gtk-doc/html/gupnp-av/
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.12.11-4
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.14.1-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.14.1-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sat Jan 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.14.1-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.14.1-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.14.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.14.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Wed Jun 15 2022 David King <amigadave@amigadave.com> - 0.14.1-1
+- Update to 0.14.1
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.14.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Sat Sep 18 2021 Kalev Lember <klember@redhat.com> - 0.14.0-1
+- Update to 0.14.0
+
+* Fri Aug 20 2021 Kalev Lember <klember@redhat.com> - 0.13.1-1
+- Update to 0.13.1
+- Switch to meson build system
+- Tighten soname globs
+- Fix various directory ownership issues
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.12.11-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.12.11-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.12.11-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.12.11-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

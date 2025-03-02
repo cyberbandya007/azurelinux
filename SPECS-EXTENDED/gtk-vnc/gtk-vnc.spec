@@ -1,13 +1,22 @@
-%global tls_priority "@LIBVIRT,SYSTEM"
-%global verdir 1.3
+# -*- rpm-spec -*-
 
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+# This spec file assumes you are building for Fedora 32 or newer,
+# or for RHEL 8 or newer. It may need some tweaks for other distros.
+
+%global tls_priority "@LIBVIRT,SYSTEM"
+%global verdir %(echo ${version} | cut -d. -f1,2)
+
+%global with_mingw 0
+
+%if 0%{?fedora}
+%global with_mingw 1
+%endif
+
 Summary: A GTK widget for VNC clients
 Name: gtk-vnc
-Version: 1.3.0
-Release: 3%{?dist}
-License: LGPLv2+
+Version: 1.3.1
+Release: 6%{?dist}
+License: LGPL-2.1-or-later
 Source: https://download.gnome.org/sources/%{name}/%{verdir}/%{name}-%{version}.tar.xz
 URL: https://gitlab.gnome.org/GNOME/gtk-vnc
 Requires: gvnc = %{version}-%{release}
@@ -17,8 +26,27 @@ BuildRequires: gobject-introspection-devel
 BuildRequires: gtk3-devel
 BuildRequires: vala
 BuildRequires: pulseaudio-libs-devel
-BuildRequires: /usr/bin/pod2man
+BuildRequires: perl-podlators
 BuildRequires: meson
+
+%if %{with_mingw}
+BuildRequires: mingw32-filesystem >= 95
+BuildRequires: mingw32-gcc
+BuildRequires: mingw32-cairo
+BuildRequires: mingw32-gettext
+BuildRequires: mingw32-libgcrypt
+BuildRequires: mingw32-gnutls
+BuildRequires: mingw32-gtk3
+
+
+BuildRequires: mingw64-filesystem >= 95
+BuildRequires: mingw64-gcc
+BuildRequires: mingw64-cairo
+BuildRequires: mingw64-gettext
+BuildRequires: mingw64-libgcrypt
+BuildRequires: mingw64-gnutls
+BuildRequires: mingw64-gtk3
+%endif
 
 %description
 gtk-vnc is a VNC viewer widget for GTK. It is built using coroutines
@@ -96,6 +124,68 @@ allowing it to be completely asynchronous while remaining single threaded.
 
 Libraries, includes, etc. to compile with the gtk-vnc library
 
+%if %{with_mingw}
+# Mingw32
+%package -n mingw32-gvnc
+Summary: MinGW Windows port of VNC GObject
+BuildArch: noarch
+
+%package -n mingw32-gvnc-tools
+Summary: Command line VNC tools
+BuildArch: noarch
+
+%package -n mingw32-gtk-vnc2
+Summary: A GTK3 widget for VNC clients
+Requires: pkgconfig
+Obsoletes: mingw32-gtk-vnc < 1.0.0
+BuildArch: noarch
+
+%description -n mingw32-gvnc
+gvnc is a GObject for managing a VNC connection. It provides all the
+infrastructure required to build a VNC client without having to deal
+with the raw protocol itself.
+
+%description -n mingw32-gvnc-tools
+Provides useful command line utilities for interacting with
+VNC servers. Includes the gvnccapture program for capturing
+screenshots of a VNC desktop
+
+%description -n mingw32-gtk-vnc2
+gtk-vnc is a VNC viewer widget for GTK. It is built using coroutines
+allowing it to be completely asynchronous while remaining single threaded.
+
+# Mingw64
+%package -n mingw64-gvnc
+Summary: MinGW Windows port of VNC GObject
+BuildArch: noarch
+
+%package -n mingw64-gvnc-tools
+Summary: Command line VNC tools
+BuildArch: noarch
+
+%package -n mingw64-gtk-vnc2
+Summary: A GTK3 widget for VNC clients
+Requires: pkgconfig
+Obsoletes: mingw64-gtk-vnc < 1.0.0
+BuildArch: noarch
+
+%description -n mingw64-gvnc
+gvnc is a GObject for managing a VNC connection. It provides all the
+infrastructure required to build a VNC client without having to deal
+with the raw protocol itself.
+
+%description -n mingw64-gvnc-tools
+Provides useful command line utilities for interacting with
+VNC servers. Includes the gvnccapture program for capturing
+screenshots of a VNC desktop
+
+%description -n mingw64-gtk-vnc2
+gtk-vnc is a VNC viewer widget for GTK. It is built using coroutines
+allowing it to be completely asynchronous while remaining single threaded.
+
+%{?mingw_debug_package}
+%endif
+
 %prep
 %autosetup -n gtk-vnc-%{version}
 
@@ -104,10 +194,28 @@ Libraries, includes, etc. to compile with the gtk-vnc library
 %meson_build
 chmod -x examples/*.pl examples/*.js examples/*.py
 
+%if %{with_mingw}
+%mingw_meson -Dintrospection=disabled
+%mingw_ninja
+%endif
+
+
 %install
 %meson_install
 
 %find_lang %{name}
+
+%if %{with_mingw}
+export DESTDIR=%{buildroot}
+%mingw_ninja install
+
+rm -f $RPM_BUILD_ROOT%{mingw32_mandir}/man1/gvnccapture.1*
+rm -f $RPM_BUILD_ROOT%{mingw64_mandir}/man1/gvnccapture.1*
+
+%mingw_debug_install_post
+
+%mingw_find_lang gtk-vnc
+%endif
 
 %check
 %meson_test
@@ -165,10 +273,76 @@ chmod -x examples/*.pl examples/*.js examples/*.py
 %{_libdir}/pkgconfig/%{name}-2.0.pc
 %{_datadir}/gir-1.0/GtkVnc-2.0.gir
 
+%if %{with_mingw}
+# Mingw32
+%files -n mingw32-gvnc -f mingw32-gtk-vnc.lang
+%doc AUTHORS
+%doc ChangeLog
+%doc ChangeLog-old
+%doc NEWS
+%doc README
+%doc COPYING.LIB
+%{mingw32_bindir}/libgvnc-1.0-0.dll
+%{mingw32_libdir}/libgvnc-1.0.dll.a
+%{mingw32_libdir}/pkgconfig/gvnc-1.0.pc
+%{mingw32_includedir}/gvnc-1.0
+
+%files -n mingw32-gtk-vnc2
+%{mingw32_bindir}/libgtk-vnc-2.0-0.dll
+%{mingw32_libdir}/libgtk-vnc-2.0.dll.a
+%{mingw32_libdir}/pkgconfig/gtk-vnc-2.0.pc
+%{mingw32_includedir}/gtk-vnc-2.0
+
+%files -n mingw32-gvnc-tools
+%{mingw32_bindir}/gvnccapture.exe
+
+# Mingw64
+%files -n mingw64-gvnc -f mingw64-gtk-vnc.lang
+%doc AUTHORS
+%doc ChangeLog
+%doc ChangeLog-old
+%doc NEWS
+%doc README
+%doc COPYING.LIB
+%{mingw64_bindir}/libgvnc-1.0-0.dll
+%{mingw64_libdir}/libgvnc-1.0.dll.a
+%{mingw64_libdir}/pkgconfig/gvnc-1.0.pc
+%{mingw64_includedir}/gvnc-1.0
+
+%files -n mingw64-gtk-vnc2
+%{mingw64_bindir}/libgtk-vnc-2.0-0.dll
+%{mingw64_libdir}/libgtk-vnc-2.0.dll.a
+%{mingw64_libdir}/pkgconfig/gtk-vnc-2.0.pc
+%{mingw64_includedir}/gtk-vnc-2.0
+
+%files -n mingw64-gvnc-tools
+%{mingw64_bindir}/gvnccapture.exe
+%endif
+
 %changelog
-* Mon Mar 06 2023 Muhammad Falak R Wani <mwani@microsoft.com> - 1.3.0-3
-- Initial CBL-Mariner import from Fedora 36 (license: MIT).
-- License Verified
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.1-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.1-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sat Jan 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.1-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Mon Jan 16 2023 Yaakov Selkowitz <yselkowi@redhat.com> - 1.3.1-1
+- Update to 1.3.1 release
+
+* Mon Aug  8 2022 Daniel P. Berrangé <berrange@redhat.com> - 1.3.0-5
+- Pull in mingw sub-packages
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
 
 * Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild

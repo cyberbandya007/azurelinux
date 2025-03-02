@@ -1,0 +1,8 @@
+diff -pruN liblangtag-0.6.2.orig/liblangtag-gobject/gendeps.sh liblangtag-0.6.2/liblangtag-gobject/gendeps.sh
+--- liblangtag-0.6.2.orig/liblangtag-gobject/gendeps.sh	2012-12-13 17:59:17.000000000 +0900
++++ liblangtag-0.6.2/liblangtag-gobject/gendeps.sh	2020-11-18 21:10:08.511540427 +0900
+@@ -11,3 +11,4 @@ while [ $# -ne 0 ]; do
+     echo "	\$(AM_V_GEN) \$(srcdir)/gengir.sh \$(top_srcdir)/liblangtag \$@"
+ done
+ echo "\$(srcdir)/gendir.sh:"
++echo ".NOTPARALLEL:"

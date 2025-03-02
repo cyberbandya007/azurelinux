@@ -1,0 +1,54 @@
+From 060fef89b6968f0c8f254e6f612eff839b83c057 Mon Sep 17 00:00:00 2001
+From: Pavel Cahyna <pcahyna@redhat.com>
+Date: Mon, 13 Nov 2023 18:54:41 +0100
+Subject: [PATCH] Do not mount /sys if already mounted
+
+Newer versions of systemd (starting with Fedora 39) seem to mount /sys
+themselves. Mounting it again leads to errors on the recovery system
+startup (startup scripts failing with status=219/CGROUP ), see
+https://github.com/rear/rear/issues/3017.
+
+Check if /sys is already mounted using the `mountpoint` tool and mount it
+only if it is not.
+
+Do the same for the other system mountpoints like /proc, /dev, /dev/pts.
+Not sure if they suffer from the same problem, but they probably could.
+
+N.B. the `mountpoint` command is already among REQUIRED_PROGS.
+---
+ usr/share/rear/skel/default/etc/scripts/boot | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/usr/share/rear/skel/default/etc/scripts/boot b/usr/share/rear/skel/default/etc/scripts/boot
+index 0f221af3e4..f06e759620 100755
+--- a/usr/share/rear/skel/default/etc/scripts/boot
++++ b/usr/share/rear/skel/default/etc/scripts/boot
+@@ -4,8 +4,8 @@
+ dmesg -n1
+ 
+ # basic mounts
+-mount -t proc -n none /proc
+-mount -t sysfs none /sys
++mountpoint /proc || mount -t proc -n none /proc
++mountpoint /sys || mount -t sysfs none /sys
+ 
+ if type udevd &>/dev/null && ! type udevinfo &>/dev/null; then
+     ### we use udevinfo to filter out old udev versions (<106) that don't
+@@ -13,7 +13,7 @@ if type udevd &>/dev/null && ! type udevinfo &>/dev/null; then
+     udev_version=$(udevd --version)
+     if [[ "$udev_version" -gt 175 ]]; then
+         ### udev > 175 needs devtmpfs
+-        mount -t devtmpfs none /dev
++        mountpoint /dev || mount -t devtmpfs none /dev
+     fi
+ fi
+ 
+@@ -26,7 +26,7 @@ if [[ ! -L /dev/fd ]] ; then
+     ln -s /proc/self/fd /dev/fd
+ fi
+ 
+-mount -t devpts -o gid=5,mode=620 none /dev/pts
++mountpoint /dev/pts || mount -t devpts -o gid=5,mode=620 none /dev/pts
+ 
+ cat /proc/mounts >/etc/mtab 2>/dev/null
+ 

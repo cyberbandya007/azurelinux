@@ -1,14 +1,13 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 Name:           lzip
-Version:        1.21
+Version:        1.24.1
 Release:        3%{?dist}
 Summary:        LZMA compressor with integrity checking
 
-License:        GPLv3+
+License:        GPL-2.0-or-later
 URL:            http://www.nongnu.org/lzip/lzip.html
 Source0:        http://download.savannah.gnu.org/releases/lzip/lzip-%{version}.tar.gz
 Source1:        http://download.savannah.gnu.org/releases/lzip/lzip-%{version}.tar.gz.sig
+BuildRequires: make
 BuildRequires:  gcc-c++
 
 %description
@@ -50,8 +49,53 @@ make check
 
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.21-3
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.24.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Tue Apr 09 2024 Gwyn Ciesla <gwync@protonmail.com> - 1.24.1-2
+- Correct license tag
+
+* Mon Mar 04 2024 Gwyn Ciesla <gwync@protonmail.com> - 1.24.1-1
+- 1.24.1
+
+* Tue Jan 30 2024 Gwyn Ciesla <gwync@protonmail.com> - 1.24-1
+- 1.24
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.23-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.23-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.23-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Tue Mar 07 2023 Gwyn Ciesla <gwync@protonmail.com> - 1.23-4
+- migrated to SPDX license
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.23-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.23-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Feb 03 2022 Gwyn Ciesla <gwync@protonmail.com> - 1.23-1
+- 1.23
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.22-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.22-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.22-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Mon Jan 11 2021 Gwyn Ciesla <gwync@protonmail.com> - 1.22-1
+- 1.22
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.21-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.21-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

@@ -1,5 +1,3 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 %{!?_httpd_apxs: %{expand: %%global _httpd_apxs %%{_sbindir}/apxs}}
 %{!?_httpd_mmn: %{expand: %%global _httpd_mmn %%(cat %{_includedir}/httpd/.mmn || echo 0-0)}}
 # /etc/httpd/conf.d with httpd < 2.4 and defined as /etc/httpd/conf.modules.d with httpd >= 2.4
@@ -11,9 +9,9 @@ Distribution:   Azure Linux
 
 Summary: Security module for the Apache HTTP Server
 Name: mod_security
-Version: 2.9.4
-Release: 1%{?dist}
-License: ASL 2.0
+Version: 2.9.7
+Release: 7%{?dist}
+License: Apache-2.0
 URL: http://www.modsecurity.org/
 Source: https://github.com/SpiderLabs/ModSecurity/releases/download/v%{version}/modsecurity-%{version}.tar.gz
 Source1: mod_security.conf
@@ -22,15 +20,19 @@ Source3: modsecurity_localrules.conf
 Patch0: modsecurity-2.9.3-lua-54.patch
 Patch1: modsecurity-2.9.3-apulibs.patch
 Patch2: mod_security-2.9.3-remote-rules-timeout.patch
+Patch3: mod_security-2.9.7-send_error_bucket.patch
 
 Requires: httpd httpd-mmn = %{_httpd_mmn}
+%if 0%{?fedora} || 0%{?rhel} > 7
+# Ensure apache user exists for file ownership
 Requires(pre): httpd-filesystem
+%endif
 
 BuildRequires: gcc, make, autoconf, automake, libtool
 BuildRequires: httpd-devel
 BuildRequires: perl-generators
+BuildRequires: pcre2-devel
 BuildRequires: pkgconfig(libcurl)
-BuildRequires: pkgconfig(libpcre)
 BuildRequires: pkgconfig(libxml-2.0)
 BuildRequires: pkgconfig(lua)
 
@@ -51,7 +53,10 @@ as a powerful umbrella - shielding web applications from attacks.
 %package        mlogc
 Summary:        ModSecurity Audit Log Collector
 Requires:       mod_security
+%if 0%{?fedora} || 0%{?rhel} > 7
+# Ensure apache user exists for file ownership
 Requires(pre):  httpd-filesystem
+%endif
 
 %description mlogc
 This package contains the ModSecurity Audit Log Collector.
@@ -66,6 +71,7 @@ This package contains the ModSecurity Audit Log Collector.
            --enable-pcre-match-limit-recursion=1000000 \
            --with-apxs=%{_httpd_apxs} \
            --with-yajl \
+           --with-pcre2 \
            --disable-static
 
 # remove rpath
@@ -116,8 +122,7 @@ install -m0644 mlogc/mlogc-default.conf %{buildroot}%{_sysconfdir}/mlogc.conf
 
 
 %files
-%license LICENSE
-%doc CHANGES README.* NOTICE
+%doc CHANGES LICENSE README.* NOTICE
 %{_httpd_moddir}/mod_security2.so
 %config(noreplace) %{_httpd_confdir}/*.conf
 %if "%{_httpd_modconfdir}" != "%{_httpd_confdir}"
@@ -140,12 +145,66 @@ install -m0644 mlogc/mlogc-default.conf %{buildroot}%{_sysconfdir}/mlogc.conf
 %endif
 
 %changelog
-* Fri Mar 04 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 2.9.4-1
-- Updating to version 2.9.4 using Fedora 36 spec (license: MIT) for guidance.
-- License verified.
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.9.7-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 2.9.3-5
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.9.7-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.9.7-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Tue Jan 02 2024 Tomas Korbar <tkorbar@redhat.com> - 2.9.7-4
+- Clear original response code in send_error_bucket function
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.9.7-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Fri Jun 02 2023 Luboš Uhliarik <luhliari@redhat.com> - 2.9.7-2
+- SPDX migration
+
+* Thu Apr 13 2023 Luboš Uhliarik <luhliari@redhat.com> - 2.9.7-1
+- new version 2.9.7
+- use pcre2 instead of deprecated pcre (rhbz #2128330)
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.9.6-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Wed Sep 14 2022 Luboš Uhliarik <luhliari@redhat.com> - 2.9.6-1
+- new version 2.9.6
+
+* Wed Aug 31 2022 Luboš Uhliarik <luhliari@redhat.com> - 2.9.5-1
+- new version 2.9.5
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.9.4-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.9.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Wed Aug 18 2021 Luboš Uhliarik <luhliari@redhat.com> - 2.9.4-1
+- new version 2.9.4
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.9.3-11
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.9.3-10
+- Resolves: #1930664 - RFE: Add a feature that can set a mod_security/libcurl
+  timeout for retrieving the rules
+- rename mlogc to mod_security-mlogc
+
+* Fri Jan 22 2021 Joe Orton <jorton@redhat.com> - 2.9.3-8
+- don't link against redundant apr-util dependent libraries
+
+* Sat Aug 08 2020 Othman Madjoudj <athmane@fedoraproject.org> - 2.9.3-7
+- Add a patch to fix build with Lua 5.4 until we completely switch to mod_sec3 as default
+
+* Sat Aug 01 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.9.3-6
+- Second attempt - Rebuilt for
+  https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.9.3-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.9.3-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

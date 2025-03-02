@@ -1,21 +1,19 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 Name:           libgxps
-Version:        0.3.1
-Release:        8%{?dist}
+Version:        0.3.2
+Release:        9%{?dist}
 Summary:        GObject based library for handling and rendering XPS documents
 
-License:        LGPLv2+
+License:        LGPL-2.1-or-later
 URL:            https://wiki.gnome.org/Projects/libgxps
 Source0:        https://ftp.gnome.org/pub/gnome/sources/%{name}/0.3/%{name}-%{version}.tar.xz
 
-BuildRequires:  %{_bindir}/xsltproc
 BuildRequires:  meson
 BuildRequires:  gcc
 BuildRequires:  gtk3-devel
 BuildRequires:  glib2-devel
 BuildRequires:  gobject-introspection-devel
-BuildRequires:  pkgconfig(cairo)
+BuildRequires:  gtk-doc
+BuildRequires:  cairo-devel
 BuildRequires:  libarchive-devel
 BuildRequires:  freetype-devel
 BuildRequires:  libjpeg-devel
@@ -48,7 +46,7 @@ documents using the %{name} library.
 
 
 %build
-%meson -Denable-gtk-doc=false -Denable-man=false
+%meson -Denable-gtk-doc=true -Denable-man=true
 %meson_build
 
 
@@ -59,7 +57,8 @@ documents using the %{name} library.
 %files
 %doc AUTHORS MAINTAINERS NEWS README TODO
 %license COPYING
-%{_libdir}/*.so.*
+%{_libdir}/*.so.2
+%{_libdir}/*.so.2.*
 %dir %{_libdir}/girepository-1.0
 %{_libdir}/girepository-1.0/*.typelib
 
@@ -70,24 +69,49 @@ documents using the %{name} library.
 %{_libdir}/pkgconfig/*.pc
 %dir %{_datadir}/gir-1.0
 %{_datadir}/gir-1.0/*.gir
+%dir %{_datadir}/gtk-doc
+%dir %{_datadir}/gtk-doc/html
+%{_datadir}/gtk-doc/html/libgxps
 
 
 %files tools
 %{_bindir}/xpsto*
+%{_mandir}/man1/xpsto*.1*
 
 
 %changelog
-* Fri Mar 31 2023 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.3.1-8
-- Bumping release to re-build with newer 'libtiff' libraries.
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.3.2-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Mon Mar 21 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.3.1-7
-- Adding BR on '%%{_bindir}/xsltproc'.
-- Disabled gtk doc generation to remove network dependency during build-time.
-- License verified.
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.3.2-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
 
-* Thu Jun 17 2021 Thomas Crain <thcrain@microsoft.com> - 0.3.1-6
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
-- Use pkgconfig(cairo) build requirement instead of cairo-devel
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.3.2-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.3.2-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.3.2-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.3.2-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.3.2-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.3.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri Feb 26 2021 Tom Hughes <tom@compton.nu> - 0.3.2-1
+- Update to 0.3.2 upstream release
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.3.1-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.3.1-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.3.1-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

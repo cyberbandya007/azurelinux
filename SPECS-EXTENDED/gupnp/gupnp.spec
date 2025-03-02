@@ -1,63 +1,57 @@
 %global apiver 1.6
+
 %global gssdp_version 1.6.2
-%global docs 0
-Summary:        A framework for creating UPnP devices & control points
-Name:           gupnp
-Version:        1.6.3
-Release:        3%{?dist}
-License:        LGPLv2+
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
-URL:            https://www.gupnp.org/
-Source0:        https://github.com/GNOME/%{name}/archive/refs/tags/%{name}-%{version}.tar.gz
-%if %{with docs}
-BuildRequires:  docbook-style-xsl
-BuildRequires:  gi-docgen
-%endif
-BuildRequires:  gobject-introspection-devel
-BuildRequires:  meson
-BuildRequires:  vala
-BuildRequires:  %{_bindir}/xsltproc
-BuildRequires:  pkgconfig(gssdp-1.6) >= %{gssdp_version}
-BuildRequires:  pkgconfig(libsoup-3.0)
-BuildRequires:  pkgconfig(libxml-2.0)
-BuildRequires:  pkgconfig(uuid)
-Requires:       dbus
-Requires:       gssdp%{?_isa} >= %{gssdp_version}
+
+Name:          gupnp
+Version:       1.6.7
+Release:       1%{?dist}
+Summary:       A framework for creating UPnP devices & control points
+
+License:       LGPL-2.1-or-later
+URL:           https://www.gupnp.org/
+Source0:       https://download.gnome.org/sources/%{name}/1.6/%{name}-%{version}.tar.xz
+
+BuildRequires: docbook-style-xsl
+BuildRequires: gi-docgen
+BuildRequires: gobject-introspection-devel
+BuildRequires: meson
+BuildRequires: vala
+BuildRequires: /usr/bin/xsltproc
+BuildRequires: pkgconfig(gssdp-1.6) >= %{gssdp_version}
+BuildRequires: pkgconfig(libsoup-3.0)
+BuildRequires: pkgconfig(libxml-2.0)
+BuildRequires: pkgconfig(uuid)
+
+Requires: dbus
+Requires: gssdp%{?_isa} >= %{gssdp_version}
 
 %description
-GUPnP is an object-oriented open source framework for creating UPnP
-devices and control points, written in C using GObject and libsoup.
-The GUPnP API is intended to be easy to use, efficient and flexible.
+GUPnP is an object-oriented open source framework for creating UPnP 
+devices and control points, written in C using GObject and libsoup. 
+The GUPnP API is intended to be easy to use, efficient and flexible. 
 
 %package devel
-Summary:        Development package for gupnp
-Requires:       %{name}%{?_isa} = %{version}-%{release}
+Summary: Development package for gupnp
+Requires: %{name}%{?_isa} = %{version}-%{release}
 
 %description devel
 Files for development with %{name}.
 
-%if %{with docs}
 %package docs
-Summary:        Documentation files for %{name}
-Requires:       %{name} = %{version}-%{release}
-BuildArch:      noarch
+Summary: Documentation files for %{name}
+Requires: %{name} = %{version}-%{release}
+BuildArch: noarch
 
 %description docs
 This package contains developer documentation for %{name}.
-%endif
 
 %prep
-%autosetup -p1 -n %{name}-%{name}-%{version}
+%autosetup -p1
 
 %build
 %meson \
   -Dcontext_manager=network-manager \
-%if %{with docs}
   -Dgtk_doc=true \
-%else
-  -Dgtk_doc=false \
-%endif
   -Dexamples=false \
   %{nil}
 %meson_build
@@ -85,20 +79,38 @@ This package contains developer documentation for %{name}.
 %dir %{_datadir}/vala
 %dir %{_datadir}/vala/vapi
 %{_datadir}/vala/vapi/gupnp*
-%if %{with docs}
 %{_mandir}/man1/gupnp-binding-tool-%{apiver}.1*
-%endif
 
-%if %{with docs}
 %files docs
 %{_docdir}/gupnp-%{apiver}/
-%endif
 
 %changelog
-* Wed Feb 01 2023 Sumedh Sharma <sumsharma@microsoft.com> - 1.6.3-3
-- Initial CBL-Mariner import from Fedora 38 (license: MIT)
-- Disable docs
-- License verified
+* Tue Sep 24 2024 nmontero <nmontero@redhat.com> - 1.6.7-1
+- Update to 1.6.7
+
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.6-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.6-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sat Jan 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.6-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Mon Nov 27 2023 David King <amigadave@amigadave.com> - 1.6.6-2
+- Fix building against libxml2 2.12.0 or above
+
+* Thu Nov 02 2023 Kalev Lember <klember@redhat.com> - 1.6.6-1
+- Update to 1.6.6
+
+* Mon Jul 31 2023 Kalev Lember <klember@redhat.com> - 1.6.5-1
+- Update to 1.6.5
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Sat Jul 01 2023 Kalev Lember <klember@redhat.com> - 1.6.4-1
+- Update to 1.6.4
 
 * Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.3-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild

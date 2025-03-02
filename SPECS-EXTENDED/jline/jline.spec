@@ -22,7 +22,7 @@ Release:        4%{?dist}
 Summary:        Java library for handling console input
 License:        BSD-3-Clause
 URL:            https://github.com/jline/jline3
-ExclusiveArch:  %{java_arches}
+#ExclusiveArch:  %{java_arches}
 
 Source0:        %{url}/archive/jline-parent-%{version}.tar.gz
 

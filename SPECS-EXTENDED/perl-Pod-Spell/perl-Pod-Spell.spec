@@ -1,47 +1,40 @@
 Name:           perl-Pod-Spell
-Version:        1.20
-Release:        15%{?dist}
+Version:        1.26
+Release:        5%{?dist}
 Summary:        A formatter for spell-checking POD
-License:        Artistic 2.0
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+License:        Artistic-2.0
 URL:            https://metacpan.org/release/Pod-Spell
-Source0:        https://cpan.metacpan.org/modules/by-module/Pod/Pod-Spell-%{version}.tar.gz#/perl-Pod-Spell-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/modules/by-module/Pod/Pod-Spell-%{version}.tar.gz
 BuildArch:      noarch
 BuildRequires:  coreutils
-BuildRequires:  findutils
 BuildRequires:  make
 BuildRequires:  perl-generators
 BuildRequires:  perl-interpreter
-BuildRequires:  perl(ExtUtils::MakeMaker)
+BuildRequires:  perl(Config)
+BuildRequires:  perl(ExtUtils::MakeMaker) >= 6.76
 BuildRequires:  perl(File::ShareDir::Install) >= 0.06
 BuildRequires:  perl(strict)
 BuildRequires:  perl(warnings)
-BuildRequires:  sed
 # Run-time:
-BuildRequires:  perl(Carp)
 BuildRequires:  perl(Class::Tiny)
 BuildRequires:  perl(constant)
 BuildRequires:  perl(File::ShareDir)
+BuildRequires:  perl(File::Spec)
 BuildRequires:  perl(Lingua::EN::Inflect)
 BuildRequires:  perl(locale)
 BuildRequires:  perl(parent)
-BuildRequires:  perl(Path::Tiny)
-BuildRequires:  perl(Pod::Escapes)
-BuildRequires:  perl(Pod::Parser)
+BuildRequires:  perl(Pod::Simple)
 BuildRequires:  perl(Text::Wrap)
 # Optional run-time:
 # I18N::Langinfo not used at tests
 # POSIX not used at tests
 # Tests:
-BuildRequires:  perl(File::Spec)
+BuildRequires:  perl(blib)
 BuildRequires:  perl(File::Temp) >= 0.17
 BuildRequires:  perl(IO::Handle)
 BuildRequires:  perl(IPC::Open3)
-BuildRequires:  perl(Test::Deep)
 BuildRequires:  perl(Test::More) >= 0.96
 BuildRequires:  perl(utf8)
-Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 Requires:       perl(File::ShareDir)
 Recommends:     perl(I18N::Langinfo)
 Recommends:     perl(POSIX)
@@ -53,20 +46,45 @@ effort into actual formatting, and it suppresses things that look like
 Perl symbols or Perl jargon (so that your spell-checking program won't
 complain about mystery words like "$thing" or "Foo::Bar" or "hashref").
 
+%package tests
+Summary:        Tests for %{name}
+Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       perl-Test-Harness
+
+%description tests
+Tests from %{name}. Execute them
+with "%{_libexecdir}/%{name}/test".
+
 %prep
 %setup -q -n Pod-Spell-%{version}
-sed -i -e '/^#!/ c #!%{__perl}' bin/podspell
+
+# Help generators to recognize Perl scripts
+for F in t/*.t; do
+    perl -i -MConfig -ple 'print $Config{startperl} if $. == 1 && !s{\A#!.*perl\b}{$Config{startperl}}' "$F"
+    chmod +x "$F"
+done
 
 %build
-perl Makefile.PL INSTALLDIRS=vendor
-make %{?_smp_mflags}
+perl Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1 NO_PERLLOCAL=1
+%{make_build}
 
 %install
-make pure_install DESTDIR=%{buildroot}
-find %{buildroot} -type f -name .packlist -delete
+%{make_install}
 %{_fixperms} -c %{buildroot}
 
+# Install tests
+mkdir -p %{buildroot}%{_libexecdir}/%{name}
+mkdir -p %{buildroot}%{_libexecdir}/%{name}/bin
+ln -s %{_bindir}/podspell %{buildroot}%{_libexecdir}/%{name}/bin
+cp -a t %{buildroot}%{_libexecdir}/%{name}
+cat > %{buildroot}%{_libexecdir}/%{name}/test << 'EOF'
+#!/bin/sh
+cd %{_libexecdir}/%{name} && exec prove -I . -j "$(getconf _NPROCESSORS_ONLN)"
+EOF
+chmod +x %{buildroot}%{_libexecdir}/%{name}/test
+
 %check
+export HARNESS_OPTIONS=j$(perl -e 'if ($ARGV[0] =~ /.*-j([0-9][0-9]*).*/) {print $1} else {print 1}' -- '%{?_smp_mflags}')
 make test
 
 %files
@@ -79,9 +97,61 @@ make test
 %{_mandir}/man3/Pod::Spell.3*
 %{_mandir}/man3/Pod::Wordlist.3*
 
+%files tests
+%{_libexecdir}/%{name}
+
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.20-15
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.26-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.26-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.26-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.26-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Tue Mar 14 2023 Jitka Plesnikova <jplesnik@redhat.com> - 1.26-1
+- 1.26 bump
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.25-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Wed Oct 05 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.25-1
+- 1.25 bump
+
+* Thu Sep 22 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.23-1
+- 1.23 bump
+- Package tests
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.20-23
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Wed Jun 01 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.20-22
+- Perl 5.36 rebuild
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.20-21
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.20-20
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 1.20-19
+- Perl 5.34 rebuild
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.20-18
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.20-17
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 1.20-16
+- Perl 5.32 rebuild
+
+* Tue Mar 10 2020 Paul Howarth <paul@city-fan.org> - 1.20-15
+- BR: perl(blib) for t/00-compile.t
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.20-14
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

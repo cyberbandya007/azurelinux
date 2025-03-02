@@ -1,0 +1,12 @@
+diff -up hdf-4.2.16-2/mfhdf/libsrc/putget.c.type hdf-4.2.16-2/mfhdf/libsrc/putget.c
+--- hdf-4.2.16-2/mfhdf/libsrc/putget.c.type	2023-02-06 07:13:34.000000000 -0700
++++ hdf-4.2.16-2/mfhdf/libsrc/putget.c	2024-02-05 17:50:09.981633746 -0700
+@@ -593,7 +593,7 @@ xdr_NCv1data(XDR *xdrs, u_long where, nc
+ #ifdef H4_HAVE_LP64
+             return (xdr_int(xdrs, (nclong *)values));
+ #else
+-            return (xdr_long(xdrs, (nclong *)values));
++            return (xdr_long(xdrs, (long *)values));
+ #endif
+         case NC_FLOAT:
+             return (xdr_float(xdrs, (float *)values));

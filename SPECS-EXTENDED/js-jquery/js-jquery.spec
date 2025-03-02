@@ -1,7 +1,5 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 Name:           js-jquery
-Version:        3.5.0
+Version:        3.7.1
 Release:        4%{?dist}
 Summary:        JavaScript DOM manipulation, event handling, and AJAX library
 BuildArch:      noarch
@@ -13,18 +11,16 @@ BuildArch:      noarch
 License:        MIT
 URL:            https://jquery.com/
 Source0:        https://github.com/jquery/jquery/archive/%{version}/jquery-%{version}.tar.gz
-# Created by ./update_sources.sh <version>
+# Created by ./update-sources.sh <version>
 Source1:        jquery_%{version}_node_modules.tar.gz
 
 # disable gzip-js during build
 Patch1:         %{name}-disable-gzip-js.patch
-# Patch for CVE-2019-20149 in kind-of package https://github.com/jonschlinkert/kind-of/pull/31
-Patch2:         CVE-2019-20149.patch
 
 
 BuildRequires:  web-assets-devel
 BuildRequires:  nodejs-packaging
-BuildRequires:  nodejs-devel
+BuildRequires:  nodejs
 
 Provides:       jquery = %{version}-%{release}
 Provides:       %{name}-static = %{version}-%{release}
@@ -47,15 +43,14 @@ browsers. With a combination of versatility and extensibility, jQuery has
 changed the way that millions of people write JavaScript.
 
 %prep
-%setup -n jquery-%{version}
-%patch 1 -p1
+%autosetup -n jquery-%{version} -v -p1
 
 #remove precompiled stuff
 rm -rf dist/*
 
 # Install the cached node modules
 tar xf %{SOURCE1}
-%patch 2 -p1
+
 
 %build
 ./node_modules/grunt-cli/bin/grunt -v 'build:*:*' uglify
@@ -86,13 +81,50 @@ ln -s %{version} %{installdir}/%{ver_x}.%{ver_y}
 
 
 %changelog
-* Fri Aug 9 2024 Amrita Kohli <amritakohli@microsoft.com> - 3.5.0-4
-- Patch CVE-2019-20149 in kind-of package.
-- License verified
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.7.1-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Mon Jun 14 2021 Thomas Crain <thcrain@microsoft.com> - 3.5.0-3
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
-- Add explicit build-time dependency on nodejs-devel
+* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.7.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sat Jan 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.7.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sat Sep 02 2023 Orion Poplawski <orion@nwra.com> - 3.7.1-1
+- Update to 3.7.1
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.6.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Mar 09 2023 Orion Poplawski <orion@nwra.com> - 3.6.4-1
+- Update to 3.6.4
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.6.3-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Dec 22 2022 Orion Poplawski <orion@nwra.com> - 3.6.3-1
+- Update to 3.6.3
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.6.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.6.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Mon Jan 17 2022 Orion Poplawski <orion@nwra.com> - 3.6.0-1
+- Update to 3.6.0
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.5.0-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.5.0-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 3.5.0-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Fri Apr 17 2020 Stephen Gallagher <sgallagh@redhat.com> - 3.5.0-3
+- Add explicit dependency on nodejs
 
 * Wed Apr 15 2020 Stephen Gallagher <sgallagh@redhat.com> - 3.5.0-2
 - Add virtual Provides: for bundled sizzle

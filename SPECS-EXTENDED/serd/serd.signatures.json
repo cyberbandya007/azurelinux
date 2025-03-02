@@ -1,5 +1,7 @@
 {
  "Signatures": {
-  "serd-0.30.2.tar.bz2": "9d3102701172804f823f2215ca3147c50eba992641f9fbe014272355f4937202"
+  "drobilla.gpg": "29c8ffc9ffee2982ad3c3355736ed043377c1f0f4ea4776df4b98a464692b70e",
+  "serd-0.32.2.tar.xz": "df7dc2c96f2ba1decfd756e458e061ded7d8158d255554e7693483ac0963c56b",
+  "serd-0.32.2.tar.xz.sig": "3e75ccdeeb7f00e103a3bbdb9da35a3052922a8dee1d34456549e87d5cb76243"
  }
 }

@@ -1,0 +1,49 @@
+Avoid calling the undeclared exit function and future failures
+with compilers which do not support implicit function declarations.
+
+Submitted upstream: <https://savannah.gnu.org/bugs/index.php?63679>
+
+diff --git a/configure b/configure
+index b593652a6693e702..dac25375fd493823 100755
+--- a/configure
++++ b/configure
+@@ -14407,7 +14407,7 @@ int main (void)
+    inf = exp(1.0e10);
+    nan = inf / inf ;
+    status = (nan == nan);
+-   exit (status);
++   return status;
+ }
+ _ACEOF
+ if ac_fn_c_try_run "$LINENO"
+@@ -14452,7 +14452,7 @@ int main (void)
+    for (i = 0; i < 5; i++) { z = z / 10.0 ; };
+    for (i = 0; i < 5; i++) { z = z * 10.0 ; };
+    status = (z == 0.0);
+-   exit (status);
++   return status;
+ }
+ _ACEOF
+ if ac_fn_c_try_run "$LINENO"
+diff --git a/configure.ac b/configure.ac
+index a2e038f5656e983a..40e7d2a3db3e4d41 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -449,7 +449,7 @@ int main (void)
+    inf = exp(1.0e10);
+    nan = inf / inf ;
+    status = (nan == nan);
+-   exit (status);
++   return status;
+ }]])],[ac_cv_c_ieee_comparisons="yes"],[ac_cv_c_ieee_comparisons="no"],[ac_cv_c_ieee_comparisons="yes"])
+ ])
+ 
+@@ -469,7 +469,7 @@ int main (void)
+    for (i = 0; i < 5; i++) { z = z / 10.0 ; };        
+    for (i = 0; i < 5; i++) { z = z * 10.0 ; };
+    status = (z == 0.0);
+-   exit (status);
++   return status;
+ }]])],[ac_cv_c_ieee_denormals="yes"],[ac_cv_c_ieee_denormals="no"],[ac_cv_c_ieee_denormals="yes"])
+ ])
+ 

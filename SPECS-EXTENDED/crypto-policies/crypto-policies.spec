@@ -1,5 +1,5 @@
-%global git_date 20250124
-%global git_commit 4d262e79be1cd15c84cad55ad88c53a2d7712e85
+%global git_date 20241029
+%global git_commit 8baf55743b6f68ae889584b194970f8f3f613a8c
 %{?git_commit:%global git_commit_hash %(c=%{git_commit}; echo ${c:0:7})}
 
 %global _python_bytecompile_extra 0
@@ -19,7 +19,7 @@ URL:            https://gitlab.com/redhat-crypto/fedora-crypto-policies
 Source0:        https://gitlab.com/redhat-crypto/fedora-crypto-policies/-/archive/%{git_commit_hash}/%{name}-git%{git_commit_hash}.tar.gz
 
 BuildArch: noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 BuildRequires: asciidoc
 BuildRequires: libxslt
 BuildRequires: openssl
@@ -35,10 +35,10 @@ BuildRequires: sequoia-policy-config
 BuildRequires: systemd-rpm-macros
 
 Conflicts: openssl-libs < 3.0.2-2
-Conflicts: nss < 3.105
+Conflicts: nss < 3.101
 Conflicts: libreswan < 3.28
-Conflicts: openssh < 9.9
-Conflicts: gnutls < 3.8.8-1
+Conflicts: openssh < 9.0p1-5
+Conflicts: gnutls < 3.8.6-6
 
 # Most users want this, the split is mostly for Fedora CoreOS
 Recommends: crypto-policies-scripts
@@ -227,7 +227,7 @@ end
 
 %pre
 # Drop removed javasystem backend; can be dropped in F43
-rm -f "%{_sysconfdir}/crypto-policies/back-ends/javasystem.config" 2>/dev/null || :
+rm -f "%{_sysconfdir}/crypto-policies/back-ends/javasystem.config" || :
 exit 0
 
 %posttrans scripts
@@ -295,20 +295,6 @@ exit 0
 %{_mandir}/man8/fips-finish-install.8*
 
 %changelog
-* Fri Jan 24 2025 Alexander Sosedkin <asosedkin@redhat.com> - 20250124-1.git4d262e7
-- openssl: stricter enabling of Ciphersuites
-- openssl: make use of -CBC and -AESGCM keywords
-- openssl, BSI: add TLS 1.3 Brainpool identifiers
-- openssh: map mlkem768x25519-sha256 to KEM-ECDH & MLKEM768-X25519 & SHA2-256
-- update-crypto-policies: don't output FIPS warning in fips mode
-- gnutls: add GROUP-X25519-MLKEM768 and GROUP-SECP256R1-MLKEM768
-- nss: add mlkem768x25519
-- openssl: use both names for SecP256r1MLKEM768 / X25519MLKEM768
-- Silence harmless error messages from %%pre scriptlet
-- openssh, TEST-PQ: rename MLKEM key-exchange to MLKEM768
-- openssh: add support for sntrup761x25519-sha512 and mlkem768x25519-sha256
-- TEST-PQ: enable sntrup761x25519-sha512 and mlkem768x25519-sha256 for openssh
-
 * Tue Oct 29 2024 Alexander Sosedkin <asosedkin@redhat.com> - 20241029-1.git8baf557
 - Bump version for the f41 package to sort higher that the f40 one
 

@@ -95,7 +95,7 @@
 %global exclude_packages %{exclude_packages}"
 
 Name: subscription-manager
-Version: 1.30.5
+Version: 1.30.2
 Release: 1%{?dist}
 Summary: Tools and libraries for subscription and repository management
 %if 0%{?suse_version}
@@ -151,6 +151,7 @@ Requires: %{py_package_prefix}-zypp-plugin
 %else
 Requires: %{py_package_prefix}-dateutil
 Requires: %{py_package_prefix}-dbus
+Requires: usermode
 Requires: python3-gobject-base
 %endif
 
@@ -384,7 +385,6 @@ make -f Makefile install VERSION=%{version}-%{release} \
     OS_VERSION=%{?fedora}%{?rhel}%{?suse_version} OS_DIST=%{dist} \
     COMPLETION_DIR=%{completion_dir} \
     RUN_DIR=%{run_dir} \
-    SBIN_DIR=%{_sbindir} \
     %{?install_ostree} %{?install_container} \
     %{?install_dnf_plugins} \
     %{?install_zypper_plugins} \
@@ -456,6 +456,14 @@ find %{buildroot} -name \*.py* -exec touch -r %{SOURCE0} '{}' \;
 %{_sbindir}/rcrhsm
 %{_sbindir}/rcrhsm-facts
 %{_sbindir}/rcrhsmcertd
+
+%else
+
+# symlink to console-helper
+%{_bindir}/subscription-manager
+# PAM config
+%{_sysconfdir}/pam.d/subscription-manager
+%{_sysconfdir}/security/console.apps/subscription-manager
 
 %endif
 
@@ -726,28 +734,14 @@ fi
 %endif
 
 %posttrans
-%systemd_posttrans_with_restart rhsm.service
 # Remove old *.egg-info empty directories not removed be previous versions of RPMs
 # due to this BZ: https://bugzilla.redhat.com/show_bug.cgi?id=1927245
 rmdir %{python_sitearch}/subscription_manager-*-*.egg-info --ignore-fail-on-non-empty
 # Remove old cache files
 # The -f flag ensures that exit code 0 will be returned even if the file does not exist.
 rm -f /var/lib/rhsm/cache/rhsm_icon.json
-rm -f /var/lib/rhsm/cache/content_access_mode.json
 
 %changelog
-* Tue Feb 04 2025 Packit <hello@packit.dev> - 1.30.5-1
-- Update to version 1.30.5
-- Resolves: rhbz#2343730
-
-* Wed Jan 22 2025 Packit <hello@packit.dev> - 1.30.4-1
-- Update to version 1.30.4
-- Resolves: rhbz#2339420
-
-* Thu Dec 19 2024 Packit <hello@packit.dev> - 1.30.3-1
-- Update to version 1.30.3
-- Resolves: rhbz#2333286
-
 * Thu Sep 26 2024 Packit <hello@packit.dev> - 1.30.2-1
 - Update to version 1.30.2
 - Resolves: rhbz#2305321

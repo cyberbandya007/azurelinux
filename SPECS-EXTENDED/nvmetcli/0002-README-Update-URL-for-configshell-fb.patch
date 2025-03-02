@@ -1,0 +1,30 @@
+From a481736441b4c811f57fa84a8e3609b084f93835 Mon Sep 17 00:00:00 2001
+From: Tony Asleson <tasleson@redhat.com>
+Date: Thu, 26 Mar 2020 13:07:44 -0500
+Subject: [PATCH 02/12] README: Update URL for configshell-fb
+
+The github repository was moved. There is a github redirect,
+so this change is not strictly required.
+
+Signed-off-by: Tony Asleson <tasleson@redhat.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ README | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/README b/README
+index c8717e8..5a4ecd1 100644
+--- a/README
++++ b/README
+@@ -7,7 +7,7 @@ to save, restore or clear the current NVMe target configuration.
+ Installation
+ ------------
+ Please install the configshell-fb package from
+-https://github.com/agrover/configshell-fb first.
++https://github.com/open-iscsi/configshell-fb first.
+ 
+ nvmetcli can be run directly from the source directory or installed
+ using setup.py.
+-- 
+2.29.2
+

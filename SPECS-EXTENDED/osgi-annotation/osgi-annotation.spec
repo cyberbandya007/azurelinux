@@ -7,7 +7,7 @@ Summary:        Annotations for use in compiling OSGi bundles
 License:        Apache-2.0
 URL:            https://www.osgi.org
 BuildArch:      noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 
 # Upstream project is behind an account registration system with no anonymous
 # read access, so we download the source from maven central instead

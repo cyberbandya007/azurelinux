@@ -1,33 +1,33 @@
-%bcond_with docs
+%ifnarch s390x
+%bcond_without check
+%else
+# https://github.com/festvox/flite/issues/67
+%bcond_with check
+%endif
+
+# https://github.com/festvox/flite/issues/86
+%global _smp_mflags -j1
 
 Name:           flite
-Version:        1.3
-Release:        36%{?dist}
+Version:        2.2
+Release:        9%{?dist}
 Summary:        Small, fast speech synthesis engine (text-to-speech)
 License:        MIT
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 URL:            http://www.speech.cs.cmu.edu/flite/
 
-Source0:        http://www.speech.cs.cmu.edu/flite/packed/%{name}-%{version}/%{name}-%{version}-release.tar.gz
-Source1:        README-ALSA.txt
-Patch0:         flite-1.3-sharedlibs.patch
-Patch1:         flite-1.3-doc_texinfo.patch
-Patch2:         flite-1.3-alsa_support.patch
-Patch3:         flite-1.3-implicit_dso_linking.patch
-Patch4:         0001-auserver.c-Only-write-audio-data-to-a-file-in-debug-.patch
-Patch5:         flite-0001-Fixed-texi2html-ambiguity.patch
-
-%if %{with docs}
-BuildRequires:  texi2html
+Source0:        https://github.com/festvox/flite/archive/v%{version}/flite-%{version}.tar.gz
+Patch0:         flite-2.2-lto.patch
+# fixes build with texinfo-7.0+, see https://lists.gnu.org/archive/html/bug-texinfo/2022-11/msg00036.html
+Patch1:         flite-2.2-texinfo-7.0.patch
 # texi2pdf
 # WARNING see explanation about PDF doc below.
 #BuildRequires:  texinfo-tex
-%endif
-
 BuildRequires:  gcc
 BuildRequires:  autoconf automake libtool
 BuildRequires:  ed alsa-lib-devel
+BuildRequires: make
+BuildRequires:  pulseaudio-libs-devel
+BuildRequires:  texinfo
 
 
 %description
@@ -46,42 +46,41 @@ Development files for Flite, a small, fast speech synthesis engine.
 
 
 %prep
-%setup -q -n %{name}-%{version}-release
-%patch 0 -p1 -b .flite-1.3-sharedlibs
-%patch 1 -p1 -b .flite-1.3-doc_texinfo
-%patch 2 -p1 -b .flite-1.3-alsa_support
-%patch 3 -p1 -b .flite-1.3-implicit_dso_linking
-%patch 4 -p1
-%patch 5 -p1
-cp -p %{SOURCE1} .
+%setup -q
+%patch -P0 -p1 -b .lto
+%patch -P1 -p1 -b .ti7
 
 
 %build
 autoreconf -vif
-%configure --enable-shared --with-audio=alsa
-# This package fails parallel make (thus cannot be built using "_smp_flags")
-make
-%if %{with docs}
+%configure \
+    --enable-shared \
+    --with-audio=pulseaudio \
+
+%make_build
 # Build documentation
 cd doc
 # WARNING "make doc" provides a huge PDF file. It was decided not to produce/package it.
 #make doc
 make flite.html
-%endif
+
 
 %install
-make install INSTALLBINDIR=%{buildroot}%{_bindir} INSTALLLIBDIR=%{buildroot}%{_libdir}  INSTALLINCDIR=%{buildroot}%{_includedir}/flite
+%make_install
+rm %{buildroot}%{_libdir}/libflite*.a
 
 
-%ldconfig_scriptlets
+%if %{with check}
+%check
+LD_LIBRARY_PATH=%{buildroot}%{_libdir} make -C testsuite do_thread_test
+%endif
 
 
 %files
 %license COPYING
-%doc ACKNOWLEDGEMENTS README README-ALSA.txt
-%if %{with docs}
+%doc ACKNOWLEDGEMENTS
 %doc doc/html
-%endif
+%doc README.md
 %{_libdir}/*.so.*
 %{_bindir}/*
 
@@ -92,9 +91,50 @@ make install INSTALLBINDIR=%{buildroot}%{_bindir} INSTALLLIBDIR=%{buildroot}%{_l
 
 
 %changelog
-* Mon Jun 14 2021 Thomas Crain <thcrain@microsoft.com> - 1.3-36
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
-- Conditionally build documentation, and turn off documentation building by default
+* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.2-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.2-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jan 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.2-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Wed Jul 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.2-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Tue Feb 21 2023 Dominik 'Rathann' Mierzejewski <rpm@greysector.net> 2.2-5
+- work around FTBFS bug with make-4.4+ (resolves rhbz#2171492)
+- fix HTML doc build with texinfo 7.0
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.2-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.2-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Tue Oct 05 2021 Dominik 'Rathann' Mierzejewski <rpm@greysector.net> 2.2-1
+- update to 2.2 (#1062487)
+- drop obsolete patches
+- update BuildRequires
+- run testsuite
+- drop obsolete ldconfig_scriptlets macro
+- enable parallel make
+- use modern macros
+- fix LTO warnings
+- skip test on s390x
+
+* Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.3-38
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.3-37
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.3-36
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.3-35
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

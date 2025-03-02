@@ -1,0 +1,735 @@
+From 481c28bebb04610363daa048db175f197ca9f512 Mon Sep 17 00:00:00 2001
+From: wo80 <christian.woltering@tu-dortmund.de>
+Date: Thu, 10 Aug 2023 11:18:35 +0200
+Subject: [PATCH] Update prototypes of BLAS routines ?axpy and ?copy; Update
+ extern declaration of ?axpy and ?copy in examples ?fgmr routines
+
+---
+ CBLAS/caxpy.c   | 10 +++++-----
+ CBLAS/ccopy.c   |  8 ++++----
+ CBLAS/daxpy.c   | 12 ++++++------
+ CBLAS/dcopy.c   | 10 +++++-----
+ CBLAS/saxpy.c   | 12 ++++++------
+ CBLAS/scopy.c   | 10 +++++-----
+ CBLAS/zaxpy.c   | 10 +++++-----
+ CBLAS/zcopy.c   |  8 ++++----
+ EXAMPLE/cfgmr.c |  4 ++--
+ EXAMPLE/dfgmr.c |  4 ++--
+ EXAMPLE/sfgmr.c |  4 ++--
+ EXAMPLE/zfgmr.c |  4 ++--
+ 12 files changed, 48 insertions(+), 48 deletions(-)
+
+diff --git a/CBLAS/caxpy.c b/CBLAS/caxpy.c
+index 26c31e23..558ab107 100644
+--- a/CBLAS/caxpy.c
++++ b/CBLAS/caxpy.c
+@@ -6,7 +6,7 @@
+ 
+ #include "f2c.h"
+ 
+-/* Subroutine */ int caxpy_(integer *n, complex *ca, complex *cx, integer *
++/* Subroutine */ void caxpy_(integer *n, complex *ca, complex *cx, integer *
+ 	incx, complex *cy, integer *incy)
+ {
+ 
+@@ -36,10 +36,10 @@
+ 
+ 
+     if (*n <= 0) {
+-	return 0;
++	return;
+     }
+     if ((r__1 = ca->r, dabs(r__1)) + (r__2 = r_imag(ca), dabs(r__2)) == 0.f) {
+-	return 0;
++	return;
+     }
+     if (*incx == 1 && *incy == 1) {
+ 	goto L20;
+@@ -65,7 +65,7 @@
+ 	iy += *incy;
+ /* L10: */
+     }
+-    return 0;
++    return;
+ 
+ /*        code for both increments equal to 1 */
+ 
+@@ -77,6 +77,6 @@
+ 	CY(i).r = q__1.r, CY(i).i = q__1.i;
+ /* L30: */
+     }
+-    return 0;
++    return;
+ } /* caxpy_ */
+ 
+diff --git a/CBLAS/ccopy.c b/CBLAS/ccopy.c
+index 919360d0..448620fa 100644
+--- a/CBLAS/ccopy.c
++++ b/CBLAS/ccopy.c
+@@ -6,7 +6,7 @@
+ 
+ #include "f2c.h"
+ 
+-/* Subroutine */ int ccopy_(integer *n, complex *cx, integer *incx, complex *
++/* Subroutine */ void ccopy_(integer *n, complex *cx, integer *incx, complex *
+ 	cy, integer *incy)
+ {
+ 
+@@ -31,7 +31,7 @@
+ 
+ 
+     if (*n <= 0) {
+-	return 0;
++	return;
+     }
+     if (*incx == 1 && *incy == 1) {
+ 	goto L20;
+@@ -54,7 +54,7 @@
+ 	iy += *incy;
+ /* L10: */
+     }
+-    return 0;
++    return;
+ 
+ /*        code for both increments equal to 1 */
+ 
+@@ -63,6 +63,6 @@
+ 	CY(i).r = CX(i).r, CY(i).i = CX(i).i;
+ /* L30: */
+     }
+-    return 0;
++    return;
+ } /* ccopy_ */
+ 
+diff --git a/CBLAS/daxpy.c b/CBLAS/daxpy.c
+index 050ac676..2bbf29ed 100644
+--- a/CBLAS/daxpy.c
++++ b/CBLAS/daxpy.c
+@@ -6,7 +6,7 @@
+ 
+ #include "f2c.h"
+ 
+-/* Subroutine */ int daxpy_(integer *n, doublereal *da, doublereal *dx, 
++/* Subroutine */ void daxpy_(integer *n, doublereal *da, doublereal *dx, 
+ 	integer *incx, doublereal *dy, integer *incy)
+ {
+ 
+@@ -31,10 +31,10 @@
+ 
+ 
+     if (*n <= 0) {
+-	return 0;
++	return;
+     }
+     if (*da == 0.) {
+-	return 0;
++	return;
+     }
+     if (*incx == 1 && *incy == 1) {
+ 	goto L20;
+@@ -57,7 +57,7 @@
+ 	iy += *incy;
+ /* L10: */
+     }
+-    return 0;
++    return;
+ 
+ /*        code for both increments equal to 1   
+ 
+@@ -74,7 +74,7 @@
+ /* L30: */
+     }
+     if (*n < 4) {
+-	return 0;
++	return;
+     }
+ L40:
+     mp1 = m + 1;
+@@ -85,6 +85,6 @@
+ 	DY(i + 3) += *da * DX(i + 3);
+ /* L50: */
+     }
+-    return 0;
++    return;
+ } /* daxpy_ */
+ 
+diff --git a/CBLAS/dcopy.c b/CBLAS/dcopy.c
+index 9d930598..30c0603d 100644
+--- a/CBLAS/dcopy.c
++++ b/CBLAS/dcopy.c
+@@ -6,7 +6,7 @@
+ 
+ #include "f2c.h"
+ 
+-/* Subroutine */ int dcopy_(integer *n, doublereal *dx, integer *incx, 
++/* Subroutine */ void dcopy_(integer *n, doublereal *dx, integer *incx, 
+ 	doublereal *dy, integer *incy)
+ {
+ 
+@@ -31,7 +31,7 @@
+ 
+ 
+     if (*n <= 0) {
+-	return 0;
++	return;
+     }
+     if (*incx == 1 && *incy == 1) {
+ 	goto L20;
+@@ -54,7 +54,7 @@
+ 	iy += *incy;
+ /* L10: */
+     }
+-    return 0;
++    return;
+ 
+ /*        code for both increments equal to 1   
+ 
+@@ -71,7 +71,7 @@
+ /* L30: */
+     }
+     if (*n < 7) {
+-	return 0;
++	return;
+     }
+ L40:
+     mp1 = m + 1;
+@@ -85,6 +85,6 @@
+ 	DY(i + 6) = DX(i + 6);
+ /* L50: */
+     }
+-    return 0;
++    return;
+ } /* dcopy_ */
+ 
+diff --git a/CBLAS/saxpy.c b/CBLAS/saxpy.c
+index 2b9029e6..da26ac7e 100644
+--- a/CBLAS/saxpy.c
++++ b/CBLAS/saxpy.c
+@@ -6,7 +6,7 @@
+ 
+ #include "f2c.h"
+ 
+-/* Subroutine */ int saxpy_(integer *n, real *sa, real *sx, integer *incx, 
++/* Subroutine */ void saxpy_(integer *n, real *sa, real *sx, integer *incx, 
+ 	real *sy, integer *incy)
+ {
+ 
+@@ -31,10 +31,10 @@
+ 
+ 
+     if (*n <= 0) {
+-	return 0;
++	return;
+     }
+     if (*sa == 0.f) {
+-	return 0;
++	return;
+     }
+     if (*incx == 1 && *incy == 1) {
+ 	goto L20;
+@@ -57,7 +57,7 @@
+ 	iy += *incy;
+ /* L10: */
+     }
+-    return 0;
++    return;
+ 
+ /*        code for both increments equal to 1   
+ 
+@@ -74,7 +74,7 @@
+ /* L30: */
+     }
+     if (*n < 4) {
+-	return 0;
++	return;
+     }
+ L40:
+     mp1 = m + 1;
+@@ -85,6 +85,6 @@
+ 	SY(i + 3) += *sa * SX(i + 3);
+ /* L50: */
+     }
+-    return 0;
++    return;
+ } /* saxpy_ */
+ 
+diff --git a/CBLAS/scopy.c b/CBLAS/scopy.c
+index c7ae4c8a..72a64683 100644
+--- a/CBLAS/scopy.c
++++ b/CBLAS/scopy.c
+@@ -6,7 +6,7 @@
+ 
+ #include "f2c.h"
+ 
+-/* Subroutine */ int scopy_(integer *n, real *sx, integer *incx, real *sy, 
++/* Subroutine */ void scopy_(integer *n, real *sx, integer *incx, real *sy, 
+ 	integer *incy)
+ {
+ 
+@@ -31,7 +31,7 @@
+ 
+ 
+     if (*n <= 0) {
+-	return 0;
++	return;
+     }
+     if (*incx == 1 && *incy == 1) {
+ 	goto L20;
+@@ -54,7 +54,7 @@
+ 	iy += *incy;
+ /* L10: */
+     }
+-    return 0;
++    return;
+ 
+ /*        code for both increments equal to 1   
+ 
+@@ -71,7 +71,7 @@
+ /* L30: */
+     }
+     if (*n < 7) {
+-	return 0;
++	return;
+     }
+ L40:
+     mp1 = m + 1;
+@@ -85,6 +85,6 @@
+ 	SY(i + 6) = SX(i + 6);
+ /* L50: */
+     }
+-    return 0;
++    return;
+ } /* scopy_ */
+ 
+diff --git a/CBLAS/zaxpy.c b/CBLAS/zaxpy.c
+index 1a1ef4e1..a71d3674 100644
+--- a/CBLAS/zaxpy.c
++++ b/CBLAS/zaxpy.c
+@@ -6,7 +6,7 @@
+ 
+ #include "f2c.h"
+ 
+-/* Subroutine */ int zaxpy_(integer *n, doublecomplex *za, doublecomplex *zx, 
++/* Subroutine */ void zaxpy_(integer *n, doublecomplex *za, doublecomplex *zx, 
+ 	integer *incx, doublecomplex *zy, integer *incy)
+ {
+ 
+@@ -33,10 +33,10 @@
+ 
+ 
+     if (*n <= 0) {
+-	return 0;
++	return;
+     }
+     if (dcabs1_(za) == 0.) {
+-	return 0;
++	return;
+     }
+     if (*incx == 1 && *incy == 1) {
+ 	goto L20;
+@@ -62,7 +62,7 @@
+ 	iy += *incy;
+ /* L10: */
+     }
+-    return 0;
++    return;
+ 
+ /*        code for both increments equal to 1 */
+ 
+@@ -74,6 +74,6 @@
+ 	ZY(i).r = z__1.r, ZY(i).i = z__1.i;
+ /* L30: */
+     }
+-    return 0;
++    return;
+ } /* zaxpy_ */
+ 
+diff --git a/CBLAS/zcopy.c b/CBLAS/zcopy.c
+index e47aa840..8c4fcb03 100644
+--- a/CBLAS/zcopy.c
++++ b/CBLAS/zcopy.c
+@@ -6,7 +6,7 @@
+ 
+ #include "f2c.h"
+ 
+-/* Subroutine */ int zcopy_(integer *n, doublecomplex *zx, integer *incx, 
++/* Subroutine */ void zcopy_(integer *n, doublecomplex *zx, integer *incx, 
+ 	doublecomplex *zy, integer *incy)
+ {
+ 
+@@ -31,7 +31,7 @@
+ 
+ 
+     if (*n <= 0) {
+-	return 0;
++	return;
+     }
+     if (*incx == 1 && *incy == 1) {
+ 	goto L20;
+@@ -54,7 +54,7 @@
+ 	iy += *incy;
+ /* L10: */
+     }
+-    return 0;
++    return;
+ 
+ /*        code for both increments equal to 1 */
+ 
+@@ -63,6 +63,6 @@
+ 	ZY(i).r = ZX(i).r, ZY(i).i = ZX(i).i;
+ /* L30: */
+     }
+-    return 0;
++    return;
+ } /* zcopy_ */
+ 
+diff --git a/EXAMPLE/cfgmr.c b/EXAMPLE/cfgmr.c
+index 6721ddd7..2542f074 100644
+--- a/EXAMPLE/cfgmr.c
++++ b/EXAMPLE/cfgmr.c
+@@ -34,7 +34,7 @@
+ 
+ #define  epsmac  1.0e-16
+ 
+-extern int ccopy_(int *, complex *, int *, complex *, int *);
++extern void ccopy_(int *, complex *, int *, complex *, int *);
+ extern void caxpy_(int *, complex *, complex *, int *, complex *, int *);
+ extern void cdotc_(complex *, int *, complex [], int *, complex [], int *);
+ extern float scnrm2_(int *, complex [], int *);
+@@ -79,8 +79,8 @@
+     complex tt1, tt2;
+ 
+     /* prototypes */
+-    extern int ccopy_(int *, complex *, int *, complex *, int *);
+-    extern int caxpy_(int *, complex *, complex [], int *, complex [], int *);
++    extern void ccopy_(int *, complex *, int *, complex *, int *);
++    extern void caxpy_(int *, complex *, complex *, int *, complex *, int *);
+ 
+     its = 0;
+     vv = (complex **)SUPERLU_MALLOC((im + 1) * sizeof(complex *));
+diff --git a/EXAMPLE/dfgmr.c b/EXAMPLE/dfgmr.c
+index 25cc2540..02890d88 100644
+--- a/EXAMPLE/dfgmr.c
++++ b/EXAMPLE/dfgmr.c
+@@ -75,8 +75,8 @@ int dfgmr(int n,
+     double one = 1.0;
+ 
+     /* prototypes */
+-    extern int dcopy_(int *, double *, int *, double *, int *);
+-    extern int daxpy_(int *, double *, double [], int *, double [], int *);
++    extern void dcopy_(int *, double *, int *, double *, int *);
++    extern void daxpy_(int *, double *, double *, int *, double *, int *);
+ 
+     its = 0;
+     vv = (double **)SUPERLU_MALLOC((im + 1) * sizeof(double *));
+diff --git a/EXAMPLE/sfgmr.c b/EXAMPLE/sfgmr.c
+index e606ad3c..c5e45a3c 100644
+--- a/EXAMPLE/sfgmr.c
++++ b/EXAMPLE/sfgmr.c
+@@ -76,8 +76,8 @@ int sfgmr(int n,
+     float one = 1.0;
+ 
+     /* prototypes */
+-    extern int scopy_(int *, float *, int *, float *, int *);
+-    extern int saxpy_(int *, float *, float [], int *, float [], int *);
++    extern void scopy_(int *, float *, int *, float *, int *);
++    extern void saxpy_(int *, float *, float *, int *, float *, int *);
+ 
+     its = 0;
+     vv = (float **)SUPERLU_MALLOC((im + 1) * sizeof(float *));
+diff --git a/EXAMPLE/zfgmr.c b/EXAMPLE/zfgmr.c
+index 0f8dc823..2808525c 100644
+--- a/EXAMPLE/zfgmr.c
++++ b/EXAMPLE/zfgmr.c
+@@ -76,8 +76,8 @@ int zfgmr(int n,
+     doublecomplex tt1, tt2;
+ 
+     /* prototypes */
+-    extern int zcopy_(int *, doublecomplex *, int *, doublecomplex *, int *);
+-    extern int zaxpy_(int *, doublecomplex *, doublecomplex [], int *, doublecomplex [], int *);
++    extern void zcopy_(int *, doublecomplex *, int *, doublecomplex *, int *);
++    extern void zaxpy_(int *, doublecomplex *, doublecomplex *, int *, doublecomplex *, int *);
+ 
+     its = 0;
+     vv = (doublecomplex **)SUPERLU_MALLOC((im + 1) * sizeof(doublecomplex *));
+
+From 34d6811cb19ced128d5cf1117180c1a57f1b01dd Mon Sep 17 00:00:00 2001
+From: wo80 <christian.woltering@tu-dortmund.de>
+Date: Thu, 10 Aug 2023 13:50:57 +0200
+Subject: [PATCH] Update remaining prototypes of BLAS routines ?axpy and ?copy
+
+---
+ SRC/cgsrfs.c            | 4 ++--
+ SRC/clacon2.c           | 2 +-
+ SRC/dgsrfs.c            | 4 ++--
+ SRC/dlacon2.c           | 2 +-
+ SRC/sgsrfs.c            | 4 ++--
+ SRC/slacon2.c           | 2 +-
+ SRC/zgsrfs.c            | 4 ++--
+ SRC/zlacon2.c           | 2 +-
+ TESTING/MATGEN/claghe.c | 4 ++--
+ TESTING/MATGEN/clagsy.c | 4 ++--
+ TESTING/MATGEN/clatme.c | 2 +-
+ TESTING/MATGEN/dlagsy.c | 4 ++--
+ TESTING/MATGEN/dlatms.c | 2 +-
+ TESTING/MATGEN/slagsy.c | 4 ++--
+ TESTING/MATGEN/slatms.c | 2 +-
+ TESTING/MATGEN/zlaghe.c | 6 +++---
+ TESTING/MATGEN/zlagsy.c | 8 ++++----
+ 17 files changed, 30 insertions(+), 30 deletions(-)
+
+diff --git a/SRC/cgsrfs.c b/SRC/cgsrfs.c
+index d9b463e7..5e287f97 100644
+--- a/SRC/cgsrfs.c
++++ b/SRC/cgsrfs.c
+@@ -175,8 +175,8 @@ cgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
+     extern int CCOPY(int *, complex *, int *, complex *, int *);
+     extern int CSAXPY(int *, complex *, complex *, int *, complex *, int *);
+ #else
+-    extern int ccopy_(int *, complex *, int *, complex *, int *);
+-    extern int caxpy_(int *, complex *, complex *, int *, complex *, int *);
++    extern void ccopy_(int *, complex *, int *, complex *, int *);
++    extern void caxpy_(int *, complex *, complex *, int *, complex *, int *);
+ #endif
+ 
+     Astore = A->Store;
+diff --git a/SRC/clacon2.c b/SRC/clacon2.c
+index 49f995e9..77e8cfcf 100644
+--- a/SRC/clacon2.c
++++ b/SRC/clacon2.c
+@@ -106,7 +106,7 @@ clacon2_(int *n, complex *v, complex *x, float *est, int *kase, int isave[3])
+     extern float smach(char *);
+     extern int icmax1_slu(int *, complex *, int *);
+     extern double scsum1_slu(int *, complex *, int *);
+-    extern int ccopy_(int *, complex *, int *, complex *, int *);
++    extern void ccopy_(int *, complex *, int *, complex *, int *);
+ 
+     safmin = smach("Safe minimum");
+     if ( *kase == 0 ) {
+diff --git a/SRC/dgsrfs.c b/SRC/dgsrfs.c
+index ebda1a18..367be391 100644
+--- a/SRC/dgsrfs.c
++++ b/SRC/dgsrfs.c
+@@ -175,8 +175,8 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
+     extern int SCOPY(int *, double *, int *, double *, int *);
+     extern int SSAXPY(int *, double *, double *, int *, double *, int *);
+ #else
+-    extern int dcopy_(int *, double *, int *, double *, int *);
+-    extern int daxpy_(int *, double *, double *, int *, double *, int *);
++    extern void dcopy_(int *, double *, int *, double *, int *);
++    extern void daxpy_(int *, double *, double *, int *, double *, int *);
+ #endif
+ 
+     Astore = A->Store;
+diff --git a/SRC/dlacon2.c b/SRC/dlacon2.c
+index 79476fe6..48954700 100644
+--- a/SRC/dlacon2.c
++++ b/SRC/dlacon2.c
+@@ -105,7 +105,7 @@ dlacon2_(int *n, double *v, double *x, int *isgn, double *est, int *kase, int is
+ #else
+     extern int idamax_(int *, double *, int *);
+     extern double dasum_(int *, double *, int *);
+-    extern int dcopy_(int *, double *, int *, double *, int *);
++    extern void dcopy_(int *, double *, int *, double *, int *);
+ #endif
+ #define d_sign(a, b) (b >= 0 ? fabs(a) : -fabs(a))    /* Copy sign */
+ #define i_dnnt(a) \
+diff --git a/SRC/sgsrfs.c b/SRC/sgsrfs.c
+index 406fbb05..36a0d337 100644
+--- a/SRC/sgsrfs.c
++++ b/SRC/sgsrfs.c
+@@ -175,8 +175,8 @@ sgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
+     extern int SCOPY(int *, float *, int *, float *, int *);
+     extern int SSAXPY(int *, float *, float *, int *, float *, int *);
+ #else
+-    extern int scopy_(int *, float *, int *, float *, int *);
+-    extern int saxpy_(int *, float *, float *, int *, float *, int *);
++    extern void scopy_(int *, float *, int *, float *, int *);
++    extern void saxpy_(int *, float *, float *, int *, float *, int *);
+ #endif
+ 
+     Astore = A->Store;
+diff --git a/SRC/slacon2.c b/SRC/slacon2.c
+index e8ab5afc..39bc8ed4 100644
+--- a/SRC/slacon2.c
++++ b/SRC/slacon2.c
+@@ -105,7 +105,7 @@ slacon2_(int *n, float *v, float *x, int *isgn, float *est, int *kase, int isave
+ #else
+     extern int isamax_(int *, float *, int *);
+     extern float sasum_(int *, float *, int *);
+-    extern int scopy_(int *, float *, int *, float *, int *);
++    extern void scopy_(int *, float *, int *, float *, int *);
+ #endif
+ #define d_sign(a, b) (b >= 0 ? fabs(a) : -fabs(a))    /* Copy sign */
+ #define i_dnnt(a) \
+diff --git a/SRC/zgsrfs.c b/SRC/zgsrfs.c
+index 9540e04d..0c365e51 100644
+--- a/SRC/zgsrfs.c
++++ b/SRC/zgsrfs.c
+@@ -175,8 +175,8 @@ zgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
+     extern int CCOPY(int *, doublecomplex *, int *, doublecomplex *, int *);
+     extern int CSAXPY(int *, doublecomplex *, doublecomplex *, int *, doublecomplex *, int *);
+ #else
+-    extern int zcopy_(int *, doublecomplex *, int *, doublecomplex *, int *);
+-    extern int zaxpy_(int *, doublecomplex *, doublecomplex *, int *, doublecomplex *, int *);
++    extern void zcopy_(int *, doublecomplex *, int *, doublecomplex *, int *);
++    extern void zaxpy_(int *, doublecomplex *, doublecomplex *, int *, doublecomplex *, int *);
+ #endif
+ 
+     Astore = A->Store;
+diff --git a/SRC/zlacon2.c b/SRC/zlacon2.c
+index 386b99cd..d9f35da8 100644
+--- a/SRC/zlacon2.c
++++ b/SRC/zlacon2.c
+@@ -106,7 +106,7 @@ zlacon2_(int *n, doublecomplex *v, doublecomplex *x, double *est, int *kase, int
+     extern double dmach(char *);
+     extern int izmax1_slu(int *, doublecomplex *, int *);
+     extern double dzsum1_slu(int *, doublecomplex *, int *);
+-    extern int zcopy_(int *, doublecomplex *, int *, doublecomplex *, int *);
++    extern void zcopy_(int *, doublecomplex *, int *, doublecomplex *, int *);
+ 
+     safmin = dmach("Safe minimum");
+     if ( *kase == 0 ) {
+diff --git a/TESTING/MATGEN/claghe.c b/TESTING/MATGEN/claghe.c
+index 054ee402..28efc550 100644
+--- a/TESTING/MATGEN/claghe.c
++++ b/TESTING/MATGEN/claghe.c
+@@ -38,8 +38,8 @@ static int c__1 = 1;
+ 	    , complex *, int *, complex *, int *, complex *, complex *
+ 	    , int *), chemv_(char *, int *, complex *,
+ 	    complex *, int *, complex *, int *, complex *, complex *,
+-	    int *), caxpy_(int *, complex *, complex *,
+-	    int *, complex *, int *);
++	    int *);
++    extern void caxpy_(int *, complex *, complex *, int *, complex *, int *);
+     extern float scnrm2_(int *, complex *, int *);
+     static complex wa, wb;
+     static float wn;
+diff --git a/TESTING/MATGEN/clagsy.c b/TESTING/MATGEN/clagsy.c
+index dafb7ced..4abd3d30 100644
+--- a/TESTING/MATGEN/clagsy.c
++++ b/TESTING/MATGEN/clagsy.c
+@@ -35,10 +35,10 @@ static int c__1 = 1;
+ 	    *, complex *, int *);
+     extern /* Subroutine */ int cgemv_(char *, int *, int *, complex *
+ 	    , complex *, int *, complex *, int *, complex *, complex *
+-	    , int *), caxpy_(int *, complex *, complex *,
+-	    int *, complex *, int *), csymv_sluslu(char *, int *,
++	    , int *), csymv_sluslu(char *, int *,
+ 	    complex *, complex *, int *, complex *, int *, complex *,
+ 	    complex *, int *);
++    extern void caxpy_(int *, complex *, complex *, int *, complex *, int *);
+     extern float scnrm2_(int *, complex *, int *);
+     static int ii, jj;
+     static complex wa, wb;
+diff --git a/TESTING/MATGEN/clatme.c b/TESTING/MATGEN/clatme.c
+index 53c0c510..d8907d80 100644
+--- a/TESTING/MATGEN/clatme.c
++++ b/TESTING/MATGEN/clatme.c
+@@ -45,7 +45,7 @@ static int c__5 = 5;
+     static int iinfo;
+     static float tempa[1];
+     static int icols, idist;
+-    extern /* Subroutine */ int ccopy_(int *, complex *, int *,
++    extern /* Subroutine */ void ccopy_(int *, complex *, int *,
+ 	    complex *, int *);
+     static int irows;
+     extern /* Subroutine */ int clatm1_(int *, float *, int *, int
+diff --git a/TESTING/MATGEN/dlagsy.c b/TESTING/MATGEN/dlagsy.c
+index f46b11b0..daae749f 100644
+--- a/TESTING/MATGEN/dlagsy.c
++++ b/TESTING/MATGEN/dlagsy.c
+@@ -36,10 +36,10 @@ static double c_b26 = 1.;
+     extern /* Subroutine */ int dscal_(int *, double *, double *,
+ 	    int *), dgemv_(char *, int *, int *, double *,
+ 	    double *, int *, double *, int *, double *,
+-	    double *, int *), daxpy_(int *, double *,
+-	    double *, int *, double *, int *), dsymv_(char *,
++	    double *, int *), dsymv_(char *,
+ 	    int *, double *, double *, int *, double *,
+ 	    int *, double *, double *, int *);
++    extern void daxpy_(int *, double *, double *, int *, double *, int *);
+     static double wa, wb, wn;
+     extern /* Subroutine */ int dlarnv_slu(int *, int *, int *, double *);
+     extern int input_error(char *, int *);
+diff --git a/TESTING/MATGEN/dlatms.c b/TESTING/MATGEN/dlatms.c
+index c9e1ad2f..a1728a5c 100644
+--- a/TESTING/MATGEN/dlatms.c
++++ b/TESTING/MATGEN/dlatms.c
+@@ -36,7 +36,7 @@ dlatms_slu(int *m, int *n, char *dist, int *
+ 	    int *);
+     static int ioffg;
+     static int iinfo, idist, mnmin;
+-    extern /* Subroutine */ int dcopy_(int *, double *, int *,
++    extern /* Subroutine */ void dcopy_(int *, double *, int *,
+ 	    double *, int *);
+     static int iskew;
+     static double extra, dummy;
+diff --git a/TESTING/MATGEN/slagsy.c b/TESTING/MATGEN/slagsy.c
+index e1c179c1..112d97f8 100644
+--- a/TESTING/MATGEN/slagsy.c
++++ b/TESTING/MATGEN/slagsy.c
+@@ -31,10 +31,10 @@ static float c_b26 = 1.f;
+     static float alpha;
+     extern /* Subroutine */ int sscal_(int *, float *, float *, int *),
+ 	    sgemv_(char *, int *, int *, float *, float *, int *,
+-	    float *, int *, float *, float *, int *), saxpy_(
+-	    int *, float *, float *, int *, float *, int *), ssymv_(
++	    float *, int *, float *, float *, int *), ssymv_(
+ 	    char *, int *, float *, float *, int *, float *, int *,
+ 	    float *, float *, int *);
++	extern void saxpy_(int *, float *, float *, int *, float *, int *);
+     static float wa, wb, wn;
+     extern /* Subroutine */ int slarnv_slu(int *, int *, int *, float *);
+     extern int input_error(char *, int *);
+diff --git a/TESTING/MATGEN/slatms.c b/TESTING/MATGEN/slatms.c
+index cebe8984..e676e7c5 100644
+--- a/TESTING/MATGEN/slatms.c
++++ b/TESTING/MATGEN/slatms.c
+@@ -35,7 +35,7 @@ static bool c_false = false;
+     extern /* Subroutine */ int sscal_(int *, float *, float *, int *);
+     static int idist, mnmin, iskew;
+     static float extra, dummy;
+-    extern /* Subroutine */ int scopy_(int *, float *, int *, float *,
++    extern /* Subroutine */ void scopy_(int *, float *, int *, float *,
+ 	    int *), slatm1_slu(int *, float *, int *, int *,
+ 	    int *, float *, int *, int *);
+     static int ic, jc, nc, il, iendch, ir, jr, ipackg, mr;
+diff --git a/TESTING/MATGEN/zlaghe.c b/TESTING/MATGEN/zlaghe.c
+index 583082aa..687e3c3e 100644
+--- a/TESTING/MATGEN/zlaghe.c
++++ b/TESTING/MATGEN/zlaghe.c
+@@ -42,9 +42,9 @@ static int c__1 = 1;
+ 	    int *, doublecomplex *, doublecomplex *, int *),
+ 	    zhemv_(char *, int *, doublecomplex *, doublecomplex *,
+ 	    int *, doublecomplex *, int *, doublecomplex *,
+-	    doublecomplex *, int *), zaxpy_(int *,
+-	    doublecomplex *, doublecomplex *, int *, doublecomplex *,
+-	    int *);
++	    doublecomplex *, int *);
++	extern void zaxpy_(int *, doublecomplex *, doublecomplex *, int *,
++	    doublecomplex *, int *);
+     extern double dznrm2_(int *, doublecomplex *, int *);
+     static doublecomplex wa, wb;
+     static double wn;
+diff --git a/TESTING/MATGEN/zlagsy.c b/TESTING/MATGEN/zlagsy.c
+index 88aa002b..70aa5e92 100644
+--- a/TESTING/MATGEN/zlagsy.c
++++ b/TESTING/MATGEN/zlagsy.c
+@@ -35,11 +35,11 @@ static int c__1 = 1;
+ 	    doublecomplex *, int *, doublecomplex *, int *);
+     extern /* Subroutine */ int zgemv_(char *, int *, int *,
+ 	    doublecomplex *, doublecomplex *, int *, doublecomplex *,
+-	    int *, doublecomplex *, doublecomplex *, int *),
+-	    zaxpy_(int *, doublecomplex *, doublecomplex *, int *,
+-	    doublecomplex *, int *), zsymv_(char *, int *,
+-	    doublecomplex *, doublecomplex *, int *, doublecomplex *,
++	    int *, doublecomplex *, doublecomplex *, int *), zsymv_(char *,
++	    int *, doublecomplex *, doublecomplex *, int *, doublecomplex *,
+ 	    int *, doublecomplex *, doublecomplex *, int *);
++	extern void zaxpy_(int *, doublecomplex *, doublecomplex *, int *,
++	    doublecomplex *, int *);
+     extern double dznrm2_(int *, doublecomplex *, int *);
+     static int ii, jj;
+     static doublecomplex wa, wb;
+

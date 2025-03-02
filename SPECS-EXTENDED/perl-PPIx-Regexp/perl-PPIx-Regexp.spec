@@ -2,14 +2,12 @@
 %bcond_with perl_PPIx_Regexp_enables_optional_test
 
 Name:           perl-PPIx-Regexp
-Version:        0.069
-Release:        2%{?dist}
+Version:        0.088
+Release:        5%{?dist}
 Summary:        Represent a regular expression of some sort
-License:        GPL+ or Artistic
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/PPIx-Regexp
-Source0:        https://cpan.metacpan.org/authors/id/W/WY/WYANT/PPIx-Regexp-%{version}.tar.gz#/perl-PPIx-Regexp-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/W/WY/WYANT/PPIx-Regexp-%{version}.tar.gz
 BuildArch:      noarch
 BuildRequires:  coreutils
 BuildRequires:  make
@@ -26,9 +24,9 @@ BuildRequires:  perl(warnings)
 BuildRequires:  perl(base)
 BuildRequires:  perl(constant)
 BuildRequires:  perl(Exporter)
-BuildRequires:  perl(List::MoreUtils)
 BuildRequires:  perl(List::Util)
-BuildRequires:  perl(PPI::Document) >= 1.117
+BuildRequires:  perl(PPI::Document) >= 1.238
+# PPI::Dumper 1.238 not used at tests
 BuildRequires:  perl(Scalar::Util)
 BuildRequires:  perl(Task::Weaken)
 # Optional run-time:
@@ -45,22 +43,34 @@ BuildRequires:  perl(Test::More) >= 0.88
 BuildRequires:  perl(Time::HiRes)
 # YAML not used
 %endif
-Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 Recommends:     perl(Encode)
-Requires:       perl(Exporter)
-Requires:       perl(PPI::Document) >= 1.117
+Requires:       perl(PPI::Document) >= 1.238
+Requires:       perl(PPI::Dumper) >= 1.238
 Requires:       perl(Task::Weaken)
-Provides:       perl(PPIx::Regexp::Structure::Atomic_Script_Run) = %{version}
-Provides:       perl(PPIx::Regexp::Structure::Script_Run) = %{version}
-Provides:       perl(PPIx::Regexp::Token::GroupType::Atomic_Script_Run) = %{version}
-Provides:       perl(PPIx::Regexp::Token::GroupType::Script_Run) = %{version}
 
-%global __requires_exclude %{?__requires_exclude:%__requires_exclude|}perl\\(PPI::Document\\)$
+%global __requires_exclude %{?__requires_exclude:%__requires_exclude|}^perl\\(PPI::Document\\)$
+# Filter private modules
+%global __requires_exclude %{__requires_exclude}|^perl\\(My::Module::
+%global __provides_exclude %{?__provides_exclude:%__provides_exclude|}^perl\\(My::Module::
 
 %description
 The purpose of the PPIx-Regexp package is to parse regular expressions in a
 manner similar to the way the PPI package parses Perl. This class forms the
 root of the parse tree, playing a role similar to PPI::Document.
+
+%package tests
+Summary:        Tests for %{name}
+Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       perl-Test-Harness
+Requires:       perl(open)
+Requires:       perl(PPI::Document) >= 1.238
+%if %{with perl_PPIx_Regexp_enables_optional_test}
+Requires:       perl(Time::HiRes)
+%endif
+
+%description tests
+Tests from %{name}. Execute them
+with "%{_libexecdir}/%{name}/test".
 
 %prep
 %setup -q -n PPIx-Regexp-%{version}
@@ -68,6 +78,11 @@ chmod -x eg/*
 perl -MConfig -i -p \
     -e 's{^#!/usr/(?:local/bin/|bin/env )perl\b}{$Config{startperl}}' \
     eg/*
+# Help generators to recognize Perl scripts
+for F in t/*.t; do
+    perl -i -MConfig -ple 'print $Config{startperl} if $. == 1 && !s{\A#!\s*perl}{$Config{startperl}}' "$F"
+    chmod +x "$F"
+done
 
 %build
 unset MAKING_MODULE_DISTRIBUTION
@@ -76,10 +91,24 @@ perl Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1 NO_PERLLOCAL=1
 
 %install
 %{make_install}
-%{_fixperms} $RPM_BUILD_ROOT/*
+%{_fixperms} %{buildroot}/*
+# Install tests
+mkdir -p %{buildroot}%{_libexecdir}/%{name}
+cp -a t %{buildroot}%{_libexecdir}/%{name}
+mkdir -p %{buildroot}%{_libexecdir}/%{name}/inc/My/Module
+cp -a inc/My/Module/{Mock_Tokenizer,Test}.pm %{buildroot}%{_libexecdir}/%{name}/inc/My/Module
+mkdir -p %{buildroot}%{_libexecdir}/%{name}/eg
+cp -a eg/predump %{buildroot}%{_libexecdir}/%{name}/eg
+cat > %{buildroot}%{_libexecdir}/%{name}/test << 'EOF'
+#!/bin/sh
+unset AUTHOR_TESTING PPIX_REGEXP_TOKENIZER_TRACE
+cd %{_libexecdir}/%{name} && exec prove -I . -j "$(getconf _NPROCESSORS_ONLN)"
+EOF
+chmod +x %{buildroot}%{_libexecdir}/%{name}/test
 
 %check
 unset AUTHOR_TESTING PPIX_REGEXP_TOKENIZER_TRACE
+export HARNESS_OPTIONS=j$(perl -e 'if ($ARGV[0] =~ /.*-j([0-9][0-9]*).*/) {print $1} else {print 1}' -- '%{?_smp_mflags}')
 make test
 
 %files
@@ -88,9 +117,109 @@ make test
 %{perl_vendorlib}/*
 %{_mandir}/man3/*
 
+%files tests
+%{_libexecdir}/%{name}
+
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.069-2
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.088-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.088-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.088-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.088-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Wed Mar 01 2023 Michal Josef Špaček <mspacek@redhat.com> - 0.088-1
+- 0.088 bump
+
+* Mon Jan 30 2023 Michal Josef Špaček <mspacek@redhat.com> - 0.087-1
+- 0.087 bump
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.086-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Mon Jan 02 2023 Michal Josef Špaček <mspacek@redhat.com> - 0.086-1
+- 0.086 bump
+
+* Sat Dec 10 2022 Michal Josef Špaček <mspacek@redhat.com> - 0.085-4
+- Update license to SPDX format
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.085-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.085-2
+- Perl 5.36 rebuild
+
+* Thu Apr 21 2022 Michal Josef Špaček <mspacek@redhat.com> - 0.085-1
+- 0.085 bump
+
+* Tue Apr 05 2022 Michal Josef Špaček <mspacek@redhat.com> - 0.084-1
+- 0.084 bump
+
+* Tue Mar 22 2022 Michal Josef Špaček <mspacek@redhat.com> - 0.083-1
+- 0.083 bump
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.082-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Wed Jan 05 2022 Michal Josef Špaček <mspacek@redhat.com> - 0.082-1
+- 0.082 bump
+
+* Mon Oct 25 2021 Michal Josef Špaček <mspacek@redhat.com> - 0.081-1
+- 0.081 bump
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.080-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.080-2
+- Perl 5.34 rebuild
+
+* Tue Apr 20 2021 Michal Josef Špaček <mspacek@redhat.com> - 0.080-1
+- 0.080 bump
+
+* Fri Mar 26 2021 Petr Pisar <ppisar@redhat.com> - 0.079-1
+- 0.079 bump
+- Package tests
+
+* Fri Jan 29 2021 Petr Pisar <ppisar@redhat.com> - 0.078-1
+- 0.078 bump
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.077-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Thu Jan 14 2021 Petr Pisar <ppisar@redhat.com> - 0.077-1
+- 0.077 bump
+
+* Mon Nov 30 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.076-1
+- 0.076 bump
+
+* Fri Oct 09 2020 Petr Pisar <ppisar@redhat.com> - 0.075-1
+- 0.075 bump
+
+* Wed Sep 09 2020 Petr Pisar <ppisar@redhat.com> - 0.074-1
+- 0.074 bump
+
+* Wed Jul 29 2020 Petr Pisar <ppisar@redhat.com> - 0.073-1
+- 0.073 bump
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.072-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.072-2
+- Perl 5.32 rebuild
+
+* Wed May 20 2020 Petr Pisar <ppisar@redhat.com> - 0.072-1
+- 0.072 bump
+
+* Mon Mar 30 2020 Petr Pisar <ppisar@redhat.com> - 0.071-1
+- 0.071 bump
+
+* Fri Feb 28 2020 Petr Pisar <ppisar@redhat.com> - 0.070-1
+- 0.070 bump
 
 * Mon Feb 10 2020 Petr Pisar <ppisar@redhat.com> - 0.069-1
 - 0.069 bump

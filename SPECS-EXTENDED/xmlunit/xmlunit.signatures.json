@@ -1,6 +1,6 @@
 {
  "Signatures": {
-  "xmlunit-1.5-src.zip": "ae2f340dfa730e3932bd970b2008a67696b32517ae8bf74f49e7149caa1842ae",
-  "xmlunit-1.5.pom": "092e64f9d645761c83d9a11969f0233cb7ccf0fa7cf2804437595ec9ca113a1e"
+  "generate-tarball.sh": "5ec8d3d14a03af85ad5019dcbecc4cae40e4bc1defabce8c6c9db110c694956f",
+  "xmlunit-2.9.1.tar.gz": "8ec8db9ad47c5176309ee54a8211b8330419315f837a451341f80977a7dca657"
  }
 }

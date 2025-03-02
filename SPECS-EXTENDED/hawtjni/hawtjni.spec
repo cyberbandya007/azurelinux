@@ -14,7 +14,7 @@ Source0:          https://github.com/fusesource/hawtjni/archive/%{name}-project-
 Patch0:           00-hawtjni-port-to-commons-lang3.patch
 
 BuildArch:        noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 
 BuildRequires:    maven-local
 BuildRequires:    mvn(commons-cli:commons-cli)

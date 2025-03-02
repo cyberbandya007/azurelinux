@@ -1,5 +1,6 @@
 {
  "Signatures": {
-  "rubygem-mysql2-0.5.4.tar.gz": "104e2fb5e9c6201a5b479f4766f1ef22c2318c17289bc83854ea970c19b6b22e"
+  "mysql2-0.5.5-tests.txz": "9e54e0d083d5243ebcc50cea7d44bd3b6e142c482252e73da02f36839f6a6709",
+  "mysql2-0.5.5.gem": "76d11f8590a821060b8465e82eb0b2965767acee876991c4981c365c82905bbe"
  }
 }

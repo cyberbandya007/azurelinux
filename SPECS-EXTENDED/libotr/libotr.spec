@@ -1,10 +1,8 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 %global snapshot 0
 Summary: Off-The-Record Messaging library and toolkit
 Name: libotr
 Version: 4.1.1
-Release: 10%{?dist}
+Release: 21%{?dist}
 License: GPLv2 and LGPLv2
 Source0: http://otr.cypherpunks.ca/%{name}-%{version}.tar.gz
 Url: http://otr.cypherpunks.ca/
@@ -12,11 +10,15 @@ Provides: libotr-toolkit = %{version}
 Obsoletes: libotr-toolkit < %{version}
 Requires: libgcrypt >= 1.2.0
 Requires: pkgconfig
+BuildRequires: make
 BuildRequires:  gcc
 BuildRequires: libgcrypt-devel >= 1.2.0, libgpg-error-devel
 %if %{snapshot}
 Buildrequires: libtool automake autoconf
 %endif
+
+Patch: libotr-4.1.1-versioning.patch
+Patch: libotr-4.1.1-socket-h.patch
 
 %description
 Off-the-Record Messaging Library and Toolkit
@@ -33,7 +35,7 @@ Conflicts: libotr3-devel
 The devel package contains the libotr library and include files.
 
 %prep
-%setup -q
+%autosetup -p1
 
 %if %{snapshot}
 aclocal
@@ -73,8 +75,43 @@ rm -rf $RPM_BUILD_ROOT%{_libdir}/*.la
 
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 4.1.1-10
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-21
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-20
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-19
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-18
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-17
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Tue Nov 15 2022 Stephen Gallagher <sgallagh@redhat.com> - 4.1.1-16
+- Fix FTBFS: Add missing include to client test
+- Resolves: rhbz#2113487
+- Drop unused patches
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-14
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-13
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Wed May 19 2021 Paul Wouters <paul.wouters@aiven.io> - 4.1.1-12
+- Resolves: rhbz#1634321 RFE Drop check for mismatch of versions
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-11
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

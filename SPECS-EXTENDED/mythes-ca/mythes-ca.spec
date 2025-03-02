@@ -1,12 +1,10 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 Name: mythes-ca
 Summary: Catalan thesaurus
-Version: 1.5.0
-Release: 21%{?dist}
-Source: http://www.softcatala.org/diccionaris/actualitzacions/sinonims/thesaurus-ca.oxt
+Version: 2.3.1
+Release: 4%{?dist}
+Source: https://github.com/Softcatala/sinonims-cat/releases/latest/download/thesaurus-ca.oxt
 URL: http://www.softcatala.org/wiki/Projectes/Openthesaurus-ca
-License: GPL+
+License: CC-BY-4.0
 BuildArch: noarch
 Requires: mythes
 Supplements: (mythes and langpacks-ca)
@@ -18,7 +16,7 @@ Catalan thesaurus.
 %setup -q -c
 
 %build
-for i in release_note-ca.txt dictionaries/README_th_ca_ES_v3.txt; do
+for i in release_note-ca.txt dictionaries/README_th_ca.txt; do
   tr -d '\r' < $i > $i.new
   touch -r $i $i.new
   mv -f $i.new $i
@@ -26,8 +24,8 @@ done
 
 %install
 mkdir -p $RPM_BUILD_ROOT/%{_datadir}/mythes
-cp -p dictionaries/th_ca_ES_v3.dat $RPM_BUILD_ROOT/%{_datadir}/mythes/th_ca_ES_v2.dat
-cp -p dictionaries/th_ca_ES_v3.idx $RPM_BUILD_ROOT/%{_datadir}/mythes/th_ca_ES_v2.idx
+cp -p dictionaries/th_ca_ES.dat $RPM_BUILD_ROOT/%{_datadir}/mythes/th_ca_ES_v2.dat
+cp -p dictionaries/th_ca_ES.idx $RPM_BUILD_ROOT/%{_datadir}/mythes/th_ca_ES_v2.idx
 pushd $RPM_BUILD_ROOT/%{_datadir}/mythes/
 ca_ES_aliases="ca_AD ca_FR ca_IT"
 for lang in $ca_ES_aliases; do
@@ -38,12 +36,45 @@ popd
 
 
 %files
-%doc dictionaries/README_th_ca_ES_v3.txt LICENCES-fr.txt LICENSES-en.txt LICENCIAS-es.txt LLICENCIES-ca.txt release_note-ca.txt
+%doc dictionaries/README_th_ca.txt LICENCES-fr.txt LICENSES-en.txt LICENCIAS-es.txt LLICENCIES-ca.txt release_note-ca.txt
 %{_datadir}/mythes/*
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.5.0-21
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.1-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Aug 10 2023 Parag Nemade <pnemade AT redhat DOT com> - 2.3.1-1
+- Resolves:rh#2230534 - Update to new Upstream Source
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.0-28
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Feb 23 2023 Caolán McNamara <caolanm@redhat.com> - 1.5.0-27
+- migrated to SPDX license
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.0-26
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.0-25
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.0-24
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.0-23
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.0-22
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.0-21
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.0-20
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
@@ -94,7 +125,7 @@ popd
 * Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.0-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
 
-* Sat Apr 03 2010 Caolan McNamara <caolanm@redhat.com> - 1.5.0-4
+* Sat Apr 03 2010 Caolán McNamara <caolanm@redhat.com> - 1.5.0-4
 - mythes now owns /usr/share/mythes
 
 * Sat Jul 25 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.0-3

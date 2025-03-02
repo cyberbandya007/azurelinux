@@ -1,17 +1,18 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
-%global shortname srtp
-
 Name:		libsrtp
-Version:	2.3.0
-Release:	3%{?dist}
+Version:	2.6.0
+Release:	1%{?dist}
 Summary:	An implementation of the Secure Real-time Transport Protocol (SRTP)
-License:	BSD
+License:	BSD-3-Clause
 URL:		https://github.com/cisco/libsrtp
-Source0:	https://github.com/cisco/libsrtp/archive/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
-BuildRequires:	gcc, nss-devel, libpcap-devel
-# Fix shared lib so ldconfig doesn't complain
-Patch0:		libsrtp-2.3.0-shared-fix.patch
+Source0:	https://github.com/cisco/libsrtp/archive/v%{version}.tar.gz
+BuildRequires:	gcc
+BuildRequires:	doxygen
+BuildRequires:	meson
+BuildRequires:	procps-ng
+BuildRequires:	pkgconfig(openssl)
+BuildRequires:	pkgconfig(libpcap)
+Provides:	libsrtp-tools = %{version}-%{release}
+Obsoletes:	libsrtp-tools < 2.6.0-1
 
 %description
 This package provides an implementation of the Secure Real-time
@@ -21,7 +22,6 @@ a supporting cryptographic kernel.
 %package devel
 Summary:	Development files for %{name}
 Requires:	%{name}%{?_isa} = %{version}-%{release}
-Requires:	pkgconfig
 
 %description devel
 The %{name}-devel package contains libraries and header files for
@@ -29,24 +29,16 @@ developing applications that use %{name}.
 
 %prep
 %setup -q -n %{name}-%{version}
-%patch 0 -p1 -b .sharedfix
-
-%if 0%{?rhel} > 0
-%ifarch ppc64
-sed -i 's/-z noexecstack//' Makefile.in
-%endif
-%endif
 
 %build
-export CFLAGS="%{optflags} -fPIC"
-%configure --enable-nss
-make %{?_smp_mflags} shared_library
+%meson -Dcrypto-library=openssl -Dcrypto-library-kdf=disabled
+%meson_build
 
 %install
-make install DESTDIR=%{buildroot}
-find %{buildroot} -name '*.la' -exec rm -f {} ';'
+%meson_install
 
-%ldconfig_scriptlets
+%check
+%meson_test
 
 %files
 %license LICENSE
@@ -54,13 +46,52 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %{_libdir}/*.so.*
 
 %files devel
-%{_includedir}/%{shortname}2/
+%{_includedir}/srtp2/
 %{_libdir}/pkgconfig/libsrtp2.pc
 %{_libdir}/*.so
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 2.3.0-3
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Mon Aug  5 2024 Tom Callaway <spot@fedoraproject.org> - 2.6.0-1
+- update to 2.6.0
+
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-14
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-13
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-12
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Fri Jul 07 2023 Wim Taymans <wtaymans@redhat.com> - 2.3.0-11
+- add %check (thanks to Gerd v. Egidy) Related: rhbz#2163492
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Thu Apr 15 2021 Tom Callaway <spot@fedoraproject.org> - 2.3.0-6
+- fix NSS incompatibility, thanks to George Joseph
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Mon Oct 12 2020 Tom Callaway <spot@fedoraproject.org> - 2.3.0-4
+- add -tools subpackage (thanks to Gerd v. Egidy)
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

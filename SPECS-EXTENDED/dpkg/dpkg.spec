@@ -1,10 +1,8 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 %global pkgconfdir      %{_sysconfdir}/dpkg
 %global pkgdatadir      %{_datadir}/dpkg
 
 Name:           dpkg
-Version:        1.20.10
+Version:        1.22.11
 Release:        1%{?dist}
 Summary:        Package maintenance system for Debian Linux
 # The entire source code is GPLv2+ with exception of the following
@@ -13,7 +11,8 @@ Summary:        Package maintenance system for Debian Linux
 # dselect/methods/ftp - GPL no version info
 # scripts/Dpkg/Gettext.pm - BSD
 # lib/compat/obstack.h, lib/compat/gettext.h,lib/compat/obstack.c - LGPLv2+
-License:        GPLv2 and GPLv2+ and LGPLv2+ and Public Domain and BSD
+# Automatically converted from old format: GPLv2 and GPLv2+ and LGPLv2+ and Public Domain and BSD - review is highly recommended.
+License:        GPL-2.0-only AND GPL-2.0-or-later AND LicenseRef-Callaway-LGPLv2+ AND LicenseRef-Callaway-Public-Domain AND LicenseRef-Callaway-BSD
 URL:            https://tracker.debian.org/pkg/dpkg
 Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}.tar.xz
 # https://lists.debian.org/debian-dpkg/2017/08/msg00002.html
@@ -24,23 +23,34 @@ Patch1:         cputable_ppc64le.patch
 Patch2:         ostable_armv7hl.patch
 
 
+BuildRequires:  autoconf
+BuildRequires:  automake
 BuildRequires:  gcc-c++
+BuildRequires:  gettext
+BuildRequires:  gettext-devel
 BuildRequires:  make
-BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
-BuildRequires:  autoconf automake gettext-devel libtool
-BuildRequires:  doxygen xz-devel
-BuildRequires:  po4a >= 0.59
+BuildRequires:  libtool
+BuildRequires:  bzip2-devel
+BuildRequires:  doxygen
 BuildRequires:  dotconf-devel
+BuildRequires:  libmd-devel
+BuildRequires:  libselinux-devel
+BuildRequires:  libzstd-devel
+BuildRequires:  ncurses-devel
+BuildRequires:  po4a >= 0.59
+BuildRequires:  xz-devel
+BuildRequires:  zlib-devel
 # for /usr/bin/perl
 BuildRequires: perl-interpreter
-BuildRequires: perl-devel
+# Since dpkg 1.21.x
+# checking for perl >= 5.28.1... configure: error: cannot find perl >= 5.28.1
+# epel8 only have perl-5.26.3
+BuildRequires: perl-devel >= 5.28.1
 BuildRequires: perl-generators
 BuildRequires: perl-Time-Piece
 BuildRequires: perl(Digest)
 # for /usr/bin/pod2man
 BuildRequires: perl-podlators
-# Needed for --clamp-mtime in dpkg-source -b.
-Requires:      tar >= 1.28
 # Need by make check
 BuildRequires: perl(Test::More)
 BuildRequires: perl(IPC::Cmd)
@@ -52,7 +62,11 @@ BuildRequires: perl(Tie::Handle)
 BuildRequires: fakeroot
 
 Requires(post): coreutils
+# Needed for --clamp-mtime in dpkg-source -b.
+Requires:      tar >= 2:1.28
 
+# Remove bad dependencies added by perl-generators
+%global __requires_exclude %{?__requires_exclude:%{__requires_exclude}|}^perl\\(at|extra|file\\)$
 
 %description
 This package provides the low-level infrastructure for handling the
@@ -92,6 +106,7 @@ Requires: binutils
 Requires: bzip2
 Requires: lzma
 Requires: xz
+Requires: zstd
 # dpkg-architecture -qDEB_HOST_GNU_TYPE relies on cc -dumpmachine
 Requires:  gcc
 Obsoletes: dpkg-devel < 1.16
@@ -107,7 +122,6 @@ for example, most packages need make and the C compiler gcc.
 %package perl
 Summary: Dpkg perl modules
 Requires: dpkg = %{version}-%{release}
-Requires: perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 Requires: perl-TimeDate
 Requires: perl-Time-Piece
 Requires: perl(Digest::MD5)
@@ -160,7 +174,6 @@ modules.
 %package -n dselect
 Summary:  Debian package management front-end
 Requires: %{name} = %{version}-%{release}
-Requires: perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 
 %description -n dselect
 dselect is a high-level interface for managing the installation and
@@ -171,24 +184,15 @@ user interfaces.
 %prep
 %autosetup -p1
 
-# Filter unwanted Requires:
-cat << \EOF > %{name}-req
-#!/bin/sh
-%{__perl_requires} $* |\
-  sed -e '/perl(Dselect::Ftp)/d' -e '/perl(extra)/d' -e '/perl(file)/d' -e '/perl(in)/d'
-EOF
-
-%define __perl_requires %{_builddir}/dpkg-%{version}/dpkg-req
-chmod +x %{__perl_requires}
-
 %build
 autoreconf
 %configure --disable-linker-optimisations \
         --with-admindir=%{_localstatedir}/lib/dpkg \
+        --runstatedir=/run \
         --with-libselinux \
-        --without-libmd \
         --with-libz \
         --with-liblzma \
+        --with-libzstd \
         --with-libbz2
 
 # todo add this
@@ -226,7 +230,7 @@ install -pm0644 debian/dpkg.logrotate %{buildroot}/%{_sysconfdir}/logrotate.d/%{
 # from dpkg.postinst
 # Create the database files if they don't already exist
 create_database() {
-    admindir=${DPKG_ADMINDIR:-%{buildroot}/var/lib/dpkg}
+    admindir=${DPKG_ADMINDIR:-%{buildroot}%{_localstatedir}/lib/dpkg}
 
     for file in diversions statoverride status; do
     if [ ! -f "$admindir/$file" ]; then
@@ -237,8 +241,8 @@ create_database() {
 
 # Create log file and set default permissions if possible
 create_logfile() {
-    logfile=%{buildroot}/var/log/dpkg.log
-    mkdir -p %{buildroot}/var/log/
+    logfile=%{buildroot}%{_localstatedir}/log/dpkg.log
+    mkdir -p %{buildroot}%{_localstatedir}/log/
     touch $logfile
     chmod 644 $logfile
     #chown root:root $logfile 2>/dev/null || chown 0:0 $logfile
@@ -270,6 +274,12 @@ rm -rf %{buildroot}%{_mandir}/it/man5/
 rm -rf %{buildroot}%{_mandir}/pl/man1/
 %endif
 
+# Not required on fully usr-merged systems.
+# See https://salsa.debian.org/dpkg-team/dpkg/-/commit/49b3219281350fe8db799541456a5917094367c3
+rm %{buildroot}%{_sbindir}/dpkg-fsys-usrunmess
+rm %{buildroot}%{_mandir}/man8/dpkg-fsys-usrunmess.8
+rm %{buildroot}%{_mandir}/*/man8/dpkg-fsys-usrunmess.8
+
 %check
 make VERBOSE=1 TESTSUITEFLAGS=--verbose \
     TEST_PARALLEL=4 check || :
@@ -296,7 +306,8 @@ make VERBOSE=1 TESTSUITEFLAGS=--verbose \
 %{_bindir}/dpkg-statoverride
 %{_bindir}/dpkg-realpath
 %{_sbindir}/start-stop-daemon
-%{_sbindir}/dpkg-fsys-usrunmess
+%{_libexecdir}/dpkg/dpkg-db-backup
+%{_libexecdir}/dpkg/dpkg-db-keeper
 %dir %{pkgdatadir}
 %{pkgdatadir}/abitable
 %{pkgdatadir}/cputable
@@ -313,7 +324,6 @@ make VERBOSE=1 TESTSUITEFLAGS=--verbose \
 %{_mandir}/man1/dpkg-statoverride.1.gz
 %{_mandir}/man8/start-stop-daemon.8.gz
 %{_mandir}/man1/dpkg-realpath.1.gz
-%{_mandir}/man8/dpkg-fsys-usrunmess.8.gz
 %{_mandir}/*/man1/dpkg.1.gz
 %{_mandir}/*/man1/dpkg-deb.1.gz
 %{_mandir}/*/man1/dpkg-maintscript-helper.1.gz
@@ -325,26 +335,31 @@ make VERBOSE=1 TESTSUITEFLAGS=--verbose \
 %{_mandir}/*/man1/dpkg-statoverride.1.gz
 %{_mandir}/*/man8/start-stop-daemon.8.gz
 %{_mandir}/*/man1/dpkg-realpath.1.gz
-%{_mandir}/*/man8/dpkg-fsys-usrunmess.8.gz
 %{_datadir}/polkit-1/actions/org.dpkg.pkexec.update-alternatives.policy
 %{_datadir}/doc/dpkg/*
 %{_datadir}/dpkg/sh/dpkg-error.sh
-%{_localstatedir}/log/%{name}.log
-%{_localstatedir}/lib/dpkg
+%config(noreplace) %{_localstatedir}/log/%{name}.log
+%dir %{_localstatedir}/lib/dpkg
+%config(noreplace) %{_localstatedir}/lib/dpkg/diversions
+%config(noreplace) %{_localstatedir}/lib/dpkg/statoverride
+%config(noreplace) %{_localstatedir}/lib/dpkg/status
 
 %files devel
 %{_libdir}/libdpkg.a
 %{_libdir}/pkgconfig/libdpkg.pc
 %{_includedir}/dpkg/*.h
 %{_datadir}/aclocal/dpkg-*.m4
+%{_mandir}/man7/libdpkg.7.gz
 
 %files dev -f dpkg-dev.lang
-%doc AUTHORS THANKS debian/README.bug-usertags doc/README.api doc/frontend.txt doc/triggers.txt
+%doc doc/README.feature-removal-schedule doc/README.api doc/spec
 %config(noreplace) %{pkgconfdir}/shlibs.default
 %config(noreplace) %{pkgconfdir}/shlibs.override
 
 %{_bindir}/dpkg-architecture
+%{_bindir}/dpkg-buildapi
 %{_bindir}/dpkg-buildpackage
+%{_bindir}/dpkg-buildtree
 %{_bindir}/dpkg-buildflags
 %{_bindir}/dpkg-checkbuilddeps
 %{_bindir}/dpkg-distaddfile
@@ -361,6 +376,7 @@ make VERBOSE=1 TESTSUITEFLAGS=--verbose \
 %{_bindir}/dpkg-source
 %{_bindir}/dpkg-vendor
 %{pkgdatadir}/*.mk
+%{_datadir}/zsh/vendor-completions/_dpkg-parsechangelog
 #dpkg-dev.manpages
 %{_mandir}/man5/deb-buildinfo.5.gz
 %{_mandir}/man5/deb-changelog.5.gz
@@ -368,6 +384,7 @@ make VERBOSE=1 TESTSUITEFLAGS=--verbose \
 %{_mandir}/man5/deb-conffiles.5.gz
 %{_mandir}/man5/deb-control.5.gz
 %{_mandir}/man5/deb-extra-override.5.gz
+%{_mandir}/man5/deb-md5sums.5.gz
 %{_mandir}/man5/deb-old.5.gz
 %{_mandir}/man5/deb-origin.5.gz
 %{_mandir}/man5/deb-override.5.gz
@@ -389,7 +406,10 @@ make VERBOSE=1 TESTSUITEFLAGS=--verbose \
 %{_mandir}/man5/deb822.5.gz
 %{_mandir}/man1/dpkg-architecture.1.gz
 %{_mandir}/man1/dpkg-buildflags.1.gz
+%{_mandir}/man1/dpkg-buildapi.1.gz
+%{_mandir}/man7/dpkg-build-api.7.gz
 %{_mandir}/man1/dpkg-buildpackage.1.gz
+%{_mandir}/man1/dpkg-buildtree.1.gz
 %{_mandir}/man1/dpkg-checkbuilddeps.1.gz
 %{_mandir}/man1/dpkg-distaddfile.1.gz
 %{_mandir}/man1/dpkg-genbuildinfo.1.gz
@@ -411,6 +431,7 @@ make VERBOSE=1 TESTSUITEFLAGS=--verbose \
 %{_mandir}/*/man5/deb-conffiles.5.gz
 %{_mandir}/*/man5/deb-control.5.gz
 %{_mandir}/*/man5/deb-extra-override.5.gz
+%{_mandir}/*/man5/deb-md5sums.5.gz
 %{_mandir}/*/man5/deb-old.5.gz
 %{_mandir}/*/man5/deb-origin.5.gz
 %{_mandir}/*/man5/deb-override.5.gz
@@ -432,7 +453,10 @@ make VERBOSE=1 TESTSUITEFLAGS=--verbose \
 %{_mandir}/*/man5/deb822.5.gz
 %{_mandir}/*/man1/dpkg-architecture.1.gz
 %{_mandir}/*/man1/dpkg-buildflags.1.gz
+%{_mandir}/*/man1/dpkg-buildapi.1.gz
+%{_mandir}/*/man7/dpkg-build-api.7.gz
 %{_mandir}/*/man1/dpkg-buildpackage.1.gz
+%{_mandir}/*/man1/dpkg-buildtree.1.gz
 %{_mandir}/*/man1/dpkg-checkbuilddeps.1.gz
 %{_mandir}/*/man1/dpkg-distaddfile.1.gz
 %{_mandir}/*/man1/dpkg-genbuildinfo.1.gz
@@ -470,15 +494,75 @@ make VERBOSE=1 TESTSUITEFLAGS=--verbose \
 
 
 %changelog
-* Mon Jun 20 2022 Muhammad Falak <mwani@microsoft.com> - 1.20-10-1
-- Bump version to 1.20.10 to address CVE-2022-1664
-- License verified
+* Mon Oct 21 2024 Packit <hello@packit.dev> - 1.22.11-1
+- Update to version 1.22.11
+- Resolves: rhbz#2298391
 
-* Wed Nov 03 2021 Muhammad Falak <mwani@microsft.com> - 1.20.9-5
-- Remove epoch from tar
+* Wed Aug 28 2024 Miroslav Suchý <msuchy@redhat.com> - 1.22.6-3
+- convert license to SPDX
 
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.20.9-4
-- Initial CBL-Mariner import from Fedora 35 (license: MIT).
+* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.22.6-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Thu Apr 11 2024 Daan De Meyer <daan.j.demeyer@gmail.com> - 1.22.6-1
+- Update dpkg to 1.22.6
+- Drop dpkg-fsys-usrunmess as it is not required on properly usr-merged systems
+  and pulls in perl as a dependency.
+
+* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.21.21-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jan 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.21.21-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Wed Jul 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.21.21-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Tue Mar 28 2023 Sérgio Basto <sergio@serjux.com> - 1.21.21-1
+- Update dpkg to 1.21.21 (#2173339)
+
+* Tue Feb 21 2023 Sérgio Basto <sergio@serjux.com> - 1.21.20-3
+- Proper fix for bad requires generated by perl-generators (#2171353)
+
+* Mon Feb 20 2023 Sérgio Basto <sergio@serjux.com> - 1.21.20-2
+- Fix FTI, bug https://bugzilla.redhat.com/show_bug.cgi?id=2171353
+
+* Wed Feb 15 2023 Dalton Miner <daltonminer@gmail.com> - 1.21.20-1
+- Update dpkg to 1.21.20 (#2150017)
+- Add zstd support (#2112807)
+- Fully switch to libmd for MD5 implementation
+  https://git.dpkg.org/cgit/dpkg/dpkg.git/commit/debian/?id=2767801430de3c6d4ec7394e286fc261a8180feb
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.21.9-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Aug 04 2022 Sérgio Basto <sergio@serjux.com> - 1.21.9-1
+- Update dpkg to 1.21.9 (#2103155)
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.21.8-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Mon Jun 06 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.21.8-2
+- Perl 5.36 re-rebuild of bootstrapped packages
+
+* Sun Jun 05 2022 Sérgio Basto <sergio@serjux.com> - 1.21.8-1
+- Update dpkg to 1.21.8 (#2090495)
+
+* Wed Jun 01 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.21.7-2
+- Perl 5.36 rebuild
+
+* Fri Apr 08 2022 Sérgio Basto <sergio@serjux.com> - 1.21.7-1
+- Update dpkg to 1.21.7 (#2063616)
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.21.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Sat Dec 18 2021 Sérgio Basto <sergio@serjux.com> - 1.21.1-1
+- Update dpkg to 1.21.1 (#2029230)
+
+* Wed Nov 17 2021 Sérgio Basto <sergio@serjux.com> - 1.20.9-4
+- add %config(noreplace) to avoid clean up databases on upgrades and to be
+  compliant with silverblue
 
 * Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.20.9-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
@@ -493,7 +577,7 @@ make VERBOSE=1 TESTSUITEFLAGS=--verbose \
 - Update to 1.20.9 (#1949336)
 - flex is not required anymore, doxygen is only needed if you call make doc
 - The dpkg-gettext.pl and controllib.pl are long obsolete, can be removed.
-- dpkg has not shipped install-info for a long while now.
+- dpkg hasn't package install-info for a long time.
 - and others reviews
 
 * Sat May 01 2021 Sérgio Basto <sergio@serjux.com> - 1.20.7.1-2
@@ -531,7 +615,7 @@ make VERBOSE=1 TESTSUITEFLAGS=--verbose \
 - More clean up of el6 builds
 
 * Thu Nov 14 2019 Sérgio Basto <sergio@serjux.com> - 1.19.7-1
-- Upgrade dpkg to 1.19.x 1.19.7
+- Upgrade dpkg to 1.19.x, 1.19.7
 - Won't be possible build on el7
 - Remove hacks for tar <= 1.28 on el7 (patch 3)
 - Remove hacks buil on el6 (patch 2)

@@ -1,5 +1,18 @@
 {
  "Signatures": {
-  "nodejs-packaging-fedora-25.tar.xz": "85d0d477f332f9ef686205107383eaa93f023b028ffbcf96386c0b5fb2775de1"
+  "LICENSE": "920fcc8c4fead0ec213c9af4df553fa8eb5f5d551616418aa0b6bf72542ac9d9",
+  "README.md": "25b3ce149fe790c6c83e98aea46754544a3da4653da63a215d3e6e17c21befad",
+  "macros.nodejs": "179e336acc37da25b9e64aec6fd153d4c34526127be1a756ed49f9917e0e2888",
+  "multiver_modules": "7f7ff28ba072af8460d6dad5c460c1665a4b0889c36bc9d798a5829c67a30fd0",
+  "nodejs-fixdep": "93ad20ec765cbc502325acff4160fb72d6b8e85cdbaf425e447029ae802ccb80",
+  "nodejs-packaging-bundler": "b59a9a8d721b1a4e41542ca975962198780c17d08d078b0468ced653d46562ef",
+  "nodejs-setversion": "992a17f75aa3d56863a25cafd151cb9048a638845463dde01c6c55417e22322f",
+  "nodejs-symlink-deps": "ba5f61bf6dba8d4c3f9e184d3f8c838d2680856df1ccb29267de47d939c66695",
+  "nodejs.attr": "3c3ccc14d17adc45f13384d8222537b6669279ba298c0062eb14c43eaf48cfc1",
+  "nodejs.prov": "af65e7794bc9b4ec42a1311e4e866533e29adea585ffdf9ee154c3e72f85df1b",
+  "nodejs.req": "50d2118feed3fbc867ab434a988fe9be406799406ece30e657b4fc0a61063b26",
+  "nodejs_abi.attr": "1faa1cdfd50a7ee7c098d1149c8e9d357964e8ac9217c9964e3ad827134e0545",
+  "nodejs_abi.req": "ba1f007f1084d94f920e8d66a7b11be8139b1b6a0e0606b1b97ff7575ffc5ef3",
+  "test.tar.gz": "bd0a68d323bd7f5ab2bc635c014a16fcbb2fae6249bd8c5cb35dd08ccf0b0fb0"
  }
 }

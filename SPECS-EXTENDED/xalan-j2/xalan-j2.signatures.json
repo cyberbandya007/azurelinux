@@ -1,11 +1,11 @@
 {
  "Signatures": {
-  "optional-xerces-req.patch": "17d8377451cb62c58e09589cea1a143f7f81bd8678f1db2733f19861110d93c7",
-  "serializer-2.7.2.pom": "bb2bc5b33b8a9030e4abe03022ec4993b3ccbe30fd2aaf1fc019a0b80cc04969",
-  "xalan-2.7.2.pom": "47e04c9456485a9cd106fe6e722097efb5c65954392a5cb095b8686cd094d292",
-  "xalan-j2-MANIFEST.MF": "265291c18dc3a2102e3ea7b1c42cd167bee6159d8cd9c4fe5bc8778e331ed3b4",
-  "xalan-j2-serializer-MANIFEST.MF": "9ac7462066c5067dab098ce07d48027f9259034bae1c0c021479cc6be67c0617",
-  "xalan-j_2_7_2-src.tar.gz": "5c184ad2984973cc19783c7f9339c28a210cca724b25b0d706f1e310627adb98",
-  "xsltc-2.7.2.pom": "5a0b59331f0d32397fad76c2f339ac91f17e745d3e9a796b8095b99694f74cc8"
+  "generate-tarball.sh": "daabca369676ec11ee12982c28c21cba4d565da28e33da5ff19294a9e8290a40",
+  "serializer-2.7.3.pom": "cd6427fae77a1cd4b2afdbae43f54b4fb04d18b4517148aff398fd777a54f8d3",
+  "xalan-2.7.3.pom": "9358b7b07f59b9e1801fd8761cc4801456a9baca29d2f204f0561cef490f1822",
+  "xalan-j2-2.7.3.tar.gz": "5888df7df67e743e2a65a2e1bb26eea5c9a5a2b7fda650a2926337bd99bb4a7e",
+  "xalan-j2-MANIFEST.MF": "9954359f31db20da91afe92c20cc2ca60a079ea735e043ea059b21a01f0af2e9",
+  "xalan-j2-serializer-MANIFEST.MF": "d475357c30699ef5909bf406f26f0d050ced72b0b0b534213795c8170de64c2a",
+  "xsltc-2.7.3.pom": "e09fa1bf883c1120201be1f001e544db670fe6855ac16b30673578eaa39f1664"
  }
 }

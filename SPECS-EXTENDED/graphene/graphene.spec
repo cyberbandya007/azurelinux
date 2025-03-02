@@ -1,17 +1,20 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 Name:           graphene
-Version:        1.10.4
-Release:        3%{?dist}
+Version:        1.10.6
+Release:        9%{?dist}
 Summary:        Thin layer of types for graphic libraries
 
 License:        MIT
 URL:            https://github.com/ebassi/graphene
 Source:         %{url}/releases/download/%{version}/%{name}-%{version}.tar.xz
+# https://github.com/ebassi/graphene/commit/3b3e316908e4fb15056d10fb9d5271eed6f65051
+# https://github.com/ebassi/graphene/commit/fbfbdad5a3f38ddbe543ee8c236b4315bba111b9
+Patch0:         graphene-1.10.6-perf-aarch64.patch
+# https://github.com/ebassi/graphene/commit/3b3e316908e4fb15056d10fb9d5271eed6f65051
+Patch1:         graphene-1.10.6-perf.patch
 
-BuildRequires:  %{_bindir}/xsltproc
 BuildRequires:  gcc
 BuildRequires:  gobject-introspection-devel
+BuildRequires:  gtk-doc
 BuildRequires:  meson >= 0.50.1
 BuildRequires:  pkgconfig(gobject-2.0) >= 2.30.0
 
@@ -39,11 +42,20 @@ the functionality of the installed %{name} package.
 %autosetup -p1
 
 %build
-%meson -Dgtk_doc=false
+# Disable neon
+# https://github.com/ebassi/graphene/issues/215
+%meson -Dgtk_doc=true \
+%ifarch %{arm}
+  -Darm_neon=false \
+%endif
+
 %meson_build
 
 %install
 %meson_install
+
+%check
+%meson_test
 
 %files
 %license LICENSE.txt
@@ -59,22 +71,62 @@ the functionality of the installed %{name} package.
 %{_libdir}/pkgconfig/graphene-1.0.pc
 %{_libdir}/pkgconfig/graphene-gobject-1.0.pc
 %{_datadir}/gir-1.0/
+%{_datadir}/gtk-doc/
 
 %files tests
 %{_libexecdir}/installed-tests/
 %{_datadir}/installed-tests/
 
 %changelog
-* Mon Mar 21 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.10.4-3
-- Adding BR on '%%{_bindir}/xsltproc'.
-- Disabled gtk doc generation to remove network dependency during build-time.
-- License verified.
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.10.6-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.10.4-2
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.10.6-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sat Jan 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.10.6-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.10.6-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.10.6-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.10.6-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.10.6-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri Jul 16 2021 Dan Horák <dan[at]danny.cz> - 1.10.6-2
+- upstream perfomance fixes for non-x86 arches
+
+* Tue Apr 06 2021 Kalev Lember <klember@redhat.com> - 1.10.6-1
+- Update to 1.10.6
+
+* Tue Mar 09 2021 Nicolas Chauvet <kwizart@gmail.com> - 1.10.4-2
+- Disable neon for graphene on armv7hl
+- Add meson_test
 
 * Wed Feb 10 2021 Kalev Lember <klember@redhat.com> - 1.10.4-1
 - Update to 1.10.4
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.10.2-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Mon Sep 28 2020 Jeff Law <law@redhat.com> - 1.10.2-5
+- Re-enable LTO as upstream GCC target/96939 has been fixed
+
+* Mon Aug 10 2020 Jeff Law <law@redhat.com> - 1.10.2-4
+- Disable LTO for now
+
+* Sat Aug 01 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.10.2-3
+- Second attempt - Rebuilt for
+  https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.10.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Mon Jun 22 2020 Kalev Lember <klember@redhat.com> - 1.10.2-1
 - Update to 1.10.2

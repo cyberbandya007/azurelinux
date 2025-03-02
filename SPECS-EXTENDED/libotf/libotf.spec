@@ -1,15 +1,14 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 Name:		libotf
-Version:	0.9.13
-Release:	16%{?dist}
+Version:	0.9.16
+Release:	5%{?dist}
 Summary:	A Library for handling OpenType Font
 
-License:	LGPLv2+
+License:	LGPL-2.1-or-later
 URL:            http://www.nongnu.org/m17n/
 Source0:        http://download.savannah.gnu.org/releases/m17n/%{name}-%{version}.tar.gz
 
-BuildRequires:	gcc chrpath freetype-devel
+BuildRequires:	gcc chrpath freetype-devel libXaw-devel
+BuildRequires: make
 Requires:	freetype
 
 %description 
@@ -45,32 +44,68 @@ make %{?_smp_mflags}
 %install
 make install DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p"
 find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
-for file in $RPM_BUILD_ROOT/usr/bin/*; do chrpath -d $file || true; done
+for file in $RPM_BUILD_ROOT%{_bindir}/*; do chrpath -d $file || true; done
 
 (cd example && make clean && rm -rf .deps && rm Makefile)
-rm $RPM_BUILD_ROOT/usr/bin/libotf-config
+rm $RPM_BUILD_ROOT%{_bindir}/libotf-config
 
 %ldconfig_scriptlets
 
 
 %files
 %doc AUTHORS COPYING README NEWS
-%{_libdir}/*.so.*
+%{_libdir}/libotf.so.1{,.*}
 %{_bindir}/otfdump
 %{_bindir}/otflist
 %{_bindir}/otftobdf
+%{_bindir}/otfview
 
 %files devel
 %doc example
 %{_includedir}/*
-%{_libdir}/*.so
+%{_libdir}/libotf.so
 %{_libdir}/pkgconfig/*
 
 %changelog
-* Thu Mar 25 2021 Henry Li <lihl@microsoft.com> - 0.9.13-16
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
-- Remove libXaw-devel from build requirement
-- Remove otfview from file section, which depends on x11
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.16-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.16-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.16-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Aug 03 2023 Lukáš Zaoral <lzaoral@redhat.com> - 0.9.16-2
+- migrate to SPDX license format
+
+* Tue Jul 25 2023 Mike FABIAN <mfabian@redhat.com> - 0.9.16-1
+- Update to 0.9.16
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.13-23
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.13-22
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.13-21
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.13-20
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.13-19
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.13-18
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Sat Aug 01 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.13-17
+- Second attempt - Rebuilt for
+  https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.13-16
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.13-15
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

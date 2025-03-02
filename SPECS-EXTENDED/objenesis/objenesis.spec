@@ -37,7 +37,7 @@ Release:        4%{?dist}
 License:        Apache-2.0
 URL:            http://objenesis.org/
 BuildArch:      noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 
 Source0:        https://github.com/easymock/%{name}/archive/%{version}.tar.gz
 

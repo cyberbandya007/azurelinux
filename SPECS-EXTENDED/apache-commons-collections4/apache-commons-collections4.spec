@@ -8,7 +8,7 @@ URL:            http://commons.apache.org/proper/commons-collections/
 Source0:        http://archive.apache.org/dist/commons/collections/source/commons-collections4-%{version}-src.tar.gz
 
 BuildArch:      noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 
 BuildRequires:  maven-local
 BuildRequires:  mvn(junit:junit)

@@ -11,7 +11,7 @@ Summary:        Code Generation Library for Java
 License:        Apache-2.0 AND BSD-3-Clause
 URL:            https://github.com/cglib/cglib
 BuildArch:      noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 
 Source0:        https://github.com/cglib/cglib/archive/%{tarball_name}.tar.gz
 

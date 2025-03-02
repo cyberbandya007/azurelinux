@@ -5,7 +5,7 @@ Summary:        Byte Code Engineering Library
 License:        Apache-2.0
 URL:            http://commons.apache.org/proper/commons-bcel/
 BuildArch:      noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 
 Source0:        http://archive.apache.org/dist/commons/bcel/source/bcel-%{version}-src.tar.gz
 

@@ -1,19 +1,17 @@
 Name:		perl-Package-DeprecationManager
-Version:	0.17
-Release:	12%{?dist}
+Version:	0.18
+Release:	5%{?dist}
 Summary:	Manage deprecation warnings for your distribution
-License:	Artistic 2.0
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+License:	Artistic-2.0
 URL:		https://metacpan.org/release/Package-DeprecationManager
-Source0:	https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/Package-DeprecationManager-%{version}.tar.gz#/perl-Package-DeprecationManager-%{version}.tar.gz
+Source0:	https://cpan.metacpan.org/modules/by-module/Package/Package-DeprecationManager-%{version}.tar.gz
 BuildArch:	noarch
 # Module Build
 BuildRequires:	coreutils
 BuildRequires:	findutils
 BuildRequires:	make
-BuildRequires:	perl-interpreter
 BuildRequires:	perl-generators
+BuildRequires:	perl-interpreter
 BuildRequires:	perl(ExtUtils::MakeMaker)
 # Module Runtime
 BuildRequires:	perl(Carp)
@@ -22,7 +20,7 @@ BuildRequires:	perl(Package::Stash)
 BuildRequires:	perl(Params::Util)
 BuildRequires:	perl(strict)
 BuildRequires:	perl(Sub::Install)
-BuildRequires:	perl(Sub::Name)
+BuildRequires:	perl(Sub::Util)
 BuildRequires:	perl(warnings)
 # Test Suite
 BuildRequires:	perl(Exporter)
@@ -34,7 +32,6 @@ BuildRequires:	perl(Test::Warnings)
 BuildRequires:	perl(CPAN::Meta) >= 2.120900
 BuildRequires:	perl(CPAN::Meta::Prereqs)
 # Runtime
-Requires:	perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 
 %description
 This module allows you to manage a set of deprecations for one or more modules.
@@ -53,24 +50,66 @@ make %{?_smp_mflags}
 %install
 make pure_install DESTDIR=%{buildroot}
 find %{buildroot} -type f -name .packlist -delete
-%{_fixperms} %{buildroot}
+%{_fixperms} -c %{buildroot}
 
 %check
 make test
 
 %files
-%if 0%{?_licensedir:1}
 %license LICENSE
-%else
-%doc LICENSE
-%endif
-%doc Changes CONTRIBUTING.md README.md
+%doc Changes CODE_OF_CONDUCT.md CONTRIBUTING.md README.md
 %{perl_vendorlib}/Package/
 %{_mandir}/man3/Package::DeprecationManager.3*
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.17-12
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.18-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.18-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.18-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.18-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Mon Feb 20 2023 Paul Howarth <paul@city-fan.org> - 0.18-1
+- Update to 0.18
+  - Use Sub::Util instead of Sub::Name, which is part of Scalar-List-Utils,
+    which itself is already a dependency (GH#3)
+- Use author-independent source URL
+- Use SPDX-format license tag
+- Use %%license unconditionally
+- Package CODE_OF_CONDUCT.md
+- Fix permissions verbosely
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.17-20
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.17-19
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Wed Jun 01 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.17-18
+- Perl 5.36 rebuild
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.17-17
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.17-16
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.17-15
+- Perl 5.34 rebuild
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.17-14
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.17-13
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.17-12
+- Perl 5.32 rebuild
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.17-11
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

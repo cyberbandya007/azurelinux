@@ -1,5 +1,7 @@
 {
  "Signatures": {
-  "libchewing-0.5.1.tar.gz": "b30a809123b6ba36283765b9337a98d695a292d361bd6f6bc74f03ac4f5772f8"
+  "libchewing-0.9.1.tar.zst": "e98b76c306552148b7d85f0e596860751d9eef4bc8f2dfc053177b14f421c31f",
+  "libchewing-0.9.1.tar.zst.asc": "d519ff61452a62eb202c99b7be162766495ff19afef5edee9b4a641fc906258e",
+  "libchewing.pgp": "5bb2f1a372c841621d2269ba4a3f5d9ddd3c2804523fdcf41ea65c4e9a65a63e"
  }
 }

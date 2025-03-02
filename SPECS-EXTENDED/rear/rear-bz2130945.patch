@@ -1,0 +1,41 @@
+From 6d1e5ab96213a0d79489c4296cd1f5a4be645597 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Luk=C3=A1=C5=A1=20Zaoral?= <lzaoral@redhat.com>
+Date: Thu, 29 Sep 2022 15:32:22 +0200
+Subject: [PATCH] Fix initrd regeneration on s390x and Fedora/RHEL
+
+For some reason, the 550_rebuild_initramfs.sh script was not included
+for s390x on Fedora/RHEL so the initrd was not regenerated after backup
+restore on this architecture.
+
+Since all other architectures were actually using the same script,
+let's just move it one level up to fix this bug and to also simplify
+the directory structure a bit.
+---
+ .../rear/finalize/Fedora/{i386 => }/550_rebuild_initramfs.sh     | 0
+ usr/share/rear/finalize/Fedora/ppc64/550_rebuild_initramfs.sh    | 1 -
+ usr/share/rear/finalize/Fedora/ppc64le/550_rebuild_initramfs.sh  | 1 -
+ 3 files changed, 2 deletions(-)
+ rename usr/share/rear/finalize/Fedora/{i386 => }/550_rebuild_initramfs.sh (100%)
+ delete mode 120000 usr/share/rear/finalize/Fedora/ppc64/550_rebuild_initramfs.sh
+ delete mode 120000 usr/share/rear/finalize/Fedora/ppc64le/550_rebuild_initramfs.sh
+
+diff --git a/usr/share/rear/finalize/Fedora/i386/550_rebuild_initramfs.sh b/usr/share/rear/finalize/Fedora/550_rebuild_initramfs.sh
+similarity index 100%
+rename from usr/share/rear/finalize/Fedora/i386/550_rebuild_initramfs.sh
+rename to usr/share/rear/finalize/Fedora/550_rebuild_initramfs.sh
+diff --git a/usr/share/rear/finalize/Fedora/ppc64/550_rebuild_initramfs.sh b/usr/share/rear/finalize/Fedora/ppc64/550_rebuild_initramfs.sh
+deleted file mode 120000
+index 22eede59d..000000000
+--- a/usr/share/rear/finalize/Fedora/ppc64/550_rebuild_initramfs.sh
++++ /dev/null
+@@ -1 +0,0 @@
+-../i386/550_rebuild_initramfs.sh
+\ No newline at end of file
+diff --git a/usr/share/rear/finalize/Fedora/ppc64le/550_rebuild_initramfs.sh b/usr/share/rear/finalize/Fedora/ppc64le/550_rebuild_initramfs.sh
+deleted file mode 120000
+index 22eede59d..000000000
+--- a/usr/share/rear/finalize/Fedora/ppc64le/550_rebuild_initramfs.sh
++++ /dev/null
+@@ -1 +0,0 @@
+-../i386/550_rebuild_initramfs.sh
+\ No newline at end of file

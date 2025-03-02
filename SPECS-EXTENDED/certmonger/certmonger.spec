@@ -1,24 +1,39 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+%if 0%{?fedora} > 15 || 0%{?rhel} > 6
 %global systemd 1
 %global	sysvinit 0
+%else
+%global systemd 0
+%global	sysvinit 1
+%endif
 
+%if 0%{?fedora} > 15 && 0%{?fedora} < 20
+%global systemdsysv 1
+%else
 %global systemdsysv 0
+%endif
 
+%if 0%{?fedora} > 14 || 0%{?rhel} > 6
 %global tmpfiles 1
+%else
+%global tmpfiles 0
+%endif
 
+%if 0%{?fedora} > 9 || 0%{?rhel} > 5
 %global sysvinitdir %{_initddir}
+%else
+%global sysvinitdir %{_initrddir}
+%endif
 
 %bcond_with xmlrpc
 
 Name:		certmonger
-Version:        0.79.20
-Release:        1%{?dist}
+Version:	0.79.20
+Release:	2%{?dist}
 Summary:	Certificate status monitor and PKI enrollment client
 
-License:	GPLv3 or later (with an exception that it can be linked with OpenSSL).
+License:	GPL-3.0-or-later
 URL:		http://pagure.io/certmonger/
-Source0:	https://pagure.io/certmonger/archive/%{version}/certmonger-%{version}.tar.gz
+Source0:	http://releases.pagure.org/certmonger/certmonger-%{version}.tar.gz
 #Source1:	http://releases.pagure.org/certmonger/certmonger-%%{version}.tar.gz.sig
 
 BuildRequires:	autoconf
@@ -29,14 +44,22 @@ BuildRequires:	openldap-devel
 BuildRequires:	krb5-devel
 BuildRequires:	libidn2-devel
 BuildRequires:	dbus-devel, nspr-devel, nss-devel, openssl-devel
+%if 0%{?fedora} >= 12 || 0%{?rhel} >= 6
 BuildRequires:	libuuid-devel
+%else
+BuildRequires:	e2fsprogs-devel
+%endif
 BuildRequires:	libtalloc-devel, libtevent-devel
+%if 0%{?rhel} >= 6 || 0%{?fedora} >= 9
 BuildRequires:	libcurl-devel
+%else
+BuildRequires:	curl-devel
+%endif
 BuildRequires:	libxml2-devel
 %if %{with xmlrpc}
-BuildRequires:	xmlrpc-c-devel
+BuildRequires:  xmlrpc-c-devel
 %endif
-BuildRequires:	jansson-devel
+BuildRequires:  jansson-devel
 %if 0%{?rhel} && 0%{?rhel} < 6
 BuildRequires:	bind-libbind-devel
 BuildRequires:	mktemp
@@ -67,7 +90,7 @@ Requires(post):	%{_bindir}/dbus-send
 
 %if %{systemd}
 BuildRequires:	systemd-units
-BuildRequires:  systemd-devel
+BuildRequires: make
 Requires(post):	systemd-units
 Requires(preun):	systemd-units, dbus, sed
 Requires(postun):	systemd-units
@@ -89,8 +112,10 @@ Requires(post):	/sbin/chkconfig, /sbin/service
 Requires(preun):	/sbin/chkconfig, /sbin/service, dbus, sed
 %endif
 
+%if 0%{?fedora} >= 15
 # Certain versions of libtevent have incorrect internal ABI versions.
 Conflicts: libtevent < 0.9.13
+%endif
 
 %description
 Certmonger is a service which is primarily concerned with getting your
@@ -119,8 +144,9 @@ autoreconf -i -f
 %endif
 	--with-homedir=/run/certmonger \
 %if %{with xmlrpc}
-	--with-xmlrpc \
+    --with-xmlrpc \
 %endif
+	--disable-dsa \
 	--with-tmpdir=/run/certmonger --enable-pie --enable-now
 %if %{with xmlrpc}
 # For some reason, some versions of xmlrpc-c-config in Fedora and RHEL just
@@ -147,7 +173,7 @@ fi
 %if %{without xmlrpc}
 # remove any existing certmaster CA configuration
 if test $1 -gt 1 ; then
-	%{_bindir}/getcert remove-ca -c certmaster 2>&1 || :
+    %{_bindir}/getcert remove-ca -c certmaster 2>&1 || :
 fi
 %endif
 %if %{systemd}
@@ -238,18 +264,94 @@ exit 0
 %endif
 
 %changelog
-* Mon Dec 10 2024 Sandeep Karambelkar <skarambelkar@microsoft.com> - 0.79.15-1
-- Update to upstream 0.79.20 to fix build issues with certmonger. Verified license.
+* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.79.20-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Tue Jun 22 2021 Thomas Crain <thcrain@microsoft.com@microsoft.com> - 0.79.13-2
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
-- Add build-time requirement on systemd-devel for systemd pkgconfig files
+* Mon Jun 10 2024 Rob Crittenden <rcritten@redhat.com> - 0.79.20-1
+- Update to upstream 0.79.20
+
+* Tue Feb 20 2024 Rob Crittenden <rcritten@redhat.com> - 0.79.19-5
+- Update tests to be compatible with OpenSSL 3.2
+
+* Tue Jan 23 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.79.19-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jan 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.79.19-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Dec 22 2023 Florian Weimer <fweimer@redhat.com> - 0.79.19-2
+- Fix C compatibility issues
+
+* Tue Oct 10 2023 Rob Crittenden <rcritten@redhat.com> - 0.79.19-1
+- Update to upstream 0.79.19
+
+* Wed Jul 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.79.18-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Wed Apr 05 2023 Rob Crittenden <rcritten@redhat.com> - 0.79.18-1
+- Update to upstream 0.79.18
+
+* Thu Feb 23 2023 Rob Crittenden <rcritten@redhat.com> - 0.79.17-4
+- migrated to SPDX license
+
+* Wed Jan 18 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.79.17-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Tue Dec  6 2022 Rob Crittenden <rcritten@redhat.com> - 0.79.17-2
+- Rename DBus service and conf files to match canonical name (#2151243)
+
+* Wed Nov 30 2022 Rob Crittenden <rcritten@redhat.com> - 0.79.17-1
+- Update to upstream 0.79.17
+
+* Thu Aug 25 2022 Rob Crittenden <rcritten@redhat.com> - 0.79.16-1
+- Update to upstream 0.79.16
+
+* Wed Jul 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.79.15-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Mon Apr 11 2022 Rob Crittenden <rcritten@redhat.com> - 0.79.15-3
+- Disable DSA key support. They do not work in FIPS mode at all and
+  are disabled by crypto policy by default.
+
+* Wed Jan 19 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.79.15-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Wed Jan  5 2022 Rob Crittenden <rcritten@redhat.com> - 0.79.15-1
+- Update to upstream 0.79.15
+
+* Tue Oct 05 2021 Rob Crittenden <rcritten@redhat.com> - 0.79.14-6
+- Don't encode critical=FALSE in X509v3 extensions
+
+* Wed Sep 29 2021 Rob Crittenden <rcritten@redhat.com> - 0.79.14-5
+- Fix FTBFS due to OpenSSL 3.0.0 API change between beta1 and 2.
+
+* Wed Sep 15 2021 Rob Crittenden <rcritten@redhat.com> - 0.79.14-4
+- Port to OpenSSL 3.0.0
+
+* Tue Sep 14 2021 Sahana Prasad <sahana@redhat.com> - 0.79.14-3
+- Rebuilt with OpenSSL 3.0.0
+
+* Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.79.14-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jun 15 2021 Rob Crittenden <rcritten@redhat.com> - 0.79.14-1
+- Update to upstream 0.79.14
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.79.13-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
 * Tue Oct 20 2020 Rob Crittenden <rcritten@redhat.com> - 0.79.13-1
 - Update to upstream 0.79.13
 
 * Mon Oct  5 2020 Rob Crittenden <rcritten@redhat.com> - 0.79.12-1
 - Update to upstream 0.79.12
+
+* Fri Sep 18 2020 Rob Crittenden <rcritten@redhat.com> - 0.79.11-4
+- Don't send SIGKILL to child processes to terminate them
+- Switch to JSON for communication with IPA
+
+* Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.79.11-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Tue Jun 30 2020 Rob Crittenden <rcritten@redhat.com> - 0.79.11-2
 - Fix for an unnecessary free() which can cause core dump.

@@ -8,7 +8,7 @@ Summary:        Provides classes to do asserts on xml
 License:        Apache-2.0
 URL:            https://www.xmlunit.org/
 BuildArch:      noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 
 # ./generate-tarball.sh
 Source0:        %{name}-%{version}.tar.gz

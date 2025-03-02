@@ -6,12 +6,10 @@
 %endif
 
 Name:		perl-Config-Tiny
-Version:	2.24
+Version:	2.30
 Release:	4%{?dist}
 Summary:	Perl module for reading and writing .ini style configuration files
-License:	GPL+ or Artistic
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+License:	GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:		https://metacpan.org/release/Config-Tiny
 Source0:	https://cpan.metacpan.org/modules/by-module/Config/Config-Tiny-%{version}.tgz
 BuildArch:	noarch
@@ -28,8 +26,8 @@ BuildRequires:	perl(strict)
 # Test Suite
 BuildRequires:	perl(File::Spec) >= 3.30
 BuildRequires:	perl(File::Temp) >= 0.22
-BuildRequires:	perl(Test::More) >= 0.47
-BuildRequires:	perl(UNIVERSAL)
+BuildRequires:	perl(Test::More) >= 1.001002
+BuildRequires:	perl(UNIVERSAL::isa)
 BuildRequires:	perl(utf8)
 %if %{with perl_Config_Tiny_enables_extra_test}
 # Extra Tests
@@ -40,8 +38,8 @@ BuildRequires:	perl(Test::MinimumVersion) >= 0.101080
 %endif
 BuildRequires:	perl(Test::Pod) >= 1.44
 %endif
-# Runtime
-Requires:	perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
+# Dependencies
+# (none)
 
 %description
 Config::Tiny is a Perl module designed for reading and writing .ini
@@ -73,8 +71,92 @@ make test TEST_FILES="$(echo $(find xt/ -name '*.t'))" AUTOMATED_TESTING=1
 %{_mandir}/man3/Config::Tiny.3*
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 2.24-4
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.30-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.30-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.30-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Oct 13 2023 Paul Howarth <paul@city-fan.org> - 2.30-1
+- Update to 2.30
+  - Add support for an array syntax for cases where you wish to assign an array
+    of values to a key
+    - See the new POD section called ARRAY SYNTAX
+    - See also the updated question in the FAQ: What happens if a key is
+      repeated?
+    - See also the sample code in the Synopsis, in t/02.main.t and in
+      t/test.conf
+    - In each case, search for the word greetings to find the new code samples
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.29-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Wed Apr  5 2023 Paul Howarth <paul@city-fan.org> - 2.29-1
+- Update to 2.29
+  - Edit to remove Test::Pod from TEST_REQUIRES in Makefile.PL, again
+  - Update version number in t/02.main.t
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.28-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.28-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Fri Jun 03 2022 Jitka Plesnikova <jplesnik@redhat.com> - 2.28-4
+- Perl 5.36 re-rebuild of bootstrapped packages
+
+* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 2.28-3
+- Perl 5.36 rebuild
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.28-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Tue Jan  4 2022 Paul Howarth <paul@city-fan.org> - 2.28-1
+- Update to 2.28
+  - Replace both uses of bareword filehandles with 'my' variables
+  - Modernize Makefile.PL
+  - Make corresponding patches where appropriate to Tiny.pm and t/02.main.t
+
+* Wed Sep 22 2021 Paul Howarth <paul@city-fan.org> - 2.27-1
+- Update to 2.27
+  - Add the option of passing a hashref to the constructor, where it is
+    turned into an object of the class (see POD under new([$config]) for
+    details)
+  - Move test.conf back into t/, where it was years ago, before someone tried
+    to remove all uses of File::Spec; since File::Spec is used often now,
+    there is no point in keeping test.conf in the root directory of the distro
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.26-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Mon May 24 2021 Jitka Plesnikova <jplesnik@redhat.com> - 2.26-3
+- Perl 5.34 re-rebuild of bootstrapped packages
+
+* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 2.26-2
+- Perl 5.34 rebuild
+
+* Thu Feb  4 2021 Paul Howarth <paul@city-fan.org> - 2.26-1
+- Update to 2.24
+  - Merge in clean-up patches from Karen Etheridge
+  - Add back file t/0, required for t/05.zero.t
+  - Update Makefile.PL to switch issue tracker from rt.cpan.org to GitHub
+  - Update POD to change RT to GitHub
+  - Reformat Makefile.PL
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.24-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.24-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Fri Jun 26 2020 Jitka Plesnikova <jplesnik@redhat.com> - 2.24-5
+- Perl 5.32 re-rebuild of bootstrapped packages
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 2.24-4
+- Perl 5.32 rebuild
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.24-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

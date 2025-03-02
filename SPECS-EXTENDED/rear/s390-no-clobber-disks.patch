@@ -1,0 +1,797 @@
+commit 015c1ffd9fa96b01882b068714d3bc3aae3b5168
+Merge: 02dad206 20cc0137
+Author: Schlomo Schapiro <schlomo+github@schapiro.org>
+Date:   Tue Feb 28 22:46:13 2023 +0100
+
+    Merge pull request #2943 from pcahyna/s390-layout-format
+    
+    s390x (IBM Z) disk formatting fixes
+
+    Cherry-picked-by: Lukáš Zaoral <lzaoral@redhat.com>
+
+diff --git a/packaging/rpm/rear.spec b/packaging/rpm/rear.spec
+index eba48198..fb943019 100644
+--- a/packaging/rpm/rear.spec
++++ b/packaging/rpm/rear.spec
+@@ -29,8 +29,8 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+ # Of course the rear bash scripts can be installed on any architecture just as any binaries can be installed on any architecture.
+ # But the meaning of architecture dependent packages should be on what architectures they will work.
+ # Therefore only those architectures that are actually supported are explicitly listed.
+-# This avoids that rear can be "just installed" on architectures that are actually not supported (e.g. ARM or IBM z Systems):
+-ExclusiveArch: %ix86 x86_64 ppc ppc64 ppc64le ia64
++# This avoids that rear can be "just installed" on architectures that are actually not supported (e.g. ARM):
++ExclusiveArch: %ix86 x86_64 ppc ppc64 ppc64le ia64 s390x
+ # Furthermore for some architectures it requires architecture dependent packages (like syslinux for x86 and x86_64)
+ # so that rear must be architecture dependent because ifarch conditions never match in case of "BuildArch: noarch"
+ # see the GitHub issue https://github.com/rear/rear/issues/629
+diff --git a/usr/share/rear/conf/default.conf b/usr/share/rear/conf/default.conf
+index fe34636f..50baaf82 100644
+--- a/usr/share/rear/conf/default.conf
++++ b/usr/share/rear/conf/default.conf
+@@ -486,6 +486,17 @@ test "$MIGRATION_MODE" || MIGRATION_MODE=''
+ # Currently by default no disk is wiped to avoid issues until this feature was more tested:
+ DISKS_TO_BE_WIPED='false'
+ 
++##
++# Formatting DASDs (S/390 specific)
++# DASD (Direct Access Storage Device) denotes a disk drive on the S/390 architecture.
++# DASDs need to be formatted before use (even before creating a partition table on them).
++# By default ReaR will format the DASDs that are going to be used to recreate the system
++# (are referenced in disklayout.conf) before recreating the disk layout.
++# This can be suppressed by setting FORMAT_DASDS="false". It can be useful when one intends
++# to use already formatted DASDs as recovery target.
++FORMAT_DASDS=""
++##
++
+ ##
+ # Resizing partitions in MIGRATION_MODE during "rear recover"
+ #
+diff --git a/usr/share/rear/layout/prep-for-mount/Linux-s390/205_s390_enable_disk.sh b/usr/share/rear/layout/prep-for-mount/Linux-s390/205_s390_enable_disk.sh
+new file mode 120000
+index 00000000..5f7a2ac0
+--- /dev/null
++++ b/usr/share/rear/layout/prep-for-mount/Linux-s390/205_s390_enable_disk.sh
+@@ -0,0 +1 @@
++../../prepare/Linux-s390/205_s390_enable_disk.sh
+\ No newline at end of file
+diff --git a/usr/share/rear/layout/prepare/GNU/Linux/100_include_partition_code.sh b/usr/share/rear/layout/prepare/GNU/Linux/100_include_partition_code.sh
+index 84a7cd33..acc65adf 100644
+--- a/usr/share/rear/layout/prepare/GNU/Linux/100_include_partition_code.sh
++++ b/usr/share/rear/layout/prepare/GNU/Linux/100_include_partition_code.sh
+@@ -24,6 +24,7 @@ fi
+ ### Prepare a disk for partitioning/general usage.
+ create_disk() {
+     local component disk size label junk
++    local blocksize layout dasdtype dasdcyls junk2
+     read component disk size label junk < <(grep "^disk $1 " "$LAYOUT_FILE")
+ 
+     cat >> "$LAYOUT_CODE" <<EOF
+@@ -57,7 +58,8 @@ sync
+ 
+ EOF
+ 
+-    create_partitions "$disk" "$label"
++    # $junk can contain useful DASD-specific fields
++    create_partitions "$disk" "$label" "$junk"
+ 
+     cat >> "$LAYOUT_CODE" <<EOF
+ # Make sure device nodes are visible (eg. in RHEL4)
+@@ -83,6 +85,11 @@ create_partitions() {
+     ### List partition types/names to detect disk label type.
+     local -a names=()
+     local part disk size pstart name junk
++    local orig_block_size layout dasdtype dasdcyls junk2
++    if [ "$label" == dasd ]; then
++        # dasd has more fields - junk is not junk anymore
++        read orig_block_size layout dasdtype dasdcyls junk2 <<<$3
++    fi
+     while read part disk size pstart name junk ; do
+         names+=( $name )
+         case $name in
+@@ -217,12 +224,12 @@ EOF
+             if [[ "$end" ]] ; then
+                 end=$( mathlib_calculate "$end - 1" )
+             fi
+-            if [[ "$ARCH" == "Linux-s390" ]] ; then
++            if [[ "$ARCH" == "Linux-s390" && "$label" == dasd ]] ; then
+                 # LDL formatted disks are already partitioned and should not be partitioned with parted or fdasd , it will fail
+-                # the listDasdLdl array contains devices such as /dev/dasdb that are formatted as LDL
+-                # listDasdLdl is set in layout/prepare/Linux-s390/205_s390_enable_disk.sh 
+-                if ! IsInArray "$device" "${listDasdLdl[@]}" ; then
+-                    echo "not LDL dasd formated disk, create a partition"
++                if [ "$layout" == LDL ]; then
++                    Debug "$device: LDL formatted DASD, do not create a partition"
++                else
++                    Debug "$device: ${layout} formatted DASD, create a partition"
+                     cat >> "$LAYOUT_CODE" <<EOF
+ create_disk_partition "$device" "$name" $number $start $end
+ EOF
+diff --git a/usr/share/rear/layout/prepare/Linux-s390/090_include_dasd_code.sh b/usr/share/rear/layout/prepare/Linux-s390/090_include_dasd_code.sh
+new file mode 100644
+index 00000000..fc5be463
+--- /dev/null
++++ b/usr/share/rear/layout/prepare/Linux-s390/090_include_dasd_code.sh
+@@ -0,0 +1,17 @@
++# Generate code for low-level formatting of a DASD
++
++dasd_format_code() {
++    local device size blocksize layout dasdtype dasdcyls
++
++    device="$1"
++    size="$2"
++    blocksize="$3"
++    layout="$4"
++    dasdtype="$5"
++    dasdcyls="$6"
++
++    has_binary dasdfmt || Error "Cannot find 'dasdfmt' command"
++
++    LogPrint 'dasdfmt:' $device ', blocksize:' $blocksize ', layout:' $layout
++    echo "dasdfmt -b $blocksize -d $layout -y $device"
++}
+diff --git a/usr/share/rear/layout/prepare/Linux-s390/205_s390_enable_disk.sh b/usr/share/rear/layout/prepare/Linux-s390/205_s390_enable_disk.sh
+index 0ff2fd58..0f6946a9 100644
+--- a/usr/share/rear/layout/prepare/Linux-s390/205_s390_enable_disk.sh
++++ b/usr/share/rear/layout/prepare/Linux-s390/205_s390_enable_disk.sh
+@@ -2,45 +2,36 @@
+ # Before we can compare or map DASD devices we must enable them.
+ # This operation is only needed during "rear recover".
+ 
+-format_s390_disk() {
+-    LogPrint "run dasdfmt"
+-    while read line ; do
+-        LogPrint 'dasdfmt:' "$line"
+-        # example format command: dasdfmt -b 4096 -d cdl -y /dev/dasda
+-        # where
+-        #  b is the block size
+-        #  d is the layout: 
+-        #   cdl - compatible disk layout (can be shared with zos and zvm apps)
+-        #   ldl - linux disk layout
+-        #  y - answer yes
+-        device=$( echo $line | awk '{ print $7 }' )
+-        blocksize=$( echo $line | awk '{ print $3 }' )
+-        layout=$( echo $line | awk '{ print tolower($5) }' )
+-        if [[ "$layout" == "ldl" ]] ; then
+-            # listDasdLdl contains devices such as /dev/dasdb that are formatted as LDL
+-            # LDL formatted disks are already partitioned and should not be partitioned with parted or fdasd , it will fail
+-            # this var, listDasdLdl, is used by 100_include_partition_code.sh to exclude writing partition code to diskrestore.sh for LDL disks
+-            listDasdLdl+=( $device )
+-            LogPrint "LDL disk '$device' will not be partitioned (LDL disks are already partitioned)"
+-        fi
+-        LogPrint 'dasdfmt:' $device ', blocksize:' $blocksize ', layout:' $layout
+-        # dasd format
+-        dasdfmt -b $blocksize -d $layout -y $device
+-    done < <( grep "^dasdfmt " "$LAYOUT_FILE" )
+-}
+-
++DISK_MAPPING_HINTS=()
+ 
+ enable_s390_disk() {
++    local keyword device bus len newname
++
+     LogPrint "run chccwdev"
+-    while read line ; do
+-        LogPrint 'dasd channel:' "$line"
+-        device=$( echo $line | awk '{ print $4 }' )
+-        bus=$( echo $line | awk '{ print $2 }' )
+-        channel=$( echo $line | awk '{ print $5 }' )
+-        LogPrint 'chccwdev:' $device ', bus:' $bus ', channel:' $channel
+-        # dasd channel enable
+-        chccwdev -e $bus
+-    done < <( grep "^dasd_channel " "$LAYOUT_FILE" )
++    while read len device bus ; do
++        # this while loop must be outside the pipeline so that variables propagate outside
++        # (pipelines run in subshells)
++        LogPrint "Enabling DASD $device with virtual device number $bus"
++        if chccwdev -e $bus ; then
++            newname=$(lsdasd $bus | awk "/$bus/ { print \$3}" )
++            if ! test $newname ; then
++                LogPrintError "New device with virtual device number $bus not found among online DASDs"
++                continue
++            fi
++            if [ "$newname" != "$device" ]; then
++                LogPrint "original DASD '$device' changed name to '$newname'"
++                test "$MIGRATION_MODE" || MIGRATION_MODE='true'
++            fi
++            DISK_MAPPING_HINTS+=( "/dev/$device /dev/$newname" )
++        else
++            LogPrintError "Failed to enable $bus"
++        fi
++    done < <( grep "^dasd_channel " "$LAYOUT_FILE" | while read keyword bus device; do
++                  # add device name length, so that "dasdb" sorts properly before "dasdaa"
++                  # we need to create devices in the same order as the kernel orders them (by minor number)
++                  # - this increases the chance that they will get identical names
++                  echo ${#device} $device $bus
++                  done | sort -k1n -k2 )
+ }
+ 
+ # May need to look at $OS_VENDOR also as DASD disk layout is distro specific:
+@@ -49,7 +40,6 @@ case $OS_MASTER_VENDOR in
+         # "Fedora" also handles Red Hat
+         # "Debian" also handles Ubuntu
+         enable_s390_disk
+-        format_s390_disk
+         ;;
+     (*)
+         LogPrintError "No code for DASD disk device enablement on $OS_MASTER_VENDOR"
+diff --git a/usr/share/rear/layout/prepare/Linux-s390/360_generate_dasd_format_code.sh b/usr/share/rear/layout/prepare/Linux-s390/360_generate_dasd_format_code.sh
+new file mode 100644
+index 00000000..14bb942d
+--- /dev/null
++++ b/usr/share/rear/layout/prepare/Linux-s390/360_generate_dasd_format_code.sh
+@@ -0,0 +1,51 @@
++# DASD_FORMAT_CODE is the script to recreate the dasd formatting (dasdformat.sh).
++
++local component disk size label junk
++local blocksize layout dasdtype dasdcyls junk2
++
++
++save_original_file "$DASD_FORMAT_CODE"
++
++# Initialize
++
++echo '#!/bin/bash' >"$DASD_FORMAT_CODE"
++
++# Show the current output of lsdasd, it can be useful for identifying disks
++# (in particular it shows the Linux device name <-> virtual device number mapping,
++# formatted / unformatted status and the number/size of blocks when formatted )
++echo "# Current output of 'lsdasd':" >>"$DASD_FORMAT_CODE"
++lsdasd | sed -e 's/^/# /' >>"$DASD_FORMAT_CODE"
++
++cat <<EOF >>"$DASD_FORMAT_CODE"
++
++LogPrint "Start DASD format restoration."
++
++set -e
++set -x
++
++EOF
++
++while read component disk size label junk; do
++    if [ "$label" == dasd ]; then
++        # Ignore excluded components.
++        # Normally they are removed in 520_exclude_components.sh,
++        # but we run before it, so we must skip them here as well.
++        if IsInArray "$disk" "${EXCLUDE_RECREATE[@]}" ; then
++            Log "Excluding $disk from DASD reformatting."
++            continue
++        fi
++        # dasd has more fields - junk is not junk anymore
++        read blocksize layout dasdtype dasdcyls junk2 <<<$junk
++        dasd_format_code "$disk" "$size" "$blocksize" "$layout" "$dasdtype" "$dasdcyls" >> "$DASD_FORMAT_CODE" || \
++            LogPrintError "Error producing DASD format code for $disk"
++    fi
++done < <(grep "^disk " "$LAYOUT_FILE")
++
++cat <<EOF >>"$DASD_FORMAT_CODE"
++
++set +x
++set +e
++
++LogPrint "DASD(s) formatted."
++
++EOF
+diff --git a/usr/share/rear/layout/prepare/Linux-s390/370_confirm_dasd_format_code.sh b/usr/share/rear/layout/prepare/Linux-s390/370_confirm_dasd_format_code.sh
+new file mode 100644
+index 00000000..5ba4edd5
+--- /dev/null
++++ b/usr/share/rear/layout/prepare/Linux-s390/370_confirm_dasd_format_code.sh
+@@ -0,0 +1,69 @@
++# adapted from 100_confirm_layout_code.sh
++#
++# Let the user confirm the
++# DASD format code (dasdformat.sh) script.
++#
++
++is_false "$FORMAT_DASDS" && return 0
++
++# Show the user confirmation dialog in any case but when not in migration mode
++# automatically proceed with less timeout USER_INPUT_INTERRUPT_TIMEOUT (by default 10 seconds)
++# to avoid longer delays (USER_INPUT_TIMEOUT is by default 300 seconds) in case of unattended recovery:
++# (taken from 120_confirm_wipedisk_disks.sh)
++local timeout="$USER_INPUT_TIMEOUT"
++is_true "$MIGRATION_MODE" || timeout="$USER_INPUT_INTERRUPT_TIMEOUT"
++
++rear_workflow="rear $WORKFLOW"
++original_disk_space_usage_file="$VAR_DIR/layout/config/df.txt"
++rear_shell_history="$( echo -e "cd $VAR_DIR/layout/\nvi $DASD_FORMAT_CODE\nless $DASD_FORMAT_CODE" )"
++unset choices
++choices[0]="Confirm DASD format script and continue '$rear_workflow'"
++choices[1]="Edit DASD format script ($DASD_FORMAT_CODE)"
++choices[2]="View DASD format script ($DASD_FORMAT_CODE)"
++choices[3]="View original disk space usage ($original_disk_space_usage_file)"
++choices[4]="Confirm what is currently on the DASDs, skip formatting them and continue '$rear_workflow'"
++choices[5]="Use Relax-and-Recover shell and return back to here"
++choices[6]="Abort '$rear_workflow'"
++prompt="Confirm or edit the DASD format script"
++choice=""
++wilful_input=""
++# When USER_INPUT_DASD_FORMAT_CODE_CONFIRMATION has any 'true' value be liberal in what you accept and
++# assume choices[0] 'Confirm DASD format' was actually meant:
++is_true "$USER_INPUT_DASD_FORMAT_CODE_CONFIRMATION" && USER_INPUT_DASD_FORMAT_CODE_CONFIRMATION="${choices[0]}"
++while true ; do
++    choice="$( UserInput -I DASD_FORMAT_CODE_CONFIRMATION -t "$timeout" -p "$prompt" -D "${choices[0]}" "${choices[@]}" )" && wilful_input="yes" || wilful_input="no"
++    case "$choice" in
++        (${choices[0]})
++            # Confirm DASD format file and continue:
++            is_true "$wilful_input" && LogPrint "User confirmed DASD format script" || LogPrint "Continuing '$rear_workflow' by default"
++            break
++            ;;
++        (${choices[1]})
++            # Run 'vi' with the original STDIN STDOUT and STDERR when 'rear' was launched by the user:
++            vi $DASD_FORMAT_CODE 0<&6 1>&7 2>&8
++            ;;
++        (${choices[2]})
++            # Run 'less' with the original STDIN STDOUT and STDERR when 'rear' was launched by the user:
++            less $DASD_FORMAT_CODE 0<&6 1>&7 2>&8
++            ;;
++        (${choices[3]})
++            # Run 'less' with the original STDIN STDOUT and STDERR when 'rear' was launched by the user:
++            less $original_disk_space_usage_file 0<&6 1>&7 2>&8
++            ;;
++        (${choices[4]})
++            # Confirm what is on the disks and continue without formatting
++            FORMAT_DASDS="false"
++            ;;
++        (${choices[5]})
++            # rear_shell runs 'bash' with the original STDIN STDOUT and STDERR when 'rear' was launched by the user:
++            rear_shell "" "$rear_shell_history"
++            ;;
++        (${choices[6]})
++            abort_dasd_format
++            Error "User chose to abort '$rear_workflow' in ${BASH_SOURCE[0]}"
++            ;;
++    esac
++done
++
++chmod +x $DASD_FORMAT_CODE
++
+diff --git a/usr/share/rear/layout/prepare/Linux-s390/400_run_dasd_format_code.sh b/usr/share/rear/layout/prepare/Linux-s390/400_run_dasd_format_code.sh
+new file mode 100644
+index 00000000..16451af6
+--- /dev/null
++++ b/usr/share/rear/layout/prepare/Linux-s390/400_run_dasd_format_code.sh
+@@ -0,0 +1,185 @@
++# adapted from 200_run_layout_code.sh
++#
++# Run the DASD format code (dasdformat.sh)
++# again and again until it succeeds or the user aborts.
++#
++
++# Skip DASD formatting when the user has explicitly specified to not format them
++# or when the user selected "Confirm what is currently on the DASDs, skip formatting them"
++# in 370_confirm_dasd_format_code.sh
++
++is_false "$FORMAT_DASDS" && return 0
++
++function lsdasd_output () {
++    lsdasd 1>> >( tee -a "$RUNTIME_LOGFILE" 1>&7 )
++}
++
++rear_workflow="rear $WORKFLOW"
++original_disk_space_usage_file="$VAR_DIR/layout/config/df.txt"
++rear_shell_history="$( echo -e "cd $VAR_DIR/layout/\nvi $DASD_FORMAT_CODE\nless $RUNTIME_LOGFILE" )"
++wilful_input=""
++
++unset choices
++choices[0]="Rerun DASD format script ($DASD_FORMAT_CODE)"
++choices[1]="View '$rear_workflow' log file ($RUNTIME_LOGFILE)"
++choices[2]="Edit DASD format script ($DASD_FORMAT_CODE)"
++choices[3]="Show what is currently on the disks ('lsdasd' device list)"
++choices[4]="View original disk space usage ($original_disk_space_usage_file)"
++choices[5]="Use Relax-and-Recover shell and return back to here"
++choices[6]="Confirm what is currently on the disks and continue '$rear_workflow'"
++choices[7]="Abort '$rear_workflow'"
++prompt="DASD format choices"
++
++choice=""
++# When USER_INPUT_DASD_FORMAT_CODE_RUN has any 'true' value be liberal in what you accept and
++# assume choices[0] 'Rerun DASD format script' was actually meant
++# regardless that this likely lets 'rear recover' run an endless loop
++# of failed DASD format attempts but ReaR must obey what the user specified
++# (perhaps it is intended to let 'rear recover' loop here until an admin intervenes):
++is_true "$USER_INPUT_DASD_FORMAT_CODE_RUN" && USER_INPUT_DASD_FORMAT_CODE_RUN="${choices[0]}"
++
++unset confirm_choices
++confirm_choices[0]="Confirm recreated DASD format and continue '$rear_workflow'"
++confirm_choices[1]="Go back one step to redo DASD format"
++confirm_choices[2]="Use Relax-and-Recover shell and return back to here"
++confirm_choices[3]="Abort '$rear_workflow'"
++confirm_prompt="Confirm the recreated DASD format or go back one step"
++confirm_choice=""
++# When USER_INPUT_DASD_FORMAT_MIGRATED_CONFIRMATION has any 'true' value be liberal in what you accept and
++# assume confirm_choices[0] 'Confirm recreated DASD format and continue' was actually meant:
++is_true "$USER_INPUT_DASD_FORMAT_MIGRATED_CONFIRMATION" && USER_INPUT_DASD_FORMAT_MIGRATED_CONFIRMATION="${confirm_choices[0]}"
++
++# Run the DASD format code (dasdformat.sh)
++# again and again until it succeeds or the user aborts
++# or the user confirms to continue with what is currently on the disks
++# (the user may have setup manually what he needs via the Relax-and-Recover shell):
++while true ; do
++    prompt="The DASD format had failed"
++    # After switching to recreating with DASD format script
++    # change choices[0] from "Run ..." to "Rerun ...":
++    choices[0]="Rerun DASD format script ($DASD_FORMAT_CODE)"
++    # Run DASD_FORMAT_CODE in a sub-shell because it sets 'set -e'
++    # so that it exits the running shell in case of an error
++    # but that exit must not exit this running bash here:
++    ( source $DASD_FORMAT_CODE )
++    # One must explicitly test whether or not $? is zero in a separated bash command
++    # because with bash 3.x and bash 4.x code like
++    #   # ( set -e ; cat qqq ; echo "hello" ) && echo ok || echo failed
++    #   cat: qqq: No such file or directory
++    #   hello
++    #   ok
++    # does not work as one may expect (cf. what "man bash" describes for 'set -e').
++    # There is a subtle behavioural difference between bash 3.x and bash 4.x
++    # when a script that has 'set -e' set gets sourced:
++    # With bash 3.x the 'set -e' inside the sourced script is effective:
++    #   # echo 'set -e ; cat qqq ; echo hello' >script.sh
++    #   # ( source script.sh ) && echo ok || echo failed
++    #   cat: qqq: No such file or directory
++    #   failed
++    # With bash 4.x the 'set -e' inside the sourced script gets noneffective:
++    #   # echo 'set -e ; cat qqq ; echo hello' >script.sh
++    #   # ( source script.sh ) && echo ok || echo failed
++    #   cat: qqq: No such file or directory
++    #   hello
++    #   ok
++    # With bash 3.x and bash 4.x testing $? in a separated bash command
++    # keeps the 'set -e' inside the sourced script effective:
++    #   # echo 'set -e ; cat qqq ; echo hello' >script.sh
++    #   # ( source script.sh ) ; (( $? == 0 )) && echo ok || echo failed
++    #   cat: qqq: No such file or directory
++    #   failed
++    # See also https://github.com/rear/rear/pull/1573#issuecomment-344303590
++    if (( $? == 0 )) ; then
++        prompt="DASD format had been successful"
++        # When DASD_FORMAT_CODE succeeded and when not in migration mode
++        # break the outer while loop and continue the "rear recover" workflow
++        # which means continue with restoring the backup:
++        is_true "$MIGRATION_MODE" || break
++        # When DASD_FORMAT_CODE succeeded in migration mode
++        # let the user explicitly confirm the recreated (and usually migrated) format
++        # before continuing the "rear recover" workflow with restoring the backup.
++        # Show the recreated DASD format to the user on his terminal (and also in the log file):
++        LogPrint "Recreated DASD format:"
++        lsdasd_output
++        # Run an inner while loop with a user dialog so that the user can inspect the recreated DASD format
++        # and perhaps even manually fix the recreated DASD format if it is not what the user wants
++        # (e.g. by using the Relax-and-Recover shell and returning back to this user dialog):
++        while true ; do
++            confirm_choice="$( UserInput -I DASD_FORMAT_MIGRATED_CONFIRMATION -p "$confirm_prompt" -D "${confirm_choices[0]}" "${confirm_choices[@]}" )" && wilful_input="yes" || wilful_input="no"
++            case "$confirm_choice" in
++                (${confirm_choices[0]})
++                    # Confirm recreated DASD format and continue:
++                    is_true "$wilful_input" && LogPrint "User confirmed recreated DASD format" || LogPrint "Continuing with recreated DASD format by default"
++                    # Break the outer while loop and continue with restoring the backup:
++                    break 2
++                    ;;
++                (${confirm_choices[1]})
++                    # Go back one step to redo DASD format:
++                    # Only break the inner while loop (i.e. this user dialog loop)
++                    # and  continue with the next user dialog below:
++                    break
++                    ;;
++                (${confirm_choices[2]})
++                    # rear_shell runs 'bash' with the original STDIN STDOUT and STDERR when 'rear' was launched by the user:
++                    rear_shell "" "$rear_shell_history"
++                    ;;
++                (${confirm_choices[3]})
++                    abort_dasd_format
++                    Error "User did not confirm the recreated DASD format but aborted '$rear_workflow' in ${BASH_SOURCE[0]}"
++                    ;;
++            esac
++        done
++    fi
++    # Run an inner while loop with a user dialog so that the user can fix things
++    # when DASD_FORMAT_CODE failed.
++    # Such a fix does not necessarily mean the user must change
++    # the dasdformat.sh script when DASD_FORMAT_CODE failed.
++    # The user might also fix things by only using the Relax-and-Recover shell and
++    # then confirm what is on the disks and continue with restoring the backup
++    # or abort this "rear recover" run to re-try from scratch.
++    while true ; do
++        choice="$( UserInput -I DASD_FORMAT_CODE_RUN -p "$prompt" -D "${choices[0]}" "${choices[@]}" )" && wilful_input="yes" || wilful_input="no"
++        case "$choice" in
++            (${choices[0]})
++                # Rerun or run (after switching to recreating with DASD format script) DASD format script:
++                is_true "$wilful_input" && LogPrint "User runs DASD format script" || LogPrint "Running DASD format script by default"
++                # Only break the inner while loop (i.e. the user dialog loop):
++                break
++                ;;
++            (${choices[1]})
++                # Run 'less' with the original STDIN STDOUT and STDERR when 'rear' was launched by the user:
++                less $RUNTIME_LOGFILE 0<&6 1>&7 2>&8
++                ;;
++            (${choices[2]})
++                # Run 'vi' with the original STDIN STDOUT and STDERR when 'rear' was launched by the user:
++                vi $DASD_FORMAT_CODE 0<&6 1>&7 2>&8
++                ;;
++            (${choices[3]})
++                LogPrint "This is the current list of DASDs:"
++                lsdasd_output
++                ;;
++            (${choices[4]})
++                # Run 'less' with the original STDIN STDOUT and STDERR when 'rear' was launched by the user:
++                less $original_disk_space_usage_file 0<&6 1>&7 2>&8
++                ;;
++            (${choices[5]})
++                # rear_shell runs 'bash' with the original STDIN STDOUT and STDERR when 'rear' was launched by the user:
++                rear_shell "" "$rear_shell_history"
++                ;;
++            (${choices[6]})
++                # Confirm what is on the disks and continue:
++                # Break the outer while loop and continue with restoring the backup:
++                break 2
++                ;;
++            (${choices[7]})
++                abort_dasd_format
++                Error "User chose to abort '$rear_workflow' in ${BASH_SOURCE[0]}"
++                ;;
++        esac
++    done
++# End of the outer while loop:
++done
++
++# Local functions must be 'unset' because bash does not support 'local function ...'
++# cf. https://unix.stackexchange.com/questions/104755/how-can-i-create-a-local-function-in-my-bashrc
++unset -f lsdasd_output
+diff --git a/usr/share/rear/layout/prepare/default/010_prepare_files.sh b/usr/share/rear/layout/prepare/default/010_prepare_files.sh
+index 7a980e63..4191be33 100644
+--- a/usr/share/rear/layout/prepare/default/010_prepare_files.sh
++++ b/usr/share/rear/layout/prepare/default/010_prepare_files.sh
+@@ -7,6 +7,8 @@ LAYOUT_CODE="$VAR_DIR/layout/diskrestore.sh"
+ LAYOUT_XFS_OPT_DIR="$VAR_DIR/layout/xfs"
+ LAYOUT_XFS_OPT_DIR_RESTORE="$LAYOUT_XFS_OPT_DIR/restore"
+ 
++DASD_FORMAT_CODE="$VAR_DIR/layout/dasdformat.sh"
++
+ FS_UUID_MAP="$VAR_DIR/layout/fs_uuid_mapping"
+ LUN_WWID_MAP="$VAR_DIR/layout/lun_wwid_mapping"
+ 
+diff --git a/usr/share/rear/layout/prepare/default/250_compare_disks.sh b/usr/share/rear/layout/prepare/default/250_compare_disks.sh
+index 260ab178..0931b183 100644
+--- a/usr/share/rear/layout/prepare/default/250_compare_disks.sh
++++ b/usr/share/rear/layout/prepare/default/250_compare_disks.sh
+@@ -58,7 +58,9 @@ local more_than_one_same_orig_size=''
+ while read disk dev size junk ; do
+     old_disks_and_sizes+=( "$dev $size" )
+     if IsInArray "$size" "${original_system_used_disk_sizes[@]}" ; then
+-        more_than_one_same_orig_size='true'
++        if ! has_mapping_hint "$dev" ; then
++            more_than_one_same_orig_size='true'
++        fi
+     else
+         original_system_used_disk_sizes+=( "$size" )
+     fi
+@@ -143,8 +145,8 @@ fi
+ # No further disk comparisons are needed when MIGRATION_MODE is already set true above:
+ if ! is_true "$MIGRATION_MODE" ; then
+     # Compare original disks and their possible target disk one by one:
+-    while read disk dev size junk ; do
+-        dev=$( get_sysfs_name $dev )
++    while read disk devnode size junk ; do
++        dev=$( get_sysfs_name $devnode )
+         Log "Comparing $dev"
+         if test -e "/sys/block/$dev" ; then
+             Log "Device /sys/block/$dev exists"
+@@ -156,6 +158,14 @@ if ! is_true "$MIGRATION_MODE" ; then
+                 else
+                     LogPrint "Device $dev has expected (same) size $size bytes (will be used for '$WORKFLOW')"
+                 fi
++            elif test "$( get_mapping_hint $devnode )" == "$devnode" ; then
++                Debug "Found identical mapping hint ${devnode} -> ${devnode}"
++                if is_write_protected "/sys/block/$dev"; then
++                    LogPrint "Device $dev is designated as write-protected (needs manual configuration)"
++                    MIGRATION_MODE='true'
++                else
++                    LogPrint "Device $dev found according to mapping hints (will be used for '$WORKFLOW')"
++                fi
+             else
+                 LogPrint "Device $dev has size $newsize bytes but $size bytes is expected (needs manual configuration)"
+                 MIGRATION_MODE='true'
+diff --git a/usr/share/rear/layout/prepare/default/300_map_disks.sh b/usr/share/rear/layout/prepare/default/300_map_disks.sh
+index 3353daea..d7b45a84 100644
+--- a/usr/share/rear/layout/prepare/default/300_map_disks.sh
++++ b/usr/share/rear/layout/prepare/default/300_map_disks.sh
+@@ -121,7 +121,14 @@ while read keyword orig_device orig_size junk ; do
+     # considered again during the subsequent "same size" tests:
+     excluded_target_device_names=()
+     # First, try to find if there is a current disk with same name and same size as the original:
+-    sysfs_device_name="$( get_sysfs_name "$orig_device" )"
++    # (possibly influenced by mapping hints if known)
++    if has_mapping_hint "$orig_device" ; then
++        candidate_target_device_name="$( get_mapping_hint "$orig_device" )"
++        Debug "Using mapping hint ${candidate_target_device_name} as candidate for $orig_device mapping"
++    else
++        candidate_target_device_name="$orig_device"
++    fi
++    sysfs_device_name="$( get_sysfs_name "$candidate_target_device_name" )"
+     current_device="/sys/block/$sysfs_device_name"
+     if test -e $current_device ; then
+         current_size=$( get_disk_size $sysfs_device_name )
+@@ -129,23 +136,28 @@ while read keyword orig_device orig_size junk ; do
+         # its matching actual block device (e.g. /dev/sda) must be determined:
+         preferred_target_device_name="$( get_device_name $current_device )"
+         # Use the current one if it is of same size as the old one:
+-        if test "$orig_size" -eq "$current_size" ; then
++        if has_mapping_hint "$orig_device" || test "$orig_size" -eq "$current_size" ; then
+             # Ensure the target device is really a block device on the replacement hardware.
+             # Here the target device has same name as the original device which was a block device on the original hardware
+             # but it might perhaps happen that this device name is not a block device on the replacement hardware:
+             if test -b "$preferred_target_device_name" ; then
++                if has_mapping_hint "$orig_device" ; then
++                    mapping_reason="determined by mapping hint"
++                else
++                    mapping_reason="same name and same size $current_size"
++                fi
+                 # Do not map if the current one is already used as target in the mapping file:
+                 if is_mapping_target "$preferred_target_device_name" ; then
+-                    DebugPrint "Cannot use $preferred_target_device_name (same name and same size) for recreating $orig_device ($preferred_target_device_name already exists as target in $MAPPING_FILE)"
++                    DebugPrint "Cannot use $preferred_target_device_name ($mapping_reason) for recreating $orig_device ($preferred_target_device_name already exists as target in $MAPPING_FILE)"
+                     excluded_target_device_names+=( "$preferred_target_device_name" )
+                 else
+                     # Ensure the determined target device is not write-protected:
+                     if is_write_protected "$preferred_target_device_name" ; then
+-                        DebugPrint "Cannot use $preferred_target_device_name (same name and same size) for recreating $orig_device ($preferred_target_device_name is write-protected)"
++                        DebugPrint "Cannot use $preferred_target_device_name ($mapping_reason) for recreating $orig_device ($preferred_target_device_name is write-protected)"
+                         excluded_target_device_names+=( "$preferred_target_device_name" )
+                     else
+                         add_mapping "$orig_device" "$preferred_target_device_name"
+-                        LogPrint "Using $preferred_target_device_name (same name and same size $current_size) for recreating $orig_device"
++                        LogPrint "Using $preferred_target_device_name ($mapping_reason) for recreating $orig_device"
+                         # Continue with next original device because the current one is now mapped:
+                         continue
+                     fi
+diff --git a/usr/share/rear/layout/save/GNU/Linux/200_partition_layout.sh b/usr/share/rear/layout/save/GNU/Linux/200_partition_layout.sh
+index 52a4b142..a3e21c48 100644
+--- a/usr/share/rear/layout/save/GNU/Linux/200_partition_layout.sh
++++ b/usr/share/rear/layout/save/GNU/Linux/200_partition_layout.sh
+@@ -377,18 +377,27 @@ Log "Saving disks and their partitions"
+ 
+             if [[ $blockd == dasd* && "$ARCH" == "Linux-s390" ]] ; then
+                 devname=$(get_device_name $disk)
++                dasdnum=$( lsdasd | awk "\$3 == \"$blockd\" { print \$1}" )
++                dasdstatus=$( lsdasd | awk "\$3 == \"$blockd\" { print \$2}" )
++                # ECKD or FBA
++                dasdtype=$( lsdasd | awk "\$3 == \"$blockd\" { print \$5}" )
++                if [ "$dasdtype" != ECKD ] && [ "$dasdtype" != FBA ]; then
++                    LogPrint "Type $dasdtype of DASD $blockd unexpected: neither ECKD nor FBA"
++                fi
+ 
+-                echo "# active dasd bus and channel"
+-                echo "# bus-id <name device> type"
+-                echo "dasd_channel $( lsdasd|grep $blockd|awk '{ print $1 " "  $2 " "  $3 " "  $4}' )"
+-
+-                echo "# dasdfmt - disk layout is either cdl for the compatible disk layout (default) or ldl"
+-                echo "#  example usage: dasdfmt -b 4096 -d cdl -y /dev/dasda"
+-                layout=$(dasdview -x  /dev/$blockd|grep "^format"|awk '{print $7}')
+-                blocksize=$( dasdview -i  /dev/$blockd|grep blocksize|awk '{print $6}' )
+-                echo "# dasdfmt $devname"
+-                echo "# dasdfmt -b <blocksize> -d <layout> -y <devname>"
+-                echo "dasdfmt -b $blocksize -d $layout -y $devname"
++                echo "# every DASD bus and channel"
++                echo "# Format: dasd_channel <bus-id> <device name>"
++                echo "dasd_channel $dasdnum $blockd"
++
++                # We need to print the dasd_channel line even for ignored devices,
++                # otherwise we could have naming gaps and naming would change when
++                # recreating layout.
++                # E.g. if dasda is ignored, and dasdb is not, we would create only dasdb
++                # during recreation, but it would be named dasda.
++                if [ "$dasdstatus" != active ]; then
++                    Log "Ignoring $blockd: it is not active (Status is $dasdstatus)"
++                    continue
++                fi
+             fi
+ 
+             #FIXME: exclude *rpmb (Replay Protected Memory Block) for nvme*, mmcblk* and uas
+@@ -412,11 +421,38 @@ Log "Saving disks and their partitions"
+                 # which can happen when /dev/sdX is an empty SD card slot without medium,
+                 # see https://github.com/rear/rear/issues/2810
+                 test $disktype || LogPrintError "No partition label type for 'disk $devname' (may cause 'rear recover' failure)"
+-
+-                echo "# Disk $devname"
+-                echo "# Format: disk <devname> <size(bytes)> <partition label type>"
+-                echo "disk $devname $devsize $disktype"
+-
++                if [ "$disktype" != "dasd" ]; then
++                    echo "# Disk $devname"
++                    echo "# Format: disk <devname> <size(bytes)> <partition label type>"
++                    echo "disk $devname $devsize $disktype"
++                elif [[ $blockd == dasd* && "$ARCH" == "Linux-s390" ]] ; then
++                    layout=$(dasdview -x $devname |grep "^format"|awk '{print $7}')
++                    case "$layout" in
++                        (NOT)
++                            # NOT -> dasdview has printed "NOT formatted"
++                            LogPrintError "Ignoring $blockd: it is not formatted"
++                            continue
++                            ;;
++                        (LDL|CDL)
++                            ;;
++                        (*)
++                            BugError "Invalid 'disk $devname' entry (unknown DASD layout $layout)"
++                            ;;
++                    esac
++                    test $disktype || Error "No partition label type for DASD entry 'disk $devname'"
++                    blocksize=$( get_block_size "$blockd" )
++                    if ! test $blocksize ; then
++                        # fallback - ugly method
++                        blocksize=$( dasdview -i $devname |grep blocksize|awk '{print $6}' )
++                        test $blocksize || Error "Unknown block size of DASD $devname"
++                    fi
++                    dasdcyls=$( get_dasd_cylinders "$blockd" )
++                    echo "# Disk $devname"
++                    echo "# Format: disk <devname> <size(bytes)> <partition label type> <logical block size> <DASD layout> <DASD type> <size(cylinders)>"
++                    echo "disk $devname $devsize $disktype $blocksize $layout $dasdtype $dasdcyls"
++                else
++                    Error "Invalid 'disk $devname' entry (DASD partition label on non-s390 arch $ARCH)"
++                fi
+                 echo "# Partitions on $devname"
+                 echo "# Format: part <device> <partition size(bytes)> <partition start(bytes)> <partition type|name> <flags> /dev/<partition>"
+                 extract_partitions "$devname"
+diff --git a/usr/share/rear/lib/layout-functions.sh b/usr/share/rear/lib/layout-functions.sh
+index cb33ac28..6dd43313 100644
+--- a/usr/share/rear/lib/layout-functions.sh
++++ b/usr/share/rear/lib/layout-functions.sh
+@@ -87,6 +87,12 @@ abort_recreate() {
+     restore_original_file "$LAYOUT_FILE"
+ }
+ 
++abort_dasd_format() {
++    Log "Error detected during DASD formatting."
++    Log "Restoring saved original $DASD_FORMAT_FILE"
++    restore_original_file "$DASD_FORMAT_FILE"
++}
++
+ # Test and log if a component $1 (type $2) needs to be recreated.
+ create_component() {
+     local device="$1"
+@@ -734,6 +740,46 @@ get_block_size() {
+     fi
+ }
+ 
++# Get the number of cylinders of a DASD.
++# The number of cylinders has the advantage of being fixed - size depends on formatting
++# and number of cylinders is valid even for unformatted DASDs, size is not.
++get_dasd_cylinders() {
++    local disk_name="${1##*/}" # /some/path/dasda -> dasda
++    local dasd_cyls
++
++    dasd_cyls=$(dasdview -i /dev/$disk_name | grep cylinders | cut -d ':' -f2 | awk '{print $4}')
++    ### Make sure we always return a number
++    echo $(( dasd_cyls ))
++}
++
++# Sometimes we know what the new device for the original device should be in a more reliable way
++# than by looking at disk sizes. THis information is called "mapping hints". Let's pass them
++# to the mapping code using the DISK_MAPPING_HINTS array. Each element of the array has the form
++# "/dev/source /dev/target" (space-separated).
++
++# Output the mapping hint for the original device.
++function get_mapping_hint () {
++    local device="$1"
++    local hint mapping_hint_source mapping_hint_target
++
++    for hint in "${DISK_MAPPING_HINTS[@]}"; do
++        mapping_hint_source=${hint%% *}
++        mapping_hint_target=${hint##* }
++        if [ "${device}" == "${mapping_hint_source}" ] ; then
++            echo "$mapping_hint_target"
++            return 0
++        fi
++    done
++    return 1
++}
++
++# Determine if there is a mapping hint for the original device.
++function has_mapping_hint () {
++    local device="$1"
++
++    get_mapping_hint "$device" > /dev/null
++}
++
+ # Get the UUID of a device.
+ # Device is something like /dev/sda1.
+ blkid_uuid_of_device() {

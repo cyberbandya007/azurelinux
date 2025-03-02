@@ -6,14 +6,15 @@
 %endif
 
 Name:           perl-YAML-Syck
-Version:        1.32
-Release:        2%{?dist}
+Version:        1.34
+Release:        14%{?dist}
 Summary:        Fast, lightweight YAML loader and dumper
-License:        BSD and MIT
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
+# gram.*: GPL-2.0-or-later
+# *:      MIT
+# Note that libsyck COPYING file describes itself as BSD but it's actually MIT
+License:        GPL-2.0-or-later AND MIT
 URL:            https://metacpan.org/release/YAML-Syck
-Source0:        https://cpan.metacpan.org/modules/by-module/YAML/YAML-Syck-%{version}.tar.gz#/perl-YAML-Syck-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/modules/by-module/YAML/YAML-Syck-%{version}.tar.gz
 # Module Build
 BuildRequires:  coreutils
 BuildRequires:  findutils
@@ -55,7 +56,7 @@ BuildRequires:  perl(JSON)
 BuildRequires:  perl(Symbol)
 %endif
 # Dependencies
-Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
+# (none)
 
 # Avoid provides for private perl objects
 %{?perl_default_filter}
@@ -67,9 +68,6 @@ structures to YAML strings, and the other way around.
 
 %prep
 %setup -q -n YAML-Syck-%{version}
-
-# Unbundle core and unused modules
-rm -rvf inc/{Module,Scalar,Test}
 
 %build
 perl Makefile.PL INSTALLDIRS=vendor OPTIMIZE="%{optflags} -DI_STDLIB=1 -DI_STRING=1"
@@ -94,8 +92,60 @@ make test
 %{_mandir}/man3/YAML::Syck.3*
 
 %changelog
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.32-2
-- Initial CBL-Mariner import from Fedora 31 (license: MIT).
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.34-14
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Mon Jun 10 2024 Jitka Plesnikova <jplesnik@redhat.com> - 1.34-13
+- Perl 5.40 rebuild
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.34-12
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.34-11
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.34-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Tue Jul 11 2023 Jitka Plesnikova <jplesnik@redhat.com> - 1.34-9
+- Perl 5.38 rebuild
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.34-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.34-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.34-6
+- Perl 5.36 rebuild
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.34-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Fri Jul 23 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.34-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 1.34-3
+- Perl 5.34 rebuild
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.34-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Oct 27 2020 Paul Howarth <paul@city-fan.org> - 1.34-1
+- Update to 1.34
+  - Fix memory corruption (GH#44, GH#48)
+  - Fix for handling circular aliases (GH#52, GH#53)
+  - Unconditionally include stdlib.h in syck.h (GH#56)
+  - Switch changelog to a more parsable format
+  - Update github CI to use a cpanfile
+  - Update Devel::PPPort to 3.62
+  - Stop depending on constants dropped from Perl 5.28 (GH#50)
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.32-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 1.32-2
+- Perl 5.32 rebuild
 
 * Tue Jan 28 2020 Paul Howarth <paul@city-fan.org> - 1.32-1
 - Update to 1.32

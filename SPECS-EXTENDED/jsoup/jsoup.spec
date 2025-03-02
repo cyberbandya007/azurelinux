@@ -7,7 +7,7 @@ Summary:        Java library for working with real-world HTML
 License:        MIT
 URL:            https://jsoup.org/
 BuildArch:      noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 
 # ./generate-tarball.sh
 Source0:        %{name}-%{version}.tar.gz

@@ -1,62 +1,60 @@
-Summary:        Low-level interface to lzma compression library
-Name:           perl-Compress-Raw-Lzma
-Version:        2.101
-Release:        4%{?dist}
-License:        GPL+ OR Artistic
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
-URL:            https://metacpan.org/release/Compress-Raw-Lzma
-Source0:        https://cpan.metacpan.org/modules/by-module/Compress/Compress-Raw-Lzma-%{version}.tar.gz
-Source1:        LICENSE.PTR
+# Perform optional tests
+%bcond_without perl_Compress_Raw_Lzma_enables_optional_test
 
+Name:		perl-Compress-Raw-Lzma
+Version:	2.212
+Release:	5%{?dist}
+Summary:	Low-level interface to lzma compression library
+License:	GPL-1.0-or-later OR Artistic-1.0-Perl
+URL:		https://metacpan.org/release/Compress-Raw-Lzma
+Source0:	https://cpan.metacpan.org/modules/by-module/Compress/Compress-Raw-Lzma-%{version}.tar.gz
 # Module Build
-BuildRequires:  coreutils
-BuildRequires:  findutils
-BuildRequires:  gcc
-BuildRequires:  make
-BuildRequires:  perl-devel
-BuildRequires:  perl-generators
-BuildRequires:  perl-interpreter
-BuildRequires:  xz-devel
-BuildRequires:  perl(Config)
-BuildRequires:  perl(ExtUtils::Constant)
-BuildRequires:  perl(ExtUtils::MakeMaker) >= 6.76
-BuildRequires:  perl(File::Copy)
-BuildRequires:  perl(File::Spec::Functions)
-BuildRequires:  perl(FindBin)
-BuildRequires:  perl(lib)
-BuildRequires:  perl(Module::CoreList)
-
+BuildRequires:	coreutils
+BuildRequires:	findutils
+BuildRequires:	gcc
+BuildRequires:	make
+BuildRequires:	perl-devel
+BuildRequires:	perl-generators
+BuildRequires:	perl-interpreter
+BuildRequires:	perl(Config)
+BuildRequires:	perl(ExtUtils::Constant)
+BuildRequires:	perl(ExtUtils::MakeMaker) >= 6.76
+BuildRequires:	perl(File::Copy)
+BuildRequires:	perl(File::Spec::Functions)
+BuildRequires:	perl(lib)
+BuildRequires:	xz-devel
 # Module Runtime
-BuildRequires:  perl(AutoLoader)
-BuildRequires:  perl(Carp)
-BuildRequires:  perl(Exporter)
-BuildRequires:  perl(Scalar::Util)
-BuildRequires:  perl(UNIVERSAL)
-BuildRequires:  perl(XSLoader)
-BuildRequires:  perl(bytes)
-BuildRequires:  perl(constant)
-BuildRequires:  perl(strict)
-BuildRequires:  perl(warnings)
-
-%if 0%{?with_check}
+BuildRequires:	perl(AutoLoader)
+BuildRequires:	perl(bytes)
+BuildRequires:	perl(Carp)
+BuildRequires:	perl(constant)
+BuildRequires:	perl(Exporter)
+BuildRequires:	perl(Scalar::Util)
+BuildRequires:	perl(strict)
+BuildRequires:	perl(UNIVERSAL)
+BuildRequires:	perl(warnings)
+BuildRequires:	perl(XSLoader)
 # Test Suite
-BuildRequires:  perl(File::Path)
-BuildRequires:  perl(Test::More)
-
+BuildRequires:	perl(File::Path)
+BuildRequires:	perl(Test::More)
+%if %{with perl_Compress_Raw_Lzma_enables_optional_test}
 # Optional Tests
-BuildRequires:  xz
-BuildRequires:  perl(Test::CPAN::Meta)
-BuildRequires:  perl(Test::CPAN::Meta::JSON)
-BuildRequires:  perl(Test::NoWarnings)
-BuildRequires:  perl(Test::Pod) >= 1.00
+BuildRequires:	perl(Test::CPAN::Meta)
+BuildRequires:	perl(Test::CPAN::Meta::JSON)
+BuildRequires:	perl(Test::NoWarnings)
+BuildRequires:	perl(Test::Pod) >= 1.00
+BuildRequires:	xz
 %endif
-
+# Dependencies
+Requires:	perl(XSLoader)
 # Built-against version is embedded in module, so we have a strict version dependency
-Requires:       xz-libs%{?_isa} = %((pkg-config --modversion liblzma 2>/dev/null || echo 0) | tr -dc '[0-9.]')
-# Runtime
-Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
-Requires:       perl(XSLoader)
+%if 0%{?fedora} < 40 && 0%{?rhel} < 10
+%global xz_epoch %{nil}
+%else
+%global xz_epoch 1:
+%endif
+Requires:	xz-libs%{?_isa} = %{xz_epoch}%((pkg-config --modversion liblzma 2>/dev/null || echo 0) | tr -dc '[0-9.]')
+
 # Don't "provide" private Perl libs
 %{?perl_default_filter}
 
@@ -77,29 +75,147 @@ perl Makefile.PL \
   NO_PACKLIST=1 \
   NO_PERLLOCAL=1 \
   OPTIMIZE="%{optflags}"
-%make_build
+%{make_build}
 
 %install
-%make_install
+%{make_install}
 find %{buildroot} -type f -name '*.bs' -empty -delete
 %{_fixperms} -c %{buildroot}
 
-cp %{SOURCE1} .
-
 %check
-%make_build test
+make test
 
 %files
-%license LICENSE.PTR
 %doc Changes README
 %{perl_vendorarch}/auto/Compress/
 %{perl_vendorarch}/Compress/
 %{_mandir}/man3/Compress::Raw::Lzma.3*
 
 %changelog
-* Wed Jan 19 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 2.101-4
-- Initial CBL-Mariner import from Fedora 36 (license: MIT).
-- License verified.
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.212-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Thu Jun 20 2024 Yaakov Selkowitz <yselkowi@redhat.com> - 2.212-4
+- Rebuild against xz 5.6.2
+
+* Thu Jun 20 2024 Richard W.M. Jones <rjones@redhat.com> - 2.212-3
+- Rebuild against xz 5.6.2
+
+* Mon Jun 10 2024 Jitka Plesnikova <jplesnik@redhat.com> - 2.212-2
+- Perl 5.40 rebuild
+
+* Sun Apr 28 2024 Paul Howarth <paul@city-fan.org> - 2.212-1
+- Update to 2.212
+  - Remove 5.6.0 and 5.6.1 from workflow (GH#12)
+
+* Sun Apr  7 2024 Paul Howarth <paul@city-fan.org> - 2.211-1
+- Update to 2.211 (no changes)
+
+* Thu Mar 28 2024 Richard W.M. Jones <rjones@redhat.com> - 2.209-8
+- Rebuild against xz 5.4.6
+
+* Wed Mar 13 2024 Yaakov Selkowitz <yselkowi@redhat.com> - 2.209-6
+- Re-rebuild against xz 5.6.1 for ELN
+  (https://github.com/fedora-eln/eln/issues/182)
+
+* Sat Mar 09 2024 Richard W.M. Jones <rjones@redhat.com> - 2.209-5
+- Rebuild against xz 5.6.1 (RHBZ#2267598)
+
+* Mon Mar 04 2024 Adam Williamson <awilliam@redhat.com> - 2.209-4
+- Rebuild with no changes for F40 update shenanigans
+
+* Thu Feb 29 2024 Adam Williamson <awilliam@redhat.com> - 2.209-3
+- Really rebuild against xz 5.6.0, on a side tag
+
+* Tue Feb 27 2024 Jindrich Novy <jnovy@redhat.com> - 2.209-2
+- Rebuild against xz 5.6.0
+
+* Wed Feb 21 2024 Paul Howarth <paul@city-fan.org> - 2.209-1
+- Update to 2.209
+  - Fix for READMEmd target
+  - Raise skip count in t/001version.t (GH#11)
+
+* Mon Jan 29 2024 Richard W.M. Jones <rjones@redhat.com> - 2.206-6
+- Rebuild against xz 5.4.6 (RHBZ#2260521)
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.206-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.206-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Wed Nov 01 2023 Richard W.M. Jones <rjones@redhat.com> - 2.206-3
+- Rebuild against xz 5.4.5 (RHBZ#2247487)
+
+* Wed Aug 02 2023 Richard W.M. Jones <rjones@redhat.com> - 2.206-2
+- Rebuild against xz 5.4.4 (RHBZ#2228542)
+
+* Wed Jul 26 2023 Paul Howarth <paul@city-fan.org> - 2.206-1
+- Update to 2.206
+  - Drop rt.cpan.org from SUPPORT section
+  - Add instructions to deal with build failure on Ubuntu/Debian (GH#7)
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.205-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Mon Jul 17 2023 Paul Howarth <paul@city-fan.org> - 2.205-1
+- Update to 2.205
+  - Test::More isn't warns in Perl 5.38
+  - Add perl 5.38 to CI matrix
+  - Add on workflow_dispatch
+  - Update action/checkout version
+
+* Tue Jul 11 2023 Jitka Plesnikova <jplesnik@redhat.com> - 2.204-7
+- Perl 5.38 rebuild
+
+* Thu May 04 2023 Richard W.M. Jones <rjones@redhat.com> - 2.204-6
+- Rebuild against xz-5.4.3-1.fc39
+
+* Thu Apr 27 2023 Yaakov Selkowitz <yselkowi@redhat.com> - 2.204-5
+- Rebuild against the new xz in ELN
+
+* Mon Apr 17 2023 Adam Williamson <awilliam@redhat.com> - 2.204-4
+- Really rebuild against the new xz this time
+
+* Mon Apr 17 2023 Adam Williamson <awilliam@redhat.com> - 2.204-3
+- Rebuild for new xz
+
+* Thu Feb  9 2023 Paul Howarth <paul@city-fan.org> - 2.204-2
+- Update for disttag
+
+* Thu Feb  9 2023 Paul Howarth <paul@city-fan.org> - 2.204-1
+- Update to 2.204
+  - Use GIMME_V instead of GIMME
+
+* Mon Jan 23 2023 Paul Howarth <paul@city-fan.org> - 2.201-7
+- Rebuild against xz-5.4.1
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.201-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Dec 01 2022 Jitka Plesnikova <jplesnik@redhat.com> - 2.201-5
+- Rebuild against xz-5.2.9
+
+* Wed Oct 12 2022 Stephen Gallagher <sgallagh@redhat.com> - 2.201-4
+- Rebuild against xz-5.2.7
+
+* Wed Aug 31 2022 Petr Pisar <ppisar@redhat.com> - 2.201-3
+- Rebuild against xz-5.2.6
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.201-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Sat Jun 25 2022 Paul Howarth <paul@city-fan.org> - 2.201-1
+ Update to 2.201 (no functional changes)
+
+* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 2.103-2
+- Perl 5.36 rebuild
+
+* Mon Apr  4 2022 Paul Howarth <paul@city-fan.org> - 2.103-1
+- Update to 2.103 (no changes)
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.101-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
 
 * Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.101-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild

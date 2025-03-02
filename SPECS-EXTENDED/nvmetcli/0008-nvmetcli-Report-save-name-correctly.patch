@@ -1,0 +1,50 @@
+From fd09200bba73011b4b7086c96e394ce875fdd38f Mon Sep 17 00:00:00 2001
+From: Tony Asleson <tasleson@redhat.com>
+Date: Thu, 26 Mar 2020 13:07:50 -0500
+Subject: [PATCH 08/12] nvmetcli: Report save name correctly
+
+When a user simply does 'nvmetcli restore' without
+specifying a file name the default is used.  However, if the
+restore fails you end up with the error message:
+
+Error processing config file at None, error [Errno 1] Operation not
+permitted: '/sys/kernel/config/nvmet/ports/0/ana_groups/1', exiting
+
+Correct file name if None in error path.
+
+Error processing config file at /etc/nvmet/config.json, error \
+[Errno 1] Operation not permitted: \
+'/sys/kernel/config/nvmet/ports/1/ana_groups/1', exiting
+
+Signed-off-by: Tony Asleson <tasleson@redhat.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ nvmet/__init__.py | 3 ++-
+ nvmetcli          | 3 +++
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/nvmet/__init__.py b/nvmet/__init__.py
+index ca05de4..cf172bd 100644
+--- a/nvmet/__init__.py
++++ b/nvmet/__init__.py
+@@ -1 +1,2 @@
+-from .nvme import Root, Subsystem, Namespace, Port, Host, Referral, ANAGroup
++from .nvme import Root, Subsystem, Namespace, Port, Host, Referral, ANAGroup,\
++    DEFAULT_SAVE_FILE
+diff --git a/nvmetcli b/nvmetcli
+index a646232..8ee8590 100755
+--- a/nvmetcli
++++ b/nvmetcli
+@@ -680,6 +680,9 @@ def restore(from_file):
+     try:
+         errors = nvme.Root().restore_from_file(from_file)
+     except IOError as e:
++        if not from_file:
++            from_file = nvme.DEFAULT_SAVE_FILE
++
+         if e.errno == errno.ENOENT:
+             # Not an error if the restore file is not present
+             print("No saved config file at %s, ok, exiting" % from_file)
+-- 
+2.29.2
+

@@ -19,7 +19,7 @@ Source6:        generate-tarball.sh
 Patch0:         xalan-j2-noxsltcdeps.patch
 
 BuildArch:      noarch
-ExclusiveArch:  %{java_arches} noarch
+#ExclusiveArch:  %{java_arches} noarch
 
 BuildRequires:  javapackages-local
 BuildRequires:  ant

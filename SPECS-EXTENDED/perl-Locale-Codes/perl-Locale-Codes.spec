@@ -1,12 +1,10 @@
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 Name:           perl-Locale-Codes
-Version:        3.66
-Release:        4%{?dist}
+Version:        3.79
+Release:        2%{?dist}
 Summary:        Distribution of modules to handle locale codes
-License:        GPL+ or Artistic
+License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/Locale-Codes
-Source0:        https://cpan.metacpan.org/authors/id/S/SB/SBECK/Locale-Codes-%{version}.tar.gz#/perl-Locale-Codes-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/S/SB/SBECK/Locale-Codes-%{version}.tar.gz
 BuildArch:      noarch
 BuildRequires:  coreutils
 BuildRequires:  make
@@ -19,22 +17,22 @@ BuildRequires:  perl(warnings)
 BuildRequires:  perl(:VERSION) >= 5.6
 BuildRequires:  perl(Carp)
 BuildRequires:  perl(constant)
-# deprecate not used on perl < 5.27.7
+BuildRequires:  perl(deprecate)
 BuildRequires:  perl(Exporter)
 BuildRequires:  perl(if)
 BuildRequires:  perl(utf8)
 # Tests:
 # Release tests are deleted
-BuildRequires:  perl(deprecate)
 BuildRequires:  perl(Test::Inter) >= 1.09
-Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
-# deprecate not used on perl < 5.27.7
+Requires:       perl(deprecate)
 
 # Filter dependencies on private modules, they are not provided. Generator:
 # for F in $(find lib -type f); do perl -e '$/ = undef; $_ = <>; if (/^package #\R([\w:]*);/m) { print qq{|^perl\\\\($1\\\\)} }' "$F"; done
 %global __requires_exclude %{?__requires_exclude:%__requires_exclude|}^perl\\(Locale::Codes::Country_Retired\\)|^perl\\(Locale::Codes::LangFam_Retired\\)|^perl\\(Locale::Codes::Script_Retired\\)|^perl\\(Locale::Codes::LangExt_Codes\\)|^perl\\(Locale::Codes::LangFam_Codes\\)|^perl\\(Locale::Codes::Script_Codes\\)|^perl\\(Locale::Codes::Language_Codes\\)|^perl\\(Locale::Codes::LangExt_Retired\\)|^perl\\(Locale::Codes::Currency_Codes\\)|^perl\\(Locale::Codes::LangVar_Retired\\)|^perl\\(Locale::Codes::Language_Retired\\)|^perl\\(Locale::Codes::Country_Codes\\)|^perl\\(Locale::Codes::LangVar_Codes\\)|^perl\\(Locale::Codes::Currency_Retired\\)
 # Filter dependencies on test subscripts
 %global __requires_exclude %{?__requires_exclude:%__requires_exclude|}^perl\\(do_tests\\.pl\\)
+# Filter underspecified dependencies
+%global __requires_exclude %{?__requires_exclude:%__requires_exclude|}^perl\\(Test::Inter\\)$
 
 %description
 Locale-Codes is a distribution containing a set of modules. The modules
@@ -43,11 +41,12 @@ including languages, countries, currency, etc.
 
 %package tests
 Summary:        Tests for %{name}
-Requires:       %{name} = %{version}-%{release}
+Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       perl-Test-Harness
+Requires:       perl(Test::Inter) >= 1.09
 
 %description tests
-Tests from %{name}-%{version}. Execute them
+Tests from %{name}. Execute them
 with "%{_libexecdir}/%{name}/test".
 
 %prep
@@ -67,17 +66,17 @@ perl Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1 NO_PERLLOCAL=1
 
 %install
 %{make_install}
-mkdir -p %{buildroot}/%{_libexecdir}/%{name}
-cp -a t %{buildroot}/%{_libexecdir}/%{name}
-cat > %{buildroot}/%{_libexecdir}/%{name}/test << 'EOF'
+%{_fixperms} %{buildroot}/*
+mkdir -p %{buildroot}%{_libexecdir}/%{name}
+cp -a t %{buildroot}%{_libexecdir}/%{name}
+cat > %{buildroot}%{_libexecdir}/%{name}/test << 'EOF'
 #!/usr/bin/sh
 cd %{_libexecdir}/%{name} && exec prove -j $(getconf _NPROCESSORS_ONLN)
 EOF
-chmod +x %{buildroot}/%{_libexecdir}/%{name}/test
-%{_fixperms} %{buildroot}/*
+chmod +x %{buildroot}%{_libexecdir}/%{name}/test
 
 %check
-unset RELEASE_TESTING
+export HARNESS_OPTIONS=j$(perl -e 'if ($ARGV[0] =~ /.*-j([0-9][0-9]*).*/) {print $1} else {print 1}' -- '%{?_smp_mflags}')
 make test
 
 %files
@@ -90,15 +89,80 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
-* Fri Apr 22 2022 Muhammad Falak <mwani@microsoft.com> - 3.66-4
-- Add an explicit BR on `perl(deprecate)` to enable ptest
-- License verified
+* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.79-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
-* Mon Nov 01 2021 Muhammad Falak <mwani@microsoft.com> - 3.66-3
-- Remove epoch
+* Mon Jun 03 2024 Michal Josef Špaček <mspacek@redhat.com> - 3.79-1
+- 3.79 bump
 
-* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 3.66-2
-- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+* Fri Mar 08 2024 Michal Josef Špaček <mspacek@redhat.com> - 3.78-1
+- 3.78 bump
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.77-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.77-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Tue Dec 05 2023 Michal Josef Špaček <mspacek@redhat.com> - 3.77-1
+- 3.77 bump
+
+* Tue Sep 05 2023 Michal Josef Špaček <mspacek@redhat.com> - 3.76-1
+- 3.76 bump
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.74-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Thu Jun 08 2023 Michal Josef Špaček <mspacek@redhat.com> - 3.74-1
+- 3.74 bump
+
+* Mon Mar 06 2023 Michal Josef Špaček <mspacek@redhat.com> - 3.73-1
+- 3.73 bump
+
+* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.72-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Mon Dec 05 2022 Michal Josef Špaček <mspacek@redhat.com> - 3.72-2
+- Update license to SPDX format
+
+* Fri Sep 02 2022 Michal Josef Špaček <mspacek@redhat.com> - 3.72-1
+- 3.72 bump
+
+* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.71-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Fri Jun 03 2022 Jitka Plesnikova <jplesnik@redhat.com> - 3.71-2
+- Perl 5.36 re-rebuild of bootstrapped packages
+
+* Thu Jun 02 2022 Michal Josef Špaček <mspacek@redhat.com> - 3.71-1
+- 3.71 bump
+
+* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 3.70-2
+- Perl 5.36 rebuild
+
+* Thu Mar 03 2022 Michal Josef Špaček <mspacek@redhat.com> - 3.70-1
+- 3.70 bump
+
+* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.69-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Wed Jan 05 2022 Michal Josef Špaček <mspacek@redhat.com> - 3.69-1
+- 3.69 bump
+
+* Mon Sep 06 2021 Michal Josef Špaček <mspacek@redhat.com> - 3.68-1
+- 3.68 bump
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.67-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 3.67-2
+- Perl 5.34 rebuild
+
+* Tue Mar 02 2021 Petr Pisar <ppisar@redhat.com> - 3.67-1
+- 3.67 bump
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.66-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
 * Tue Dec 01 2020 Jitka Plesnikova <jplesnik@redhat.com> - 3.66-1
 - 3.66 bump
@@ -106,11 +170,20 @@ make test
 * Wed Sep 02 2020 Petr Pisar <ppisar@redhat.com> - 3.65-1
 - 3.65 bump
 
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 3.64-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 3.64-2
+- Perl 5.32 rebuild
+
 * Wed Jun 03 2020 Petr Pisar <ppisar@redhat.com> - 3.64-1
 - 3.64 bump
 
 * Wed Mar 04 2020 Jitka Plesnikova <jplesnik@redhat.com> - 3.63-1
 - 3.63 bump
+
+* Tue Mar 03 2020 Petr Pisar <ppisar@redhat.com> - 3.62-3
+- depracate module is used on current perl
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 3.62-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

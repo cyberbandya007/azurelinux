@@ -1,83 +1,54 @@
-%global device_sniffer 0
-%global docs 0
-%global manpages 0
-Summary:        Resource discovery and announcement over SSDP
-Name:           gssdp
-Version:        1.6.2
-Release:        3%{?dist}
-License:        LGPLv2+
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
-URL:            https://www.gupnp.org/
-Source0:        https://github.com/GNOME/%{name}/archive/refs/tags/%{name}-%{version}.tar.gz
-BuildRequires:  pkgconfig(gio-2.0)
-%if %{with device_sniffer}
-BuildRequires:  pkgconfig(gtk4)
-%endif
-BuildRequires:  pkgconfig(libsoup-3.0)
-%if %{with docs}
-BuildRequires:  gi-docgen
-%endif
-BuildRequires:  gobject-introspection-devel >= 1.36
-BuildRequires:  meson
-BuildRequires:  vala >= 0.20
-%if %{with manpages}
-BuildRequires:  %{_bindir}/pandoc
-%endif
+Name:          gssdp
+Version:       1.6.3
+Release:       3%{?dist}
+Summary:       Resource discovery and announcement over SSDP
+
+License:       LGPLv2+
+URL:           http://www.gupnp.org/
+Source0:       https://download.gnome.org/sources/%{name}/1.6/%{name}-%{version}.tar.xz
+
+BuildRequires: pkgconfig(gio-2.0)
+BuildRequires: pkgconfig(gtk4)
+BuildRequires: pkgconfig(libsoup-3.0)
+BuildRequires: gi-docgen
+BuildRequires: gobject-introspection-devel >= 1.36
+BuildRequires: meson
+BuildRequires: vala >= 0.20
+BuildRequires: /usr/bin/pandoc
 
 %description
-GSSDP implements resource discovery and announcement over SSDP and is part
-of gUPnP.  GUPnP is an object-oriented open source framework for creating
-UPnP devices and control points, written in C using GObject and libsoup. The
+GSSDP implements resource discovery and announcement over SSDP and is part 
+of gUPnP.  GUPnP is an object-oriented open source framework for creating 
+UPnP devices and control points, written in C using GObject and libsoup. The 
 GUPnP API is intended to be easy to use, efficient and flexible.
 
 %package devel
-Summary:        Development package for gssdp
-Requires:       %{name}%{?_isa} = %{version}-%{release}
+Summary: Development package for gssdp
+Requires: %{name}%{?_isa} = %{version}-%{release}
 
 %description devel
 Files for development with gssdp.
 
-%if %{with device_sniffer}
 %package utils
-Summary:        Various GUI utuls for %{name}
-Requires:       %{name}%{?_isa} = %{version}-%{release}
+Summary: Various GUI utuls for %{name}
+Requires: %{name}%{?_isa} = %{version}-%{release}
 
 %description utils
 This package contains GUI utilies for %{name}.
-%endif
 
-%if %{with docs}
 %package docs
-Summary:        Documentation files for %{name}
-Requires:       %{name} = %{version}-%{release}
-BuildArch:      noarch
+Summary: Documentation files for %{name}
+Requires: %{name} = %{version}-%{release}
+BuildArch: noarch
 
 %description docs
 This package contains developer documentation for %{name}.
-%endif
 
 %prep
-%autosetup -p1 -n %{name}-%{name}-%{version}
+%autosetup -p1
 
 %build
-%meson \
-%if %{with docs}
-       -Dgtk_doc=true \
-%else
-       -Dgtk_doc=false \
-%endif
-%if %{with manpages}
-       -Dmanpages=true \
-%else
-       -Dmanpages=false \
-%endif
-%if %{with device_sniffer}
-	-Dsniffer=true
-%else
-	-Dsniffer=false
-%endif
-
+%meson -Dgtk_doc=true
 %meson_build
 
 %install
@@ -103,22 +74,25 @@ This package contains developer documentation for %{name}.
 %dir %{_datadir}/vala/vapi
 %{_datadir}/vala/vapi/gssdp*
 
-%if %{with device_sniffer}
 %files utils
 %{_bindir}/gssdp-device-sniffer
 %{_mandir}/man1/gssdp-device-sniffer.1*
-%endif
 
-%if %{with docs}
 %files docs
 %{_docdir}/gssdp-1.6/
-%endif
 
 %changelog
-* Tue Jan 31 2023 Sumedh Sharma <sumsharma@microsoft.com> - 1.6.2-3
-- Initial CBL-Mariner import from Fedora 38 (license: MIT)
-- Disable gssdp-device-sniffer, docs and manpage sub-package builds
-- License verified
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.3-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.3-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
+* Thu Nov 02 2023 Kalev Lember <klember@redhat.com> - 1.6.3-1
+- Update to 1.6.3
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.2-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
 
 * Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.2-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild

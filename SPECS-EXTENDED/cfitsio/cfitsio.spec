@@ -1,86 +1,78 @@
-Summary:        Library for manipulating FITS data files
-Name:           cfitsio
-Version:        4.0.0
-Release:        5%{?dist}
-License:        MIT
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
-URL:            https://heasarc.gsfc.nasa.gov/fitsio/
-Source0:        http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/%{name}-%{version}.tar.gz
+## START: Set by rpmautospec
+## (rpmautospec version 0.7.2)
+## RPMAUTOSPEC: autorelease, autochangelog
+%define autorelease(e:s:pb:n) %{?-p:0.}%{lua:
+    release_number = 4;
+    base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
+    print(release_number + base_release_number - 1);
+}%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{!?-n:%{?dist}}
+## END: Set by rpmautospec
+
+Name: cfitsio
+Version: 4.5.0
+Release: %autorelease
+Summary: Library for manipulating FITS data files
+
+License: CFITSIO
+URL: http://heasarc.gsfc.nasa.gov/fitsio/
+Source: http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-%{version}.tar.gz
 # Remove soname version check
-Patch1:         cfitsio-noversioncheck.patch
-# Some rearrangements in pkg-config file
-Patch2:         cfitsio-pkgconfig.patch
-# Use builder linker flags
-Patch3:         cfitsio-ldflags.patch
-# Remove rpath
-Patch4:         cfitsio-remove-rpath.patch
-BuildRequires:  bzip2-devel
-BuildRequires:  curl-devel
-BuildRequires:  gcc-gfortran
-BuildRequires:  make
-BuildRequires:  zlib-devel
-##BuildRequires: pkgconfig(curl)
+Patch: cfitsio-noversioncheck.patch
+
+BuildRequires: gcc-gfortran
+BuildRequires: make
+BuildRequires: zlib-devel
+BuildRequires: bzip2-devel
+BuildRequires: curl-devel
 
 %description
-CFITSIO is a library of C and FORTRAN subroutines for reading and writing
-data files in FITS (Flexible Image Transport System) data format. CFITSIO
-simplifies the task of writing software that deals with FITS files by
-providing an easy to use set of high-level routines that insulate the
-programmer from the internal complexities of the FITS file format. At the
-same time, CFITSIO provides many advanced features that have made it the
-most widely used FITS file programming interface in the astronomical
+CFITSIO is a library of C and FORTRAN subroutines for reading and writing 
+data files in FITS (Flexible Image Transport System) data format. CFITSIO 
+simplifies the task of writing software that deals with FITS files by 
+providing an easy to use set of high-level routines that insulate the 
+programmer from the internal complexities of the FITS file format. At the 
+same time, CFITSIO provides many advanced features that have made it the 
+most widely used FITS file programming interface in the astronomical 
 community.
 
 %package devel
-Summary:        Headers required when building programs against cfitsio
-Requires:       %{name} = %{version}-%{release}
-Requires:       pkgconfig
+Summary: Headers required when building programs against cfitsio
+Requires: %{name} = %{version}-%{release}
+Requires: pkgconfig
 
 %description devel
 Headers required when building a program against the cfitsio library.
 
 %package static
-Summary:        Static cfitsio library
+Summary: Static cfitsio library
 
 %description static
 Static cfitsio library; avoid use if possible.
 
 %package docs
-Summary:        Documentation for cfitsio
-BuildArch:      noarch
+Summary: Documentation for cfitsio
+BuildArch:  noarch
 
 %description docs
 Stand-alone documentation for cfitsio.
 
-%package -n fpack
-Summary:        FITS image compression and decompression utilities
-Requires:       %{name} = %{version}-%{release}
+%package utils
+Summary: CFITSIO based utilities
+Requires: %{name} = %{version}-%{release}
+Provides: fpack{?_isa} = %{version}-%{release}
+Obsoletes: fpack <= 4.5.0-1  
+Provides: fitsverify{?_isa} = 4.22-5
+Obsoletes: fitsverify <= 4.22-4
 
-%description -n fpack
-fpack optimally compresses FITS format images and funpack restores them
-to the original state.
-
-* Integer format images are losslessly compressed using the Rice
-compression algorithm.
-    * typically 30% better compression than GZIP
-    * about 3 times faster compression speed than GZIP
-    * about the same uncompression speed as GUNZIP
-
-* Floating-point format images are compressed with a lossy algorithm
-    * truncates the image pixel noise by a user-specified amount to
-      produce much higher compression than by lossless techniques
-    * the precision of scientific measurements in the compressed image
-      (relative to those in the original image) depends on the selected
-       amount of compression
+%description utils
+This package contains utility programas provided by CFITSIO
 
 %prep
-%autosetup
+%autosetup -p1
 
 %build
-%configure --enable-reentrant -with-bzip2
-make shared
-make fpack funpack
+%configure --enable-reentrant -with-bzip2 --includedir=%{_includedir}/%{name}
+make %{?_smp_mflags}
 
 %check
 make testprog
@@ -89,49 +81,75 @@ cmp -s testprog.lis testprog.out
 cmp -s testprog.fit testprog.std
 
 %install
-%make_install LIBDIR=%{_libdir} INCLUDEDIR=%{_includedir}/%{name} \
- CFITSIO_LIB=%{buildroot}%{_libdir} \
- CFITSIO_INCLUDE=%{buildroot}%{_includedir}/%{name}
-cp -p f{,un}pack %{buildroot}%{_bindir}
-
-chmod 755 %{buildroot}%{_libdir}/libcfitsio.so.*
-chmod 755 %{buildroot}%{_bindir}/f{,un}pack
-
+make DESTDIR=%{buildroot} install
+#
+rm %{buildroot}/%{_bindir}/cookbook
+rm %{buildroot}/%{_bindir}/smem
+rm %{buildroot}/%{_bindir}/speed
 
 %ldconfig_scriptlets
 
 %files
-%license License.txt
-%doc README docs/changes.txt
-%{_libdir}/libcfitsio.so.9*
+%doc README.md ChangeLog
+%license licenses/License.txt
+%{_libdir}/libcfitsio.so.10*
 
 %files devel
-%doc cookbook.*
+%doc utilities/cookbook.*
 %{_includedir}/%{name}
 %{_libdir}/libcfitsio.so
 %{_libdir}/pkgconfig/cfitsio.pc
 
 %files static
-%license License.txt
+%license licenses/License.txt
 %{_libdir}/libcfitsio.a
 
 %files docs
-%license License.txt
-%doc docs/fitsio.doc docs/fitsio.pdf docs/cfitsio.pdf
+%doc docs/fitsio.pdf docs/cfitsio.pdf
+%license licenses/License.txt
 
-%files -n fpack
-%license License.txt
+%files utils
 %doc docs/fpackguide.pdf
+%license licenses/License.txt
+%{_bindir}/fitsverify
+%{_bindir}/fitscopy
 %{_bindir}/fpack
 %{_bindir}/funpack
+%{_bindir}/imcopy
 
 %changelog
-* Wed Aug 09 2023 Archana Choudhary <archana1@microsoft.com> - 4.0.0-5
-- Initial CBL-Mariner import from Fedora 37 (license: MIT).
-- License verified
+## START: Generated by rpmautospec
+* Sun Oct 06 2024 Sergio Pascual <sergiopr@fedoraproject.org> - 4.5.0-4
+- Obsolete fitsverify, add imcopy and fitscopy
 
-* Thu Jan 05 2023 Kalev Lember <klember@redhat.com> - 4.0.0-4
+* Thu Sep 05 2024 Sergio Pascual <sergiopr@fedoraproject.org> - 4.5.0-3
+- Remove fitscopy from utils (fixes rhbz#2310228)
+
+* Tue Aug 27 2024 Nils Philippsen <nils@tiptoe.de> - 4.5.0-2
+- Fix pkgconfig includedir
+
+* Mon Aug 26 2024 Sergio Pascual <sergiopr@fedoraproject.org> - 4.5.0-1
+- New upstream 4.5.0
+- Obsoleted pkg fpack with cfitsio-utils
+
+* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.4.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Tue Jul 11 2023 Sergio Pascual <sergiopr@fedoraproject.org> - 4.2.0-4
+- Use SPDX License
+- License name is CFITSIO
+
+* Wed Jan 18 2023 Fedora Release Engineering <releng@fedoraproject.org> - 4.2.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jan 05 2023 Kalev Lember <klember@redhat.com> - 4.2.0-2
 - Use make_install macro
+
+* Fri Nov 25 2022 Sergio Pascual <sergiopr@fedoraproject.org> - 4.2.0-1
+- New upstream version 4.2.0
+
+* Wed Aug 24 2022 Orion Poplawski <orion@nwra.com> - 4.1.0-1
+- Update to 4.1.0
 
 * Wed Jul 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 4.0.0-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
@@ -333,7 +351,7 @@ chmod 755 %{buildroot}%{_bindir}/f{,un}pack
 - Update to upstream 3.240 release.
 
 * Mon Nov 2 2009 Matthew Truch <matt at truch.net> - 3.210-2
-- Re-introduce library soname patch (accidentally removed it).  
+- Re-introduce library soname patch (accidentally removed it).
 
 * Tue Oct 20 2009 Matthew Truch <matt at truch.net> - 3.210-1
 - Update to upstream 3.210 release.
@@ -347,14 +365,14 @@ chmod 755 %{buildroot}%{_bindir}/f{,un}pack
 
 * Wed Jun 17 2009 Matthew Truch <matt at truch.net> - 3.130-5
 - Separate -docs noarch subpackage as per BZ 492438.
-- Explicitly set file attributes correctly.  
+- Explicitly set file attributes correctly.
 
 * Tue Mar 10 2009 Matthew Truch <matt at truch.net> - 3.130-4
-- Set correct version in pkgconfig .pc file.  
+- Set correct version in pkgconfig .pc file.
 
 * Sun Feb 22 2009 Matthew Truch <matt at truch.net> - 3.130-3
 - Re-check testprogram output.
-- Build for koji, rpm, gcc upgrade.  
+- Build for koji, rpm, gcc upgrade.
 
 * Thu Feb 5 2009 Matthew Truch <matt at truch.net> - 3.130-2
 - Fix source file naming typo.
@@ -363,7 +381,7 @@ chmod 755 %{buildroot}%{_bindir}/f{,un}pack
 - Update to 3.130 upstream.
 
 * Sat Sep 20 2008 Matthew Truch <matt at truch.net> - 3.100-2
-- Test library with included test-suite.  
+- Test library with included test-suite.
 
 * Fri Sep 19 2008 Matthew Truch <matt at truch.net> - 3.100-1
 - Update to 3.100 upstream.
@@ -392,8 +410,8 @@ chmod 755 %{buildroot}%{_bindir}/f{,un}pack
 
 * Fri Feb 16 2007 Matthew Truch <matt at truch.net> - 3.030-2
 - Require pkgconfig for -devel.
-- export CC=gcc so we don't clobber $RPM_OPT_FLAGS, thereby 
-  ruining any -debuginfo packages.  
+- export CC=gcc so we don't clobber $RPM_OPT_FLAGS, thereby
+  ruining any -debuginfo packages.
   See RedHat Bugzilla 229041.
 
 * Fri Jan 5 2007 Matthew Truch <matt at truch.net> - 3.030-1
@@ -416,7 +434,7 @@ chmod 755 %{buildroot}%{_bindir}/f{,un}pack
 - Include defattr() for devel package as well - bug 187366
 
 * Sun Mar 19 2006 Matthew Truch <matt at truch.net> - 3.006-4
-- Don't use macro {buildroot} in build, only in install as per 
+- Don't use macro {buildroot} in build, only in install as per
   appended comments to Bugzilla bug 172042
 
 * Fri Mar 10 2006 Matthew Truch <matt at truch.net> - 3.006-3
@@ -476,3 +494,5 @@ chmod 755 %{buildroot}%{_bindir}/f{,un}pack
 
 * Sat Oct 29 2005 Matthew Truch <matt at truch.net> - 3.004-0.1.b
 - Initial spec file for Fedora Extras.
+
+## END: Generated by rpmautospec
