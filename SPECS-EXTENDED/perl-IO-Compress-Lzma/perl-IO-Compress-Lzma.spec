@@ -6,12 +6,15 @@
 %endif
 
 Name:		perl-IO-Compress-Lzma
-Version:	2.212
-Release:	2%{?dist}
+Version:	2.213
+Release:	1%{?dist}
 Summary:	Read and write lzma compressed data
 License:	GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:		https://metacpan.org/release/IO-Compress-Lzma
 Source0:	https://cpan.metacpan.org/modules/by-module/IO/IO-Compress-Lzma-%{version}.tar.gz
+Source1:        LICENSE.PTR
 BuildArch:	noarch
 # Module Build
 BuildRequires:	coreutils
@@ -89,10 +92,13 @@ make pure_install DESTDIR=%{buildroot}
 find %{buildroot} -type f -name .packlist -delete
 %{_fixperms} -c %{buildroot}
 
+cp %{SOURCE1} .
+
 %check
 make test COMPRESS_ZLIB_RUN_MOST=1
 
 %files
+%license LICENSE.PTR
 %doc Changes README examples/*
 %{perl_vendorlib}/IO/
 %{_mandir}/man3/IO::Compress::Lzip.3*
@@ -103,58 +109,13 @@ make test COMPRESS_ZLIB_RUN_MOST=1
 %{_mandir}/man3/IO::Uncompress::UnXz.3*
 
 %changelog
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.212-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Feb 27 2025 Sumit Jena <v-sumitjena@microsoft.com> - 2.213-1
+- Update to version 2.213
+- License verified
 
-* Sun Apr 28 2024 Paul Howarth <paul@city-fan.org> - 2.212-1
-- Update to 2.212 (no functional changes)
-
-* Sun Apr  7 2024 Paul Howarth <paul@city-fan.org> - 2.211-1
-- Update to 2.211 (no functional changes)
-
-* Wed Feb 21 2024 Paul Howarth <paul@city-fan.org> - 2.207-1
-- Update to 2.207 (no functional changes)
-
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.206-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.206-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Wed Jul 26 2023 Paul Howarth <paul@city-fan.org> - 2.206-1
-- Update to 2.206
-  - Drop rt.cpan.org from SUPPORT section
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.205-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Mon Jul 17 2023 Paul Howarth <paul@city-fan.org> - 2.205-1
-- Update to 2.205
-  - Add perl 5.38 to CI matrix
-  - Add on workflow_dispatch
-  - Add some OO examples
-
-* Thu Feb  9 2023 Paul Howarth <paul@city-fan.org> - 2.204-1
-- Update to 2.204 (no functional changes)
-- Use SPDX-format license tag
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.201-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.201-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Sat Jun 25 2022 Paul Howarth <paul@city-fan.org> - 2.201-1
-- Update to 2.201 (no functional changes)
-
-* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 2.103-2
-- Perl 5.36 rebuild
-
-* Mon Apr  4 2022 Paul Howarth <paul@city-fan.org> - 2.103-1
-- Update to 2.103 (no changes)
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.101-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+* Wed Jan 19 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 2.101-5
+- Initial CBL-Mariner import from Fedora 36 (license: MIT).
+- License verified.
 
 * Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.101-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild

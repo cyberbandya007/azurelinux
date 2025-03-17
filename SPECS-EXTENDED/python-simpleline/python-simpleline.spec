@@ -4,13 +4,15 @@ Name: python-%{srcname}
 Summary: A Python library for creating text UI
 Url: https://github.com/rhinstaller/python-%{srcname}
 Version: 1.9.0
-Release: 12%{?dist}
+Release: 13%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/python-simpleline
 #   cd python-simpleline && make archive
-Source0: https://github.com/rhinstaller/python-%{srcname}/releases/download/%{version}/%{srcname}-%{version}.tar.gz
+Source0: https://github.com/rhinstaller/python-%{srcname}/releases/download/%{version}/%{srcname}-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
 License: LGPL-3.0-or-later
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 BuildArch: noarch
 BuildRequires: make
 BuildRequires: python3-devel
@@ -60,6 +62,10 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Fri Dec 20 2024 Akhila Guruju <v-guakhila@microsoft.com> - 1.9.0-13
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.9.0-12
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

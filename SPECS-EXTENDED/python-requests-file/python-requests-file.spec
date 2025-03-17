@@ -2,16 +2,22 @@
 
 Name:           python-%{srcname}
 Version:        2.0.0
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Transport adapter for using file:// URLs with python-requests
 
 License:        Apache-2.0
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://github.com/dashea/requests-file
-Source0:        %pypi_source
+Source0:        %{pypi_source}#/%{name}-%{version}.tar.gz
 
 BuildArch:      noarch
 BuildRequires:  python3-devel
 BuildRequires:  python3dist(pytest)
+BuildRequires: 	python3-pip
+BuildRequires: 	python3-wheel
+BuildRequires: 	python3-setuptools_scm
+BuildRequires: 	python3-requests
 
 %global _description %{expand:
 Requests-File is a transport adapter for use with the Requests Python
@@ -45,6 +51,10 @@ Summary:        %{summary}
 %doc README.rst
 
 %changelog
+* Thu Feb 27 2025 Akhila Guruju <v-guakhila@microsoft.com> - 2.0.0-5
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.0-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

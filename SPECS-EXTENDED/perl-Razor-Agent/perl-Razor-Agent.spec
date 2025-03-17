@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 # Filter the Perl extension module
 %{?perl_default_filter}
 
@@ -6,13 +8,14 @@
 Summary:        Collaborative, content-based spam filtering network agent
 Name:           perl-Razor-Agent
 Version:        2.86
-Release:        12%{?dist}
+Release:        13%{?dist}
 License:        Artistic-2.0
 URL:            https://metacpan.org/release/%{pkgname}
-Source0:        https://cpan.metacpan.org/authors/id/T/TO/TODDR/%{pkgname}-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/T/TO/TODDR/%{pkgname}-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 Patch0:         https://github.com/toddr/Razor2-Client-Agent/commit/033b00e94741550ef3ef087d9903742ac881a7ba.patch#/perl-Razor-Agent-2.86-parallel-make.patch
 Patch1:         https://github.com/toddr/Razor2-Client-Agent/commit/1a8dc0ea64c6bbe187babdb1079bc0cf05926e59.patch#/perl-Razor-Agent-2.86-digest-sha.patch
 Requires:       perl(Digest::SHA)
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 BuildRequires:  coreutils
 BuildRequires:  findutils
 BuildRequires:  gcc
@@ -91,6 +94,10 @@ make test
 %{_mandir}/man5/razor-whitelist.5*
 
 %changelog
+* Fri Dec 20 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 2.86-13
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.86-12
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

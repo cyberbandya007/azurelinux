@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %define _kde4_prefix %_prefix
 %define _kde4_sysconfdir %_sysconfdir
 %define _kde4_libdir %_libdir
@@ -19,7 +21,7 @@
 Summary: KDE filesystem layout
 Name: kde-filesystem
 Version: 5
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 License: Public Domain
 
@@ -195,6 +197,10 @@ mkdir -p $RPM_BUILD_ROOT%{_datadir}/solid/{actions,devices}
 
 
 %changelog
+* Thu Jan 02 2025 Aninda Pradhan <v-anipradhan@microsoft.com> - 5-5
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 5-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

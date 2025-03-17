@@ -1,12 +1,15 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name: libcdio-paranoia
 Version: 10.2+2.0.1
-Release: 13%{?dist}
+Release: 1%{?dist}
 Summary: CD paranoia on top of libcdio
 License: GPLv3+
-URL: http://www.gnu.org/software/libcdio/
-Source0: http://ftp.gnu.org/gnu/libcdio/libcdio-paranoia-%{version}.tar.bz2
+URL: https://www.gnu.org/software/libcdio/
+Source0: https://ftp.gnu.org/gnu/libcdio/libcdio-paranoia-%{version}.tar.bz2
 Patch0: libcdio-paranoia-manpage.patch
-Patch1: https://github.com/rocky/libcdio-paranoia/pull/38.patch
+Patch1: 38.patch
+
 BuildRequires: gcc
 BuildRequires: pkgconfig
 BuildRequires: gettext-devel
@@ -85,45 +88,12 @@ chrpath --delete $RPM_BUILD_ROOT%{_libdir}/*.so.*
 
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 10.2+2.0.1-13
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Nov 11 2024 Jyoti Kanase <v-jykanase@microsoft.com> - 10.2+2.0.1 - 1
+- Update to 10.2+2.0.1
+- License verified
 
-* Tue Apr 02 2024 Adrian Reber <adrian@lisas.de> - 10.2+2.0.1-12
-- applied upstream patch (#2272548)
-
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 10.2+2.0.1-11
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 10.2+2.0.1-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 10.2+2.0.1-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 10.2+2.0.1-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 10.2+2.0.1-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 10.2+2.0.1-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 10.2+2.0.1-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 10.2+2.0.1-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 10.2+2.0.1-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Mon Jul 13 2020 Tom Stellard <tstellar@redhat.com> - 10.2+2.0.1-2
-- Use make macros
-- https://fedoraproject.org/wiki/Changes/UseMakeBuildInstallMacro
-
-* Mon Mar 30 2020 Adrian Reber <adrian@lisas.de> - 10.2+2.0.1-1
-- updated to 10.2+2.0.1
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 10.2+2.0.0-5
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 10.2+2.0.0-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

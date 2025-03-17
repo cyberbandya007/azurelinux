@@ -1,16 +1,14 @@
-# RPM version needs 4 digits after the decimal to preserve upgrade path
-%global module_version 0.71
-%global RPM_version %(printf "%.4f" %{module_version})
-
 # TODO: BR: optional test dependency Unknown::Values if it becomes available
-
+%global cpan_version 0.71
 Name:           perl-Test-Differences
-Version:        %{RPM_version}
-Release:        4%{?dist}
+Version:        %(LANG=C printf "%.4f" %{cpan_version})
+Release:        1%{?dist}
 Summary:        Test strings and data structures and show differences if not OK
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/Test-Differences
-Source0:        https://cpan.metacpan.org/modules/by-module/Test/Test-Differences-%{module_version}.tar.gz
+Source0:        https://cpan.metacpan.org/modules/by-module/Test/Test-Differences-%{cpan_version}.tar.gz
 BuildArch:      noarch
 # Module Build
 BuildRequires:  coreutils
@@ -46,7 +44,7 @@ structures and they're just plain wrong, an equivalent to the Unix
 diff utility may be just what's needed.
 
 %prep
-%setup -q -n Test-Differences-%{module_version}
+%setup -q -n Test-Differences-%{cpan_version}
 
 %build
 perl Makefile.PL INSTALLDIRS=vendor
@@ -66,67 +64,12 @@ make test
 %{_mandir}/man3/Test::Differences.3*
 
 %changelog
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.7100-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Feb 27 2025 Sumit Jena <v-sumitjena@microsoft.com> - 0.7100-1
+- Update to version 0.7100
+- License verified
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.7100-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.7100-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Fri Oct 13 2023 Paul Howarth <paul@city-fan.org> - 0.7100-1
-- Update to 0.71
-  - Document and test different behavior regarding Booleans in perl 5.38.0
-    compared to earlier versions (GH#21)
-
-* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.7000-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Sat Jul  8 2023 Paul Howarth <paul@city-fan.org> - 0.7000-1
-- Update to 0.70
-  - Stop pointless use of taint-mode in tests, so tests pass when perl is
-    built without taint support
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.6900-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.6900-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.6900-3
-- Perl 5.36 rebuild
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.6900-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Sat Jan  8 2022 Paul Howarth <paul@city-fan.org> - 0.6900-1
-- Update to 0.69
-  - Special-case Unknown::Values objects in comparisons, as it's better to spit
-    out a diagnostic failure than to just die
-  - Correct misleading Unicode doco
-
-* Fri Jul 23 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.6800-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.6800-2
-- Perl 5.34 rebuild
-
-* Wed May 19 2021 Paul Howarth <paul@city-fan.org> - 0.6800-1
-- Update to 0.68
-  - Revert undocumented change that was causing unreasonably verbose output
-    (GH#5)
-  - Improve documentation about text vs. data mode and eq_or_diff_{text,data}
-    (GH#8)
-
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.6700-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.6700-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.6700-5
-- Perl 5.32 rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.6700-5
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.6700-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

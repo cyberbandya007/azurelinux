@@ -1,10 +1,12 @@
 Summary: Enclosure LED Utilities
 Name: ledmon
 Version: 1.1.0
-Release: 1%{?dist}
-License: GPL-2.0-only AND LGPL-2.1-only
+Release: 2%{?dist}
+License: GPL-2.0-only AND LGPL-2.1-or-later AND GPL-3.0-or-later
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL: https://github.com/intel/ledmon
-Source0: %{url}/archive/v%{version}/%{name}-%{version}.tar.gz
+Source0: https://github.com/intel/ledmon/archive/v%{version}/%{name}-%{version}.tar.gz
 
 BuildRequires: autoconf automake
 BuildRequires: autoconf-archive
@@ -14,7 +16,8 @@ BuildRequires: libtool
 BuildRequires: pciutils-devel
 BuildRequires: sg3_utils-devel
 # Needed for pkgconfig usage.
-BuildRequires: pkgconfig(systemd)
+BuildRequires: pkgconfig
+BuildRequires: systemd
 # Needed for the udev dependency.
 BuildRequires: systemd-devel
 BuildRequires: systemd-rpm-macros
@@ -80,6 +83,7 @@ autoreconf -fiv
 
 %files libs
 %{_libdir}/*.so.*
+%{_libdir}/libled.la
 
 %files devel
 %{_includedir}/*
@@ -87,6 +91,10 @@ autoreconf -fiv
 %{_libdir}/pkgconfig/%{name}.pc
 
 %changelog
+* Tue Mar 11 2025 Aninda Pradhan <v-anipradhn@microsoft.com> - 1.1.0-2
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License Verified
+
 * Mon Nov 11 2024 Jan Macku <jamacku@redhat.com> - 1.1.0-1
 - update to 1.1.0
 - drop Packit config

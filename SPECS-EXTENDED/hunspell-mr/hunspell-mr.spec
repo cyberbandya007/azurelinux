@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %if 0%{?fedora} >= 36 || 0%{?rhel} > 9
 %global dict_dirname hunspell
 %else
@@ -7,7 +9,7 @@
 Name: hunspell-mr
 Summary: Marathi hunspell dictionaries
 Version: 14.01webext
-Release: 1%{?dist}
+Release: 2%{?dist}
 Epoch: 1
 Source: https://addons.mozilla.org/firefox/downloads/file/4324409/marathi_dictionary-14.01webext.xpi
 URL: https://addons.mozilla.org/en-US/firefox/addon/marathi-dictionary/
@@ -36,6 +38,10 @@ cp -p dictionaries/mr-IN.aff $RPM_BUILD_ROOT/%{_datadir}/%{dict_dirname}/mr_IN.a
 %{_datadir}/%{dict_dirname}/*
 
 %changelog
+* Tue Dec 17 2024 Akarsh Chaudhary <v-akarshc@microsoft.com> - 1:14.01webext-2
+- AzureLinux import from Fedora 41 .
+- License verified
+
 * Thu Jul 25 2024 Parag Nemade <pnemade@fedoraproject.org> - 1:14.01webext-1
 - Move to use new upstream URL from firefox addon 14.01webext version
 

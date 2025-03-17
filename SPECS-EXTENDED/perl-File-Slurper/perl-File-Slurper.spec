@@ -1,8 +1,10 @@
 Name:           perl-File-Slurper
 Version:        0.014
-Release:        6%{?dist}
+Release:        1%{?dist}
 Summary:        Simple, sane and efficient module to slurp a file
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/File-Slurper
 Source0:        https://cpan.metacpan.org/authors/id/L/LE/LEONT/File-Slurper-%{version}.tar.gz
 BuildArch:      noarch
@@ -85,51 +87,12 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.014-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Feb 27 2025 Sumit Jena <v-sumitjena@microsoft.com> - 0.014-1
+- Update to version 0.014
+- License verified
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.014-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.014-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.014-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.014-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Fri Dec 16 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.014-1
-- 0.014 bump
-- Package tests
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.013-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.013-3
-- Perl 5.36 rebuild
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.013-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Mon Jan 03 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.013-1
-- 0.013 bump
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.012-12
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.012-11
-- Perl 5.34 rebuild
-
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.012-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.012-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.012-8
-- Perl 5.32 rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.012-8
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.012-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

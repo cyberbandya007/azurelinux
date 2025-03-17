@@ -19,11 +19,13 @@ or library.
 
 Name:           python-oslo-i18n
 Version:        6.3.0
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        OpenStack i18n library
 License:        Apache-2.0
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://github.com/openstack/%{pypi_name}
-Source0:        https://tarballs.openstack.org/%{pypi_name}/%{pypi_name}-%{upstream_version}.tar.gz
+Source0:        https://tarballs.openstack.org/%{pypi_name}/%{pypi_name}-%{upstream_version}.tar.gz#/%{name}-%{version}.tar.gz
 # Required for tarball sources verification
 %if 0%{?sources_gpg} == 1
 Source101:        https://tarballs.openstack.org/%{pypi_name}/%{pypi_name}-%{upstream_version}.tar.gz.asc
@@ -46,8 +48,23 @@ BuildRequires:  git-core
 Summary:        OpenStack i18n Python 2 library
 
 BuildRequires:  python3-devel
-BuildRequires:  pyproject-rpm-macros
+BuildRequires:  python3-setuptools
+BuildRequires:  python3-pbr
 BuildRequires:  python3-babel
+BuildRequires:  python3-six
+BuildRequires:  python3-fixtures
+BuildRequires:  python3-tox
+BuildRequires:  python3-pluggy
+BuildRequires:  python3-py
+BuildRequires:  python3-toml
+BuildRequires:  python3-openstackdocstheme
+BuildRequires:  python3-dulwich
+BuildRequires:  python3-tox-current-env
+BuildRequires:  python3-filelock
+BuildRequires:  python3-pip
+BuildRequires:  python3-babel
+BuildRequires:  python3-wheel
+BuildRequires:  python3-sphinxcontrib-apidoc
 Requires:       python-%{pkg_name}-lang = %{version}-%{release}
 
 %description -n python3-%{pkg_name}
@@ -142,6 +159,10 @@ mv %{buildroot}%{python3_sitelib}/oslo_i18n/locale %{buildroot}%{_datadir}/local
 %license LICENSE
 
 %changelog
+* Mon Feb 24 2025 Archana Shettigar <v-shettigara@microsoft.com> - 6.3.0-6
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 6.3.0-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

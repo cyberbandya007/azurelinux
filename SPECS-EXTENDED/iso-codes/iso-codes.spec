@@ -1,18 +1,20 @@
-Name:       iso-codes
-Summary:    ISO code lists and translations
-Version:    4.16.0
-Release:    5%{?dist}
-License:    LGPL-2.1-or-later
-URL:        https://salsa.debian.org/iso-codes-team/iso-codes
-Source0:    https://salsa.debian.org/iso-codes-team/%{name}/-/archive/v%{version}/%{name}-v%{version}.tar.gz
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+Name:           iso-codes
+Summary:        ISO code lists and translations
+Version:        4.17.0
+Release:        1%{?dist}
+License:        LGPL-2.1-or-later
+URL:            https://salsa.debian.org/iso-codes-team/iso-codes
+Source0:        https://salsa.debian.org/iso-codes-team/%{name}/-/archive/v%{version}/%{name}-v%{version}.tar.gz
 
-BuildRequires: gettext
-BuildRequires: python3
-BuildRequires: make
-BuildArch: noarch
+BuildRequires:  gettext
+BuildRequires:  python3
+BuildRequires:  make
+BuildArch:      noarch
 
 # for /usr/share/xml
-Requires: xml-common
+Requires:       xml-common
 
 %description
 This package provides the ISO 639 Language code list, the ISO 4217
@@ -20,8 +22,8 @@ Currency code list, the ISO 3166 Territory code list, and ISO 3166-2
 sub-territory lists, and all their translations in gettext format.
 
 %package devel
-Summary: Files for development using %{name}
-Requires: %{name} = %{version}-%{release}
+Summary:        Files for development using %{name}
+Requires:       %{name} = %{version}-%{release}
 
 %description devel
 This package contains the pkg-config files for development
@@ -53,73 +55,13 @@ sed -i 's/ & / and /g' data/iso_3166-2.json
 %files devel
 %{_datadir}/pkgconfig/iso-codes.pc
 
+
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.16.0-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Wed oct 23 2024 Akarsh Chaudhary <v-akarshc@microsoft.com> - 4.17.0-1
+- Update to version 4.17.0
 
-* Fri Jul 12 2024 Parag Nemade <pnemade AT redhat DOT com> - 4.16.0-4
-- Fix xmllint error for iso_3166-2.xml file
-
-* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.16.0-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sat Jan 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.16.0-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Mon Jan 15 2024 Parag Nemade <pnemade AT redhat DOT com> - 4.16.0-1
-- Update to 4.16.0 version (#2258341)
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 4.15.0-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Fri Apr 28 2023 Parag Nemade <pnemade AT redhat DOT com> - 4.15.0-1
-- Update to 4.15.0 version (#2190318)
-
-* Tue Feb 28 2023 Parag Nemade <pnemade AT redhat DOT com> - 4.13.0-1
-- Update to 4.13.0 version (#2173897)
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 4.12.0-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Fri Dec 02 2022 Parag Nemade <pnemade AT redhat DOT com> - 4.12.0-2
-- Update license tag to SPDX format
-
-* Thu Nov 10 2022 Parag Nemade <pnemade AT redhat DOT com> - 4.12.0-1
-- Update to 4.12.0 version (#2140456)
-
-* Mon Jul 25 2022 Parag Nemade <pnemade AT redhat DOT com> - 4.11.0-1
-- Update to 4.11.0 version (#2110786)
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 4.10.0-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Thu Jun 02 2022 Parag Nemade <pnemade AT redhat DOT com> - 4.10.0-1
-- Update to 4.10.0 version (#2092413)
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 4.9.0-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Tue Jan 04 2022 Parag Nemade <pnemade AT redhat DOT com> - 4.9.0-1
-- Update to 4.9.0 version (#2036757)
-
-* Fri Nov 05 2021 Parag Nemade <pnemade AT redhat DOT com> - 4.8.0-1
-- Update to 4.8.0 version (#2019880)
-- Adjust upstream tarball Source URL
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 4.6.0-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Mon Mar 08 2021 Parag Nemade <pnemade AT redhat DOT com> - 4.6.0-1
-- Update to 4.6.0 version (#1936377)
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 4.5.0-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 4.5.0-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Wed May 20 2020 Parag Nemade <pnemade AT redhat DOT com> - 4.5.0-1
-- Update to 4.5.0 version (#1837748)
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 4.4-3
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 4.4-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

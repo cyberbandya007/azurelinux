@@ -1,8 +1,10 @@
 Name:		perl-XString
 Version:	0.005
-Release:	14%{?dist}
+Release:	15%{?dist}
 Summary:	Isolated String helpers from B
 License:	GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:		https://metacpan.org/release/XString
 Source0:	https://cpan.metacpan.org/authors/id/A/AT/ATOOMIC/XString-%{version}.tar.gz
 # Build
@@ -27,6 +29,8 @@ BuildRequires:	perl(Test::More) >= 0.88
 BuildRequires:	perl(CPAN::Meta) >= 2.120900
 BuildRequires:	perl(CPAN::Meta::Prereqs)
 # Dependencies
+Requires:	perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
+
 Requires:	perl(XSLoader)
 
 %description
@@ -56,6 +60,10 @@ make test
 %{_mandir}/man3/XString.3*
 
 %changelog
+* Wed Dec 18 2024 Sumit Jena <v-sumitjena@microsoft.com> - 0.005-15
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.005-14
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

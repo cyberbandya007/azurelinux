@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %bcond_with gp2ddb
 
 %global udevdir %(pkg-config --variable=udevdir udev)
@@ -5,22 +7,19 @@
 
 Name:           libgphoto2
 Version:        2.5.31
-Release:        2%{?dist}
+Release:        1%{?dist}
 Summary:        Library for accessing digital cameras
-License:        GPL-2.0-only AND GPL-2.0-or-later AND LGPL-2.0-only AND LGPL-2.0-or-later AND LGPL-2.1-or-later AND LGPL-3.0-or-later AND BSD-3-Clause AND IJG-short AND (MIT OR Unlicense)
+# GPLV2+ for the main lib (due to exif.c) and most plugins, some plugins GPLv2
+License:        GPLv2+ and GPLv2
 URL:            http://www.gphoto.org/
 
 Source0:        http://downloads.sourceforge.net/gphoto/%{name}-%{version}.tar.bz2
 Patch1:         gphoto2-pkgcfg.patch
-Patch2:         gphoto2-device-return.patch
-# Upstream fix for GCC 14
-Patch3:         gphoto2-gcc14.patch
 
 BuildRequires:  gcc
 BuildRequires:  gcc-c++
 BuildRequires:  make
-BuildRequires:  systemd-rpm-macros
-BuildRequires:  pkgconfig(udev)
+BuildRequires:  systemd-devel
 %if %{with gp2ddb}
 BuildRequires:  flex
 BuildRequires:  bison
@@ -34,10 +33,9 @@ BuildRequires:  pkgconfig(libexif)
 # -----------------------------------
 # libgphoto2_port
 # -----------------------------------
-%if !0%{?flatpak}
 BuildRequires:  lockdev-devel
-%endif
 BuildRequires:  pkgconfig(libusb-1.0)
+Requires:       lockdev
 # -----------------------------------
 
 # Temporarily required for patch3
@@ -124,7 +122,6 @@ cat libgphoto2*.lang >> %{name}.lang
 
 # https://fedoraproject.org/wiki/Packaging_tricks#With_.25doc
 mkdir __doc
-rm -rf %{buildroot}%{_pkgdocdir}_port/{AUTHORS,NEWS,README}
 mv %{buildroot}%{_pkgdocdir}/* __doc
 rm -rf %{buildroot}%{_pkgdocdir}
 rm -rf %{buildroot}%{_datadir}/libgphoto2_port/*/vcamera/
@@ -148,7 +145,7 @@ rm -rf %{buildroot}%{_datadir}/libgphoto2_port/*/vcamera/
 %{_datadir}/libgphoto2/
 
 %files devel
-%doc __doc/*
+%doc %{_defaultdocdir}/%{name}_port/*
 %{_bindir}/gphoto2-config
 %{_bindir}/gphoto2-port-config
 %{_includedir}/gphoto2/
@@ -160,44 +157,13 @@ rm -rf %{buildroot}%{_datadir}/libgphoto2_port/*/vcamera/
 %{_mandir}/man3/%{name}_port.3*
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.5.31-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Wed Oct 16 2024 Kevin Lockwood <v-klockwood@microsoft.com> - 2.5.31-1
+- Update to current upstream
+- License Verified
 
-* Tue Feb 13 2024 Josef Ridky <jridky@redhat.com> - 2.5.31-1
-- New upstream release (#2236966)
-
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.5.30-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.5.30-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.5.30-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.5.30-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.5.30-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Thu Jul 07 2022 Josef Ridky <jridky@redhat.com> - 2.5.30-2
-- Spec bump
-
-* Thu Jul 07 2022 Josef Ridky <jridky@redhat.com> - 2.5.30-1
-- New upstream release 2.5.30 (#2103339)
-
-* Thu Mar 10 2022 Josef Ridky <jridky@redhat.com> - 2.5.29-1
-- New upstream release 2.5.29 (#2036612)
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.5.27-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Wed Oct 06 2021 Kalev Lember <klember@redhat.com> - 2.5.27-3
-- Don't use lockdev for flatpak builds
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.5.27-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+* Fri Mar 26 2021 Henry Li <lihl@microsoft.com> - 2.5.27-2
+- Initial CBL-Mariner import from Fedora 34 (license: MIT).
+- systemd-devel contains the .pc file to provide pkgconfig variables
 
 * Wed Mar 10 2021 Josef Ridky <jridky@redhat.com> - 2.5.27-1
 - New upstream release 2.5.27 (#1931187)

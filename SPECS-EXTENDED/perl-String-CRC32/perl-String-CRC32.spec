@@ -1,10 +1,12 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           perl-String-CRC32
 Version:        2.100
-Release:        13%{?dist}
+Release:        14%{?dist}
 Summary:        Perl interface for cyclic redundancy check generation
 License:        LicenseRef-Fedora-Public-Domain
 URL:            https://metacpan.org/release/String-CRC32
-Source0:        https://cpan.metacpan.org/modules/by-module/String/String-CRC32-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/L/LE/LEEJO/String-CRC32-%{version}.tar.gz
 # Module Build
 BuildRequires:  coreutils
 BuildRequires:  findutils
@@ -22,7 +24,7 @@ BuildRequires:  perl(XSLoader)
 # Test Suite
 # (no additional dependencies)
 # Dependencies
-# (no additional dependencies)
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 
 # Avoid perl object provides
 %{?perl_default_filter}
@@ -61,6 +63,10 @@ make test
 %{_mandir}/man3/String::CRC32.3*
 
 %changelog
+* Tue Dec 17 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 2.100-14
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.100-13
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

@@ -1,12 +1,15 @@
-%if 0%{?fedora} > 35
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+%if 0%{?fedora} >= 36 || 0%{?rhel} > 9
 %global dict_dirname hunspell 
 %else
 %global dict_dirname myspell
 %endif 
+
 Name: hunspell-nl
 Summary: Dutch hunspell dictionaries
 Version: 2.20.19
-Release: 13%{?dist}
+Release: 15%{?dist}
 Source: https://github.com/OpenTaal/opentaal-hunspell/archive/2.20.19.tar.gz
 URL: https://opentaal.org/
 License: BSD-3-Clause OR CC-BY-3.0
@@ -41,6 +44,14 @@ done
 %{_datadir}/%{dict_dirname}/*
 
 %changelog
+* Tue Dec 17 2024 Akarsh Chaudhary <v-akarshc@microsoft.com> - 2.20.19-15
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
+* Sun Aug 04 2024 Parag Nemade <pnemade AT redhat DOT com> - 2.20.19-14
+- Add conditional for RHEL for using hunspell directory
+- Add tmt CI tests
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.20.19-13
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

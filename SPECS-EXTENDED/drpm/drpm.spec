@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 # Do not build with zstd for RHEL < 8
 %if (0%{?rhel} && 0%{?rhel} < 8) || (0%{?suse_version} && 0%{?suse_version} < 1500)
 %bcond_with zstd
@@ -7,15 +9,13 @@
 
 Name:           drpm
 Version:        0.5.2
-Release:        6%{?dist}
+Release:        1%{?dist}
 Summary:        A library for making, reading and applying deltarpm packages
 # the entire source code is LGPLv2+, except src/drpm_diff.c and src/drpm_search.c which are BSD
 License:        LGPLv2+ and BSD
 URL:            https://github.com/rpm-software-management/%{name}
 Source:         %{url}/releases/download/%{version}/%{name}-%{version}.tar.bz2
 
-
-BuildRequires:  gcc-c++
 BuildRequires:  cmake >= 2.8.5
 BuildRequires:  gcc
 
@@ -75,59 +75,18 @@ The drpm-devel package provides a C interface (drpm.h) for the drpm library.
 %license COPYING LICENSE.BSD
 
 %files devel
-%doc %{_vpath_builddir}/doc/html/
+%doc doc/html/
 %{_libdir}/lib%{name}.so
 %{_includedir}/%{name}.h
 %{_libdir}/pkgconfig/%{name}.pc
 
 %changelog
-* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.5.2-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Fri Oct 25 2024 Sumit Jena <v-sumitjena@microsoft.com> - 0.5.2-1
+- Update to version 0.5.2
+- License verified.
 
-* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.5.2-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Fri Jan 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.5.2-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Wed Jul 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.5.2-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Tue May 16 2023 Jan Kolarik <jkolarik@redhat.com> - 0.5.2-2
-- Rebuild for rpm-4.18.90
-
-* Mon May 15 2023 Jan Kolarik <jkolarik@redhat.com> - 0.5.2-1
-- Update to 0.5.2
-- Avoid using obsolete RPM API
-- Small memory and compatibility fixes
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.5.1-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jan 12 2023 Florian Weimer <fweimer@redhat.com> - 0.5.1-3
-- C99 compatibility fix
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.5.1-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Mon Mar 14 2022 Pavla Kratochvilova <pkratoch@redhat.com> - 0.5.1-1
-- Fix SIGSEGV when an errors occurs in `rpm_get_file_info` (RhBug:1968594)
-- For rpms without any files return file count 0 (RhBug:1968594)
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.5.0-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Tue Sep 14 2021 Sahana Prasad <sahana@redhat.com> - 0.5.0-5
-- Rebuilt with OpenSSL 3.0.0
-
-* Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.5.0-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.5.0-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.5.0-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.5.0-2
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Wed Jun 03 2020 Ales Matej <amatej@redhat.com> - 0.5.0-1
 - Update to 0.5.0
@@ -193,7 +152,7 @@ The drpm-devel package provides a C interface (drpm.h) for the drpm library.
 
 * Tue May 3 2016 Matej Chalk <mchalk@redhat.com> 0.3.0-3
 - Now contains makedeltarpm and applydeltarpm functionality
-- Added lzlib-devel dependency for OpenSUSE
+- Added lzlib-devel dependency for openSUSE
 
 * Tue Apr 12 2016 Igor Gnatenko <ignatenko@redhat.com> - 0.3.0-2
 - Cleanup spec

@@ -1,41 +1,26 @@
 %global         majorminor      1.0
 
-#global gitrel     140
-#global gitcommit  a70055b58568f7304ba46bd8742232337013487b
-#global shortcommit %%(c=%%{gitcommit}; echo ${c:0:5})
-
 %global         _glib2                  2.32.0
 %global         _libxml2                2.4.0
 %global         _gobject_introspection  1.31.1
 %global 	__python %{__python3}
 
-%if 0%{?fedora}
-%bcond_without unwind
-%else
-%bcond_with unwind
-%endif
-
-Name:           gstreamer1
-Version:        1.24.10
-Release:        1%{?dist}
 Summary:        GStreamer streaming media framework runtime
-
-License:        LGPL-2.1-or-later
+Name:           gstreamer1
+Version:        1.24.8
+Release:        1%{?dist}
+License:        LGPLv2+
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            http://gstreamer.freedesktop.org/
-%if 0%{?gitrel}
-# git clone git://anongit.freedesktop.org/gstreamer/gstreamer
-# cd gstreamer; git reset --hard %{gitcommit}; ./autogen.sh; make; make distcheck
-Source0:        gstreamer-%{version}.tar.xz
-%else
 Source0:        http://gstreamer.freedesktop.org/src/gstreamer/gstreamer-%{version}.tar.xz
-%endif
 ## For GStreamer RPM provides
-Patch0:         0001-gst-inspect-add-mode-to-output-RPM-requires-format.patch
 Source1:        gstreamer1.prov
 Source2:        gstreamer1.attr
 
 BuildRequires:  meson >= 0.48.0
 BuildRequires:  gcc
+BuildRequires:  rust
 BuildRequires:  glib2-devel >= %{_glib2}
 BuildRequires:  libxml2-devel >= %{_libxml2}
 BuildRequires:  gobject-introspection-devel >= %{_gobject_introspection}
@@ -45,16 +30,8 @@ BuildRequires:  check-devel
 BuildRequires:  gettext
 BuildRequires:  pkgconfig
 BuildRequires:  libcap-devel
-%if %{with unwind}
-BuildRequires:  libunwind-devel
-%endif
 BuildRequires:  elfutils-devel
-%if 0%{?fedora} >= 41 || 0%{?rhel} >= 11 
-BuildRequires:  bash-completion-devel
-%else
-BuildRequires: bash-completion
-%endif
-BuildRequires:  rustc
+BuildRequires:  bash-completion
 
 %description
 GStreamer is a streaming media framework, based on graphs of filters which
@@ -78,31 +55,19 @@ Conflicts:      gstreamer1-plugins-bad-free-devel < 1.13
 The %{name}-devel package contains libraries and header files for
 developing applications that use %{name}.
 
-%if 0
-%package devel-docs
-Summary:         Developer documentation for GStreamer streaming media framework
-Requires:        %{name} = %{version}-%{release}
-BuildArch:       noarch
-
-%description devel-docs
-This %{name}-devel-docs contains developer documentation for the
-GStreamer streaming media framework.
-%endif
-
-
 %prep
 %setup -q -n gstreamer-%{version}
-%patch -P 0 -p3 -b .rpm-provides
 
 %build
 %meson	\
-  -D package-name='Fedora GStreamer package' \
-  -D package-origin='http://download.fedoraproject.org' \
-  -D tests=disabled -D examples=disabled \
+  -D package-name='CBL-Mariner GStreamer package' \
+  -D package-origin='https://packages.microsoft.com/azurelinux/3.0' \
+  -D tests=disabled \
+  -D examples=disabled \
   -D ptp-helper-permissions=capabilities \
-  %{!?with_unwind:-D libunwind=disabled -D libdw=disabled } \
   -D dbghelp=disabled \
-  -D doc=disabled
+  -D doc=disabled \
+  -D libunwind=disabled
 %meson_build
 
 %install
@@ -118,20 +83,14 @@ install -m0644 -D %{SOURCE2} $RPM_BUILD_ROOT%{_rpmconfigdir}/fileattrs/gstreamer
 
 %files -f gstreamer-%{majorminor}.lang
 %license COPYING
-%doc AUTHORS NEWS README.md README.static-linking RELEASE
+%doc AUTHORS NEWS README.md RELEASE
 %{_libdir}/libgstreamer-%{majorminor}.so.*
 %{_libdir}/libgstbase-%{majorminor}.so.*
 %{_libdir}/libgstcheck-%{majorminor}.so.*
 %{_libdir}/libgstcontroller-%{majorminor}.so.*
 %{_libdir}/libgstnet-%{majorminor}.so.*
 
-%dir %{_libexecdir}/gstreamer-%{majorminor}/
-%{_libexecdir}/gstreamer-%{majorminor}/gst-completion-helper
-%{_libexecdir}/gstreamer-%{majorminor}/gst-hotdoc-plugins-scanner
-%{_libexecdir}/gstreamer-%{majorminor}/gst-plugins-doc-cache-generator
-%{_libexecdir}/gstreamer-%{majorminor}/gst-plugin-scanner
-%attr(755,root,root) %caps(cap_net_bind_service,cap_net_admin,cap_sys_nice=ep) %{_libexecdir}/gstreamer-%{majorminor}/gst-ptp-helper
-#%%{_libexecdir}/gstreamer-%%{majorminor}/gst-ptp-helper-test
+%{_libexecdir}/gstreamer-%{majorminor}/
 
 %dir %{_libdir}/gstreamer-%{majorminor}
 %{_libdir}/gstreamer-%{majorminor}/libgstcoreelements.so
@@ -187,7 +146,7 @@ install -m0644 -D %{SOURCE2} $RPM_BUILD_ROOT%{_rpmconfigdir}/fileattrs/gstreamer
 
 %{_datadir}/aclocal/gst-element-check-%{majorminor}.m4
 
-%dir %{_datadir}/gstreamer-%{majorminor}/gdb
+%dir %{_datadir}/gstreamer-%{majorminor}/gdb/
 %{_datadir}/gstreamer-%{majorminor}/gdb/
 %{_datadir}/gdb/auto-load/
 
@@ -197,169 +156,27 @@ install -m0644 -D %{SOURCE2} $RPM_BUILD_ROOT%{_rpmconfigdir}/fileattrs/gstreamer
 %{_libdir}/pkgconfig/gstreamer-check-%{majorminor}.pc
 %{_libdir}/pkgconfig/gstreamer-net-%{majorminor}.pc
 
-%if 0
-%files devel-docs
-%doc %{_datadir}/gtk-doc/html/gstreamer-%{majorminor}
-%doc %{_datadir}/gtk-doc/html/gstreamer-libs-%{majorminor}
-%doc %{_datadir}/gtk-doc/html/gstreamer-plugins-%{majorminor}
-%endif
-
-
 %changelog
-* Wed Dec 04 2024 Gwyn Ciesla <gwync@protonmail.com> - 1.24.10-1
-- 1.24.10
+* Fri Oct 18 2024 Kevin Lockwood <v-klockwood@microsoft.com> - 1.24.8-1
+- Update to 1.24.8 for azl 3.0
+- Verified license
 
-* Thu Oct 31 2024 Gwyn Ciesla <gwync@protonmail.com> - 1.24.9-1
-- 1.24.9
+* Wed Feb 28 2024 Nicolas Guibourge <nicolasg@microsoft.com> - 1.20.0-2
+- Fix remaining issues linked to CBL-Mariner re-branding to Azure Linux
 
-* Thu Sep 19 2024 Gwyn Ciesla <gwync@protonmail.com> - 1.24.8-1
-- 1.24.8
+* Thu Mar 03 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.20.0-1
+- Updating to version 1.20.0 using Fedora 36 spec (license: MIT) for guidance.
 
-* Wed Aug 21 2024 Gwyn Ciesla <gwync@protonmail.com> - 1.24.7-1
-- 1.24.7
+* Fri Feb 04 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.16.2-5
+- Removing docs to drop dependency on 'ghostscript'.
+- License verified.
 
-* Mon Jul 29 2024 Gwyn Ciesla <gwync@protonmail.com> - 1.24.6-1
-- 1.24.6
+* Thu Oct 14 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.16.2-4
+- Converting the 'Release' tag to the '[number].[distribution]' format.
 
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.24.5-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
-
-* Fri Jun 21 2024 Gwyn Ciesla <gwync@protonmail.com> - 1.24.5-1
-- 1.24.5
-
-* Wed May 29 2024 Gwyn Ciesla <gwync@protonmail.com> - 1.24.4-1
-- 1.24.4
-
-* Tue Apr 30 2024 Gwyn Ciesla <gwync@protonmail.com> - 1.24.3-1
-- 1.24.3
-
-* Tue Mar 05 2024 Wim Taymans <wtaymans@redhat.com> - 1.24.0-1
-- Update to 1.24.0
-
-* Thu Jan 25 2024 Gwyn Ciesla <gwync@protonmail.com> - 1.22.9-1
-- 1.22.9
-
-* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.22.8-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sat Jan 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.22.8-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Mon Dec 18 2023 Gwyn Ciesla <gwync@protonmail.com> - 1.22.8-1
-- 1.22.8
-
-* Mon Nov 20 2023 Wim Taymans <wtaymans@redhat.com> - 1.22.7-2
-- Set cap information correctly
-- Resolves: rhbz#2238703
-
-* Mon Nov 13 2023 Gwyn Ciesla <gwync@protonmail.com> - 1.22.7-1
-- 1.22.7
-
-* Wed Sep 20 2023 Gwyn Ciesla <gwync@protonmail.com> - 1.22.6-1
-- 1.22.6
-
-* Fri Jul 21 2023 Wim Taymans <wtaymans@redhat.com> - 1.22.5-1
-- Update to 1.22.5
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.22.4-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Tue Jun 20 2023 Gwyn Ciesla <gwync@protonmail.com> - 1.22.4-1
-- 1.22.4
-
-* Thu Jun 8 2023 Wim Taymans <wtaymans@redhat.com> - 1.22.3-2
-- Do setcap on gst-ptp-helper to give the right permissions.
-
-* Thu May 25 2023 Wim Taymans <wtaymans@redhat.com> - 1.22.3-1
-- Update to 1.22.3
-
-* Thu Apr 13 2023 Wim Taymans <wtaymans@redhat.com> - 1.22.2-1
-- Update to 1.22.2
-
-* Mon Mar 13 2023 Wim Taymans <wtaymans@redhat.com> - 1.22.1-1
-- Update to 1.22.1
-
-* Tue Jan 24 2023 Wim Taymans <wtaymans@redhat.com> - 1.22.0-1
-- Update to 1.22.0
-
-* Fri Jan 20 2023 Wim Taymans <wtaymans@redhat.com> - 1.21.90-1
-- Update to 1.21.90
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.20.5-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Wed Jan 11 2023 Wim Taymans <wtaymans@redhat.com> - 1.20.5-1
-- Update to 1.20.5
-
-* Thu Oct 13 2022 Wim Taymans <wtaymans@redhat.com> - 1.20.4-1
-- Update to 1.20.4
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.20.3-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Mon Jul 18 2022 Wim Taymans <wtaymans@redhat.com> - 1.20.3-1
-- Update to 1.20.3
-
-* Fri Feb 4 2022 Wim Taymans <wtaymans@redhat.com> - 1.20.0-1
-- Update to 1.20.0
-
-* Wed Jan 26 2022 Wim Taymans <wtaymans@redhat.com> - 1.19.3-3
-- Fix build, gtk_doc does not exist anymore.
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.19.3-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Nov 11 2021 Wim Taymans <wtaymans@redhat.com> - 1.19.3-1
-- Update to 1.19.3
-
-* Thu Sep 23 2021 Wim Taymans <wtaymans@redhat.com> - 1.19.2-1
-- Update to 1.19.2
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.19.1-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Thu Jun 03 2021 Wim Taymans <wtaymans@redhat.com> - 1.19.1-1
-- Update to 1.19.1
-
-* Tue Apr 6 2021 Wim Taymans <wtaymans@redhat.com> - 1.18.4-2
-- Fix build options to disable libunwind and libdw
-
-* Tue Mar 16 2021 Wim Taymans <wtaymans@redhat.com> - 1.18.4-1
-- Update to 1.18.4
-
-* Tue Feb 23 2021 Wim Taymans <wtaymans@redhat.com> - 1.18.2-3
-- Use libunwind only on fedora
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.18.2-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Thu Dec 10 2020 Wim Taymans <wtaymans@redhat.com> - 1.18.2-1
-- Update to 1.18.2
-
-* Fri Oct 30 2020 Wim Taymans <wtaymans@redhat.com> - 1.18.1-1
-- Update to 1.18.1
-
-* Tue Sep 8 2020 Wim Taymans <wtaymans@redhat.com> - 1.18.0-1
-- Update to 1.18.0
-
-* Fri Aug 21 2020 Wim Taymans <wtaymans@redhat.com> - 1.17.90-1
-- Update to 1.17.90
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.17.2-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Mon Jul 6 2020 Wim Taymans <wtaymans@redhat.com> - 1.17.2-1
-- Update to 1.17.2
-
-* Mon Jun 22 2020 Wim Taymans <wtaymans@redhat.com> - 1.17.1-2
-- Enable debug again
-
-* Mon Jun 22 2020 Wim Taymans <wtaymans@redhat.com> - 1.17.1-1
-- Update to 1.17.1
-- Update to meson build
-- Disable docs because it needs Hotdoc, which is not in Fedora yet
-- remove BuildRequires: for gtk-doc and autoconf related things
-- Add BuildRequires: for libunwind-devel, elfutils-devel, bash-completion
+* Mon Jun 14 2021 Thomas Crain <thcrain@microsoft.com> - 1.16.2-3
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+- Conditionally build tex-based documentation, and turn off documentation building by default
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.16.2-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

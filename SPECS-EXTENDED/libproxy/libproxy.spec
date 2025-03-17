@@ -1,21 +1,23 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global _privatelibs libpxbackend-1.0[.]so.*
 %global __provides_exclude ^(%{_privatelibs})$
 %global __requires_exclude ^(%{_privatelibs})$
-
+ 
 Name:           libproxy
 Version:        0.5.8
 Release:        1%{?dist}
 Summary:        A library handling all the details of proxy configuration
-
+ 
 License:        LGPL-2.1-or-later
 URL:            https://libproxy.github.io/libproxy/
 Source0:        https://github.com/libproxy/%{name}/archive/refs/tags/%{version}.tar.gz
-
+ 
 BuildRequires:  gcc
 BuildRequires:  meson
-BuildRequires:  /usr/bin/gi-docgen
+#BuildRequires:  /usr/bin/gi-docgen
 BuildRequires:  /usr/bin/vapigen
-
+ 
 BuildRequires:  pkgconfig(duktape)
 BuildRequires:  pkgconfig(gio-2.0) >= 2.71.3
 BuildRequires:  pkgconfig(gobject-introspection-1.0)
@@ -23,41 +25,42 @@ BuildRequires:  pkgconfig(libcurl)
 BuildRequires:  python3-devel
 # For config-gnome
 BuildRequires:  pkgconfig(gsettings-desktop-schemas)
-
-
+ 
+ 
 %description
 libproxy offers the following features:
-
+ 
     * extremely small core footprint
     * minimal dependencies within libproxy core
     * only 4 functions in the stable-ish external API
     * dynamic adjustment to changing network topology
     * a standard way of dealing with proxy settings across all scenarios
     * a sublime sense of joy and accomplishment
-
-
+ 
+ 
 %package        bin
 Summary:        Binary to test %{name}
 Requires:       %{name}%{?_isa} = %{version}-%{release}
-
+ 
 %description    bin
 The %{name}-bin package contains the proxy binary for %{name}
-
+ 
 %package        devel
 Summary:        Development files for %{name}
 Requires:       %{name}%{?_isa} = %{version}-%{release}
-
+ 
 %description    devel
 The %{name}-devel package contains libraries and header files for
 developing applications that use %{name}.
-
+ 
 %prep
 %autosetup -p1
-
-
+ 
+ 
 %build
 %meson \
-  -Dconfig-gnome=true \
+  -Ddocs=false \
+  -Dconfig-gnome=false \
   -Dconfig-kde=true \
   -Dconfig-osx=false \
   -Dconfig-windows=false \
@@ -65,15 +68,12 @@ developing applications that use %{name}.
   -Dtests=true \
   -Dvapi=true
 %meson_build
-
-
+ 
 %install
 %meson_install
-
-
+ 
 %check
 %meson_test
-
 %ldconfig_scriptlets
 
 
@@ -85,13 +85,13 @@ developing applications that use %{name}.
 %{_libdir}/libproxy.so.*
 %dir %{_libdir}/libproxy
 %{_libdir}/libproxy/libpxbackend-1.0.so
-
+ 
 %files bin
 %{_bindir}/proxy
 %{_mandir}/man8/proxy.8*
-
+ 
 %files devel
-%{_docdir}/libproxy-1.0/
+#%{_docdir}/libproxy-1.0/
 %{_includedir}/libproxy/
 %{_libdir}/libproxy.so
 %{_libdir}/pkgconfig/libproxy-1.0.pc
@@ -103,71 +103,13 @@ developing applications that use %{name}.
 
 
 %changelog
-* Fri Jul 26 2024 David King <amigadave@amigadave.com> - 0.5.8-1
-- Update to 0.5.8
+* Tue Nov 12 2024 Sumit Jena <v-sumitjena@microsoft.com> - 0.5.8-1
+- Update to version 0.5.8
 
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.5.7-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
-
-* Tue Jul 02 2024 David King <amigadave@amigadave.com> - 0.5.7-1
-- Update to 0.5.7 (#2295027)
-
-* Mon Apr 08 2024 David King <amigadave@amigadave.com> - 0.5.5-1
-- Update to 0.5.5 (#2273961)
-
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.5.3-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.5.3-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Nov 02 2023 David King <amigadave@amigadave.com> - 0.5.3-3
-- Install a versioned library symlink (#2247508)
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.5.3-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Fri Jul 07 2023 David King <amigadave@amigadave.com> - 0.5.3-1
-- Update to 0.5.3
-
-* Sun Jun 18 2023 David King <amigadave@amigadave.com> - 0.5.2-1
-- Update to 0.5.2
-
-* Wed May 24 2023 David King <amigadave@amigadave.com> - 0.5.1-1
-- Update to 0.5.1
-
-* Tue May 23 2023 David King <amigadave@amigadave.com> - 0.5.0-3
-- Fix libproxy rpath (#2209173)
-
-* Mon May 22 2023 Adam Williamson <awilliam@redhat.com> - 0.5.0-2
-- Add missing obsolete/provide for libproxy-duktape
-
-* Tue May 16 2023 David King <amigadave@amigadave.com> - 0.5.0-1
-- Update to 0.5.0
-
-* Wed Feb 08 2023 Yaakov Selkowitz <yselkowi@redhat.com> - 0.4.18-6
-- Soften KDE dependency
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.4.18-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Fri Dec 16 2022 František Zatloukal <fzatlouk@redhat.com> - 0.4.18-4
-- Rebuilt for duktape 2.7.0
-
-* Wed Jul 20 2022 Michael Catanzaro <mcatanzaro@redhat.com> - 0.4.18-3
-- Replace WebKitGTK pacrunner backend with duktape
-
-* Tue Jul 19 2022 Milan Crha <mcrha@redhat.com> - 0.4.18-2
-- Change WebKitGTK API dependency to 4.1 (using libsoup3)
-
-* Tue Jun 21 2022 David King <amigadave@amigadave.com> - 0.4.18-1
-- Update to 0.4.18
-
-* Mon Jun 20 2022 David King <amigadave@amigadave.com> - 0.4.17-6
-- Accept Python 3.11 (#2098739)
-
-* Mon Mar 28 2022 David King <amigadave@amigadave.com> - 0.4.17-5
-- Fix build (#2069137)
+* Wed Mar 02 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.4.17-5
+- Initial CBL-Mariner import from Fedora 36 (license: MIT).
+- Enabling 'gnome' and 'kde' subpackages.
+- License verified.
 
 * Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.4.17-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild

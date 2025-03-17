@@ -2,12 +2,14 @@
 
 Name:      python-%{srcname}
 Version:   0.15.2
-Release:   1%{?dist}
+Release:   2%{?dist}
 Summary:   Python data validation library
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 
 License:   BSD-3-Clause
-URL:       http://github.com/alecthomas/voluptuous
-Source0:   %{pypi_source}
+URL:       https://github.com/alecthomas/voluptuous
+Source0:   %{pypi_source}#/%{name}-%{version}.tar.gz
 BuildArch: noarch
 
 %global _description %{expand:
@@ -19,8 +21,10 @@ primarily intended for validating data coming into Python as JSON, YAML, etc.}
 %package -n python3-%{srcname}
 Summary: %{summary}
 BuildRequires: python3-devel
-BuildRequires: %{py3_dist setuptools}
-BuildRequires: %{py3_dist pytest}
+BuildRequires:  python3dist(wheel)
+BuildRequires:  python3-pip
+BuildRequires: python3-setuptools
+BuildRequires: python3-pytest
 
 %description -n python3-%{srcname} %_description
 
@@ -46,6 +50,10 @@ BuildRequires: %{py3_dist pytest}
 %license COPYING
 
 %changelog
+* Wed Feb 12 2025 Archana Shettigar <v-shettigara@microsoft.com> - 0.15.2-2
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Wed Aug 21 2024 Sergio Pascual <sergiopr@fedoraproject.org> - 0.15.2-1
 - New upstream source 0.15.2
 

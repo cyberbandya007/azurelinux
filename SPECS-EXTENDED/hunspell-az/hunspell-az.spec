@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %if 0%{?fedora} >= 36 || 0%{?rhel} > 9
 %global dict_dirname hunspell
 %else
@@ -9,7 +11,7 @@ Summary: Azerbaijani hunspell dictionaries
 # date is derived from upstream az.dic file timestamp
 %global upstreamid 20180807
 Version: 0.%{upstreamid}
-Release: 5%{?dist}
+Release: 6%{?dist}
 Source: https://github.com/mozillaz/spellchecker/archive/refs/heads/master.zip#/azerbaijani_spellchecker-0.2.zip
 URL: https://github.com/mozillaz/spellchecker/
 License: MPL-2.0
@@ -37,6 +39,10 @@ cp -p dictionaries/*.aff $RPM_BUILD_ROOT/%{_datadir}/%{dict_dirname}/az_AZ.aff
 %{_datadir}/%{dict_dirname}/*
 
 %changelog
+* Tue Dec 17 2024 Akarsh Chaudhary <v-akarshc@microsoft.com> - 0.20180807-6
+- AzureLinux import from Fedora 42
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.20180807-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

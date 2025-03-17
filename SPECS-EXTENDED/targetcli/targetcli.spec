@@ -4,7 +4,9 @@ Name:           targetcli
 License:        Apache-2.0
 Summary:        An administration shell for storage targets
 Version:        2.1.58
-Release:        3%{?dist}
+Release:        4%{?dist}
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://github.com/open-iscsi/%{oname}
 Source:         %{url}/archive/v%{version}/%{oname}-%{version}.tar.gz
 # Proposed upstream
@@ -47,6 +49,10 @@ install -m 644 systemd/* %{buildroot}%{_unitdir}/
 %dir %{_sysconfdir}/target/backup
 
 %changelog
+* Mon Jan 13 2025 Archana Shettigar <v-shettigara@microsoft.com> - 2.1.58-4
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License Verified
+
 * Sat Jul 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.1.58-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

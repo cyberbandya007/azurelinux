@@ -1,10 +1,12 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %define utempter_compat_ver 0.5.2
 
 Summary: A privileged helper for utmp/wtmp updates
 Name: libutempter
 Version: 1.2.1
-Release: 15%{?dist}
-License: LGPL-2.1-or-later AND LGPL-2.1-only AND BSD-2-Clause
+Release: 16%{?dist}
+License: LGPL-2.1-or-later AND LGPL-2.1-only
 URL: ftp://ftp.altlinux.org/pub/people/ldv/utempter
 
 Source0: ftp://ftp.altlinux.org/pub/people/ldv/utempter/%{name}-%{version}.tar.gz
@@ -60,6 +62,10 @@ groupadd -g 35 -r -f utempter || :
 %{_mandir}/man3/*
 
 %changelog
+* Mon Nov 18 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 1.2.1-16
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.1-15
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

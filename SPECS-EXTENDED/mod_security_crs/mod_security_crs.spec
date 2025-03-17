@@ -1,15 +1,15 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Summary: ModSecurity Rules
 Name: mod_security_crs
 Version: 4.2.0
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: Apache-2.0
 URL: https://coreruleset.org/
-Source: https://github.com/coreruleset/coreruleset/archive/refs/tags/v%{version}.tar.gz
+Source: https://github.com/coreruleset/coreruleset/archive/refs/tags/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
 BuildArch: noarch
-Requires: mod_security >= 2.9.6
+Provides: mod_security >= 2.9.6
 Obsoletes: mod_security_crs-extras < 3.0.0
-
-# Patch0: mod_security_crs-XXX.patch
 
 %description
 This package provides the base rules for mod_security.
@@ -47,6 +47,10 @@ done
 %{_datarootdir}/mod_modsecurity_crs
 
 %changelog
+* Mon Dec 30 2024 Aninda Pradhan <v-anipradhan@microsoft.com> - 4.2.0-3
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.2.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
@@ -204,5 +208,3 @@ done
 
 * Thu Apr 19 2012 Peter Vrabec <pvrabec@redhat.com> 2.2.4-1
 - initial package
-
-

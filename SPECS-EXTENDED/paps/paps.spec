@@ -1,13 +1,15 @@
 Name:           paps
 Version:        0.8.0
-Release:        11%{?dist}
+Release:        12%{?dist}
 
 License:        LGPL-2.0-or-later
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://github.com/dov/paps
-Source0:        https://github.com/dov/paps/archive/v%{name}/%{name}-%{version}.tar.gz
+Source0:        https://github.com/dov/paps/releases/download/v%{version}/%{name}-%{version}.tar.gz
 Source1:        paps.convs
 Source2:        29-paps.conf
-Source3:        http://downloads.sourceforge.net/%{name}/%{name}-0.6.8.tar.gz
+Source3:        https://downloads.sourceforge.net/%{name}/%{name}-0.6.8.tar.gz
 BuildRequires:  make
 BuildRequires:  pango-devel automake autoconf libtool doxygen cups-devel intltool
 BuildRequires:  fmt-devel gcc-c++
@@ -129,6 +131,9 @@ install -p -m0644 %{SOURCE1} $RPM_BUILD_ROOT%{_datadir}/cups/mime/
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/fonts/conf.d
 install -p -m0644 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/fonts/conf.d/
 
+install -d $RPM_BUILD_ROOT%{_licensedir}
+install COPYING.LIB $RPM_BUILD_ROOT%{_licensedir}/COPYING_1.LIB
+
 rm -rf $RPM_BUILD_ROOT%{_includedir}
 rm $RPM_BUILD_ROOT%{_libdir}/libpaps.so
 popd
@@ -138,7 +143,8 @@ make install DESTDIR=$RPM_BUILD_ROOT INSTALL="/usr/bin/install -p"
 %ldconfig_scriptlets libs
 
 %files
-%doc AUTHORS COPYING.LIB README
+%license COPYING.LIB
+%doc AUTHORS README
 %dir %{_datadir}/paps
 %{_bindir}/paps
 %{_bindir}/src-to-paps
@@ -146,7 +152,8 @@ make install DESTDIR=$RPM_BUILD_ROOT INSTALL="/usr/bin/install -p"
 %{_mandir}/man1/paps.1*
 
 %files -n texttopaps
-%doc %{name}-0.6.8/COPYING.LIB %{name}-0.6.8/AUTHORS %{name}-0.6.8/README
+%license %{_licensedir}/COPYING_1.LIB
+%doc %{name}-0.6.8/AUTHORS %{name}-0.6.8/README
 %{_mandir}/man1/texttopaps.1*
 %{_libdir}/libpaps.so.*
 %{_cups_serverbin}/filter/texttopaps
@@ -155,6 +162,10 @@ make install DESTDIR=$RPM_BUILD_ROOT INSTALL="/usr/bin/install -p"
 
 
 %changelog
+* Wed Dec 18 2024 Jyoti kanase <v-jykanase@microsoft.com> -    0.8.0 -12
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Fri Sep 13 2024 Akira TAGOH <tagoh@redhat.com> - 0.8.0-11
 - Fix build with glib 2.82
   Patch from Yaakov Selkowitz

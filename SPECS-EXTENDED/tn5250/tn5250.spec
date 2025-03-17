@@ -1,9 +1,14 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+# workaround https://bugzilla.redhat.com/show_bug.cgi?id=1290742
+%undefine _hardened_build
+
 Summary:   5250 Telnet protocol and Terminal
 Name:      tn5250
 Version:   0.17.6
-Release:   3%{?dist}
+Release:   4%{?dist}
 # doc/tn5250*.1 are GPLv2+
-License:   LGPL-2.1-or-later AND GPL-2.0-or-later
+License:   LGPL-2.1-or-later
 URL:       https://github.com/tn5250/tn5250
 Source:    %{url}/archive/v%{version}/%{name}-%{version}.tar.gz
 Source1:   xt5250.desktop
@@ -85,6 +90,10 @@ cp -pf linux/README README.Linux
 
 
 %changelog
+* Mon Jan 13 2025 Archana Shettigar <v-shettigara@microsoft.com> - 0.17.6-4
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Sat Jul 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.17.6-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

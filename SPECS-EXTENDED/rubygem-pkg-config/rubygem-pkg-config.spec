@@ -5,16 +5,18 @@
 
 Summary:	A pkg-config implementation by Ruby
 Name:		rubygem-%{gem_name}
-Version:	1.5.8
-Release:	1%{?dist}
+Version:	1.5.7
+Release:	2%{?dist}
 # SPDX confirmed
 License:	LGPL-2.0-or-later
-URL:		http://github.com/rcairo/pkg-config
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+URL:		https://github.com/rcairo/pkg-config
 
-Source0:	http://rubygems.org/gems/%{gem_name}-%{version}.gem
+Source0:	https://github.com/ruby-gnome/%{gem_name}/archive/refs/tags/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 # Observe test failure on test_cflags test_cflags_only_I
 # with pkgconf 1.4.2
-Patch0:	rubygem-pkg-config-1.4.4-cflags-result-sort.patch
+Patch0:		rubygem-pkg-config-1.4.4-cflags-result-sort.patch
 
 Requires:	ruby(release)
 BuildRequires:	ruby(release)
@@ -25,7 +27,6 @@ BuildRequires:	rubygem(test-unit)
 BuildRequires:	ruby-devel
 BuildRequires:	cairo-devel
 Requires:	rubygems
-
 BuildArch:	noarch
 Provides:	rubygem(%{gem_name}) = %{version}-%{release}
 
@@ -40,13 +41,10 @@ Requires:	%{name} = %{version}-%{release}
 This package contains documentation for %{name}.
 
 %prep
-%setup -q -n %{gem_name}-%{version}
-mv ../%{gem_name}-%{version}.gemspec .
-
-%patch -P0 -p1
+%autosetup -p1 -n %{gem_name}-%{version}
 
 %build
-gem build ./%{gem_name}-%{version}.gemspec
+gem build %{gem_name}
 %gem_install
 
 %install
@@ -83,8 +81,9 @@ popd
 %{gem_docdir}
 
 %changelog
-* Thu Dec 05 2024 Mamoru TASAKA <mtasaka@fedoraproject.org> - 1.5.8-1
-- 1.5.8
+* Fri Dec 20 2024 Akhila Guruju <v-guakhila@microsoft.com> - 1.5.7-2
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
 
 * Fri Oct 25 2024 Mamoru TASAKA <mtasaka@fedoraproject.org> - 1.5.7-1
 - 1.5.7

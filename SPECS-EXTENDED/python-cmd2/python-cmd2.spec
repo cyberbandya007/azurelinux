@@ -1,13 +1,16 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+
 %global pypi_name cmd2
 
 Name:             python-%{pypi_name}
 Version:          2.4.2
-Release:          8%{?dist}
+Release:          9%{?dist}
 Summary:          Extra features for standard library's cmd module
 
 License:          MIT
 URL:              https://pypi.python.org/pypi/cmd2
-Source0:          %{pypi_source}
+Source0:          https://files.pythonhosted.org/packages/39/a0/830934f19f07e77c7d332fd5b41358611afc8d33d8cea78259b9a5d7f8ef/cmd2-2.4.2.tar.gz#/python-cmd2-2.4.2.tar.gz
 BuildArch:        noarch
 
 %global _description\
@@ -64,6 +67,10 @@ Requires:         /usr/bin/which
 %{python3_sitelib}/%{pypi_name}-%{version}*
 
 %changelog
+* Wed Dec 20 2024 Sumit Jena <v-sumitjena@microsoft.com> - 2.4.2-9
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.2-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

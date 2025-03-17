@@ -1,20 +1,29 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+
 %global pypi_name openstackdocstheme
 
 Name:           python-%{pypi_name}
 Version:        3.0.0
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        OpenStack Docs Theme
 
-License:        ASL 2.0
-URL:            http://docs.openstack.org/
-Source0:        %{pypi_source}
+License:        Apache-2.0
+URL:            https://docs.openstack.org/
+Source0:        %{pypi_source}#/%{name}-%{version}.tar.gz
 Patch0001:      0001-Remove-all-Google-Analytics-tracking.patch
 BuildArch:      noarch
 
 BuildRequires:  python3-devel
 BuildRequires:  pyproject-rpm-macros
 BuildRequires:  python3-sphinx
+BuildRequires:  python3-setuptools
+BuildRequires:  python3-pbr
+BuildRequires:  python3-dulwich
+BuildRequires:  python3-pip
+BuildRequires:  python3-extras
 BuildRequires:  git-core
+BuildRequires:  python3dist(wheel)
 
 %global common_desc \
 OpenStack docs.openstack.org Sphinx Theme\
@@ -77,6 +86,10 @@ rm -rf html/.{doctrees,buildinfo}
 %doc doc/build/html
 
 %changelog
+* Wed Feb 19 2025 Archana Shettigar <v-shettigara@microsoft.com> - 3.0.0-9
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.0-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

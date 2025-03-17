@@ -1,24 +1,10 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global _hardened_build 1
 
 Name:    ppp
-# Please be careful when bumping the ppp version. Several packages
-# have version-tied dependencies on it, including NetworkManager-ppp
-# (from NetworkManager) and NetworkManager-pptp , which are core
-# packages. They may need code changes to build against new ppp
-# versions. Please only bump ppp on a side tag and ensure it also
-# contains rebuilds of at least those two packages before merging.
-# Several other less important packages are also tied to the ppp
-# version, as of 2023-04-19 the list is:
-# NetworkManager-fortisslvpn
-# NetworkManager-l2tp
-# NetworkManager-ppp
-# NetworkManager-pptp
-# NetworkManager-sstp
-# sstp-client
-# These all need to be patched (if necessary) and rebuilt for new
-# versions of ppp.
 Version: 2.5.0
-Release: 13%{?dist}
+Release: 1%{?dist}
 Summary: The Point-to-Point Protocol daemon
 License: bsd-3-clause AND zlib AND licenseref-fedora-public-domain AND bsd-attribution-hpnd-disclaimer AND bsd-4.3tahoe AND bsd-4-clause-uc AND apache-2.0 AND lgpl-2.0-or-later AND (gpl-2.0-or-later OR bsd-2-clause OR bsd-3-clause OR bsd-4-clause) AND gpl-2.0-or-later AND xlock AND gpl-1.0-or-later AND mackerras-3-clause-acknowledgment AND mackerras-3-clause AND hpnd-fenneberg-Livingston AND sun-ppp AND hpnd-inria-imag AND sun-ppp-2000
 URL:     http://www.samba.org/ppp
@@ -54,15 +40,11 @@ BuildRequires: systemd
 BuildRequires: systemd-devel
 BuildRequires: glib2-devel
 BuildRequires: openssl-devel
-%if %{defined rhel}
-Provides: bundled(linux-atm) = 2.4.1
-%else
-BuildRequires: linux-atm-libs-devel
-%endif
 
+Provides: bundled(linux-atm) = 2.4.1
 Requires: glibc >= 2.0.6
 Requires: /etc/pam.d/system-auth
-Requires: libpcap >= 14:0.8.3-6
+Requires: libpcap >= 0.8.3-6
 Requires: systemd
 Requires(pre): /usr/bin/getent
 Requires(pre): /usr/sbin/groupadd
@@ -76,6 +58,7 @@ documentation for PPP support. The PPP protocol provides a method for
 transmitting datagrams over serial point-to-point links. PPP is
 usually used to dial in to an ISP (Internet Service Provider) or other
 organization over a modem and phone line.
+
 
 %package devel
 Summary: Headers for ppp plugin development
@@ -187,104 +170,21 @@ mv %{buildroot}/usr/sbin/ppp-watch %{buildroot}%{_bindir}/
 %{_libdir}/pkgconfig/pppd.pc
 
 %changelog
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.5.0-13
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Mar 10 2025 Jyoti kanase <v-jykanase@microsoft.com> - 2.5.0-1
+- Upgrade to 2.5.0
+- License verified.
 
-* Tue Jul 09 2024 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 2.5.0-12
-- Rebuilt for the bin-sbin merge
+* Thu Mar 25 2021 Thomas Crain <thcrain@microsoft.com> - 2.4.7-36
+- Remove epoch from minimum supported libpcap version
 
-* Mon Jun 24 2024 Jaroslav Škarvada <jskarvad@redhat.com> - 2.5.0-11
-- Fixed radiusclient parser
+* Tue Mar 23 2021 Henry Li <lihl@microsoft.com> - 2.4.7-36
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+- Modify patch to install pppd binaries at /usr/lib instead of /usr/lib64
 
-* Wed Jun 12 2024 Jaroslav Škarvada <jskarvad@redhat.com> - 2.5.0-10
-- Openssl engine API is deprecated for a while thus disable it
-
-* Thu May  9 2024 Jaroslav Škarvada <jskarvad@redhat.com> - 2.5.0-9
-- Pre-created upstream default lock dir
-
-* Sun Apr 14 2024 Jaroslav Škarvada <jskarvad@redhat.com> - 2.5.0-8
-- Added missing and recently approved SPDX licenses
-
-* Wed Feb 21 2024 Kalev Lember <klember@redhat.com> - 2.5.0-7
-- Obsolete dropped network-scripts-ppp subpackage
-
-* Tue Feb 13 2024 Jaroslav Škarvada <jskarvad@redhat.com> - 2.5.0-6
-- Dropped network scripts
-  Resolves: rhbz#2262981
-
-* Wed Jan 24 2024 Jaroslav Škarvada <jskarvad@redhat.com> - 2.5.0-5
-- Converted license to SPDX
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.5.0-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Tue Jul 25 2023 Yaakov Selkowitz <yselkowi@redhat.com> - 2.5.0-3
-- Use bundled ATM in RHEL builds
-
-* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.5.0-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Thu Apr 13 2023 Jaroslav Škarvada <jskarvad@redhat.com> - 2.5.0-1
-- New version
-  Resolves: rhbz#2184291
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.9-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.9-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Tue Apr 05 2022 Marcin Zajaczkowski <mszpak ATT wp DOTT pl> - 2.4.9-7
-- Backport patches from master for SSTP to connect using EAP-TLS to Azure VnetGWay and Windows RAS server
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.9-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Tue Sep 14 2021 Sahana Prasad <sahana@redhat.com> - 2.4.9-5
-- Rebuilt with OpenSSL 3.0.0
-
-* Fri Jul 23 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.9-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Mon Mar  8 2021 Jaroslav Škarvada <jskarvad@redhat.com> - 2.4.9-3
-- Keep lock files in /var/lock (https://github.com/ppp-project/ppp/pull/227)
-
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.9-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jan  5 2021 Jaroslav Škarvada <jskarvad@redhat.com> - 2.4.9-1
-- New version
-  Resolves: rhbz#1912617
-
-* Mon Aug 10 2020 Jaroslav Škarvada <jskarvad@redhat.com> - 2.4.8-8
-- Added workaround for Windows Server 2019
-  Resolves: rhbz#1867047
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.8-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Thu May 21 2020 Jaroslav Škarvada <jskarvad@redhat.com> - 2.4.8-6
-- Added missing options to man pages
-
-* Tue Apr  7 2020 Jaroslav Škarvada <jskarvad@redhat.com> - 2.4.8-5
+* Tue Apr  7 2020 Jaroslav Škarvada <jskarvad@redhat.com> - 2.4.7-35
 - Updated EAP-TLS patch to v1.300
 
-* Mon Apr  6 2020 Jaroslav Škarvada <jskarvad@redhat.com> - 2.4.8-4
-- Updated EAP-TLS patch to v1.201
-
-* Fri Feb 28 2020 Tom Stellard <tstellar@redhat.com> - 2.4.8-3
-- Use make_build macro
-- https://docs.fedoraproject.org/en-US/packaging-guidelines/#_parallel_make
-
-* Wed Feb 26 2020 Jaroslav Škarvada <jskarvad@redhat.com> - 2.4.8-2
-- Fixed ghost directories verification
-
-* Fri Feb 21 2020 Jaroslav Škarvada <jskarvad@redhat.com> - 2.4.8-1
-- New version
-- Changed sources to github
-- Dropped 0028-pppoe-include-netinet-in.h-before-linux-in.h,
-  ppp-2.4.7-DES-openssl, ppp-2.4.7-honor-ldflags,
-  ppp-2.4.7-coverity-scan-fixes  patches (all upstreamed)
+* Fri Feb 21 2020 Jaroslav Škarvada <jskarvad@redhat.com> - 2.4.7-34
 - Fixed buffer overflow in the eap_request and eap_response functions
   Resolves: CVE-2020-8597
 

@@ -1,8 +1,10 @@
 %global tarball_version %%(echo %{version} | tr '~' '.')
 
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:          yelp-tools
 Version:       42.1
-Release:       6%{?dist}
+Release:       7%{?dist}
 Summary:       Create, manage, and publish documentation for Yelp
 
 License:       GPL-2.0-or-later
@@ -49,6 +51,10 @@ wraps things up in a developer-friendly way.
 %{_datadir}/aclocal/yelp.m4
 
 %changelog
+* Thu Jan 16 2025 Archana Shettigar <v-shettigara@microsoft.com> - 42.1-7
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License Verified
+
 * Sat Jul 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 42.1-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

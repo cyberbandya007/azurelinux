@@ -1,15 +1,15 @@
 %global		gittag	4_1_1
-
+Summary:        Open Geographic Datastore Interface
 Name:		ogdi
 Version:	4.1.1
-Release:	2%{?dist}
-Summary:	Open Geographic Datastore Interface
+Release:	3%{?dist}
 License:	BSD
-URL:		http://ogdi.sourceforge.net/
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+URL:		https://ogdi.sourceforge.net/
 # new project location is https://github.com/libogdi/ogdi
-Source0:	https://github.com/libogdi/ogdi/archive/%{name}_%{gittag}.tar.gz
-Source1:	http://ogdi.sourceforge.net/ogdi.pdf
-# https://bugzilla.redhat.com/show_bug.cgi?id=1470896
+Source0:	https://github.com/libogdi/ogdi/archive/%{name}_%{gittag}.tar.gz#/%{name}-%{version}.tar.gz
+Source1:	https://ogdi.sourceforge.net/ogdi.pdf
 Patch0:		ogdi-4.1.0-sailer.patch
 
 BuildRequires:	make
@@ -37,7 +37,8 @@ data products/formats.
 Summary:	OGDI header files and documentation
 Requires:	%{name} = %{version}-%{release}
 Requires:	pkgconfig
-Requires:	zlib-devel expat-devel
+Requires:	zlib-devel
+Requires:      expat-devel
 
 %description devel
 OGDI header files and developer's documentation.
@@ -158,6 +159,10 @@ touch -r ogdi-config.in %{buildroot}%{_bindir}/%{name}-config
 
 
 %changelog
+* Wed Dec 11 2024 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 4.1.1-3
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License Verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

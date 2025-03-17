@@ -1,13 +1,16 @@
 # Perform tests that need the Internet
 %bcond_with perl_LWP_Protocol_https_enables_internet_test
 
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           perl-LWP-Protocol-https
 Version:        6.14
-Release:        2%{?dist}
+Release:        1%{?dist}
 Summary:        Provide HTTPS support for LWP::UserAgent
-License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+License:        GPL+ or Artistic
 URL:            https://metacpan.org/release/LWP-Protocol-https
-Source0:        https://cpan.metacpan.org/authors/id/O/OA/OALDERS/LWP-Protocol-https-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/O/OA/OALDERS/LWP-Protocol-https-%{version}.tar.gz#/perl-LWP-Protocol-https-%{version}.tar.gz
+
 BuildArch:      noarch
 BuildRequires:  coreutils
 BuildRequires:  make
@@ -18,8 +21,7 @@ BuildRequires:  perl(ExtUtils::MakeMaker) >= 6.76
 BuildRequires:  perl(strict)
 BuildRequires:  perl(warnings)
 # Run-time:
-BuildRequires:  perl(parent)
-BuildRequires:  perl(IO::Socket::SSL) >= 1.970
+BuildRequires:  perl(base)
 BuildRequires:  perl(LWP::Protocol::http)
 BuildRequires:  perl(LWP::Protocol::http::SocketMethods)
 BuildRequires:  perl(Mozilla::CA) >= 20180117
@@ -40,6 +42,7 @@ BuildRequires:  perl(Test::RequiresInternet)
 # Optional tests:
 BuildRequires:  perl(IO::Socket::SSL) >= 1.953
 BuildRequires:  perl(IO::Socket::SSL::Utils)
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 Requires:       perl(IO::Socket::SSL) >= 1.54
 Requires:       perl(Mozilla::CA) >= 20180117
 Requires:       perl(Net::HTTPS) >= 6
@@ -53,26 +56,12 @@ URLs with LWP. This module is a plug-in to the LWP protocol handling, so
 you don't use it directly. Once the module is installed LWP is able to
 access sites using HTTP over SSL/TLS.
 
-%package tests
-Summary:        Tests for %{name}
-Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       perl-Test-Harness
-
-%description tests
-Tests from %{name}. Execute them
-with "%{_libexecdir}/%{name}/test".
-
 %prep
-%setup -q -n LWP-Protocol-https-%{version}
+%autosetup -n LWP-Protocol-https-%{version}
 %if !%{with perl_LWP_Protocol_https_enables_internet_test}
 rm t/example.t
 perl -i -ne 'print $_ unless m{^t/example.t}' MANIFEST
 %endif
-# Help generators to recognize Perl scripts
-for F in $(find t/ -name '*.t'); do
-    perl -i -MConfig -ple 'print $Config{startperl} if $. == 1 && !s{\A#!\s*perl}{$Config{startperl}}' "$F"
-    chmod +x "$F"
-done
 
 %build
 perl Makefile.PL NO_PACKLIST=1 NO_PERLLOCAL=1 INSTALLDIRS=vendor
@@ -80,16 +69,7 @@ perl Makefile.PL NO_PACKLIST=1 NO_PERLLOCAL=1 INSTALLDIRS=vendor
 
 %install
 %{make_install}
-# Install tests
-mkdir -p %{buildroot}%{_libexecdir}/%{name}
-cp -a t %{buildroot}%{_libexecdir}/%{name}
-rm -f %{buildroot}%{_libexecdir}/%{name}/t/00*
-cat > %{buildroot}%{_libexecdir}/%{name}/test << 'EOF'
-#!/bin/sh
-cd %{_libexecdir}/%{name} && exec prove -I . -j "$(getconf _NPROCESSORS_ONLN)" -r
-EOF
-chmod +x %{buildroot}%{_libexecdir}/%{name}/test
-%{_fixperms} %{buildroot}/*
+%{_fixperms} $RPM_BUILD_ROOT/*
 
 %check
 make test
@@ -100,73 +80,24 @@ make test
 %{perl_vendorlib}/*
 %{_mandir}/man3/*
 
-%files tests
-%{_libexecdir}/%{name}
-
 %changelog
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 6.14-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Tue Dec 24 2024 Kevin Lockwood <v-klockwood@microsoft.com> - 6.14-1
+- Update to 6.14
+- License verified.
 
-* Mon Mar 11 2024 Michal Josef Špaček <mspacek@redhat.com> - 6.14-1
-- 6.14 bump
-
-* Tue Feb 06 2024 Michal Josef Špaček <mspacek@redhat.com> - 6.13-1
-- 0.13 bump
-
-* Wed Jan 24 2024 Michal Josef Špaček <mspacek@redhat.com> - 6.12-1
-- 0.12 bump
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 6.11-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Mon Jul 24 2023 Michal Josef Špaček <mspacek@redhat.com> - 6.11-1
-- 6.11 bump
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 6.10-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 6.10-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Dec 08 2022 Michal Josef Špaček <mspacek@redhat.com> - 6.10-8
-- Package tests
-- Update license to SPDX format
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 6.10-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Wed Jun 01 2022 Jitka Plesnikova <jplesnik@redhat.com> - 6.10-6
-- Perl 5.36 rebuild
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 6.10-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 6.10-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 6.10-3
-- Perl 5.34 rebuild
-
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 6.10-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+* Fri Jan 29 2021 Joe Schmitt <joschmit@microsoft.com> - 6.10-2
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+- Remove double buildrequire conditional
 
 * Fri Dec 18 2020 Petr Pisar <ppisar@redhat.com> - 6.10-1
 - 6.10 bump
 
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 6.09-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
 * Mon Jul 20 2020 Petr Pisar <ppisar@redhat.com> - 6.09-2
+- Disable tests that need the Internet by default
 - Remove unused build-time dependencies
 
 * Fri Jul 17 2020 Jitka Plesnikova <jplesnik@redhat.com> - 6.09-1
 - 6.09 bump
-
-* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 6.07-12
-- Perl 5.32 rebuild
-
-* Fri Feb 14 2020 Petr Pisar <ppisar@redhat.com> - 6.07-11
-- Disable tests that need the Internet by default
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 6.07-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

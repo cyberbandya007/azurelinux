@@ -1,12 +1,9 @@
-%if 0%{?fedora} || 0%{?epel} >= 9
-%bcond_without mingw
-%else
-%bcond_with mingw
-%endif
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 
 Name:           uriparser
 Version:        0.9.8
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        URI parsing library - RFC 3986
 
 # /test/ is under LGPL-2.1-or-later but not included in RPM
@@ -18,24 +15,15 @@ Source0:        https://github.com/%{name}/%{name}/releases/download/%{name}-%{v
 BuildRequires:  cmake
 BuildRequires:  doxygen
 BuildRequires:  gcc-c++
+BuildRequires:  gmock-devel
 BuildRequires:  graphviz
 BuildRequires:  gtest-devel
 BuildRequires:  make
-
-%if %{with mingw}
-BuildRequires:  mingw32-filesystem >= 95
-BuildRequires:  mingw32-gcc-c++
-
-BuildRequires:  mingw64-filesystem >= 95
-BuildRequires:  mingw64-gcc-c++
-%endif
-
 
 %description
 Uriparser is a strictly RFC 3986 compliant URI parsing library written
 in C. uriparser is cross-platform, fast, supports Unicode and is
 licensed under the New BSD license.
-
 
 %package devel
 Summary:        Development files for %{name}
@@ -45,34 +33,12 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 The %{name}-devel package contains libraries and header files for
 developing applications that use %{name}.
 
-
 %package doc
 Summary:        HTML documentation for %{name}
 BuildArch:      noarch
 
 %description doc
 The %{name}-doc package contains HTML documentation files for %{name}.
-
-
-%if %{with mingw}
-%package -n mingw32-%{name}
-Summary:       MinGW Windows %{name} library
-BuildArch:     noarch
-
-%description -n mingw32-%{name}
-MinGW Windows %{name} library.
-
-
-%package -n mingw64-%{name}
-Summary:       MinGW Windows %{name} library
-BuildArch:     noarch
-
-%description -n mingw64-%{name}
-MinGW Windows %{name} library.
-
-
-%{?mingw_debug_package}
-%endif
 
 
 %prep
@@ -87,20 +53,9 @@ sed -i 's/GENERATE_QHP\ =\ yes/GENERATE_QHP\ =\ no/g' doc/Doxyfile.in
 %cmake
 %cmake_build
 
-%if %{with mingw}
-# MinGW build
-%mingw_cmake -DURIPARSER_BUILD_TESTS=OFF -DURIPARSER_BUILD_DOCS=OFF
-%mingw_make_build
-%endif
-
 
 %install
 %cmake_install
-%if %{with mingw}
-%mingw_make_install
-%mingw_debug_install_post
-%endif
-
 
 %check
 %ctest
@@ -122,45 +77,14 @@ sed -i 's/GENERATE_QHP\ =\ yes/GENERATE_QHP\ =\ no/g' doc/Doxyfile.in
 %license COPYING
 %doc %{_docdir}/%{name}/html
 
-%if %{with mingw}
-%files -n mingw32-%{name}
-%license COPYING
-%{mingw32_bindir}/uriparse.exe
-%{mingw32_bindir}/lib%{name}-1.dll
-%{mingw32_includedir}/%{name}/
-%{mingw32_libdir}/lib%{name}.dll.a
-%{mingw32_libdir}/pkgconfig/lib%{name}.pc
-%{mingw32_libdir}/cmake/%{name}-%{version}/
-
-%files -n mingw64-%{name}
-%license COPYING
-%{mingw64_bindir}/uriparse.exe
-%{mingw64_includedir}/%{name}/
-%{mingw64_bindir}/lib%{name}-1.dll
-%{mingw64_libdir}/lib%{name}.dll.a
-%{mingw64_libdir}/pkgconfig/lib%{name}.pc
-%{mingw64_libdir}/cmake/%{name}-%{version}/
-%endif
-
-
 %changelog
-* Sat Jul 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.8-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Feb 17 2025 Sumit Jena <v-sumitjena@microsoft.com> - 0.9.8-3
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
 
-* Sun May 05 2024 Sandro Mani <manisandro@gmail.com> - 0.9.8-1
-- Update to 0.9.8
-
-* Sat Jan 27 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.7-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Fri Jan 19 2024 Neal Gompa <ngompa@fedoraproject.org> - 0.9.7-4
-- Move cmake files to the devel subpackage
-
-* Sat Jul 22 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.7-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Sat Jan 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.7-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+* Wed Aug 16 2023 Archana Choudhary <archana1@microsoft.com> - 0.9.7-2
+- Initial CBL-Mariner import from Fedora 37 (license: MIT).
+- License verified.
 
 * Fri Oct 07 2022 Sandro Mani <manisandro@gmail.com> - 0.9.7-1
 - Update to 0.9.7

@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 # Fedora spec file for librabbitmq
 #
 # Copyright (c) 2012-2024 Remi Collet
@@ -9,7 +11,7 @@
 
 %bcond_without      tests
 
-%global gh_commit   84b81cd97a1b5515d3d4b304796680da24c666d8
+%global gh_commit   124722b5045baa41a24ce2e2d7c52a47467e7ac0
 %global gh_short    %(c=%{gh_commit}; echo ${c:0:7})
 %global gh_owner    alanxz
 %global gh_project  rabbitmq-c
@@ -18,7 +20,7 @@
 
 Name:      %{libname}
 Summary:   Client library for AMQP
-Version:   0.15.0
+Version:   0.14.0
 Release:   1%{?dist}
 License:   MIT
 URL:       https://github.com/alanxz/rabbitmq-c
@@ -109,7 +111,7 @@ grep @ %{buildroot}%{_libdir}/pkgconfig/librabbitmq.pc && exit 1
 grep %{version} %{buildroot}%{_libdir}/pkgconfig/librabbitmq.pc || exit 1
 : check cmake files are usable
 grep static %{buildroot}%{_libdir}/cmake/rabbitmq-c/*.cmake && exit 1
-
+ 
 
 %if %{with tests}
 : upstream tests
@@ -145,69 +147,14 @@ make test
 
 
 %changelog
-* Thu Nov 21 2024 Remi Collet <remi@remirepo.net> - 0.15.0-1
-- update to 0.15.0
+* Tue Nov 12 2024 Sumit Jena <v-sumitjena@microsoft.com> - 0.14.0-1
+- Update to version 0.14.0
 
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.14.0-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Jan 24 2022 Thomas Crain <thcrain@microsoft.com> - 0.10.0-4
+- License verified
 
-* Tue Mar 26 2024 Remi Collet <remi@remirepo.net> - 0.14.0-2
-- update to 0.14.0
-- drop upstream patch
-- fix rpminspect rpmdeps
-
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.13.0-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.13.0-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.13.0-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Thu Jun 29 2023 Than Ngo <than@redhat.com> - 0.13.0-2
-- fix security issue, CVE-2023-35789
-
-* Mon Feb  6 2023 Remi Collet <remi@remirepo.net> - 0.13.0-1
-- update to 0.13.0
-- drop patches merged upstream
-
-* Wed Feb  1 2023 Remi Collet <remi@remirepo.net> - 0.12.0-1
-- update to 0.12.0
-- add patch to not install the static library, from
-  https://github.com/alanxz/rabbitmq-c/pull/749
-- add patch to fix version in pkgconfig file, from
-  https://github.com/alanxz/rabbitmq-c/pull/751
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.11.0-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.11.0-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.11.0-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Tue Sep 14 2021 Sahana Prasad <sahana@redhat.com> - 0.11.0-4
-- Rebuilt with OpenSSL 3.0.0
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.11.0-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Thu Apr  1 2021 Remi Collet <remi@remirepo.net> - 0.11.0-2
-- add patch to fix version in cmake file from
-  https://github.com/alanxz/rabbitmq-c/pull/667
-
-* Thu Apr  1 2021 Remi Collet <remi@remirepo.net> - 0.11.0-1
-- update to 0.11.0
-- add patch to not install the static library, from
-  https://github.com/alanxz/rabbitmq-c/pull/665
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.10.0-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Thu Aug 13 2020 Remi Collet <remi@remirepo.net> - 0.10.0-3
-- fix cmake macros usage, FTBFS #1863670
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.10.0-3
+- Initial CBL-Mariner import from Fedora 32 (license: CC-BY-SA).
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.10.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

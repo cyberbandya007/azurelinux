@@ -1,7 +1,7 @@
 {
  "Signatures": {
-  "facter-4.8.0.gem": "0950375502fc2ec8a0e55d89d4610be639f6ce5418ab6c5df2205e90e6af6084",
-  "facter-4.8.0.gem.asc": "53cb68dcba913b796bfb85ab07ee2598fab4d344e335a068e9d66e22f8f219a5",
+  "facter-4.9.0.gem": "7e2cc9a124724c8d5a6e8954179ade39d1d856d030d9549b681ac2bafd92629f",
+  "facter-4.9.0.gem.asc": "69cdbf4edb09ed4390529e7d7405ba0a469eb43682bb60e8f8fc0365a00c07f8",
   "puppet-gpg-signing-key-20250406.pub": "4d5a9c73f97235eebe8c69f728aa2efcc8e1ee02282f972efdbbbd3a430be454"
  }
 }

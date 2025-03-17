@@ -1,10 +1,12 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           perl-Business-ISBN-Data
 Version:        20240930.001
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The data pack for Business::ISBN
 License:        Artistic-2.0
 URL:            https://metacpan.org/release/Business-ISBN-Data
-Source0:        https://cpan.metacpan.org/modules/by-module/Business/Business-ISBN-Data-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/modules/by-module/Business/Business-ISBN-Data-%{version}.tar.gz#/perl-Business-ISBN-Data-%{version}.tar.gz
 BuildArch:      noarch
 # Module Build
 BuildRequires:  coreutils
@@ -26,6 +28,8 @@ BuildRequires:  perl(Data::Dumper)
 BuildRequires:  perl(Test::More) >= 0.95
 BuildRequires:  perl(Test::Pod) >= 1.00
 BuildRequires:  perl(Test::Pod::Coverage)
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
+
 # Dependencies
 # (none)
 
@@ -55,6 +59,10 @@ make test
 %{_mandir}/man3/Business::ISBN::Data.3*
 
 %changelog
+* Thu Dec 12 2024 Jyoti Kanase <v-jykanase@microsoft.com> - 20240930.001-2
+- Initial CBL-Mariner import from Fedora 41 (license: MIT).
+- License verified
+
 * Mon Sep 30 2024 Jitka Plesnikova <jplesnik@redhat.com> - 20240930.001-1
 - 20240930.001 bump (rhbz#2315652)
 

@@ -1,7 +1,11 @@
+%bcond_with tex_docs
+
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Summary:    A GNU program for formatting C code
 Name:       indent
 Version:    2.2.13
-Release:    8%{?dist}
+Release:    1%{?dist}
 # COPYING:                      GPL-3.0 text
 # doc/indent.texi:              Latex2e-translated-notice
 #                               (AND a subset of Latex2e WITH a texinfo-commented GPL clause;
@@ -134,7 +138,9 @@ BuildRequires:  gnupg2
 BuildRequires:  gperf
 BuildRequires:  make
 BuildRequires:  texinfo
+%if %{with tex_docs}
 BuildRequires:  texi2html
+%endif
 
 %description
 Indent is a GNU program for beautifying C code, so that it is easier to
@@ -171,7 +177,6 @@ autoreconf -i -f
 rm -f %{buildroot}%{_infodir}/dir %{buildroot}%{_bindir}/texinfo2man \
     %{buildroot}%{_datadir}/doc/indent/indent.html
 %find_lang %name
-
 %check
 make check %{?_smp_mflags}
 
@@ -183,49 +188,13 @@ make check %{?_smp_mflags}
 %{_infodir}/indent.info*
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.2.13-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Nov 11 2024 Sumit Jena <v-sumitjena@microsoft.com> - 2.2.13-1
+- Update to version 2.2.13
+- License verified
 
-* Wed Jan 24 2024 Petr Pisar <ppisar@redhat.com> - 2.2.13-7
-- Fix CVE-2024-0911 (a heap buffer underread in set_buf_break()) (bug #2259883)
-
-* Sat Jan 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.2.13-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Wed Aug 16 2023 Petr Pisar <ppisar@redhat.com> - 2.2.13-5
-- Fix a heap overread in search_brace/lexi
-- Fix CVE-2023-40305 (a heap buffer overwrite in search_brace) (bug #2231919)
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.2.13-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Mon Apr 17 2023 Petr Pisar <ppisar@redhat.com> - 2.2.13-3
-- Correct a license to "GPL-3.0-or-later AND BSD-3-Clause AND BSD-4.3TAHOE AND
-  Latex2e-translated-notice"
-
-* Wed Apr 12 2023 Petr Pisar <ppisar@redhat.com> - 2.2.13-2
-- Check for setlocale() at configure time
-
-* Tue Mar 21 2023 Petr Pisar <ppisar@redhat.com> - 2.2.13-1
-- 2.2.13 bump
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.2.12-11
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.2.12-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.2.12-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.2.12-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.2.12-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.2.12-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+* Thu Jun 17 2021 Thomas Crain <thcrain@microsoft.com> - 2.2.12-6
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+- Conditionally build tex-based documentation
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.2.12-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

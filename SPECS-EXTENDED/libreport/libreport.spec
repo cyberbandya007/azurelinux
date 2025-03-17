@@ -15,8 +15,10 @@
 Summary: Generic library for reporting various problems
 Name: libreport
 Version: 2.17.15
-Release: 3%{?dist}
+Release: 1%{?dist}
 License: GPL-2.0-or-later
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL: https://abrt.readthedocs.org/
 Source: https://github.com/abrt/%{name}/archive/%{version}/%{name}-%{version}.tar.gz
 BuildRequires: %{dbus_devel}
@@ -669,305 +671,30 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %endif
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.17.15-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Thu Nov 28 2024 Sumit Jena <v-sumitjena@microsoft.com> - 2.17.15-1
+- Update to version 2.17.15
+-License verified.
 
-* Fri Jun 07 2024 Python Maint <python-maint@redhat.com> - 2.17.15-2
-- Rebuilt for Python 3.13
+* Tue Dec 20 2022 Muhammad Falak <mwani@microsoft.com> - 2.13.1-9
+- License verified
 
-* Sun Feb 18 2024 Packit <hello@packit.dev> - 2.17.15-1
-- Release version 2.17.15 (Michal Srb)
-- reporter-bugzilla: Make the supplementary bugs easily identifiable (Michal Srb)
-- reporter-bugzilla: Fix formatting in the supplementary bugs (Michal Srb)
-- reporter-bugzilla: Fix code comment (Michal Srb)
+* Thu Dec 09 2021 Muhammad Falak <mwani@microsoft.com> - 2.13.1-8
+- Introduce macro '%{mariner_failing_tests}' to gate `--run-check` failures
+- Remove non 0 exit from check to avoid build break
 
-* Mon Feb 12 2024 Packit <hello@packit.dev> - 2.17.14-1
-- Release version 2.17.14 (Michal Srb)
-- reporter-bugzilla: Reduce number of duplicate bug reports (Michal Srb)
-- reporter-bugzilla: Fix config loading (Michal Srb)
-- reporter-bugzilla: API key must consist of latin-1 characters (Michal Srb)
-- reporter-bugzilla: Fix typo (Michal Srb)
-- reporter-bugzilla: Fix creating binary attachments (Michal Srb)
-- Update translations (mgrabovsky)
+* Wed Aug 11 2021 Thomas Crain <thcrain@microsoft.com> - 2.13.1-7
+- Only require testing requirements during check builds
+- Only build Fedora subpackage on Fedora
 
-* Sun Feb 04 2024 Packit <hello@packit.dev> - 2.17.13-1
-- Release version 2.17.13 (Michal Srb)
-- Exclude coredump archives when creating a bug (Michal Srb)
+* Tue Jan 12 2021 Joe Schmitt <joschmit@microsoft.com> - 2.13.1-6
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+- Remove gtk3 dependency and features. ignored_words and forbidden_words are built only when gtk support is on.
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.17.11-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Florian Weimer <fweimer@redhat.com> - 2.17.11-5
-- Fix C compatibility issues in tests
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.17.11-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.17.11-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Sat Jul 01 2023 Python Maint <python-maint@redhat.com> - 2.17.11-2
-- Rebuilt for Python 3.12
-
-* Fri Jun 30 2023 Packit <hello@packit.dev> - 2.17.11-1
-- Release version 2.17.11 (Michal Srb)
-- spec: Add missing requires for python3-libreport (Michal Srb)
-- Build URL with urllib.parse.urljoin() (Michal Srb)
-- Add XDG_ACTIVATION_TOKEN to the list of ignored words (Michal Srb)
-- Attachments are minor updates in Bugzilla (Michal Srb)
-- Retry Bugzilla search queries with delays (Michal Srb)
-- Fix "NameError: name 'ticket' is not defined" exception (Michal Srb)
-- Update translations (mgrabovsky)
-
-* Thu Jun 15 2023 Python Maint <python-maint@redhat.com> - 2.17.10-2
-- Rebuilt for Python 3.12
-
-* Thu May 11 2023 Packit <hello@packit.dev> - 2.17.10-1
-- Release version 2.17.10 (Matěj Grabovský)
-- reporter-upload: Fix a use-after-free error in string handling (Matěj Grabovský)
-- Update translations (mgrabovsky)
-- Update translations (mgrabovsky)
-
-* Fri Mar 24 2023 Packit <hello@packit.dev> - 2.17.9-1
-- Release version 2.17.9 (Michal Srb)
-- reporter-bugzilla: Fix string interpolation (Matěj Grabovský)
-- reporter-bugzilla: Replace flags with just keyword arg (Michal Srb)
-- reporter-bugzilla: Make sure that the creator of a bug is always in CC (Michal Srb)
-- reporter-bugzilla: Don't fail if reported_to file doesn't exist (Michal Srb)
-- reporter-bugzilla: Fix reporting when the bug already exists (Michal Srb)
-- use $XDG_CONFIG_HOME to access user's configuration files (Yann Droneaud)
-- Update translations (mgrabovsky)
-
-* Fri Mar 03 2023 Packit <hello@packit.dev> - 2.17.8-1
-- Release version 2.17.8 (Michal Srb)
-- Update changelog (Michal Srb)
-- reporter-bugzilla: Fix KeyError when HOME env var is not set (Michal Srb)
-- Update changelog (Michal Srb)
-- reporter-bugzilla: Fix password prompt in client/server mode (Michal Srb)
-
-* Mon Feb 20 2023 Packit <hello@packit.dev> - 2.17.7-1
-- Release version 2.17.7 (Michal Srb)
-- spec: Add disttag (Michal Srb)
-- Update changelog (Michal Srb)
-- Fix rpm -V issue with missing reporter-bugzilla-python in f38 (Michal Srb)
-- Fix TypeError (Michal Srb)
-- Update pot file (Matěj Grabovský)
-- readme: Add diagram of related projects (Matěj Grabovský)
-- Update translations (mgrabovsky)
-- Use SPDX format for license field (Matěj Grabovský)
-- ignored_words: Add KeyboardInterrupt (Michal Fabik)
-- packit: Add dependencies for SRPM build (Matěj Grabovský)
-- Update translations (mgrabovsky)
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.17.6-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Sun Nov 06 2022 Packit <hello@packit.dev> - 2.17.6-1
-- Release version 2.17.6 (Michal Srb)
-- Update translations (mgrabovsky)
-- Update changelog (Michal Srb)
-- reporter-bugzilla: Fix TypeError (Michal Srb)
-
-* Mon Oct 24 2022 Michal Srb <michal@redhat.com> - 2.17.5-2
-- Fix dist-tag
-
-* Mon Oct 24 2022 Packit <hello@packit.dev> - 2.17.5-1
-- Release version 2.17.5 (Michal Srb)
-- Update changelog (Michal Srb)
-- dump_dir.py: check that the filename doesn't start with "/" (Michal Srb)
-- dump_dir.py: Don't pass libreport flags to open() (Michal Srb)
-- reporter-bugzilla: Fix exceptions (Michal Srb)
-- Update translations (mgrabovsky)
-
-* Wed Sep 14 2022 Packit <hello@packit.dev> - 2.17.4-1
-- Release version 2.17.4 (Michal Fabik)
-- Update changelog (Michal Fabik)
-- reporter_bugzilla.py: Don't ask for API key if we already have it (Michal Srb)
-- internal/bz_connection.py: Fix "TypeError: 'builtin_function_or_method' object is not subscriptable" (Michal Srb)
-- reporter_bugzilla.py: Fix condition (Michal Srb)
-- internal/reported_to.py: Prevent possible ValueError if the line is for example empty (Michal Srb)
-- reporter_bugzilla.py: Prevent possible KeyError exception (Michal Srb)
-- reporter_bugzilla.py: Default value for `b_create_private` is False (Michal Srb)
-- reporter_bugzilla.py: Prevent possible KeyError exception (Michal Srb)
-
-* Mon Sep 12 2022 Packit <hello@packit.dev> - 2.17.3-1
-- Release version 2.17.3 (Michal Fabik)
-- Update changelog (Michal Fabik)
-- Run autoupdate to get rid of obsolete/deprecated macros (Michal Fabik)
-- Makefile: Move README.md to EXTRA_DIST (Michal Fabik)
-- Don't build rhel-bugzilla --without-bugzilla (Michal Fabik)
-- doc: Make anaconda_event.conf depend on BZ (Michal Fabik)
-- Fix build --without-bugzilla (Michal Fabik)
-- spec: Don't list files twice (Michal Fabik)
-- Update translations (mgrabovsky)
-
-* Thu Aug 18 2022 Packit <hello@packit.dev> - 2.17.2-1
-- Release version 2.17.2 (Michal Fabik)
-- reporter_bugzilla.py: Build, install (Michal Fabik)
-- reporter_bugzilla.py: Add tests (Michal Fabik)
-- reporter_bugzilla.py: Initial commit (Michal Fabik)
-- Update translations (mgrabovsky)
-- abrt_xmlrpc: Don't warn about discarded const (Michal Fabik)
-- Update translations (mgrabovsky)
-- Update translations (mgrabovsky)
-- Use conventional lseek arg order (Michal Fabik)
-- Update translations (mgrabovsky)
-- ignored_words: Ignore more debuginfod URLs (Matěj Grabovský)
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.17.1-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Mon Jun 13 2022 Python Maint <python-maint@redhat.com> - 2.17.1-2
-- Rebuilt for Python 3.11
-
-* Thu Mar 10 2022 Packit Service <user-cont-team+packit-service@redhat.com> - 2.17.1-1
-- Release version 2.17.1 (Michal Srb)
-- reporter-bugzilla: send API key in HTTP header (Michal Srb)
-- tito: Use custom tagger that updates changelog (Matěj Grabovský)
-- changelog: Fix link to release diff (Matěj Grabovský)
-- reporter-bugzilla: Fix APIKey name (Michal Fabik)
-- Update translations (mgrabovsky)
-- Add missing va_end (Michal Židek)
-
-* Mon Feb 21 2022 Michal Srb <michal@redhat.com> - 2.17.0-1
-- [reporter-bugzilla] Use API key for authentication
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.16.0-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Wed Jan 19 2022 Matěj Grabovský <mgrabovs@redhat.com> - 2.16.0-2
-- Rebuild for testing
-
-* Mon Jan 17 2022 Matěj Grabovský <mgrabovs@redhat.com> - 2.16.0-1
-- Bump satyr dependency to 0.38
-- Bump libreport library revision to 2:1:0
-- Drop build-time dependency on libproxy-devel
-- Drop last reference to global_uuid file
-- Don't use deprecated assertEquals() in tests
-- Add DEBUGINFOD_URLS environment variable to ignored_words
-- rhbz: Retry XML-RPC calls when uploading attachments
-- rhbz: Be a little bit more defensive when working with subcomponents
-- Update translations
-
-* Thu Jan 13 2022 Matěj Grabovský <mgrabovs@redhat.com> - 2.15.2-11
-- Backport patch for building with Python 3.11
-  (https://bugzilla.redhat.com/show_bug.cgi?id=2019402)
-
-* Wed Jan 12 2022 Matěj Grabovský <mgrabovs@redhat.com> - 2.15.2-10
-- Bump for rebuild
-
-* Thu Jan 06 2022 Matěj Grabovský <mgrabovs@redhat.com> - 2.15.2-9
-- Bump release for rebuild
-
-* Thu Jan 06 2022 Matěj Grabovský <mgrabovs@redhat.com> - 2.15.2-8
-- Bump release for rebuild
-
-* Wed Dec 22 2021 Matěj Grabovský <mgrabovs@redhat.com> - 2.15.2-7
-- Rebuild for satyr 0.39
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.15.2-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Sat Jul 10 2021 Björn Esser <besser82@fedoraproject.org> - 2.15.2-5
-- Rebuild for versioned symbols in json-c
-
-* Mon Jun 07 2021 Python Maint <python-maint@redhat.com> - 2.15.2-4
-- Rebuilt for Python 3.10
-
-* Fri Jun 04 2021 Python Maint <python-maint@redhat.com> - 2.15.2-2
-- Rebuilt for Python 3.10
-
-* Tue Jun 01 2021 Packit Service <user-cont-team+packit-service@redhat.com> - 2.15.2-1
-- Release version 2.15.2-1 (Michal Fabik)
-- binhex: Remove unused API (Matěj Grabovský)
-- lib: Use GLib for computing SHA-1 digests (Matěj Grabovský)
-- run_event: Improve memory management (Matěj Grabovský)
-- gtk: Fix segfault (Matěj Grabovský)
-
-* Tue May 04 2021 Packit Service <user-cont-team+packit-service@redhat.com> - 2.15.1-1
-- Release version 2.15.1-1 (Michal Fabik)
-- ureport: Strange usage of tmp variable (Michal Židek)
-- steal_directory: Silence a warning (Michal Židek)
-- dump_dir: Use g_free and re-init to NULL (Michal Židek)
-- dump_dir: Use g_free instead of free (Michal Židek)
-- dirsize: No need to check for NULL (Michal Židek)
-- dirsize: Bad checks for NULL (Michal Židek)
-- gui-wizard-gtk: Possible double free (Michal Židek)
-- gui-wizard-gtk: Check if EXCLUDE_FROM_REPORT is set (Michal Židek)
-- gui-wizard-gtk: Improve docs and add missing free (Michal Židek)
-- cli: Address of local auto-variable assigned to a function parameter (Michal Židek)
-- gtk-helpers: Add missing g_strfreev() (Michal Židek)
-- cli: Add missing g_free call (Michal Židek)
-- gitignore: Drop misleading comment (Michal Fabik)
-- spec: Sync upstream with distgit (Michal Fabik)
-- changelog: Add missing link to changes in 2.15.0 (Matěj Grabovský)
-- spec: Make plugin-mailx depend on /usr/bin/mailx (Matěj Grabovský)
-- Add support for excluding whole elements from search for sensitive words (Michal Srb)
-- ignored_words: add more "key" variations (Michal Srb)
-
-* Fri Jan 29 2021 Michal Srb <michal@redhat.com> - 2.14.0-17
-- Drop AnacondaRHEL workflow reference
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.14.0-16
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Mon Jan 18 2021 Peter Robinson <pbrobinson@fedoraproject.org> - 2.14.0-15
-- Bump rev for upgrades
-
-* Fri Dec 11 2020 Matěj Grabovský <mgrabovs@redhat.com> - 2.14.0-13
-- Add fix for https://bugzilla.redhat.com/show_bug.cgi?id=1906405
-
-* Tue Nov 03 2020 Matěj Grabovský <mgrabovs@redhat.com> - 2.14.0-12
-- Add fix for https://bugzilla.redhat.com/show_bug.cgi?id=1893595
-
-* Fri Oct 09 2020 Matěj Grabovský <mgrabovs@redhat.com> - 2.14.0-11
-- Add fix for https://bugzilla.redhat.com/show_bug.cgi?id=1882328
-
-* Tue Sep 29 2020 Matěj Grabovský <mgrabovs@redhat.com> - 2.14.0-10
+* Wed Oct 07 2020 Matěj Grabovský <mgrabovs@redhat.com> - 2.13.1-5
 - Add fix for https://bugzilla.redhat.com/show_bug.cgi?id=1883337
-- Add fix for https://bugzilla.redhat.com/show_bug.cgi?id=1883410
 
-* Sun Sep 27 2020 Matěj Grabovský <mgrabovs@redhat.com> - 2.14.0-9
-- Add upstream fixes for memory management
-
-* Sun Sep 27 2020 Matěj Grabovský <mgrabovs@redhat.com> - 2.14.0-8
-- Add fix for https://bugzilla.redhat.com/show_bug.cgi?id=1882950
-
-* Fri Sep 25 2020 Matěj Grabovský <mgrabovs@redhat.com> - 2.14.0-7
-- Add fix for https://bugzilla.redhat.com/show_bug.cgi?id=1882319
-
-* Wed Aug 19 2020 Merlin Mathesius <mmathesi@redhat.com> - 2.14.0-6
-- Updates so ELN builds in a Fedora-like reporting configuration, even though
-  the %%{rhel} macro is set.
-
-* Thu Aug 13 2020 Michal Fabik <mfabik@redhat.com> 2.14.0-3
-- forbidden_words: Add potentially sensitive env vars
-- lib: Add version script for libreport
-- lib: compress: Use libarchive
-- Replace various utility functions with stock GLib ones
-- gtk,lib: Update symbol list
-- dd: Update dd_get_owner to handle error return values
-- dirsize: Don't pick .lock'd dirs for deletion
-- setgid instead of setuid the abrt-action-install-debuginfo-to-abrt-cache
-- Various coding style improvements
-- Various memory management fixes
-- lib: Check for errors when opening files
-- gtk-helpers: Check return value
-- doc: Exclude more files with --without-bugzilla
-- lib: Don’t use external executables for decompression
-- lib: Decommission libreport_list_free_with_free
-- Drop Red Hat Customer Portal reporter
-- ureport: Drop Strata integration
-- lib: Remove creates-items tag parsing in event definitions
-
-* Fri Aug 07 2020 Peter Robinson <pbrobinson@fedoraproject.org> - 2.13.1-4
-- Bump to fix upgrade path
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.13.1-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Sun May 24 2020 Miro Hrončok <mhroncok@redhat.com> - 2.13.1-2
-- Rebuilt for Python 3.9
+* Mon May 11 2020 Michal Fabik <mfabik@redhat.com> 2.13.1-2
+- Fix broken abrt-vmcore.service due to bad namespacing
 
 * Mon May 11 2020 Michal Fabik <mfabik@redhat.com> 2.13.1-1
 - Fix broken abrt-vmcore.service due to bad namespacing
@@ -980,9 +707,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 - lib: Drop D-Bus code 
 - plugins: reporter-rhtsupport: Drop unused debugging code 
 - Update translations
-
-* Tue Apr 21 2020 Björn Esser <besser82@fedoraproject.org> - 2.12.0-4
-- Rebuild (json-c)
 
 * Fri Mar 20 2020 Ernestas Kulik <ekulik@redhat.com> - 2.12.0-3
 - Add patch for https://bugzilla.redhat.com/show_bug.cgi?id=1815544

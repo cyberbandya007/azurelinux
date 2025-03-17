@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %{!?_httpd_mmn: %{expand: %%global _httpd_mmn %%(cat %{_includedir}/httpd/.mmn || echo 0-0)}}
 %{!?_httpd_apxs:       %{expand: %%global _httpd_apxs       %%{_sbindir}/apxs}}
 %{!?_httpd_confdir:    %{expand: %%global _httpd_confdir    %%{_sysconfdir}/httpd/conf.d}}
@@ -8,15 +10,15 @@
 Summary: Apache module to intercept login form submission and run PAM authentication
 Name: mod_intercept_form_submit
 Version: 1.2.0
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: ASL 2.0
 URL: https://www.adelton.com/apache/mod_intercept_form_submit/
 Source0: https://www.adelton.com/apache/mod_intercept_form_submit/%{name}-%{version}.tar.gz
 BuildRequires: gcc
 BuildRequires: httpd-devel
 BuildRequires: pkgconfig
-Requires: httpd-mmn = %{_httpd_mmn}
-Requires: mod_authnz_pam >= 0.7
+Provides: httpd-mmn = %{_httpd_mmn}
+Provides: mod_authnz_pam >= 0.7
 
 # Suppres auto-provides for module DSO per
 # https://fedoraproject.org/wiki/Packaging:AutoProvidesAndRequiresFiltering#Summary
@@ -62,6 +64,10 @@ install -Dp -m 0644 intercept_form_submit.confx $RPM_BUILD_ROOT%{_httpd_confdir}
 %{_httpd_moddir}/*.so
 
 %changelog
+* Mon Dec 30 2024 Aninda Pradhan <v-anipradhan@microsoft.com> - 1.2.0-8
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified.
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.0-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
@@ -158,4 +164,3 @@ install -Dp -m 0644 intercept_form_submit.confx $RPM_BUILD_ROOT%{_httpd_confdir}
 
 * Thu Jan 30 2014 Jan Pazdziora <jpazdziora@redhat.com> - 0.9.5-1
 - 1058809 - .spec changes for Fedora package review.
-

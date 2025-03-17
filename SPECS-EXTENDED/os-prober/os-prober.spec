@@ -1,12 +1,14 @@
 Name:           os-prober
 Version:        1.81
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        Probes disks on the system for installed operating systems
 
 # For more information about licensing, see copyright file.
 License:        GPL-2.0-or-later AND GPL-1.0-or-later
-URL:            http://kitenet.net/~joey/code/os-prober/
-Source0:        http://ftp.us.debian.org/debian/pool/main/o/os-prober/%{name}_%{version}.tar.xz
+Vendor:         Microsoft Corporation                                    
+Distribution:   Azure Linux
+URL:            https://kitenet.net/~joey/code/os-prober/
+Source0:        https://ftp.us.debian.org/debian/pool/main/o/os-prober/%{name}_%{version}.tar.xz
 Patch0:         os-prober-no-dummy-mach-kernel.patch
 # Sent upstream
 Patch1:         os-prober-mdraidfix.patch
@@ -92,6 +94,10 @@ fi
 %{_var}/lib/%{name}
 
 %changelog
+* Tue Dec 17 2024 Jyoti kanase <v-jykanase@microsoft.com> - 1.81-9
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.81-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

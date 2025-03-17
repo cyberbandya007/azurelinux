@@ -1,6 +1,8 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           python-requests-kerberos
 Version:        0.14.0
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        A Kerberos authentication handler for python-requests
 License:        ISC
 URL:            https://github.com/requests/requests-kerberos
@@ -9,6 +11,11 @@ URL:            https://github.com/requests/requests-kerberos
 Source:         %{url}/archive/v%{version}/requests-kerberos-%{version}.tar.gz
 BuildArch:      noarch
 BuildRequires:  python3-devel
+BuildRequires:  python3-pip
+BuildRequires:  python3dist(wheel)
+BuildRequires:  python3dist(pytest)   
+BuildRequires:  python3dist(pytest-mock)
+BuildRequires:  python3-requests
 
 %global _description %{expand:
 Requests is an HTTP library, written in Python, for human beings. This library
@@ -17,27 +24,22 @@ authentication.}
 
 %description %_description
 
-
 %package -n python3-requests-kerberos
 Summary:        %{summary}
 
 
 %description -n python3-requests-kerberos %_description
 
-
 %prep
 %autosetup -n requests-kerberos-%{version}
 # avoid unnecessary coverage dependency
 sed -i '/pytest-cov/d' requirements-test.txt
 
-
 %generate_buildrequires
 %pyproject_buildrequires requirements-test.txt
 
-
 %build
 %pyproject_wheel
-
 
 %install
 %pyproject_install
@@ -45,65 +47,24 @@ sed -i '/pytest-cov/d' requirements-test.txt
 
 
 %check
+pip install pyspnego
 %pytest -v tests
 
 
 %files -n python3-requests-kerberos -f %{pyproject_files}
 %doc README.rst AUTHORS HISTORY.rst
 
-
 %changelog
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.14.0-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Thu Feb 12 2025 Sumit Jena <v-sumitjena@microsoft.com> - 0.14.0-6
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
 
-* Fri Jun 07 2024 Python Maint <python-maint@redhat.com> - 0.14.0-4
-- Rebuilt for Python 3.13
+* Thu Apr 28 2022 Muhammad Falak <mwani@microsoft.com> - 0.12.0-11
+- Use `py.test` instead of `py.test-3` to enable ptest
+- License verified
 
-* Fri Jan 26 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.14.0-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Mon Jan 22 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.14.0-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Wed Sep 13 2023 Carl George <carlwgeorge@fedoraproject.org> - 0.14.0-1
-- Update to version 0.14.0, resolves rhbz#2018834
-- Convert to pyproject macros
-
-* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.12.0-21
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Wed Jun 14 2023 Python Maint <python-maint@redhat.com> - 0.12.0-20
-- Rebuilt for Python 3.12
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.12.0-19
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.12.0-18
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Tue Jun 14 2022 Python Maint <python-maint@redhat.com> - 0.12.0-17
-- Rebuilt for Python 3.11
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.12.0-16
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Wed Jan 12 2022 Carl George <carl@george.computer> - 0.12.0-15
-- Drop build dependency on deprecated python3-mock
-
-* Fri Jul 23 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.12.0-14
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Thu Jun 03 2021 Python Maint <python-maint@redhat.com> - 0.12.0-13
-- Rebuilt for Python 3.10
-
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.12.0-12
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Wed Jul 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.12.0-11
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Sat May 23 2020 Miro Hrončok <mhroncok@redhat.com> - 0.12.0-10
-- Rebuilt for Python 3.9
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.12.0-10
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.12.0-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

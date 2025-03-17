@@ -1,19 +1,21 @@
 %global abi 4
 
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           libdvdnav
 Version:        6.1.1
-Release:        9%{?dist}
+Release:        1%{?dist}
 Summary:        A library for reading DVD video discs based on Ogle code
-License:        GPL-2.0-or-later AND LGPL-2.1-or-later
-URL:            http://dvdnav.mplayerhq.hu/
+License:        GPLv2+
+URL:            https://dvdnav.mplayerhq.hu/
 Source0:        https://download.videolan.org/pub/videolan/libdvdnav/%{version}/libdvdnav-%{version}.tar.bz2
 Source1:        https://download.videolan.org/pub/videolan/libdvdnav/%{version}/libdvdnav-%{version}.tar.bz2.asc
 Source2:        https://download.videolan.org/pub/keys/7180713BE58D1ADC.asc
 BuildRequires:  doxygen
 BuildRequires:  gcc
 BuildRequires:  gnupg2
+BuildRequires:  make
 BuildRequires:  libdvdread-devel >= 6.0.0
-BuildRequires: make
 
 %description
 libdvdnav provides a simple library for reading DVD video discs.
@@ -22,7 +24,7 @@ The code is based on Ogle and used in, among others, the Xine dvdnav plug-in.
 %package        devel
 Summary:        Development files for libdvdnav
 Requires:       %{name} = %{version}-%{release}
-Requires:       libdvdread-devel >= 6.0.0
+Requires:       libdvdread-devel >= 5.0.2
 Requires:       pkgconfig
 
 %description    devel
@@ -31,7 +33,7 @@ libdvdnav library.
 
 %prep
 %{gpgverify} --keyring='%{S:2}' --signature='%{S:1}' --data='%{S:0}'
-%setup -q
+%autosetup
 
 %build
 %configure --disable-static
@@ -60,41 +62,12 @@ rm %{buildroot}%{_pkgdocdir}/{COPYING,TODO}
 %{_libdir}/pkgconfig/dvdnav.pc
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 6.1.1-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Thu Nov 14 2024 Jyoti Kanase <v-jykanase@microsoft.com> - 6.1.1-1
+- Update to 6.1.1
+- License verified
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 6.1.1-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 6.1.1-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 6.1.1-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 6.1.1-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 6.1.1-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 6.1.1-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 6.1.1-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Tue May 18 2021 Dominik Mierzejewski <rpm@greysector.net> 6.1.1-1
-- update to 6.1.1 (fixes rhbz#1951666)
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 6.1.0-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Thu Oct 15 2020 Dominik Mierzejewski <rpm@greysector.net> 6.1.0-1
-- update to 6.1.0 (#1815805)
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 6.0.1-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 6.0.1-4
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 6.0.1-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

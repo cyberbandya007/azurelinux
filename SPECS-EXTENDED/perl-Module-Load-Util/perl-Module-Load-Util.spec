@@ -1,8 +1,10 @@
 Name:           perl-Module-Load-Util
 Version:        0.012
-Release:        2%{?dist}
+Release:        1%{?dist}
 Summary:        Some utility routines related to module loading
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/Module-Load-Util/
 Source0:        https://cpan.metacpan.org/authors/id/P/PE/PERLANCAR/Module-Load-Util-%{version}.tar.gz
 BuildArch:      noarch
@@ -87,44 +89,13 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.012-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Feb 27 2025 Sumit Jena <v-sumitjena@microsoft.com> - 0.012-1
+- Update to version 0.012
+- License verified
 
-* Wed May 15 2024 Jitka Plesnikova <jplesnik@redhat.com> - 0.012-1
-- 0.012 bump (rhbz#2280646)
-
-* Mon Apr 15 2024 Jitka Plesnikova <jplesnik@redhat.com> - 0.011-1
-- 0.011 bump (rhbz#2275028)
-
-* Thu Jan 25 2024 Jitka Plesnikova <jplesnik@redhat.com> - 0.010-1
-- 0.010 bump (rhbz#2260032)
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.009-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.009-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Fri Jul 14 2023 Jitka Plesnikova <jplesnik@redhat.com> - 0.009-1
-- 0.009 bump (BZ#2220905)
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.008-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.008-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.008-2
-- Perl 5.36 rebuild
-
-* Wed Mar 23 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.008-1
-- 0.008 bump
-
-* Wed Mar 02 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.007-1
-- 0.007 bump
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.006-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+* Wed Jan 26 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.006-2
+- Initial CBL-Mariner import from Fedora 36 (license: MIT).
+- License verified.
 
 * Fri Oct 01 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.006-1
 - 0.006 bump

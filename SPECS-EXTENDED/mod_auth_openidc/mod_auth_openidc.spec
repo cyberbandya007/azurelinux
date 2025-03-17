@@ -15,10 +15,14 @@
 
 Name:		mod_auth_openidc
 Version:	2.4.15.7
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	OpenID Connect auth module for Apache HTTP Server
 
 License:	Apache-2.0
+
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+
 URL:		https://github.com/OpenIDC/mod_auth_openidc
 Source0:	https://github.com/OpenIDC/mod_auth_openidc/releases/download/v%{version}/mod_auth_openidc-%{version}.tar.gz
 
@@ -34,7 +38,6 @@ BuildRequires:	automake
 BuildRequires:	cjose-devel
 BuildRequires:	jq-devel
 %{?_with_hiredis:BuildRequires: hiredis-devel}
-Requires:	httpd-mmn = %{_httpd_mmn}
 
 %description
 This module enables an Apache 2.x web server to operate as
@@ -80,11 +83,7 @@ install -m 700 -d $RPM_BUILD_ROOT%{httpd_pkg_cache_dir}/cache
 
 
 %files
-%if 0%{?rhel} && 0%{?rhel} < 7
-%doc LICENSE.txt
-%else
 %license LICENSE.txt
-%endif
 %doc ChangeLog
 %doc AUTHORS
 %doc README.md
@@ -96,6 +95,10 @@ install -m 700 -d $RPM_BUILD_ROOT%{httpd_pkg_cache_dir}/cache
 %dir %attr(0700, apache, apache) %{httpd_pkg_cache_dir}/cache
 
 %changelog
+* Fri Jan 31 2025 Aninda Pradhan <v-anipradhan@microsoft.com> - 2.4.15.7-3
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified.
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.15.7-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

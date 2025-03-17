@@ -1,11 +1,13 @@
 Name:           python-cheetah
 Version:        3.2.6.post1
-Release:        11%{?dist}
+Release:        12%{?dist}
 Summary:        Template engine and code generator
 
 License:        MIT
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://cheetahtemplate.org/
-Source:         https://github.com/CheetahTemplate3/cheetah3/archive/%{version}/Cheetah3-%{version}.tar.gz
+Source:         https://github.com/CheetahTemplate3/cheetah3/archive/%{version}/Cheetah3-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
 # Instead of playing Whac-A-Mole and adding more and more basepythons,
 # e.g. in https://github.com/CheetahTemplate3/cheetah3/commit/6be6bc10a4,
@@ -19,6 +21,19 @@ Patch5:         cheetah3-3.2.6.post1-parse_qs.patch
 
 BuildRequires:  gcc
 BuildRequires:  python3-devel
+BuildRequires:  python3-pip
+BuildRequires:  python3-wheel
+
+# for tests
+%if 0%{?with_check}
+BuildRequires:  python3-tox
+BuildRequires:  python3-pluggy
+BuildRequires:  python3-py
+BuildRequires:  python3-filelock
+BuildRequires:  python3-toml
+BuildRequires:  python3-six
+BuildRequires:  python3-tox-current-env
+%endif
 
 %global _description %{expand:
 Cheetah3 is a free and open source template engine and code generation tool.
@@ -29,13 +44,10 @@ code.}
 
 %description %{_description}
 
-
 %package -n python3-cheetah
 Summary:        %{summary}
 
-
 %description -n python3-cheetah %{_description}
-
 
 %prep
 %autosetup -p1 -n cheetah3-%{version}
@@ -46,19 +58,15 @@ sed -e 's|, < 3.2||' -i tox.ini
 # remove unnecessary shebang lines to silence rpmlint
 find Cheetah -type f -name '*.py' -print0 | xargs -0 sed -i -e '1 {/^#!/d}'
 
-
 %generate_buildrequires
 %pyproject_buildrequires -t
-
 
 %build
 %pyproject_wheel
 
-
 %install
 %pyproject_install
 %pyproject_save_files Cheetah
-
 
 %check
 # changing this in %%prep would cause an rpmlint error (rpm-buildroot-usage),
@@ -66,13 +74,16 @@ find Cheetah -type f -name '*.py' -print0 | xargs -0 sed -i -e '1 {/^#!/d}'
 sed -e 's|{envsitepackagesdir}|%{buildroot}%{python3_sitearch}|' -i tox.ini
 %tox
 
-
 %files -n python3-cheetah -f %{pyproject_files}
 %doc ANNOUNCE.rst README.rst TODO BUGS
 %{_bindir}/cheetah*
 
-
 %changelog
+* Thu Feb 13 2025 Aninda Pradhan <v-anipradhan@microsoft.com> - 3.2.6.post1-12
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License Verified
+- Added additional dependencies for successful build and test
+
 * Wed Oct 30 2024 Mike Bonnet <mikeb@redhat.com> - 3.2.6.post1-11
 - Backport fix from upstream to support Python 3.13+ (protect import of cgi module)
 - Backport fix for running tests under Python 3.13+ (use unittest.defaultTestLoader.loadTestsFromModule)

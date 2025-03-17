@@ -1,9 +1,7 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global with_java 0
-%if 0%{?el7}%{?el8}
-%global with_php 1
-%else
 %global with_php 0
-%endif
 %global with_perl 1
 %global with_python2 0
 %global with_python3 0
@@ -11,14 +9,8 @@
 %global obsolete_old_lang_subpackages 0
 %global default_sign_algo "rsa-sha1"
 %global min_hash_algo "sha1"
-
-%if 0%{?fedora} >= 38 || 0%{?rhel} >= 9
 %global default_sign_algo "rsa-sha256"
-%endif
-
-%if 0%{?rhel} >= 9
 %global min_hash_algo "sha256"
-%endif
 
 %if %{with_php}
 %if "%{php_version}" < "5.6"
@@ -28,17 +20,7 @@
 %endif
 %endif
 
-%if 0%{?el7}
-  %global obsolete_old_lang_subpackages 1
-%endif
-
-%if 0%{?el7}
-  %global with_python2 1
-%endif
-
-%if 0%{?fedora} || 0%{?rhel} >= 8
-  %global with_python3 1
-%endif
+%global with_python3 1
 
 %global configure_args %{nil}
 %global configure_args %{configure_args}
@@ -60,11 +42,7 @@
 %endif
 
 %if %{with_php}
-  %if 0%{?fedora} || 0%{?rhel} > 7
-    %global configure_args %{configure_args} --enable-php5=no --enable-php7=yes --with-php7-config-dir=%{php_inidir}
-  %else
-    %global configure_args %{configure_args} --enable-php5=yes --with-php5-config-dir=%{php_inidir} --enable-php7=no
-  %endif
+  %global configure_args %{configure_args} --enable-php5=no --enable-php7=yes --with-php7-config-dir=%{php_inidir}
 %else
   %global configure_args %{configure_args} --enable-php5=no --enable-php7=no
 %endif
@@ -81,7 +59,7 @@
 Summary: Liberty Alliance Single Sign On
 Name: lasso
 Version: 2.8.2
-Release: 14%{?dist}
+Release: 15%{?dist}
 License: GPL-2.0-or-later
 URL: https://lasso.entrouvert.org/
 Source: https://dev.entrouvert.org/lasso/lasso-%{version}.tar.gz
@@ -109,15 +87,9 @@ BuildRequires: libtool-ltdl-devel
 BuildRequires: libxml2-devel
 BuildRequires: make
 BuildRequires: openssl-devel
-%if 0%{?el7}
-BuildRequires: python
-BuildRequires: python2-six
-%endif
-%if 0%{?fedora} || 0%{?rhel} >= 8
 BuildRequires: python3
 BuildRequires: python3-six
 BuildRequires: (python3-setuptools if python3 >= 3.12)
-%endif
 BuildRequires: swig
 BuildRequires: xmlsec1-devel
 BuildRequires: xmlsec1-openssl-devel
@@ -202,7 +174,7 @@ PHP language bindings for the lasso (Liberty Alliance Single Sign On) library.
 %{?python_provide:%python_provide python2-%{name}}
 Summary: Liberty Alliance Single Sign On (lasso) Python bindings
 BuildRequires: python2-devel
-%{?el7:BuildRequires: python-lxml}
+
 Requires: python2
 Requires: %{name}%{?_isa} = %{version}-%{release}
 %if %{obsolete_old_lang_subpackages}
@@ -349,6 +321,10 @@ rm -fr %{buildroot}%{_docdir}/%{name}
 %endif
 
 %changelog
+* Wed Feb 05 2025 Aninda Pradhan <v-anipradhan@microsoft.com> - 2.8.2-14
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License Verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.8.2-14
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

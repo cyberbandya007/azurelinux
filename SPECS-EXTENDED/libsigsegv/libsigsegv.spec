@@ -1,11 +1,13 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+
+Summary: Library for handling page faults in user mode
 Name:    libsigsegv
 Version: 2.14
-Release: 9%{?dist}
-Summary: Library for handling page faults in user mode
-
+Release: 1%{?dist}
 License: GPL-2.0-or-later
 URL:     https://www.gnu.org/software/libsigsegv/
-Source0: http://ftp.gnu.org/gnu/libsigsegv/libsigsegv-%{version}.tar.gz
+Source0: https://ftp.gnu.org/gnu/libsigsegv/libsigsegv-%{version}.tar.gz
 Patch0:  configure.patch
 
 BuildRequires: automake libtool
@@ -43,7 +45,7 @@ Requires: %{name}-devel%{?_isa} = %{version}-%{release}
 %build
 # for patch1, rpaths
 autoreconf -ivf
-
+ 
 %configure \
   --enable-shared \
   --disable-silent-rules \
@@ -51,10 +53,8 @@ autoreconf -ivf
 
 %make_build
 
-
 %install
 %make_install
-
 # remove libtool archives
 find %{buildroot} -type f -name "*.la" -delete
 
@@ -79,45 +79,12 @@ make check
 
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.14-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Tue Nov 12 2024 Sumit Jena <v-sumitjena@microsoft.com> - 2.14-1
+- Update to version 2.14
+- License verified
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.14-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.14-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Mon Sep 11 2023 Lukáš Zaoral <lzaoral@redhat.com> - 2.14-6
-- migrate to SPDX license format
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.14-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.14-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.14-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.14-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Fri Jan 07 2022 Rex Dieter <rdieter@fedoraproject.org> - 2.14-1
-- 2.14
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.13-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.13-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Sun Jan 17 2021 Peter Robinson <pbrobinson@fedoraproject.org> - 2.13-1
-- Update to 2.13
-- spec file cleanup
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.11-11
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 2.11-11
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.11-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

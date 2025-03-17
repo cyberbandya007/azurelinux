@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 # hardened build if not overridden
 %{!?_hardened_build:%global _hardened_build 1}
 
@@ -8,7 +10,7 @@
 Summary: Mail processing program
 Name: procmail
 Version: 3.24
-Release: 7%{?dist}
+Release: 8%{?dist}
 # Dual licensed "gpl-2.0-or-later OR artistic-perl-1.0", but
 # artistic-perl-1.0 is not allowed, thus dropped from the license
 # tag as per: https://gitlab.com/fedora/legal/fedora-license-data/-/issues/423
@@ -68,6 +70,10 @@ cp -p %{SOURCE2} telsas_procmailrc
 %{_mandir}/man[15]/*
 
 %changelog
+* Wed Dec 18 2024 Sumit Jena <v-sumitjena@microsoft.com> - 3.24-8
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.24-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

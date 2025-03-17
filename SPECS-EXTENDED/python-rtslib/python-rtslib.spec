@@ -5,11 +5,13 @@
 
 Name:             python-rtslib
 License:          Apache-2.0
+Vendor:           Microsoft Corporation
+Distribution:     Azure Linux
 Summary:          API for Linux kernel LIO SCSI target
 Version:          2.1.76
-Release:          9%{?dist}
+Release:          10%{?dist}
 URL:              https://github.com/open-iscsi/%{oname}
-Source:           %{url}/archive/v%{version}/%{oname}-%{version}.tar.gz
+Source:           %{url}/archive/v%{version}/%{oname}-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 Patch0:           0001-disable-xen_pvscsi.patch
 Patch1:           0002-rtslib-explicitely-import-kmod.error-and-kmod.Kmod.patch
 BuildArch:        noarch
@@ -18,13 +20,11 @@ BuildRequires:    epydoc
 %endif
 BuildRequires:    systemd
 
-
 %global _description\
 API for generic Linux SCSI kernel target. Includes the 'target'\
 service and targetctl tool for restoring configuration.
 
 %description %_description
-
 
 %if %{with apidocs}
 %package doc
@@ -55,7 +55,6 @@ Obsoletes:      %{name}-doc < %{version}-%{release}
 %description -n python3-rtslib
 API for generic Linux SCSI kernel target.
 
-
 %package -n target-restore
 Summary:          Systemd service for targetcli/rtslib
 Requires:         python3-rtslib = %{version}-%{release}
@@ -67,12 +66,8 @@ Requires(postun): systemd
 Systemd service to restore the LIO kernel target settings
 on system restart.
 
-
 %prep
-%setup -q -n %{oname}-%{version}
-%patch -P0 -p1
-%patch -P1 -p1
-
+%autosetup -p1 -n %{oname}-%{version}
 
 %build
 %py3_build
@@ -128,6 +123,10 @@ install -m 644 doc/saveconfig.json.5 %{buildroot}%{_mandir}/man5/
 %endif
 
 %changelog
+* Mon Dec 23 2024 Akhila Guruju <v-guakhila@microsoft.com> - 2.1.76-10
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.1.76-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

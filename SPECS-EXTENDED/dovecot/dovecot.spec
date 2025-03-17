@@ -9,12 +9,13 @@ Version: 2.3.21.1
 Release: 1%{?dist}
 #dovecot itself is MIT, a few sources are PD, pigeonhole is LGPLv2
 License: MIT AND LGPL-2.1-only
-
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL: https://www.dovecot.org/
 Source: https://www.dovecot.org/releases/2.3/%{name}-%{version}%{?prever}.tar.gz
 Source1: dovecot.init
 Source2: dovecot.pam
-%global pigeonholever 0.5.21
+%global pigeonholever 0.5.21.1
 Source8: https://pigeonhole.dovecot.org/releases/2.3/dovecot-2.3-pigeonhole-%{pigeonholever}.tar.gz
 Source9: dovecot.sysconfig
 Source10: dovecot.tmpfilesd
@@ -84,7 +85,7 @@ BuildRequires: clucene-core-devel
 %if %{?rhel}0 == 0
 BuildRequires: libstemmer-devel
 %endif
-BuildRequires: multilib-rpm-config
+#BuildRequires: multilib-rpm-config
 BuildRequires: flex, bison
 BuildRequires: systemd-devel
 BuildRequires: systemd-rpm-macros
@@ -262,7 +263,7 @@ rm -rf $RPM_BUILD_ROOT
 mv $RPM_BUILD_ROOT/%{_docdir}/%{name} %{_builddir}/%{name}-%{version}%{?prever}/docinstall
 
 # fix multilib issues
-%multilib_fix_c_header --file %{_includedir}/dovecot/config.h
+#%multilib_fix_c_header --file %{_includedir}/dovecot/config.h
 
 pushd dovecot-pigeonhole
 %make_install
@@ -520,156 +521,27 @@ make check
 %{_libdir}/%{name}/dict/libdriver_pgsql.so
 
 %changelog
-* Mon Aug 19 2024 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.21.1-1
-- updated to 2.3.21.1(2304907)
+* Mon Oct 28 2024 Sumit Jena <v-sumitjena@microsoft.com> - 2.3.21.1-1
+- Upgrade to 2.3.21.1
+- License verified
 
-* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.3.21-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Wed Aug 30 2023 Archana Choudhary <archana1@microsoft.com> - 2.3.20-1
+- Upgrade to 2.3.20
+- Resolves: CVE-2021-33515 CVE-2021-29157 CVE-2022-30550 CVE-2020-28200
+- Update patch #6 and #8
+- Remove patch #16 as it is not needed
+- Update files
+- Verified license
 
-* Tue Jun 18 2024 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.21-8
-- fix sieve crash when there are two missing optional scripts
-- Do not use deprecated OpenSSL v3 ENGINE API
-- Drop dependency on libstemmer on RHEL
+* Mon Nov 01 2021 Muhammad Falak <mwani@microsft.com> - 2.3.13-5
+- Remove epoch
 
-* Tue Mar 26 2024 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.21-7
-- drop i686 build as per https://fedoraproject.org/wiki/Changes/EncourageI686LeafRemoval
+* Fri Oct 08 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 2.3.13-4
+- Adding missing BR on 'systemd-rpm-macros'.
 
-* Wed Jan 31 2024 Pete Walter <pwalter@fedoraproject.org> - 1:2.3.21-6
-- Rebuild for ICU 74
-
-* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.3.21-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Fri Jan 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.3.21-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Tue Oct 24 2023 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.21-3
-- drop lucene to reduce dependency, use solr for fts instead
-
-* Thu Oct 05 2023 Remi Collet <remi@remirepo.net> - 1:2.3.21-2
-- rebuild for new libsodium
-
-* Mon Sep 18 2023 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.21-1
-- updated to 2.3.21(2239134)
-
-* Wed Jul 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.3.20-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Tue Jul 11 2023 František Zatloukal <fzatlouk@redhat.com> - 1:2.3.20-5
-- Rebuilt for ICU 73.2
-
-* Wed Apr 26 2023 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.20-4
-- update license tag format (SPDX migration) for https://fedoraproject.org/wiki/Changes/SPDX_Licenses_Phase_1
-
-* Tue Feb 14 2023 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.20-3
-- drop SHA1 OTP
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.3.20-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Mon Jan 02 2023 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.20-1
-- updated to 2.3.20, pigeonhole to 0.5.20
-
-* Mon Jan 02 2023 Florian Weimer <fweimer@redhat.com> - 1:2.3.19.1-8
-- Port configure script to C99
-
-* Sat Dec 31 2022 Pete Walter <pwalter@fedoraproject.org> - 1:2.3.19.1-7
-- Rebuild for ICU 72
-
-* Tue Nov 08 2022 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.19.1-6
-- use Wants=network-online.target instead of preexec nm-online (#2095949)
-
-* Tue Oct 11 2022 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.19.1-5
-- build with lua support (#2132420)
-
-* Mon Aug 01 2022 Frantisek Zatloukal <fzatlouk@redhat.com> - 1:2.3.19.1-4
-- Rebuilt for ICU 71.1
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.3.19.1-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Tue Jul 12 2022 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.19.1-2
-- fix possible privilege escalation when similar master and non-master passdbs are used
-
-* Mon Jun 20 2022 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.19.1-1
-- updated to 2.3.19.1
-
-* Mon May 30 2022 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.19-1
-- updated to 2.3.19, pigeonhole to 0.5.19
-
-* Wed Feb 09 2022 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.18-1
-- updated to 2.3.18, pigeonhole to 0.5.18
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.3.17.1-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Tue Dec 07 2021 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.17.1-1
-- dovecot updated to 2.3.17.1, pigeonhole to 0.5.17.1
-- dsync: Add back accidentically removed parameters.
-- lib-ssl-iostream: Fix assert-crash when OpenSSL returned syscall error
-  without errno.
-- dovecot, managesieve and sieve-tool failed to run if ssl_ca was too large.
-
-* Tue Nov 02 2021 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.17-1
-- dovecot updated to 2.3.17, pigeonhole to 0.5.17
-
-* Tue Sep 28 2021 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.16-4
-- reenable LTO
-
-* Mon Sep 27 2021 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.16-3
-- fix OpenSSLv3 issues 2005884
-
-* Tue Sep 14 2021 Sahana Prasad <sahana@redhat.com> - 1:2.3.16-2
-- Rebuilt with OpenSSL 3.0.0
-
-* Fri Aug 20 2021 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.16-1
-- dovecot updated to 2.3.16, pigeonhole to 0.5.16
-- fixes several regressions
-
-* Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.3.15-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Mon Jun 21 2021 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.15-1
-- dovecot updated to 2.3.15, pigeonhole updated to 0.5.15
-- CVE-2021-29157: Dovecot does not correctly escape kid and azp fields in
-  JWT tokens. This may be used to supply attacker controlled keys to
-  validate tokens, if attacker has local access.
-- CVE-2021-33515: On-path attacker could have injected plaintext commands
-  before STARTTLS negotiation that would be executed after STARTTLS
-  finished with the client.
-- Add TSLv1.3 support to min_protocols.
-- Allow configuring ssl_cipher_suites. (for TLSv1.3+)
-
-* Wed May 19 2021 Pete Walter <pwalter@fedoraproject.org> - 1:2.3.14-4
-- Rebuild for ICU 69
-
-* Wed May 19 2021 Pete Walter <pwalter@fedoraproject.org> - 1:2.3.14-3
-- Rebuild for ICU 69
-
-* Mon May 10 2021 Jeff Law <jlaw@tachyum.com> - 1:2.3.14-2
-- Re-enable LTO
-
-* Mon Mar 22 2021 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.14-1
-- dovecot updated to 2.3.14, pigeonhole to 0.5.14
-- use OpenSSL's implementation of HMAC
-- Remove autocreate, expire, snarf and mail-filter plugins.
-- Remove cydir storage driver.
-- Remove XZ/LZMA write support. Read support will be removed in future release.
-
-* Mon Feb 08 2021 Pavel Raiskup <praiskup@redhat.com> - 1:2.3.13-7
-- rebuild for libpq ABI fix rhbz#1908268
-
-* Mon Feb 01 2021 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.13-6
-- use make macros
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.3.13-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Mon Jan 18 2021 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.13-4
-- fix multilib issues
-
-* Mon Jan 18 2021 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.13-3
-- bump release and rebuild
+* Fri Apr 30 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 2.3.13-3
+- Initial CBL-Mariner import from Fedora 33 (license: MIT).
+- Making binaries paths compatible with CBL-Mariner's paths.
 
 * Thu Jan 07 2021 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.13-2
 - fix rundir location
@@ -739,7 +611,6 @@ make check
       submission-login and lmtp processes.
 - fixes CVE-2020-7957: Specially crafted mail can crash snippet generation.
 
-
 * Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.3.9.2-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
 
@@ -804,7 +675,6 @@ make check
 - virtual plugin: Some searches used 100% CPU for many seconds 
 - dsync assert-crashed with acl plugin in some situations. 
 - imapc: Fixed various assert-crashes when reconnecting to server. 
-
 
 * Tue Oct 02 2018 Michal Hlavinka <mhlavink@redhat.com> - 1:2.3.2.1-4
 - fix dovecot-init service syntax error (#1635017)
@@ -1076,7 +946,6 @@ make check
 - fts-lucene: Fixed crash on index rescan.
 - dict-ldap: Various fixes
 - dict-sql: NULL values crashed. Now they're treated as "not found".
-
 
 * Wed Apr 27 2016 Michal Hlavinka <mhlavink@redhat.com> - 1:2.2.24-1
 - dovecot updated to 2.2.24
@@ -1551,7 +1420,6 @@ make check
 - imapc: Fixed a crash when message had more than 8 keywords.
 - imapc: Don't crash on APPEND/COPY if server doesn't support UIDPLUS.
 
-
 * Mon Jul 02 2012 Michal Hlavinka <mhlavink@redhat.com> - 1:2.1.7-5
 - make quota work with NFS mounted mailboxes
 
@@ -1643,7 +1511,6 @@ make check
   temporarily, not permanently (avoids hangs with process_limit=1
   services)
 - auth: passdb imap crashed for non-login authentication (e.g. smtp).
-
 
 * Mon Feb 20 2012 Michal Hlavinka <mhlavink@redhat.com> - 1:2.1.0-1
 - updated to 2.1.0 (no major changes since .rc6)
@@ -2610,12 +2477,10 @@ make check
 - MySQL compiling got broken in last release
 - More PostgreSQL reconnection fixing
 
-
 * Mon Jul 26 2004 John Dennis <jdennis@redhat.com> 0.99.10.7-1,FC3,1
 - enable postgres and mySQL in build
 - fix configure to look for mysql in alternate locations
 - nuke configure script in tar file, recreate from configure.in using autoconf
-
 - bring up to latest upstream, which included:
 - Added outlook-pop3-no-nuls workaround to fix Outlook hang in mails with NULs.
 - Config file lines can now contain quoted strings ("value ")
@@ -2623,7 +2488,6 @@ make check
   Dovecot closed the connection. This was supposed to work so that
   if client hasn't read data at all in 30 seconds, it's disconnected.
 - Maildir: LIST now doesn't skip symlinks
-
 
 * Wed Jun 30 2004 John Dennis <jdennis@redhat.com>
 - bump rev for build

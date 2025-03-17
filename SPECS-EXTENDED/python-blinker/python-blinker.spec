@@ -1,8 +1,10 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global mod_name blinker
 
 Name:           python-blinker
 Version:        1.7.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Fast, simple object-to-object and broadcast signaling
 
 License:        MIT
@@ -11,11 +13,16 @@ Source0:        %{url}/archive/%{version}/%{mod_name}-%{version}.tar.gz
 
 BuildArch:      noarch
 BuildRequires:  python3-devel
+BuildRequires:  python3-pip
+BuildRequires:  python3-flit-core
 
 # Tests
 BuildRequires:  python3dist(pytest)
-BuildRequires:  python3dist(tox)
+BuildRequires:  python3-pytest-asyncio
+BuildRequires:  python-tox
 BuildRequires:  python3dist(tox-current-env)
+BuildRequires:  python-filelock
+BuildRequires:  python-toml
 
 %global _description\
 Blinker provides a fast dispatching system that allows any number\
@@ -53,6 +60,11 @@ of interested parties to subscribe to events, or "signals".
 
 
 %changelog
+* Wed Feb 12 2025 Aninda Pradhan <v-anipradhan@microsoft.com> - 1.7.0-4
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License Verified
+- Added additional dependencies for successful build and test
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.7.0-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

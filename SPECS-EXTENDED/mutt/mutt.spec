@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %bcond_without debug
 %bcond_without imap
 %bcond_without pop
@@ -14,13 +16,13 @@
 %bcond_with gdbm
 %bcond_without gpgme
 %bcond_without sidebar
-
+ 
 %{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
-
+ 
 Summary: A text mode mail user agent
 Name: mutt
 Version: 2.2.13
-Release: 3%{?dist}
+Release: 1%{?dist}
 Epoch: 5
 # The entire source code is GPLv2+ except
 # pgpewrap.c setenv.c sha1.c wcwidth.c which are Public Domain
@@ -28,7 +30,7 @@ License: GPL-2.0-or-later AND LicenseRef-Fedora-Public-Domain
 # hg snapshot created from http://dev.mutt.org/hg/mutt
 Source: ftp://ftp.mutt.org/pub/%{name}/%{name}-%{version}.tar.gz
 Source1: mutt_ldap_query
-Patch1: mutt-1.10.0-muttrc.patch
+Patch1: mutt-1.10.0-muttrc.patch             
 Patch2: mutt-1.8.0-cabundle.patch
 # https://dev.mutt.org/trac/ticket/3569
 Patch3: mutt-1.7.0-syncdebug.patch
@@ -39,7 +41,7 @@ Patch10: mutt-1.9.4-lynx_no_backscapes.patch
 Patch12: mutt-1.9.5-nodotlock.patch
 Patch13: mutt-1.12.1-optusegpgagent.patch
 Patch14: mutt-configure-c99.patch
-
+ 
 Url: http://www.mutt.org
 Requires: mailcap, urlview
 BuildRequires: make
@@ -49,45 +51,46 @@ BuildRequires: ncurses-devel, gettext, automake
 BuildRequires: /usr/bin/xsltproc, docbook-style-xsl, perl-interpreter
 BuildRequires: perl-generators
 BuildRequires: lynx
-
+BuildRequires: perl(Digest::MD5)
+ 
 %if %{with hcache}
 %{?with_tokyocabinet:BuildRequires: tokyocabinet-devel}
 %{?with_bdb:BuildRequires: db4-devel}
 %{?with_qdbm:BuildRequires: qdbm-devel}
 %{?with_gdbm:BuildRequires: gdbm-devel}
 %endif
-
+ 
 %if %{with imap} || %{with pop} || %{with smtp}
 %{?with_gnutls:BuildRequires: gnutls-devel}
 %{?with_sasl:BuildRequires: cyrus-sasl-devel}
 %endif
-
+ 
 %if %{with imap}
 %{?with_gss:BuildRequires: krb5-devel}
 %endif
-
+ 
 %{?with_idn:BuildRequires: libidn-devel}
 %{?with_idn2:BuildRequires: libidn2-devel}
 %{?with_gpgme:BuildRequires: gpgme-devel}
-
-
+ 
+ 
 %description
 Mutt is a small but very powerful text-based MIME mail client.  Mutt
 is highly configurable, and is well suited to the mail power user with
 advanced features like key bindings, keyboard macros, mail threading,
 regular expression searches and a powerful pattern matching language
 for selecting groups of messages.
-
-
+ 
+ 
 %prep
 # unpack; cd
 %setup -q
 # do not run ./prepare -V, because it also runs ./configure
-
+ 
 %patch -P10 -p1 -b .lynx_no_backscapes
 %patch -P12 -p1 -b .nodotlock
 %patch -P14 -p1
-
+ 
 autoreconf --install
 %patch -P1 -p1 -b .muttrc
 %patch -P2 -p1 -b .cabundle
@@ -95,23 +98,23 @@ autoreconf --install
 %patch -P8 -p1 -b .system_certs
 %patch -P9 -p1 -b .ssl_ciphers
 %patch -P13 -p1 -b .optusegpgagent
-
+ 
 sed -i -r 's/`$GPGME_CONFIG --libs`/"\0 -lgpg-error"/' configure
-
+ 
 install -p -m644 %{SOURCE1} mutt_ldap_query
-
+ 
 %global hgreldate \\.(201[0-9])([0-1][0-9])([0-3][0-9])hg
 if echo %{release} | grep -E -q '%{hgreldate}'; then
   echo -n 'const char *ReleaseDate = ' > reldate.h
   echo %{release} | sed -r 's/.*%{hgreldate}.*/"\1-\2-\3";/' >> reldate.h
 fi
-
+ 
 # remove mutt_ssl.c to be sure it won't be used because it violates
 # Packaging:CryptoPolicies
 # https://fedoraproject.org/wiki/Packaging:CryptoPolicies
 rm -f mutt_ssl.c
-
-
+ 
+ 
 %build
 %configure \
     SENDMAIL=%{_sbindir}/sendmail \
@@ -145,35 +148,33 @@ rm -f mutt_ssl.c
     %{?with_gpgme:	--enable-gpgme} \
     %{?with_sidebar: --enable-sidebar} \
     --with-docdir=%{_pkgdocdir}
-
+ 
 %make_build
-
 # remove unique id in manual.html because multilib conflicts
 sed -i -r 's/<a id="id[a-z0-9]\+">/<a id="id">/g' doc/manual.html
-
+ 
 # fix the shebang in mutt_oauth2.py & preserve the time stamp
 oauth2_script="contrib/mutt_oauth2.py"
 t=$(stat -c %y "${oauth2_script}")
 sed -i "s:^#\!/usr/bin/env\s\+python3\s\?$:#!%{python3}:" "${oauth2_script}"
 touch -d "$t" "${oauth2_script}"
-
+ 
 %install
 %make_install
-
 # we like GPG here
 cat contrib/gpg.rc >> \
       %{buildroot}%{_sysconfdir}/Muttrc
-
+ 
 grep -5 "^color" contrib/sample.muttrc >> \
       %{buildroot}%{_sysconfdir}/Muttrc
-
+ 
 cat >> %{buildroot}%{_sysconfdir}/Muttrc <<\EOF
 source %{_sysconfdir}/Muttrc.local
 EOF
-
+ 
 echo "# Local configuration for Mutt." > \
       %{buildroot}%{_sysconfdir}/Muttrc.local
-
+ 
 # remove unpackaged files from the buildroot
 rm -f %{buildroot}%{_sysconfdir}/*.dist
 rm -f %{buildroot}%{_sysconfdir}/mime.types
@@ -187,16 +188,16 @@ rm -f %{buildroot}%{_mandir}/man1/flea.1*
 rm -f %{buildroot}%{_mandir}/man5/mbox.5*
 rm -f %{buildroot}%{_mandir}/man5/mmdf.5*
 rm -rf %{buildroot}%{_pkgdocdir}
-
+ 
 # remove /usr/share/info/dir
 rm %{buildroot}%{_infodir}/dir
-
+ 
 # provide muttrc.local(5): the same as muttrc(5)
 ln -sf ./muttrc.5 %{buildroot}%{_mandir}/man5/muttrc.local.5
-
+ 
 %find_lang %{name}
-
-
+ 
+ 
 %files -f %{name}.lang
 %{!?_licensedir:%global license %doc}
 %license COPYRIGHT GPL
@@ -217,110 +218,37 @@ ln -sf ./muttrc.5 %{buildroot}%{_mandir}/man5/muttrc.local.5
 %{_mandir}/man5/muttrc.*
 %{_infodir}/mutt.info.*
 
-
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 5:2.2.13-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Feb 24 2025 Akarsh Chaudhary <v-akarshc@microsoft.com> - 2.2.13
+- Upgrade to version 2.2.13
+- License verified
 
-* Sat Jun 22 2024 Ondrej Sloup <osloup@redhat.com> -  5:2.2.13-2
-- Remove docbookX2 BuildRequire dependency as it is being deprecated
+* Wed Sep 20 2023 Archana Choudhary <archana1@microsoft.com> - 2.2.12-1
+- Upgrade to 2.2.12 -  CVE-2022-1328 CVE-2023-4875  CVE-2023-4874
+- Update Patches
 
-* Wed Mar 20 2024 Matej Mužila <mmuzila@redhat.com> - 5:2.2.13-1
-- Upgrade to 2.2.13
-- Resolves: #2268671
+* Fri Sep 15 2023 Henry Li <lihl@microsoft.com> - 2.0.5-5
+- Add patch to resolve CVE-2023-4874
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 5:2.2.12-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+* Tue Nov 29 2022 Muhammad Falak <mwani@microsoft.com> - 2.0.5-4
+- Patch CVE-2021-32055
+- License verified
 
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 5:2.2.12-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+* Fri Oct 29 2021 Muhammad Falak <mwani@microsoft.com> - 2.0.5-3
+- Remove epoch
 
-* Thu Dec  7 2023 Florian Weimer <fweimer@redhat.com> - 5:2.2.12-2
-- Fix C99 compatibility issue
-
-* Mon Nov 13 2023 Matej Mužila <mmuzila@redhat.com> - 5:2.2.12-1
-- Upgrade to 2.2.12
-- Resolves: #2232712
-
-* Tue Sep 05 2023 Matej Mužila <mmuzila@redhat.com> - 5:2.2.11-1
-- Upgrade to 2.2.11
-- Resolves: #2232712
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 5:2.2.10-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Mon Apr 17 2023 Matej Mužila <mmuzila@redhat.com> - 5:2.2.10-1
-- Upgrade to 2.2.10
-- Resolves: #2181780
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 5:2.2.9-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Wed Nov 23 2022  Matej Mužila <mmuzila@redhat.com> - 5:2.2.9-1
-- Upgrade to 2.2.9
-- Resolves: 2140353
-
-* Thu Aug 11 2022  Matej Mužila <mmuzila@redhat.com> - 5:2.2.7-1
-- Upgrade to 2.2.7
-- Resolves: 2116172
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 5:2.2.6-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Wed Jun 15 2022  Matej Mužila <mmuzila@redhat.com> - 5:2.2.6-1
-- Upgrade to 2.2.6
-- Resolves: 2093746
-
-* Mon May 30 2022  Matej Mužila <mmuzila@redhat.com> - 5:2.2.5-1
-- Upgrade to 2.2.5
-- Resolves: 2068653
-
-* Thu Apr 21 2022 Matej Mužila <mmuzila@redhat.com> - 5:2.2.3-1
-- Upgrade to 2.2.3
-  Resolves: CVE-2022-1328
-
-* Mon Mar 28 2022 Matej Mužila <mmuzila@redhat.com> - 5:2.2.2-1
-- Upgrade to 2.2.2
-  Resolves: #2068653
-
-* Tue Feb 22 2022 Matej Mužila <mmuzila@redhat.com> - 5:2.2.1-1
-- Upgrade to 2.2.1
-  Resolves: #2053874
-
-* Wed Feb 16 2022 Matej Mužila <mmuzila@redhat.com> - 5:2.2.0-1
-- Upgrade to 2.2.0
-  Resolves: #2053874
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 5:2.1.5-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Mon Jan 03 2022 Matej Mužila <mmuzila@redhat.com> - 5:2.1.5-1
-- Upgrade to 2.1.5
-
-* Mon Oct 25 2021 Matej Mužila <mmuzila@redhat.com> - 5:2.1.3-1
-- Upgrade to 2.1.3
-
-* Tue Aug 10 2021 Matej Mužila <mmuzila@redhat.com> - 5:2.1.1-1
-- Upgrade to 2.1.1
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 5:2.0.7-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Fri May  7 2021 Dan Čermák <dan.cermak@cgc-instruments.com> - 5:2.0.7-2
-- Ship the mutt_oauth2.py script as well
-
-* Thu May 6 2021 Filip Januš <fjanus@redhat.com> 5:2.0.7-1
--Rebase to v2.0.7
-
-* Mon Mar 22 2021 Filip Januš <fjanus@redhat.com> 5:2.0.6-1
-- Rebase to upstream version 2.0.6
+* Thu Jul 8 2021 Muhammad Falak R Wani <mwani@microsoft.com> -5:2.0.5-2
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+- Fix bogus date in changelog
 
 * Mon Feb 1 2021 Filip Januš <fjanus@redhat.com> -5:2.0.5-1
 - Rebase to upstream version 2.0.5
 - Fix CVE-2021-3181
 
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 5:2.0.2-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+* Tue Jan 19 2021 Filip Januš <fjanus@redhat.com> - 5:2.0.2-2
+- Add patch for remove enforcing ssl
+- Patch is based on upstream commit
+  https://gitlab.com/muttmua/mutt/-/commit/9204b24e99767ae06b5df25eca55c028d702528b
 
 * Tue Dec 01 2020 Matej Mužila <mmuzila@redhat.com> - 5:2.0.2-1
 - Upgrade to 2.0.2
@@ -331,9 +259,6 @@ ln -sf ./muttrc.5 %{buildroot}%{_mandir}/man5/muttrc.local.5
 
 * Mon Aug 31 2020 Matej Mužila <mmuzila@redhat.com> - 5:1.14.7-1
 - Upgrade to 1.14.7
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 5:1.14.6-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Wed Jul 22 2020 Fabio Alessandro Locati <fale@fedoraproject.org> - 5:1.14.6-1
 - Upgrade to 1.14.6

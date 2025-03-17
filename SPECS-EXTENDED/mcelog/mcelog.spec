@@ -1,9 +1,10 @@
 Summary:	Tool to translate x86-64 CPU Machine Check Exception data
 Name:		mcelog
 Version:	175
-Release:	11%{?dist}
-Epoch:		3
+Release:	12%{?dist}
 License:	GPL-2.0-only
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:		https://github.com/andikleen/mcelog
 Source0:	%{url}/archive/v%{version}/%{name}-%{version}.tar.gz
 # note that this source OVERRIDES the one on the tarball above!
@@ -52,6 +53,7 @@ install -p -m644 mcelog*.5 $RPM_BUILD_ROOT/%{_mandir}/man5/
 %systemd_postun_with_restart mcelog.service
 
 %files
+%license LICENSE
 %{_sbindir}/mcelog
 %dir %{_sysconfdir}/mcelog
 %{_sysconfdir}/mcelog/triggers
@@ -60,6 +62,10 @@ install -p -m644 mcelog*.5 $RPM_BUILD_ROOT/%{_mandir}/man5/
 %{_mandir}/*/*
 
 %changelog
+* Tue Dec 31 2024 Aninda Pradhan <v-anipradhan@microsoft.com> - 175-12
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3:175-11
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
@@ -252,4 +258,3 @@ install -p -m644 mcelog*.5 $RPM_BUILD_ROOT/%{_mandir}/man5/
 
 * Thu Jan 27 2005 Dave Jones <davej@redhat.com>
 - Initial packaging.
-

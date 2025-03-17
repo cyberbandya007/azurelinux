@@ -6,11 +6,13 @@
 
 Name:           python-%{srcname}
 Version:        0.9.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        VCR imitation for python-requests
 
 License:        Apache-2.0
 URL:            https://github.com/sigmavirus24/%{srcname}
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Source0:        %{url}/archive/%{version}/%{srcname}-%{version}.tar.gz
 
 BuildArch:      noarch
@@ -61,6 +63,10 @@ py.test-%{python3_version} -vk "$TEST_SELECTOR"
 %{python3_sitelib}/%{srcname}-*.egg-info/
 
 %changelog
+* Wed Dec 18 2024 Sumit Jena <v-sumitjena@microsoft.com> - 0.9.0-4
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.0-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

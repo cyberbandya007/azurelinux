@@ -1,14 +1,15 @@
-# OCaml packages not built on i686 since OCaml 5 / Fedora 39.
-ExcludeArch: %{ix86}
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+%global srcname curses
 
-Name:           ocaml-curses
+Name:           ocaml-%{srcname}
 Version:        1.0.11
 Release:        11%{?dist}
 Summary:        OCaml bindings for ncurses
 License:        LGPL-2.1-or-later WITH OCaml-LGPL-linking-exception
 
 URL:            https://github.com/mbacarella/curses
-Source0:        %{url}/archive/%{version}/curses-%{version}.tar.gz
+Source0:        https://github.com/mbacarella/curses/archive/%{version}/%{srcname}-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
 BuildRequires:  ocaml >= 4.02.0
 BuildRequires:  ocaml-dune >= 2.7
@@ -57,8 +58,9 @@ developing applications that use %{name}.
 
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.0.11-11
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Fri Dec 20 2024 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 1.0.11-11
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
 
 * Wed Jun 19 2024 Richard W.M. Jones <rjones@redhat.com> - 1.0.11-10
 - OCaml 5.2.0 ppc64le fix
@@ -147,6 +149,9 @@ developing applications that use %{name}.
 
 * Thu Apr 02 2020 Richard W.M. Jones <rjones@redhat.com> - 1.0.4-13
 - Update all OCaml dependencies for RPM 4.16.
+
+* Thu Feb 27 2020 Richard W.M. Jones <rjones@redhat.com> - 1.0.4-12.1
+- OCaml 4.10.0 final (Fedora 32).
 
 * Wed Feb 26 2020 Richard W.M. Jones <rjones@redhat.com> - 1.0.4-12
 - OCaml 4.10.0 final.

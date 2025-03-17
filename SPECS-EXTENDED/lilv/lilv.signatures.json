@@ -1,7 +1,7 @@
 {
  "Signatures": {
   "drobilla.gpg": "29c8ffc9ffee2982ad3c3355736ed043377c1f0f4ea4776df4b98a464692b70e",
-  "lilv-0.24.24.tar.xz": "6bb6be9f88504176d0642f12de809b2b9e2dc55621a68adb8c7edb99aefabb4f",
-  "lilv-0.24.24.tar.xz.sig": "67f4c9b14e1974b5efeb414bceb74a5d999062db4551b3d8e7d6be24df7b5e5a"
+  "lilv-0.24.26.tar.xz": "22feed30bc0f952384a25c2f6f4b04e6d43836408798ed65a8a934c055d5d8ac",
+  "lilv-0.24.26.tar.xz.sig": "a491289e5df5fdf41e96b1ad7138dce42a4008795f4e6ceedfd1416036cff6a1"
  }
 }

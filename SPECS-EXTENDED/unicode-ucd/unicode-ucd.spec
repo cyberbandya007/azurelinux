@@ -1,10 +1,12 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 # for other future directories from http://www.unicode.org/Public
 %global unicodedir %{_datadir}/unicode
 %global ucddir %{unicodedir}/ucd
 
 Name:           unicode-ucd
 Version:        16.0.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Unicode Character Database
 
 # http://www.unicode.org/terms_of_use.html in ReadMe.txt redirects to:
@@ -12,10 +14,10 @@ Summary:        Unicode Character Database
 # which links to https://www.unicode.org/license.txt
 # https://github.com/spdx/license-list-XML/issues/2105
 License:        Unicode-3.0
-URL:            http://www.unicode.org/ucd/
+URL:            https://www.unicode.org/ucd/
 # update with fbrnch update-version -f
-Source0:        http://www.unicode.org/Public/zipped/%{version}/UCD.zip
-Source1:        http://www.unicode.org/Public/zipped/%{version}/Unihan.zip
+Source0:        https://www.unicode.org/Public/zipped/%{version}/UCD.zip
+Source1:        https://www.unicode.org/Public/zipped/%{version}/Unihan.zip
 Source2:        https://www.unicode.org/license.txt
 BuildArch:      noarch
 
@@ -63,6 +65,11 @@ cp %{SOURCE2} .
 
 
 %changelog
+* Thu Jan 16 2025 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 16.0.0-2
+- Initial CBL-Mariner import from Fedora 41 (license: MIT).
+- change the URL and Source0 from http to https
+- License verified
+
 * Thu Sep 19 2024 Jens Petersen <petersen@redhat.com> - 16.0.0-1
 - update for https://unicode.org/versions/Unicode16.0.0/
 

@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global somajor 9
 %global sominor 0
 %global sotiny  0
@@ -6,10 +8,10 @@
 Name:			libvpx
 Summary:		VP8/VP9 Video Codec SDK
 Version:		1.14.1
-Release:		2%{?dist}
+Release:		3%{?dist}
 License:		BSD-3-Clause
 URL:			http://www.webmproject.org/code/
-Source0:		https://github.com/webmproject/libvpx/archive/v%{version}.tar.gz
+Source0:		https://github.com/webmproject/libvpx/archive/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
 Source1:		vpx_config.h
 # Thanks to debian.
 Source2:		libvpx.ver
@@ -182,6 +184,11 @@ rm -rf %{buildroot}%{_prefix}/src
 
 %ldconfig_scriptlets
 
+%check
+# This symbolic linking is needed for the tests to execute successfully.
+ln -sf %{buildroot}%{_libdir}/libvpx.so.%{somajor} /usr/lib/libvpx.so.%{somajor}
+make test
+
 %files
 %license LICENSE
 %doc AUTHORS CHANGELOG README
@@ -202,6 +209,10 @@ rm -rf %{buildroot}%{_prefix}/src
 %{_bindir}/*
 
 %changelog
+* Thu Feb 27 2025 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 1.14.1-3
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.14.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
@@ -504,4 +515,3 @@ rm -rf %{buildroot}%{_prefix}/src
 
 * Wed May 19 2010 Tom "spot" Callaway <tcallawa@redhat.com> 0.9.0-1
 - Initial package for Fedora
-

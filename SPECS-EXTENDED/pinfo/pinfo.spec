@@ -1,9 +1,10 @@
 Name:    pinfo
 Version: 0.6.13
-Release: 7%{?dist}
+Release: 8%{?dist}
 Summary: An info file viewer
 License: GPL-2.0-only
-
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:    https://github.com/baszoetekouw/pinfo
 Source: %{url}/archive/refs/tags/v%{version}.tar.gz
 
@@ -56,6 +57,10 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %{_mandir}/man1/pinfo.1*
 
 %changelog
+* Wed Dec 18 2024 Sumit Jena <v-sumitjena@microsoft.com> - 0.6.13-8
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.6.13-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

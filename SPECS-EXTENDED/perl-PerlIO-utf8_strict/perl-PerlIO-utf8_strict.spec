@@ -1,8 +1,10 @@
 Name:           perl-PerlIO-utf8_strict
 Version:        0.010
-Release:        8%{?dist}
+Release:        1%{?dist}
 Summary:        Fast and correct UTF-8 I/O
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/PerlIO-utf8_strict
 Source0:        https://cpan.metacpan.org/modules/by-module/PerlIO/PerlIO-utf8_strict-%{version}.tar.gz
 # Build:
@@ -60,64 +62,12 @@ make test
 %{_mandir}/man3/PerlIO::utf8_strict.3*
 
 %changelog
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.010-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Feb 27 2025 Sumit Jena <v-sumitjena@microsoft.com> - 0.010-1
+- Update to version 0.010
+- License verified
 
-* Mon Jun 10 2024 Jitka Plesnikova <jplesnik@redhat.com> - 0.010-7
-- Perl 5.40 rebuild
-
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.010-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.010-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.010-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Tue Jul 11 2023 Jitka Plesnikova <jplesnik@redhat.com> - 0.010-3
-- Perl 5.38 rebuild
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.010-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Oct 27 2022 Paul Howarth <paul@city-fan.org> - 0.010-1
-- Update to 0.010 (rhbz#2138013)
-  - Re-release with updated ppport.h for 5.8.5 compatibility
-- Use SPDX-format license tag
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.009-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.009-3
-- Perl 5.36 rebuild
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.009-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Sat Jan  8 2022 Paul Howarth <paul@city-fan.org> - 0.009-1
-- Update to 0.009
-  - Mark functions that croak as noreturn
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.008-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.008-3
-- Perl 5.34 rebuild
-
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.008-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Sat Sep 19 2020 Paul Howarth <paul@city-fan.org> - 0.008-1
-- Update to 0.008
-  - Make unread by :crlf on top of :utf8_strict reliable
-- Use author-independent source URL
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.007-13
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.007-12
-- Perl 5.32 rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.007-12
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.007-11
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

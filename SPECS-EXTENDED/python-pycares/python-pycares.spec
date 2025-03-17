@@ -1,15 +1,16 @@
 # set upstream name variable
 %global srcname pycares
 
-
 Name:           python-pycares
 Version:        4.3.0
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        Python interface for c-ares
 
 License:        MIT
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://github.com/saghul/pycares
-Source0:        https://github.com/saghul/%{srcname}/archive/%{srcname}-%{version}.tar.gz
+Source0:        https://github.com/saghul/%{srcname}/archive/%{srcname}-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
 BuildRequires:  make
 BuildRequires:  gcc
@@ -20,15 +21,14 @@ BuildRequires:  c-ares-devel
 # for docs
 BuildRequires:  python3-sphinx
 BuildRequires:  python3-sphinx_rtd_theme
+BuildRequires:  python3-sphinxcontrib-jquery
 # for tests
-#BuildRequires:  python3-pytest
+BuildRequires:  python3-pytest
 
 %description
 pycares is a Python module which provides an interface to
 c-ares. c-ares is a C library that performs DNS requests and name
 resolutions asynchronously.
-
-
 
 %package     -n python3-%{srcname}
 Summary:        Python interface for c-ares
@@ -38,8 +38,6 @@ Summary:        Python interface for c-ares
 pycares is a Python module which provides an interface to
 c-ares. c-ares is a C library that performs DNS requests and name
 resolutions asynchronously.
-
-
 
 %package     -n python-%{srcname}-doc
 Summary:        Documentation for python-pycares
@@ -53,11 +51,8 @@ resolutions asynchronously.
 
 This package contains documentation in reST and HTML formats.
 
-
-
 %prep
 %autosetup -p1 -n %{srcname}-%{srcname}-%{version}
-
 
 %build
 export PYCARES_USE_SYSTEM_LIB=1
@@ -67,7 +62,6 @@ export PYCARES_USE_SYSTEM_LIB=1
 pushd docs/
 make html
 popd # docs
-
 
 %install
 %py3_install
@@ -88,8 +82,8 @@ chmod 755 %{buildroot}%{python3_sitearch}/%{srcname}/_cares.cpython-*.so
 
 %check
 # no tests to run with pytest: Disabling.
-
-
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=%{buildroot}%{python3_sitelib} \
+  %{python3} -m unittest -v
 
 %files -n python3-%{srcname}
 %license LICENSE
@@ -98,14 +92,16 @@ chmod 755 %{buildroot}%{python3_sitearch}/%{srcname}/_cares.cpython-*.so
 %{python3_sitearch}/%{srcname}/
 %{python3_sitearch}/%{srcname}-%{version}-py%{python3_version}.egg-info/
 
-
 %files -n python-%{srcname}-doc
 %doc examples/
 %{_pkgdocdir}/
 
-
-
 %changelog
+* Wed Feb 19 2025 Akhila Guruju <v-guakhila@microsoft.com> - 4.3.0-10
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+- Added `BuildRequires: python3-sphinxcontrib-jquery` to fix build.
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.3.0-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
@@ -226,3 +222,4 @@ chmod 755 %{buildroot}%{python3_sitearch}/%{srcname}/_cares.cpython-*.so
 
 * Mon Apr  2 2018 Matthieu Saulnier <fantom@fedoraproject.org> - 2.3.0-1
 - Initial package
+

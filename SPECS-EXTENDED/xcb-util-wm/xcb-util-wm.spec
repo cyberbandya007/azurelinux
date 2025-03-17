@@ -1,10 +1,12 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:		xcb-util-wm
 Version:	0.4.2
-Release:	6%{?dist}
+Release:	7%{?dist}
 Summary:	Client and window-manager helper library on top of libxcb
-License:	X11-distribute-modifications-variant
-URL:		http://xcb.freedesktop.org
-Source0:	http://xcb.freedesktop.org/dist/%{name}-%{version}.tar.xz
+License:	MIT
+URL:		https://xcb.freedesktop.org
+Source0:	https://xcb.freedesktop.org/dist/%{name}-%{version}.tar.xz
 BuildRequires:	make
 BuildRequires:	gcc
 BuildRequires:	pkgconfig(xcb-util) >= 0.3.8
@@ -67,6 +69,10 @@ rm %{buildroot}%{_libdir}/*.la
 
 
 %changelog
+* Thu Dec 26 2024 Aninda Pradhan <v-anipradhan@microsoft.com> - 0.4.2-7
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License Verified
+
 * Sat Jul 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.4.2-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
@@ -174,4 +180,3 @@ rm %{buildroot}%{_libdir}/*.la
 
 * Mon Dec  5 2011 Thomas Moschny <thomas.moschny@gmx.de> - 0.3.8-1
 - New package.
-

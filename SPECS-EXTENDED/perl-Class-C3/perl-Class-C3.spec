@@ -1,8 +1,10 @@
 Name:		perl-Class-C3
 Version:	0.35
-Release:	14%{?dist}
+Release:	1%{?dist}
 Summary:	Pragma to use the C3 method resolution order algorithm
 License:	GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:		https://metacpan.org/release/Class-C3
 Source0:	https://cpan.metacpan.org/modules/by-module/Class/Class-C3-%{version}.tar.gz
 BuildArch:	noarch
@@ -76,61 +78,12 @@ make test
 %{_mandir}/man3/Class::C3::next.3*
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.35-14
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Feb 27 2025 Sumit Jena <v-sumitjena@microsoft.com> - 0.35-1
+- Update to version 0.35
+- License verified
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.35-13
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.35-12
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.35-11
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.35-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.35-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Fri Jun 03 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.35-8
-- Perl 5.36 re-rebuild of bootstrapped packages
-
-* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.35-7
-- Perl 5.36 rebuild
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.35-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.35-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Mon May 24 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.35-4
-- Perl 5.34 re-rebuild of bootstrapped packages
-
-* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.35-3
-- Perl 5.34 rebuild
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.35-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Mon Nov  9 2020 Paul Howarth <paul@city-fan.org> - 0.35-1
-- Update to 0.35
-  - Update bundled ExtUtils::HasCompiler to 0.022
-  - Support PUREPERL_ONLY environment variable during installation
-  - Fix no-XS test to not require newer Test::More that declared prereq
-  - Drop optional Devel::Hide prereq
-- Use author-independent source URL
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.34-12
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Fri Jun 26 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.34-11
-- Perl 5.32 re-rebuild of bootstrapped packages
-
-* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.34-10
-- Perl 5.32 rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.34-10
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.34-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

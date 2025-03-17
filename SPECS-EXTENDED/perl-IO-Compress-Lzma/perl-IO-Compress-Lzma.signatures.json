@@ -1,5 +1,6 @@
 {
  "Signatures": {
-  "IO-Compress-Lzma-2.212.tar.gz": "51ef81f931cfd2c13fb2340c665204a9587843087dec1a57e9e9f4666d6dad40"
+  "IO-Compress-Lzma-2.213.tar.gz": "daa63c3fa1f7708aa55b97a4d189820f5e849f8e4583dc24b5cceebd06a493eb",
+  "LICENSE.PTR": "3127eaa628d76a647388ad2b25876f5dde0ff386266b7e498bcc599549348808"
  }
 }

@@ -1,26 +1,24 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global	gem_name	rspec-support
 
 %global	mainver	3.13.1
 %undefine	prever
 
-%global	baserelease	2
-%global	prerpmver	%(echo "%{?prever}" | sed -e 's|\\.||g')
-
-%bcond_with bootstrap
+%global	need_bootstrap_set	0
 
 %undefine __brp_mangle_shebangs
 
 Name:		rubygem-%{gem_name}
 Version:	%{mainver}
-Release:	%{?prever:0.}%{baserelease}%{?prever:.%{prerpmver}}%{?dist}
+Release:	3%{?dist}
 
 Summary:	Common functionality to Rspec series
 # SPDX confirmed
 License:	MIT
 URL:		https://github.com/rspec/rspec-support
-Source0:	https://rubygems.org/gems/%{gem_name}-%{mainver}%{?prever}.gem
+Source0:	https://github.com/rspec/rspec-support/archive/refs/tags/v%{version}.tar.gz#/rubygem-%{gem_name}-%{version}.tar.gz
 # %%{SOURCE2} %%{name} %%{version}
-Source1:	rubygem-%{gem_name}-%{version}-full.tar.gz
 Source2:	rspec-related-create-full-tarball.sh
 # tweak regex for search path
 Patch100:	rubygem-rspec-support-3.2.1-callerfilter-searchpath-regex.patch
@@ -56,12 +54,10 @@ Documentation for %{name}
 %global	version	%{version_orig}%{?prever}
 
 %prep
-%setup -q -T -n %{gem_name}-%{version} -b 1
-gem spec %{SOURCE0} -l --ruby > %{gem_name}.gemspec
-
-%patch -P100 -p1
+%autosetup -n %{gem_name}-%{version} -p1
 
 %build
+# UTF-8 is needed
 gem build %{gem_name}.gemspec
 %gem_install
 
@@ -71,8 +67,6 @@ cp -pa .%{gem_dir}/* \
 	%{buildroot}%{gem_dir}/
 
 %check
-%if %{without bootstrap}
-# UTF-8 is needed
 LANG=C.UTF-8
 
 # Test failure needs investigation...
@@ -89,9 +83,8 @@ for ((i = 0; i < ${#FAILFILE[@]}; i++)) {
 		${FAILFILE[$i]}
 }
 
-export RUBYLIB=$(pwd)/lib
-rspec spec/ || rspec --tag ~broken
-%endif
+ruby -rrubygems -Ilib/ -S rspec spec/ || \
+	ruby -rrubygems -Ilib/ -S rspec --tag ~broken
 
 %files
 %dir	%{gem_instdir}
@@ -99,7 +92,6 @@ rspec spec/ || rspec --tag ~broken
 %doc	%{gem_instdir}/Changelog.md
 %doc	%{gem_instdir}/README.md
 
-%{gem_libdir}
 %exclude %{gem_cache}
 %{gem_spec}
 
@@ -107,6 +99,11 @@ rspec spec/ || rspec --tag ~broken
 %doc	%{gem_docdir}
 
 %changelog
+* Fri Jan 17 2025 Archana Shettigar <v-shettigara@microsoft.com> - 3.13.1-3
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- Switch to build from .tar.gz
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.13.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

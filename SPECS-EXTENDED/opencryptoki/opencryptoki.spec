@@ -1,8 +1,10 @@
 Name: opencryptoki
 Summary: Implementation of the PKCS#11 (Cryptoki) specification v3.0
 Version: 3.24.0
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: CPL-1.0
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL: https://github.com/opencryptoki/opencryptoki
 Source0: https://github.com/opencryptoki/%{name}/archive/v%{version}/%{name}-%{version}.tar.gz
 Source1: opencryptoki.module
@@ -318,15 +320,7 @@ fi
 %{_libdir}/opencryptoki/stdll/PKCS11_ICSF.so
 %dir %attr(770,root,pkcs11) %{_sharedstatedir}/%{name}/icsf/
 
-%ifarch s390 s390x
-%files icatok
-%{_libdir}/opencryptoki/stdll/libpkcs11_ica.*
-%{_libdir}/opencryptoki/stdll/PKCS11_ICA.so
-%dir %attr(770,root,pkcs11) %{_sharedstatedir}/%{name}/lite/
-%dir %attr(770,root,pkcs11) %{_sharedstatedir}/%{name}/lite/TOK_OBJ/
-%endif
-
-%ifarch s390 s390x x86_64 ppc64le
+%ifarch x86_64
 %files ccatok
 %doc doc/README.cca_stdll
 %config(noreplace) %{_sysconfdir}/%{name}/ccatok.conf
@@ -338,23 +332,11 @@ fi
 %dir %attr(770,root,pkcs11) %{_sharedstatedir}/%{name}/ccatok/TOK_OBJ/
 %endif
 
-%ifarch s390 s390x
-%files ep11tok
-%doc doc/README.ep11_stdll
-%config(noreplace) %{_sysconfdir}/%{name}/ep11tok.conf
-%config(noreplace) %{_sysconfdir}/%{name}/ep11cpfilter.conf
-%{_sbindir}/pkcsep11_migrate
-%{_sbindir}/pkcsep11_session
-%{_mandir}/man1/pkcsep11_migrate.1*
-%{_mandir}/man1/pkcsep11_session.1*
-%{_libdir}/opencryptoki/stdll/libpkcs11_ep11.*
-%{_libdir}/opencryptoki/stdll/PKCS11_EP11.so
-%dir %attr(770,root,pkcs11) %{_sharedstatedir}/%{name}/ep11tok/
-%dir %attr(770,root,pkcs11) %{_sharedstatedir}/%{name}/ep11tok/TOK_OBJ/
-%endif
-
-
 %changelog
+* Wed Jan 15 2025 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 3.24.0-3
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Fri Sep 13 2024 Than Ngo <than@redhat.com> - 3.24.0-2
 - build with --enable-pkcscca_migrate
 - fix build error due to incompatible pointer types

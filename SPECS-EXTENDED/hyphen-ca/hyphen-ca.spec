@@ -1,8 +1,10 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name: hyphen-ca
 Summary: Catalan hyphenation rules
 Epoch: 1
 Version: 1.5
-Release: 4%{?dist}
+Release: 5%{?dist}
 Source: https://github.com/jaumeortola/hyphen-ca/archive/refs/tags/v1.5.tar.gz#/%{name}-%{version}.tar.gz
 URL: https://github.com/jaumeortola/hyphen-ca
 License: GPL-3.0-or-later
@@ -41,6 +43,10 @@ popd
 %{_datadir}/hyphen/*
 
 %changelog
+* Tue Oct 29 2024 Sreenivasulu Malavathula <v-smalavathu@microsft.com> - 1:1.5-5
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1:1.5-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

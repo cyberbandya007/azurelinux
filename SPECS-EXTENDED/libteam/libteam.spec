@@ -1,10 +1,12 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name: libteam
 Version: 1.32
-Release: 9%{?dist}
+Release: 10%{?dist}
 Summary: Library for controlling team network device
-License: LGPL-2.0-or-later
+License: LGPLv2+
 URL: http://www.libteam.org
-Source: http://www.libteam.org/files/libteam-%{version}.tar.gz
+Source0: https://www.libteam.org/files/libteam-%{version}.tar.gz
 
 BuildRequires: gcc
 BuildRequires: jansson-devel
@@ -113,6 +115,10 @@ install -p -m 755 utils/bond2team $RPM_BUILD_ROOT%{_bindir}/bond2team
 %{_libdir}/pkgconfig/libteamdctl.pc
 
 %changelog
+* Tue Nov 12 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 1.32-10
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.32-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

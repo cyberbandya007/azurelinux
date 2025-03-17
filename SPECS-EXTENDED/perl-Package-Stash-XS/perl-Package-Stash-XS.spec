@@ -7,9 +7,11 @@
 
 Name:		perl-Package-Stash-XS
 Version:	0.30
-Release:	9%{?dist}
+Release:	1%{?dist}
 Summary:	Faster and more correct implementation of the Package::Stash API
 License:	GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:		https://metacpan.org/release/Package-Stash-XS
 Source0:	https://cpan.metacpan.org/modules/by-module/Package/Package-Stash-XS-%{version}.tar.gz
 # Module Build
@@ -78,59 +80,16 @@ make test
 %{_mandir}/man3/Package::Stash::XS.3*
 
 %changelog
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.30-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Feb 27 2025 Sumit Jena <v-sumitjena@microsoft.com> - 0.30-1
+- Update to version 0.30
+- License verified
 
-* Tue Jun 11 2024 Jitka Plesnikova <jplesnik@redhat.com> - 0.30-8
-- Perl 5.40 rebuild
+* Fri Apr 22 2022 Muhammad Falak <mwani@microsoft.com> - 0.29-7
+- Add an explicit BR on `perl(blib)` to enable ptest
+- License verified
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.30-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.30-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.30-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Tue Jul 11 2023 Jitka Plesnikova <jplesnik@redhat.com> - 0.30-4
-- Perl 5.38 rebuild
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.30-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.30-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Mon Jun 13 2022 Paul Howarth <paul@city-fan.org> - 0.30-1
-- Update to 0.30
-  - Miscellaneous tooling updates
-  - Fixed redundant argument in sprintf in tests (CPAN RT#143205)
-- Use %%license unconditionally
-
-* Wed Jun 01 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.29-13
-- Perl 5.36 rebuild
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.29-12
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.29-11
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.29-10
-- Perl 5.34 rebuild
-
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.29-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.29-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.29-7
-- Perl 5.32 rebuild
-
-* Tue Mar 10 2020 Paul Howarth <paul@city-fan.org> - 0.29-6
-- BR: perl(blib) for t/00-compile.t
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.29-6
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.29-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

@@ -1,29 +1,32 @@
-Summary: Common RPM Macros for building EFI-related packages
-Name: efi-rpm-macros
-Version: 5
-Release: 13%{?dist}
-License: GPL-3.0-or-later
-URL: https://github.com/rhboot/%{name}/
-BuildRequires: git sed
-BuildRequires: make
-BuildArch: noarch
+%global debug_package %{nil}
+%global _efi_vendor_ %(eval echo $(sed -n -e 's/rhel/redhat/' -e 's/^ID=//p' %{_sysconfdir}/os-release))
 
-Source0: https://github.com/rhboot/%{name}/releases/download/%{version}/%{name}-5.tar.bz2
+Summary:        Common RPM Macros for building EFI-related packages
+Name:           efi-rpm-macros
+Version:        5
+Release:        1%{?dist}
+License:        GPL-3.0-or-later
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+URL:            https://github.com/rhboot/%{name}/
+Source0:        https://github.com/rhboot/%{name}/releases/download/%{version}/%{name}-5.tar.bz2
 
 Patch0001: 0001-Don-t-have-arm-as-an-alt-arch-of-aarch64.patch
 Patch0002: 0002-Makefile-fix-permission-on-boot-efi-EFI.patch
-# Not upstream, but trivial and posted upstream as a PR:
-# https://github.com/rhboot/efi-rpm-macros/pull/3
-Patch0003: 0003-add-riscv64-support.patch
 
-%global debug_package %{nil}
-%global _efi_vendor_ %(eval echo $(sed -n -e 's/rhel/redhat/' -e 's/^ID=//p' /etc/os-release))
+BuildArch:      noarch
+
+BuildRequires:  %{_sysconfdir}/os-release
+BuildRequires:  bash
+BuildRequires:  git
+BuildRequires:  sed
+BuildRequires: make
 
 %description
 %{name} provides a set of RPM macros for use in EFI-related packages.
 
 %package -n efi-srpm-macros
-Summary: Common SRPM Macros for building EFI-related packages
+Summary:        Common SRPM Macros for building EFI-related packages
 BuildArch: noarch
 Requires: rpm
 
@@ -31,7 +34,7 @@ Requires: rpm
 efi-srpm-macros provides a set of SRPM macros for use in EFI-related packages.
 
 %package -n efi-filesystem
-Summary: The basic directory layout for EFI machines
+Summary:        The basic directory layout for EFI machines
 BuildArch: noarch
 Requires: filesystem
 
@@ -43,19 +46,13 @@ machine bootloaders and tools.
 %autosetup -S git_am -n %{name}-5
 git config --local --add efi.vendor "%{_efi_vendor_}"
 git config --local --add efi.esp-root /boot/efi
-git config --local --add efi.arches "x86_64 aarch64 %{arm} %{ix86} riscv64"
+git config --local --add efi.arches "x86_64 aarch64 %{arm} %{ix86}"
 
 %build
 %make_build clean all
 
 %install
 %make_install
-
-#%%files
-#%%{!?_licensedir:%%global license %%%%doc}
-#%%license LICENSE
-#%%doc README
-#%%{_rpmmacrodir}/macros.efi
 
 %files -n efi-srpm-macros
 %{!?_licensedir:%global license %%doc}
@@ -72,55 +69,16 @@ git config --local --add efi.arches "x86_64 aarch64 %{arm} %{ix86} riscv64"
 %dir /boot/efi/EFI/%{_efi_vendor_}
 
 %changelog
-* Fri Jul 19 2024 David Abdurachmanov <davidlt@rivosinc.com> - 5-13
-- Add riscv64
+* Mon Nov 04 2024 Sumit Jena <v-sumtjena@microsoft.com> - 5-1
+- Update to version 5.
 
-* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 5-12
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Wed May 25 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 4-6
+- Fixing package build by adding an explicit BR on '/etc/os-release'.
+- License verified.
 
-* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 5-11
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Fri Jan 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 5-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Wed Dec 13 2023 Nicolas Frayer <nfrayer@redhat.com>
-- Migrate to SPDX license
-- Please refer to https://fedoraproject.org/wiki/Changes/SPDX_Licenses_Phase_2
-
-* Wed Jul 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 5-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Fri Jun 09 2023 Sandro Bonazzola <sbonazzo@redhat.com> - 5-8
-- Fixes permissions on /boot/efi/EFI
-- Resolves: rhbz#2144459
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 5-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 5-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 5-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Sep 02 2021 Robbie Harwood <rharwood@redhat.com> - 5-4
-- Remove arm as an alt for aarch64 (would require cross compiler)
-
-* Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 5-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Tue Apr 06 2021 Peter Jones <pjones@redhat.com> - 5-2
-- There's always a typo.
-
-* Tue Apr 06 2021 Peter Jones <pjones@redhat.com> - 5-1
-- Add arm as an alt for aarch64
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 4-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 4-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+* Mon Jun 07 2021 Thomas Crain <thcrain@microsoft.com> - 4-5
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+- Set shell to bash during make invocations, since the Makefile uses bash built-in commands 
 
 * Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 4-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

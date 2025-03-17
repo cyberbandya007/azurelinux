@@ -1,11 +1,13 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           perl-Net-Daemon
 Version:        0.49
-Release:        13%{?dist}
+Release:        14%{?dist}
 Summary:        Perl extension for portable daemons
 
 License:        GPL+ or Artistic
 URL:            https://metacpan.org/release/Net-Daemon
-Source0:        https://cpan.metacpan.org/authors/id/T/TO/TODDR/Net-Daemon-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/T/TO/TODDR/Net-Daemon-%{version}.tar.gz#/perl-Net-Daemon-%{version}.tar.gz
 
 BuildArch:      noarch
 BuildRequires:  coreutils
@@ -18,6 +20,7 @@ BuildRequires:  perl-interpreter
 BuildRequires:  perl-Pod-Perldoc
 BuildRequires:  sed
 # Run-time:
+Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 BuildRequires:  perl(Config)
 BuildRequires:  perl(File::Basename)
 BuildRequires:  perl(Getopt::Long)
@@ -102,6 +105,10 @@ inheriting will safe you a lot of work anyways.
 
 
 %changelog
+* Mon Dec 16 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 0.49-14
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.49-13
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

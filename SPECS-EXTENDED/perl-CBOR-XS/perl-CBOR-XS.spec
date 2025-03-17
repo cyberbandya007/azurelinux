@@ -1,11 +1,13 @@
+Summary:        Concise Binary Object Representation (CBOR)
 Name:           perl-CBOR-XS
 Version:        1.87
-Release:        5%{?dist}
-Summary:        Concise Binary Object Representation (CBOR)
+Release:        1%{?dist}
 # COPYING:      GPL-3.0 text
 ## Replaced by system header-only package
 # ecb.h:        BSD-2-Clause OR GPL-2.0-or-later
 License:        GPL-1.0-or-later AND (BSD-2-Clause OR GPL-2.0-or-later)
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/CBOR-XS
 Source0:        https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/CBOR-XS-%{version}.tar.gz
 # Use system libecb
@@ -103,40 +105,13 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.87-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Feb 27 2025 Sumit Jena <v-sumitjena@microsoft.com> - 1.87-1
+- Update to version 1.87
+- License verified
 
-* Mon Jun 10 2024 Jitka Plesnikova <jplesnik@redhat.com> - 1.87-4
-- Perl 5.40 rebuild
-
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.87-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.87-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Mon Sep 11 2023 Petr Pisar <ppisar@redhat.com> - 1.87-1
-- 1.87 bump
-- License corrected to "GPL-1.0-or-later AND (BSD-2-Clause OR
-  GPL-2.0-or-later)"
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.86-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Tue Jul 11 2023 Jitka Plesnikova <jplesnik@redhat.com> - 1.86-6
-- Perl 5.38 rebuild
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.86-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.86-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.86-3
-- Perl 5.36 rebuild
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.86-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+* Wed Jan 26 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.86-2
+- Initial CBL-Mariner import from Fedora 36 (license: MIT).
+- License verified.
 
 * Fri Nov 05 2021 Petr Pisar <ppisar@redhat.com> - 1.86-1
 - 1.86 bump (bug #2020382)

@@ -1,10 +1,13 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           perl-Net-LibIDN2
 Version:        1.02
-Release:        8%{?dist}
+Release:        1%{?dist}
 Summary:        Perl binding for GNU Libidn2
-License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+License:        GPL+ or Artistic
 URL:            https://metacpan.org/release/Net-LibIDN2
-Source0:        https://cpan.metacpan.org/authors/id/T/TH/THOR/Net-LibIDN2-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/T/TH/THOR/Net-LibIDN2-%{version}.tar.gz#/perl-Net-LibIDN2-%{version}.tar.gz
+
 BuildRequires:  coreutils
 BuildRequires:  findutils
 BuildRequires:  gcc
@@ -26,8 +29,8 @@ BuildRequires:  perl(Exporter)
 BuildRequires:  perl(Encode)
 BuildRequires:  perl(Test::More) >= 0.10
 # Optional tests:
-BuildRequires:  glibc-langpack-en
 BuildRequires:  perl(POSIX)
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 
 %description
 This Perl module provides bindings for GNU Libidn2, a C library for handling
@@ -62,7 +65,7 @@ perl Build.PL installdirs=vendor optimize="$RPM_OPT_FLAGS"
 %install
 ./Build install destdir=$RPM_BUILD_ROOT create_packlist=0
 find $RPM_BUILD_ROOT -type f -name '*.bs' -size 0 -delete
-# Install tests
+# Install tests  
 mkdir -p %{buildroot}%{_libexecdir}/%{name}
 cp -a t %{buildroot}%{_libexecdir}/%{name}
 cat > %{buildroot}%{_libexecdir}/%{name}/test << 'EOF'
@@ -86,55 +89,13 @@ chmod +x %{buildroot}%{_libexecdir}/%{name}/test
 %{_libexecdir}/%{name}
 
 %changelog
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.02-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Tue Dec 10 2024 Jyoti Kanase <v-jykanase@microsoft.com> - 1.02-1
+- Upgrade to 1.02
+- License verified
 
-* Mon Jun 10 2024 Jitka Plesnikova <jplesnik@redhat.com> - 1.02-7
-- Perl 5.40 rebuild
-
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.02-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.02-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.02-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Tue Jul 11 2023 Jitka Plesnikova <jplesnik@redhat.com> - 1.02-3
-- Perl 5.38 rebuild
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.02-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Mon Oct 31 2022 Michal Josef Špaček <mspacek@redhat.com> - 1.02-1
-- 1.02 bump
-- Package tests.
-- Update license to SPDX format
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.01-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.01-9
-- Perl 5.36 rebuild
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.01-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.01-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 1.01-6
-- Perl 5.34 rebuild
-
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.01-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.01-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 1.01-3
-- Perl 5.32 rebuild
+* Fri Jan 29 2021 Joe Schmitt <joschmit@microsoft.com> - 1.01-3
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+- Remove optional glibc test dep
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.01-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

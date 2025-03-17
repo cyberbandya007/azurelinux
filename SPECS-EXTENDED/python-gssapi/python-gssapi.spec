@@ -1,41 +1,45 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 # NOTE: tests are disabled since should_be has not yet been packaged.
 
 Name:           python-gssapi
 Version:        1.7.3
-Release:        10%{?dist}
+Release:        11%{?dist}
 Summary:        Python Bindings for GSSAPI (RFC 2743/2744 and extensions)
-
+ 
 License:        ISC
 URL:            https://github.com/pythongssapi/python-gssapi
 Source0:        https://github.com/pythongssapi/%{name}/releases/download/v%{version}/%{name}-%{version}.tar.gz
 # https://github.com/pythongssapi/python-gssapi/pull/321
 Patch0:         cython3.patch
 
-BuildRequires:  krb5-devel >= 1.19
+BuildRequires:  krb5-devel >= 1.10
+BuildRequires:  krb5-libs >= 1.10
 BuildRequires:  gcc
 BuildRequires:  python3-devel
+BuildRequires:  python3-setuptools
 BuildRequires:  python3-Cython
+BuildRequires:  python3-pip
+BuildRequires:  python3dist(wheel)
+BuildRequires:  python3-decorator
 
-# For autosetup
-BuildRequires: git-core
-
+BuildRequires: git
+ 
 %global _description\
 A set of Python bindings to the GSSAPI C library providing both\
 a high-level pythonic interfaces and a low-level interfaces\
 which more closely matches RFC 2743.  Includes support for\
 RFC 2743, as well as multiple extensions.
-
+ 
 %description %_description
-
 %package -n python3-gssapi
 Summary:        Python 3 Bindings for GSSAPI (RFC 2743/2744 and extensions)
 Requires:       krb5-libs >= 1.19
-
+ 
 %description -n python3-gssapi %_description
-
 %prep
 %autosetup -S git -n %{name}-%{version}
-
+ 
 %generate_buildrequires
 %pyproject_buildrequires
 
@@ -46,87 +50,21 @@ Requires:       krb5-libs >= 1.19
 %pyproject_install
 
 %pyproject_save_files gssapi
-
+ 
 %check
 # Check import everything except the tests, as we don't have the tests deps
 %pyproject_check_import -e 'gssapi.tests*'
-
+ 
 %files -n python3-gssapi -f %{pyproject_files}
 %doc README.txt
 
 %changelog
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.7.3-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Sat Feb 22 2025 Akarsh Chaudhary <v-akarshc@microsoft.com> - 1.7.3-1
+- Upgrade to version 1.7.3
+- License verified
 
-* Fri Jun 07 2024 Python Maint <python-maint@redhat.com> - 1.7.3-9
-- Rebuilt for Python 3.13
-
-* Fri Jan 26 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.7.3-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Mon Jan 22 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.7.3-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.7.3-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Tue Jun 13 2023 Python Maint <python-maint@redhat.com> - 1.7.3-5
-- Rebuilt for Python 3.12
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.7.3-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.7.3-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Mon Jun 13 2022 Python Maint <python-maint@redhat.com> - 1.7.3-2
-- Rebuilt for Python 3.11
-
-* Wed Feb 16 2022 Simo Sorce <simo@redhat.com> - 1.7.3-1
-- Update to 1.7.3 release
-
-* Thu Feb 03 2022 Miro Hrončok <mhroncok@redhat.com> - 1.7.2-2
-- Enable package notes
-- Reduce BuildRequires set by using git-core
-- Remove redundant runtime requires of python3-six
-- Run import check during the build
-
-* Wed Feb  2 2022 Simo Sorce <simo@redhat.com> - 1.7.2-1
-- Update to latest release and modernize spec file
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.14-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Fri Jul 23 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.14-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Wed Jun 30 2021 Robbie Harwood <rharwood@redhat.com> - 1.6.14-1
-- New upstream release (1.6.14)
-
-* Fri Jun 04 2021 Python Maint <python-maint@redhat.com> - 1.6.9-4
-- Rebuilt for Python 3.10
-
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.9-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Wed Jul 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.9-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Tue Jul 07 2020 Robbie Harwood <rharwood@redhat.com> - 1.6.9-1
-- New upstream release (1.6.9)
-
-* Tue May 26 2020 Miro Hrončok <mhroncok@redhat.com> - 1.6.5-2
-- Rebuilt for Python 3.9
-
-* Wed Apr 08 2020 Robbie Harwood <rharwood@redhat.com> - 1.6.5-1
-- New upstream release (1.6.5)
-
-* Tue Apr 07 2020 Robbie Harwood <rharwood@redhat.com> - 1.6.4-1
-- New upstream release (1.6.4)
-- Resolves: #1821889
-
-* Tue Feb 25 2020 Robbie Harwood <rharwood@redhat.com> - 1.6.2-1
-- New upstream release (1.6.2)
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.6.1-6
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.1-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

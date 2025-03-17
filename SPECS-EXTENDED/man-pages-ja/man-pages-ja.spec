@@ -1,6 +1,8 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name: man-pages-ja
 Version: 20230915
-Release: 4%{?dist}
+Release: 5%{?dist}
 # BSD-3-Clause - shadow, bsd-games, byacc, bzip2, dhcpcd, dump, file, hdparm, rssh, tcp_wrappers, tcsh
 # GFDL-1.3-or-later - GNU_*, cron, glibc-linuxthreads
 # BSD-4-Clause-UC/Linux-man-pages-copyleft/GPL-2.0-or-later/BSD-4.3TAHOE/Linux-man-pages-1-para/GPL-1.0-or-later/BSD-3-Clause/MIT/Spencer-94/LicenseRef-LDPL/BSD-2-Clause/LicenseRef-Fedora-UltraPermissive/LicenseRef-Fedora-Public-Domain - LDP_manpages, gnumaniak, ld.so
@@ -31,9 +33,9 @@ License: BSD-3-Clause AND GFDL-1.3-or-later AND BSD-4-Clause-UC AND Linux-man-pa
 BuildArch: noarch
 BuildRequires: make
 BuildRequires: perl(Env), perl(Encode)
-URL: http://linuxjm.osdn.jp/
+URL: https://linuxjm.osdn.jp/
 
-Source: http://linuxjm.osdn.jp/%{name}-%{version}.tar.gz
+Source: https://linuxjm.osdn.jp/%{name}-%{version}.tar.gz
 Source1: %{name}-rpm.pl
 Source2: %{name}-tail.1
 Source3: %{name}-echo.1
@@ -157,6 +159,10 @@ done
 
 
 %changelog
+* Fri Jan 03 2025 Aninda Pradhan <v-anipradhan@microsoft.com> - 20230915-5
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License Verified.
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 20230915-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

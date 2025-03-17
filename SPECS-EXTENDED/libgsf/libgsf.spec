@@ -4,12 +4,14 @@
 %global with_mingw 1
 %endif
 
-Name: libgsf
-Version: 1.14.53
-Release: 2%{?dist}
-Summary: GNOME Structured File library
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+Name:           libgsf
+Version:        1.14.53
+Release:        3%{?dist}
+Summary:        GNOME Structured File library
 
-License: LGPL-2.1-only
+License:        LGPL-2.1-only
 URL:     https://gitlab.gnome.org/GNOME/libgsf/
 Source:  https://download.gnome.org/sources/%{name}/1.14/%{name}-%{version}.tar.xz
 
@@ -173,6 +175,9 @@ find %{buildroot} -name '*.la' -delete -print
 %endif
 
 %changelog
+* Wed Nov 27 2024 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 1.14.53-3
+- Update to 1.14.53.
+
 * Wed Nov 06 2024 Gwyn Ciesla <gwync@protonmail.com> - 1.14.53-2
 - Fix find_lang order for 2280661
 
@@ -226,8 +231,8 @@ find %{buildroot} -name '*.la' -delete -print
 * Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.14.47-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.14.47-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.14.47-2
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Fri Mar 27 2020 Marc-André Lureau <marcandre.lureau@redhat.com> - 1.14.47-1
 - New upstream release 1.14.47

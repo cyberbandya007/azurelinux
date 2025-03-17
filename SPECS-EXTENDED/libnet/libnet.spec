@@ -1,7 +1,9 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Summary:        C library for portable packet creation and injection
 Name:           libnet
 Version:        1.3
-Release:        4%{?dist}
+Release:        1%{?dist}
 License:        BSD-2-Clause AND BSD-3-Clause
 URL:            https://github.com/libnet/libnet
 Source0:        https://github.com/libnet/libnet/releases/download/v%{version}/%{name}-%{version}.tar.gz
@@ -96,41 +98,11 @@ done
 %endif
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.3-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Nov 18 2024 Akarsh Chaudhary <v-akarshc@microsoft.com> -1.3-1
+- upgrade to version 1.3
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.3-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.3-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Tue Oct 03 2023 Gwyn Ciesla <gwync@protonmail.com> - 1.3-1
-- 1.3
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.2-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Fri Jun 16 2023 Adrian Reber <adrian@lisas.de> - 1.2-8
-- migrated to SPDX license
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.2-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.2-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.2-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.2-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Thu Apr 08 2021 Adrian Reber <adrian@lisas.de> - 1.2-3
-- Fix file conflicts with libnet-devel
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.2-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.2-2
+- Initial CBL-Mariner import from Fedora 33 (license: MIT).
 
 * Sat Jan 02 2021 Robert Scheck <robert@fedoraproject.org> 1.2-1
 - Upgrade to 1.2 (#1912031)
@@ -255,11 +227,11 @@ done
 - spec file cleanup
 
 * Fri Aug 26 2005 Patrice Dumas <pertusus@free.fr> 1.1.2.1-4
-- use pushd and popd (from Oliver Falk)
+- use pushd and popd (from Oliver Falk) 
 
 * Mon Aug 22 2005 Patrice Dumas <pertusus@free.fr> 1.1.2.1-3
 - Correct dos end of lines
-- add in devel: Provides: %%{name} = %%{version}-%%{release}
+- add in devel: Provides: %%{name} = %%{version}-%%{release} 
 
 * Fri Aug 12 2005 Patrice Dumas <pertusus@free.fr> 1.1.2.1-2
 - put everything in a devel subpackage

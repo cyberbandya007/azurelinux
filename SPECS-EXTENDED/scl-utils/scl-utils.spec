@@ -1,10 +1,11 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global __cmake_in_source_build 1
 %global macrosdir %(d=%{_rpmconfigdir}/macros.d; [ -d $d ] || d=%{_sysconfdir}/rpm; echo $d)
 
 Name:       scl-utils
-Epoch:      1
 Version:    2.0.3
-Release:    4%{dist}
+Release:    5%{?dist}
 Summary:    Utilities for alternative packaging
 
 License:    GPL-2.0-or-later
@@ -41,7 +42,9 @@ Essential RPM build macros for alternative packaging.
 %cmake .
 make %{?_smp_mflags} CFLAGS="$RPM_OPT_FLAGS" LDFLAGS="$RPM_LD_FLAGS"
 
+
 %install
+rm -rf %{buildroot}
 make install DESTDIR=%{buildroot}
 if [ %{macrosdir} != %{_sysconfdir}/rpm ]; then
     mkdir -p %{buildroot}%{macrosdir}
@@ -82,6 +85,11 @@ make check
 %{_rpmconfigdir}/brp-scl-python-bytecompile
 
 %changelog
+* Tue Jan 14 2025 Archana Shettigar <v-shettigara@microsoft.com> - 2.0.3-5
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- Removed Epoch
+- License verified
+
 * Thu Sep 12 2024 Remi Collet <remi@remirepo.net> - 1:2.0.3-4
 - add workaround to "bare words are no longer supported" in RPM 4.20 #2306492
 

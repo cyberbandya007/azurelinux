@@ -1,21 +1,28 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 # Module Magic Number
 %{!?_httpd_mmn: %global _httpd_mmn %(cat %{_includedir}/httpd/.mmn 2>/dev/null || echo 0-0)}
-# State directory
-%{!?_httpd_statedir: %global _httpd_statedir %{_localstatedir}/lib/httpd}
 
 Name:           mod_md
 Version:        2.4.26
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Certificate provisioning using ACME for the Apache HTTP Server
 License:        Apache-2.0
 URL:            https://icing.github.io/mod_md/
 Source0:        https://github.com/icing/mod_md/releases/download/v%{version}/mod_md-%{version}.tar.gz
-Patch1:         mod_md-2.0.8-state_dir.patch
-BuildRequires:  make, gcc
-BuildRequires:  pkgconfig, httpd-devel >= 2.4.41, openssl-devel >= 1.1.0, jansson-devel, libcurl-devel, xmlto
-Requires:       httpd-mmn = %{_httpd_mmn}, mod_ssl >= 1:2.4.41
+
+BuildRequires:  make
+BuildRequires:  gcc
+BuildRequires:  pkgconfig
+BuildRequires:  httpd-devel >= 2.4.41
+BuildRequires:  openssl-devel >= 1.1.0
+BuildRequires:  jansson-devel
+BuildRequires:  libcurl-devel
+BuildRequires:  xmlto
+Requires:       libxcrypt
+Requires:       mod_ssl >= 2.4.41
+Provides:       httpd-mmn = %{_httpd_mmn}
 Conflicts:      httpd < 2.4.39-7
-Epoch:          1
 
 %description
 This module manages common properties of domains for one or more
@@ -56,9 +63,14 @@ echo "LoadModule md_module modules/mod_md.so" > %{buildroot}%{_httpd_modconfdir}
 %{_httpd_moddir}/mod_md.so
 %{_bindir}/a2md
 %{_mandir}/man1/*
-%dir %{_httpd_statedir}/md
 
 %changelog
+* Mon Dec 06 2025 Aninda Pradhan <mwaniv-anipradhan@microsft.com> - 2.4.26-3
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+- Removed epoch
+- Removed "mod_md-2.0.8-state_dir.patch" to make the build skip sections not supported by Azure Linux.
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.4.26-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

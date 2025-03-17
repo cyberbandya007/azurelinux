@@ -1,17 +1,18 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name: lcov
 Version: 2.0
-Release: 4%{?dist}
+Release: 1%{?dist}
 
 Summary: LTP GCOV extension code coverage tool
-License: GPL-2.0-or-later
+License: GPLv2+
 
 URL: https://github.com/linux-test-project/lcov/
-Source0: https://github.com/linux-test-project/lcov/releases/download/v%{version}/lcov-%{version}.tar.gz
+Source0: https://github.com/linux-test-project/lcov/archive/refs/tags/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
 BuildArch: noarch
 BuildRequires: perl-generators
 BuildRequires: git-core
-BuildRequires: make
 
 Requires: /usr/bin/gcov
 Requires: /usr/bin/find
@@ -64,41 +65,12 @@ make install DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_prefix} \
 %config(noreplace) %attr(0644,root,root) %{_sysconfdir}/lcovrc
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.0-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Thu Nov 7 2024 Aninda Pradhan <v-anipradhan@microsoft.com> - 2.0-1
+- Updated to version 2.0
+- Verified license
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.0-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.0-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Mon Nov 27 2023 Terje Rosten <terje.rosten@ntnu.no> - 2.0-1
-- 2.0
-- Use explicit file listing
-- Remove upstream patches
-- Ship new files
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.14-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.14-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.14-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.14-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.14-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.14-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.14-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.14-4
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.14-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

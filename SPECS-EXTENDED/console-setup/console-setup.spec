@@ -1,7 +1,8 @@
-
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:		console-setup
 Version:	1.230
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Tools for configuring the console using X Window System key maps
 
 # For a breakdown of the licensing, see COPYRIGHT, copyright, copyright.fonts and copyright.xkb
@@ -21,7 +22,7 @@ Requires:	kbd
 
 BuildRequires:	perl-generators
 BuildRequires:	perl(encoding) perl(open)
-BuildRequires: make
+BuildRequires:	make
 BuildArch:	noarch
 
 %description
@@ -94,7 +95,11 @@ cp -a Fonts/fontsets Fonts/*.equivalents Fonts/*.set \
 
 
 %changelog
-* Mon Jul 15 2024 Packit <hello@packit.dev> - 1.230-1
+* Tue Dec 17 2024 Akarsh Chaudhary <v-akarshc@microsoft.com> - 1.230-2
+- AzureLinux import from Fedora 41 
+- License verified
+
+* Wed Jul 17 2024 Packit <hello@packit.dev> - 1.230-1
 - Update to latest upstream version
 
 * Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.228-2

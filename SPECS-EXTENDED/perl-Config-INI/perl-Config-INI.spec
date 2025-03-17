@@ -1,9 +1,11 @@
 Name:           perl-Config-INI
 Version:        0.029
-Release:        6%{?dist}
+Release:        1%{?dist}
 Summary:        Config::INI Perl module
-License:        GPL+ or Artistic
-
+# Automatically converted from old format: GPL+ or Artistic - review is highly recommended.
+License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/Config-INI
 Source0:        https://cpan.metacpan.org/authors/id/R/RJ/RJBS/Config-INI-%{version}.tar.gz
 BuildArch:      noarch
@@ -42,56 +44,12 @@ Config::INI - simple .ini-file format.
 %{_mandir}/man3/Config*
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.029-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Feb 27 2025 Sumit Jena <v-sumitjena@microsoft.com> - 0.029-1
+- Update to version 0.029
+- License verified
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.029-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.029-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.029-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.029-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Sun Jan 15 2023 Emmanuel Seyman <emmanuel@seyman.fr> - 0.029-1
-- Update to 0.029
-
-* Sun Jan 01 2023 Emmanuel Seyman <emmanuel@seyman.fr> - 0.028-1
-- Update to 0.028
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.027-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Wed Jun 01 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.027-4
-- Perl 5.36 rebuild
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.027-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.027-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Sun Jun 27 2021 Emmanuel Seyman <emmanuel@seyman.fr> - 0.027-1
-- Update to 0.027
-- Replace calls to %%{__perl} with /usr/bin/perl
-- Use %%{make_build} instead of make
-- Use %%{make_install} instead of "make pure_install"
-
-* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.025-19
-- Perl 5.34 rebuild
-
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.025-18
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.025-17
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.025-16
-- Perl 5.32 rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.025-16
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.025-15
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

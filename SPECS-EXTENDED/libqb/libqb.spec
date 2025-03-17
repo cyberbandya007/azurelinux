@@ -1,14 +1,15 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %bcond_with check
 
 Name:           libqb
 Version:        2.0.8
-Release:        5%{?dist}
+Release:        1%{?dist}
 Summary:        Library providing high performance logging, tracing, ipc, and poll
 
 License:        LGPL-2.1-or-later
 URL:            https://github.com/ClusterLabs/libqb
 Source0:        https://github.com/ClusterLabs/libqb/releases/download/v%{version}/%{name}-%{version}.tar.xz
-
 Patch0: include-libxml-parser.patch
 
 BuildRequires:  autoconf automake libtool
@@ -71,100 +72,27 @@ developing applications that use %{name}.
 %{_libdir}/libqb.so
 %{_libdir}/pkgconfig/libqb.pc
 %{_mandir}/man3/qb*3*
-
-
+ 
+ 
 %package -n     doxygen2man
 Summary:        Program to create nicely-formatted man pages from Doxygen XML files
 Requires:       %{name}%{?_isa} = %{version}-%{release}
-
-
+ 
+ 
 %description -n doxygen2man
 This package contains a program to create nicely-formatted man pages from Doxygen XML files
-
+ 
 %files -n       doxygen2man
 %{_bindir}/doxygen2man
 %{_mandir}/man1/doxygen2man.1.gz
 
-
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.8-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Tue Nov 12 2024 Sumit Jena <v-sumitjena@microsoft.com> - 2.0.8-1
+- Update to version 2.0.8
+- License verified
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.8-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.8-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Mon Dec  4 2023 Christine Caulfield <ccaulfie@redhat.com> 2.0.8-2
-- update doxygen2man for latest libXML2 - include parser.h
-
-* Fri Jul 21 2023 Christine Caulfield <ccaulfie@redhat.com> 2.0.8-1
-- rebase to v2.0.8
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.7-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Wed Jun 07 2023 Christine Caulfield <ccaulfie@redhat.com> 2.0.7-1
-- rebase to v2.0.7
-
-* Tue Jun 06 2023 Jan Friesse <jfriesse@redhat.com> - 2.0.6-6
-- migrated to SPDX license
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.6-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Fri Dec 02 2022 Christine Caulfield <ccaulfie@redhat.com> 2.0.6-4
-  ipc: Retry receiving credentials if the the message is short
-
-* Wed Aug 03 2022 Christine Caulfield <ccaulfie@redhat.com> 2.0.6-3
-  Don't run tests on Fedora. We have a local CI and it just loads
-  up the Fedora build system (and occasionally fails for loading reasons)
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.6-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Wed Mar 23 2022 Christine Caulfield <ccaulfie@redhat.com> 2.0.6-1
-- Rebase to 2.0.6
-  Don't run ipc_sock test when non-root, and fix RPM building
-
-* Mon Mar 21 2022 Christine Caulfield <ccaulfie@redhat.com> 2.0.5-1
-- Rebase to version 2.0.5
-
-* Thu Mar  3 2022 Christine Caulfield <ccaulfie@redhat.com> 2.0.4-4
-- Fix negative errno value returned from qb_ipcc_connect().
-  Introduced with qb_ipcc_async_connect()
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.4-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Mon Nov 15 2021 Christine Caulfield <ccaulfie@redhat.com> 2.0.4-1
-- Rebase to version 2.0.4
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.3-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Wed Mar  3 2021 Christine Caulfield <ccaulfie@redhat.com> 2.0.3-1
-- Rebase to version 2.0.3
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.2-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Wed Jul 29 2020 Christine Caulfield <ccaulfie@redhat.com> 2.0.2
-- Rebase to version 2.0.2
-
-* Wed Jul 29 2020 Christine Caulfield <ccaulfie@redhat.com> 2.0.1-2
-- Replace deprecated check macros fail_if() and fail_unless() with ck_assert()
-  see check BZ: bz1850198
-
-* Wed Jul 29 2020 Christine Caulfield <ccaulfie@redhat.com> 2.0.1-1
-- Rebase to version 2.0.1
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.0-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Wed May 13 2020 Christine Caulfield <ccaulfie@redhat.com> 2.0.0-1
-- Rebase to version 2.0.0
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.0.5-7
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Thu Apr 23 2020 Christine Caulfield <ccaulfie@redhat.com> 1.0.5-6
 - Further fix for qblist when compiling on gcc10

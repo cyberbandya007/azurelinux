@@ -8,9 +8,11 @@
 Name:           perl-YAML-LibYAML
 Epoch:          1
 Version:        0.902.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Perl YAML Serialization using XS and libyaml
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/YAML-LibYAML
 Source0:        https://cpan.metacpan.org/modules/by-module/YAML/YAML-LibYAML-v%{version}.tar.gz
 Patch0:         YAML-LibYAML-0.79-Unbundled-libyaml.patch
@@ -159,6 +161,10 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
+* Wed Dec 18 2024 Sumit Jena <v-sumitjena@microsoft.com> - 0.902.0-2
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Mon Sep 23 2024 Jitka Plesnikova <jplesnik@redhat.com> - 1:0.902.0-1
 - 0.902.0 bump (rhbz#2313873)
 

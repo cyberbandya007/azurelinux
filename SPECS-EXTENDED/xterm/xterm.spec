@@ -1,10 +1,12 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 
 %bcond_with trace
 
 Summary: Terminal emulator for the X Window System
 Name: xterm
 Version: 395
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: https://invisible-island.net/xterm
 License: MIT AND X11 AND HPND AND CC-BY-4.0
 BuildRequires: make
@@ -105,6 +107,10 @@ install -m644 -p xterm.appdata.xml $RPM_BUILD_ROOT%{_datadir}/appdata
 %{_mandir}/man1/resize.1*
 
 %changelog
+* Mon Jan 13 2025 Archana Shettigar <shettigara@microsoft.com> - 395-2
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Fri Nov 01 2024 Tomas Korbar <tkorbar@redhat.com> - 395-1
 - Rebase to version 395
 - Resolves: rhbz#2321689

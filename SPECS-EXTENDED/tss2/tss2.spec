@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 #
 # Spec file for IBM's TSS for the TPM 2.0
 #
@@ -5,17 +7,16 @@
 
 %global incname ibmtss
 
-Name:           tss2
+Name:		tss2
 # this is the release of the TSS library
 Version:        2.3.2
 # this is the release of the fedora package, goes back to 1 when version changes
-Release:        1%{?dist}
-Epoch:          1
+Release:        2%{?dist}
 Summary:        IBM's TCG Software Stack (TSS) for TPM 2.0 and related utilities
 
 License:        BSD-3-Clause AND LicenseRef-TCGL
 URL:            https://sourceforge.net/projects/ibmtpm20tss/
-Source0:        https://sourceforge.net/projects/ibmtpm20tss/files/ibmtss%{version}.tar.gz
+Source0:        https://sourceforge.net/projects/ibmtpm20tss/files/ibmtss%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
 BuildRequires:  automake
 BuildRequires:  autoconf
@@ -35,7 +36,7 @@ education and debugging.
 
 %package devel
 Summary:        Development libraries and headers for IBM's TSS 2.0
-Requires:       %{name}%{?_isa} = %{epoch}:%{version}-%{release}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 
 %description devel
 Development libraries and headers for IBM's TSS 2.0. You will need this in
@@ -79,6 +80,10 @@ find %{buildroot} -type f -name "*.la" -delete -print
 %doc ibmtss.docx
 
 %changelog
+* Mon Jan 13 2025 Archana Shettigar <v-shettigara@microsoft.com> - 2.3.2-2
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- Removed epoch
+- License verified
 
 * Thu Aug 15 2024 Ken Goldman <kgoldman@us.ibm.com> - 1:2.3.2-1
 - Trivial fixes for Fedora 41 Openssl 3.2.2 removal of SHA-1 signing

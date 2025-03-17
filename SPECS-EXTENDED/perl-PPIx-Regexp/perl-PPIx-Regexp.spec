@@ -3,9 +3,11 @@
 
 Name:           perl-PPIx-Regexp
 Version:        0.088
-Release:        5%{?dist}
+Release:        1%{?dist}
 Summary:        Represent a regular expression of some sort
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/PPIx-Regexp
 Source0:        https://cpan.metacpan.org/authors/id/W/WY/WYANT/PPIx-Regexp-%{version}.tar.gz
 BuildArch:      noarch
@@ -121,105 +123,12 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.088-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Feb 27 2025 Sumit Jena <v-sumitjena@microsoft.com> - 0.088-1
+- Update to version 0.088
+- License verified
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.088-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.088-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.088-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Wed Mar 01 2023 Michal Josef Špaček <mspacek@redhat.com> - 0.088-1
-- 0.088 bump
-
-* Mon Jan 30 2023 Michal Josef Špaček <mspacek@redhat.com> - 0.087-1
-- 0.087 bump
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.086-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Mon Jan 02 2023 Michal Josef Špaček <mspacek@redhat.com> - 0.086-1
-- 0.086 bump
-
-* Sat Dec 10 2022 Michal Josef Špaček <mspacek@redhat.com> - 0.085-4
-- Update license to SPDX format
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.085-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.085-2
-- Perl 5.36 rebuild
-
-* Thu Apr 21 2022 Michal Josef Špaček <mspacek@redhat.com> - 0.085-1
-- 0.085 bump
-
-* Tue Apr 05 2022 Michal Josef Špaček <mspacek@redhat.com> - 0.084-1
-- 0.084 bump
-
-* Tue Mar 22 2022 Michal Josef Špaček <mspacek@redhat.com> - 0.083-1
-- 0.083 bump
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.082-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Wed Jan 05 2022 Michal Josef Špaček <mspacek@redhat.com> - 0.082-1
-- 0.082 bump
-
-* Mon Oct 25 2021 Michal Josef Špaček <mspacek@redhat.com> - 0.081-1
-- 0.081 bump
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.080-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.080-2
-- Perl 5.34 rebuild
-
-* Tue Apr 20 2021 Michal Josef Špaček <mspacek@redhat.com> - 0.080-1
-- 0.080 bump
-
-* Fri Mar 26 2021 Petr Pisar <ppisar@redhat.com> - 0.079-1
-- 0.079 bump
-- Package tests
-
-* Fri Jan 29 2021 Petr Pisar <ppisar@redhat.com> - 0.078-1
-- 0.078 bump
-
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.077-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Thu Jan 14 2021 Petr Pisar <ppisar@redhat.com> - 0.077-1
-- 0.077 bump
-
-* Mon Nov 30 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.076-1
-- 0.076 bump
-
-* Fri Oct 09 2020 Petr Pisar <ppisar@redhat.com> - 0.075-1
-- 0.075 bump
-
-* Wed Sep 09 2020 Petr Pisar <ppisar@redhat.com> - 0.074-1
-- 0.074 bump
-
-* Wed Jul 29 2020 Petr Pisar <ppisar@redhat.com> - 0.073-1
-- 0.073 bump
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.072-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.072-2
-- Perl 5.32 rebuild
-
-* Wed May 20 2020 Petr Pisar <ppisar@redhat.com> - 0.072-1
-- 0.072 bump
-
-* Mon Mar 30 2020 Petr Pisar <ppisar@redhat.com> - 0.071-1
-- 0.071 bump
-
-* Fri Feb 28 2020 Petr Pisar <ppisar@redhat.com> - 0.070-1
-- 0.070 bump
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.069-2
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Mon Feb 10 2020 Petr Pisar <ppisar@redhat.com> - 0.069-1
 - 0.069 bump

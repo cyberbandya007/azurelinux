@@ -1,10 +1,12 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name: mythes-ca
 Summary: Catalan thesaurus
 Version: 2.3.1
-Release: 4%{?dist}
+Release: 5%{?dist}
 Source: https://github.com/Softcatala/sinonims-cat/releases/latest/download/thesaurus-ca.oxt
 URL: http://www.softcatala.org/wiki/Projectes/Openthesaurus-ca
-License: CC-BY-4.0
+License: GPLv2.0 and CC-BY-4.0
 BuildArch: noarch
 Requires: mythes
 Supplements: (mythes and langpacks-ca)
@@ -40,6 +42,10 @@ popd
 %{_datadir}/mythes/*
 
 %changelog
+* Thu Dec 26 2024 Aninda Pradhan <v-anipradhan@microsoft.com> - 2.3.1-5
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License Verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.1-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
@@ -125,7 +131,7 @@ popd
 * Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.0-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
 
-* Sat Apr 03 2010 Caolán McNamara <caolanm@redhat.com> - 1.5.0-4
+* Sat Apr 03 2010 Caolan McNamara <caolanm@redhat.com> - 1.5.0-4
 - mythes now owns /usr/share/mythes
 
 * Sat Jul 25 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.0-3

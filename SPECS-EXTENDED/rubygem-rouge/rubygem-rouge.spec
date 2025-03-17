@@ -2,12 +2,13 @@
 
 Name:           rubygem-%{gem_name}
 Version:        4.4.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Pure-ruby colorizer based on pygments
 # From LICENSE file
 # SPDX confirmed
 License:        MIT AND BSD-2-Clause
-
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            http://rouge.jneen.net/
 Source0:        https://rubygems.org/gems/%{gem_name}-%{version}.gem
 Source1:        %{gem_name}-%{version}-test-missing-files.tar.gz
@@ -26,7 +27,6 @@ BuildArch:      noarch
 %description
 Rouge aims to a be a simple, easy-to-extend drop-in replacement for pygments.
 
-
 %package        doc
 Summary:        Documentation for %{name}
 Requires:       %{name} = %{version}-%{release}
@@ -34,7 +34,6 @@ BuildArch:      noarch
 
 %description    doc
 Documentation for %{name}.
-
 
 %prep
 %setup -q -n %{gem_name}-%{version} -a 1
@@ -84,16 +83,12 @@ find spec -name \*_spec.rb -print0 | \
 
 %files
 %dir %{gem_instdir}
-
 %license %{gem_instdir}/LICENSE
-
 %{gem_libdir}
 %exclude %{gem_libdir}/%{gem_name}/demos
-
 %{_bindir}/rougify
 %{gem_instdir}/bin
 %{_mandir}/man1/rougify.1*
-
 %{gem_spec}
 
 %files doc
@@ -101,6 +96,10 @@ find spec -name \*_spec.rb -print0 | \
 %{gem_libdir}/%{gem_name}/demos
 
 %changelog
+* Tue Dec 24 2024 Akhila Guruju <v-guakhila@microsoft.com> - 4.4.0-2
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Fri Sep 20 2024 Mamoru TASAKA <mtasaka@fedoraproject.org> - 4.4.0-1
 - 4.4.0
 

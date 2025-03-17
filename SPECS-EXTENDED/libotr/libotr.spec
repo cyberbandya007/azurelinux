@@ -1,9 +1,12 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global snapshot 0
 Summary: Off-The-Record Messaging library and toolkit
 Name: libotr
 Version: 4.1.1
-Release: 21%{?dist}
-License: GPLv2 and LGPLv2
+Release: 11%{?dist}
+# Automatically converted from old format: GPLv2 and LGPLv2 - review is highly recommended.
+License: GPL-2.0-only AND LicenseRef-Callaway-LGPLv2
 Source0: http://otr.cypherpunks.ca/%{name}-%{version}.tar.gz
 Url: http://otr.cypherpunks.ca/
 Provides: libotr-toolkit = %{version}
@@ -75,43 +78,12 @@ rm -rf $RPM_BUILD_ROOT%{_libdir}/*.la
 
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-21
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Nov 12 2024 Sumit Jena <v-sumitjena@microsoft.com> - 4.1.1-11
+- Added Essential patches from Fedora 41.
+- License verified.
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-20
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-19
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-18
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-17
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Tue Nov 15 2022 Stephen Gallagher <sgallagh@redhat.com> - 4.1.1-16
-- Fix FTBFS: Add missing include to client test
-- Resolves: rhbz#2113487
-- Drop unused patches
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-15
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-14
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-13
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Wed May 19 2021 Paul Wouters <paul.wouters@aiven.io> - 4.1.1-12
-- Resolves: rhbz#1634321 RFE Drop check for mismatch of versions
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-11
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 4.1.1-10
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 4.1.1-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

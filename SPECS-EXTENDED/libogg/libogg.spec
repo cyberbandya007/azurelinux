@@ -1,12 +1,13 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Summary:        The Ogg bitstream file format library
 Name:           libogg
-Epoch:          2
 Version:        1.3.5
-Release:        9%{?dist}
+Release:        1%{?dist}
 License:        BSD-3-Clause
-URL:            https://www.xiph.org/
+URL:            http://www.xiph.org/
 
-Source:         https://downloads.xiph.org/releases/ogg/%{name}-%{version}.tar.xz
+Source:         http://downloads.xiph.org/releases/ogg/%{name}-%{version}.tar.xz
 
 BuildRequires:  gcc
 BuildRequires:  make
@@ -19,7 +20,7 @@ Ogg bitstreams.
 
 %package devel
 Summary:        Files needed for development using libogg
-Requires:       libogg = %{epoch}:%{version}-%{release}
+Requires:       libogg = %{version}-%{release}
 Requires:       pkgconfig
 Requires:       automake
 
@@ -79,38 +80,14 @@ mv $RPM_BUILD_ROOT%{_docdir}/%{name} __installed_docs
 
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2:1.3.5-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Wed Nov 20 2024 Akarsh Chaudhary <v-akarshc@microsoft.com> - 1.3.5-1
+- Upgrade to version 1.3.5
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2:1.3.5-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+* Mon Nov 01 2021 Muhammad Falak <mwani@microsft.com> - 1.3.4-4
+- Remove epoch
 
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2:1.3.5-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2:1.3.5-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2:1.3.5-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2:1.3.5-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2:1.3.5-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2:1.3.5-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Mon Jun 07 2021 Miroslav Lichvar <mlichvar@redhat.com> 2:1.3.5-1
-- update to 1.3.5
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2:1.3.4-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2:1.3.4-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 2:1.3.4-3
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2:1.3.4-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

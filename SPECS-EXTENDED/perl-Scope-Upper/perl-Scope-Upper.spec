@@ -1,9 +1,11 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           perl-Scope-Upper
 Summary:        Act on upper scopes
 Version:        0.34
-Release:        7%{?dist}
+Release:        8%{?dist}
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
-Source0:        https://cpan.metacpan.org/authors/id/V/VP/VPIT/Scope-Upper-%{version}.tar.gz 
+Source0:        https://cpan.metacpan.org/authors/id/V/VP/VPIT/Scope-Upper-%{version}.tar.gz#/perl-Scope-Upper-%{version}.tar.gz
 URL:            https://metacpan.org/release/Scope-Upper
 # Build
 BuildRequires:  coreutils
@@ -33,6 +35,7 @@ BuildRequires:  perl(threads)
 BuildRequires:  perl(threads::shared)
 # Optional tests only
 BuildRequires:  perl(Time::HiRes)
+Requires:       perl(:MODULE_COMPAT_%(eval "$(perl -V:version)"; echo $version))
 Requires:       perl(XSLoader)
 
 %{?perl_default_filter}
@@ -103,6 +106,10 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
+* Tue Dec 17 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 0.34-8
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.34-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

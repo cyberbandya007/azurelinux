@@ -1,6 +1,8 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           perl-Term-UI
 Version:        0.50
-Release:        12%{?dist}
+Release:        1%{?dist}
 Summary:        Term::ReadLine user interface made easy
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/Term-UI
@@ -56,62 +58,12 @@ make test
 %{_mandir}/man3/*
 
 %changelog
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.50-12
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Feb 27 2025 Sumit Jena <v-sumitjena@microsoft.com> - 0.50-1
+- Update to version 0.50
+- License verified
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.50-11
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.50-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.50-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.50-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Mon Nov 14 2022 Michal Josef Špaček <mspacek@redhat.com> - 0.50-7
-- Update license to SPDX format
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.50-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.50-5
-- Perl 5.36 rebuild
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.50-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Fri Aug 13 2021 Michal Josef Špaček <mspacek@redhat.com> - 0.50-3
-- Fix Requires section
-- Fix whitespace
-- Remove obsolete check for perl < 5.017
-
-* Thu Aug 12 2021 Michal Josef Špaček <mspacek@redhat.com> - 0.50-2
-- Add missing dependencies
-
-* Mon Aug 09 2021 Michal Josef Špaček <mspacek@redhat.com> - 0.50-1
-- 0.50 bump
-
-* Tue Aug 03 2021 Michal Josef Špaček <mspacek@redhat.com> - 0.48-1
-- 0.48 bump
-- Simplify spec file
-
-* Fri Jul 23 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.46-20
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.46-19
-- Perl 5.34 rebuild
-
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.46-18
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.46-17
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.46-16
-- Perl 5.32 rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.46-16
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.46-15
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

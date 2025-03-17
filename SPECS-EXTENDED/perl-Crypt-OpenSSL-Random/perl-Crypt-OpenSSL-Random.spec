@@ -1,10 +1,12 @@
 Name:           perl-Crypt-OpenSSL-Random
 Version:        0.17
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        OpenSSL/LibreSSL pseudo-random number generator access
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/Crypt-OpenSSL-Random
-Source0:        https://cpan.metacpan.org/authors/id/R/RU/RURBAN/Crypt-OpenSSL-Random-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/R/RU/RURBAN/Crypt-OpenSSL-Random-%{version}.tar.gz#/perl-Crypt-OpenSSL-Random-%{version}.tar.gz
 BuildRequires:  coreutils
 BuildRequires:  findutils
 BuildRequires:  gcc
@@ -23,6 +25,8 @@ BuildRequires:  perl(Exporter)
 BuildRequires:  perl(strict)
 BuildRequires:  perl(vars)
 BuildRequires:  perl(XSLoader)
+Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
+
 # Tests:
 BuildRequires:  perl(Test::More)
 # Optional tests:
@@ -91,6 +95,10 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
+* Thu Dec 19 2024 Jyoti kanase <v-jykanase@microsoft.com> -  0.17-3
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.17-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

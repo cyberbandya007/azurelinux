@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 # OCaml packages not built on i686 since OCaml 5 / Fedora 39.
 ExcludeArch: %{ix86}
 
@@ -5,7 +7,7 @@ ExcludeArch: %{ix86}
 
 Name:           ocaml-tyxml
 Version:        4.6.0
-Release:        12%{?dist}
+Release:        13%{?dist}
 Summary:        Build valid HTML and SVG documents
 
 License:        LGPL-2.1-only WITH OCaml-LGPL-linking-exception
@@ -143,107 +145,16 @@ developing applications that use %{name}-ppx.
 %files ppx-devel -f .ofiles-tyxml-ppx-devel
 
 %changelog
-* Mon Aug  5 2024 Jerry James <loganjerry@gmail.com> - 4.6.0-12
-- Rebuild for ocaml-ppxlib 0.33.0
+* Mon Dec 23 2024 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 4.6.0-13
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
 
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.6.0-11
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
-
-* Wed Jul  3 2024 Jerry James <loganjerry@gmail.com> - 4.6.0-10
-- Rebuild for ocaml-sexplib0 0.17.0
-
-* Wed Jun 19 2024 Richard W.M. Jones <rjones@redhat.com> - 4.6.0-9
-- OCaml 5.2.0 ppc64le fix
-
-* Wed May 29 2024 Richard W.M. Jones <rjones@redhat.com> - 4.6.0-8
-- OCaml 5.2.0 for Fedora 41
-
-* Fri Feb  2 2024 Jerry James <loganjerry@gmail.com> - 4.6.0-7
-- Rebuild for changed ocamlx(Location) hash
-
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.6.0-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.6.0-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Mon Dec 18 2023 Richard W.M. Jones <rjones@redhat.com> - 4.6.0-4
-- OCaml 5.1.1 + s390x code gen fix for Fedora 40
-
-* Tue Dec 12 2023 Richard W.M. Jones <rjones@redhat.com> - 4.6.0-3
-- OCaml 5.1.1 rebuild for Fedora 40
-
-* Thu Oct 05 2023 Richard W.M. Jones <rjones@redhat.com> - 4.6.0-2
-- OCaml 5.1 rebuild for Fedora 40
-
-* Wed Oct  4 2023 Jerry James <loganjerry@gmail.com> - 4.6.0-1
-- Version 4.6.0
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 4.5.0-19
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Wed Jul 12 2023 Richard W.M. Jones <rjones@redhat.com> - 4.5.0-18
-- OCaml 5.0 rebuild for Fedora 39
-
-* Mon Jul 10 2023 Jerry James <loganjerry@gmail.com> - 4.5.0-17.20230622git407f41b
-- Build from git HEAD for OCaml 5.0.0
-
-* Tue Jan 24 2023 Richard W.M. Jones <rjones@redhat.com> - 4.5.0-16
-- Rebuild OCaml packages for F38
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 4.5.0-15
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Tue Nov  1 2022 Jerry James <loganjerry@gmail.com> - 4.5.0-14
-- Rebuild for ocaml-ppxlib 0.28.0
-
-* Thu Aug 18 2022 Jerry James <loganjerry@gmail.com> - 4.5.0-13
-- Rebuild for ocaml-ppxlib 0.27.0
-- Convert License tag to SPDX
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 4.5.0-12
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Wed Jul 20 2022 Jerry James <loganjerry@gmail.com> - 4.5.0-11
-- Use new OCaml macros
-
-* Sun Jun 19 2022 Richard W.M. Jones <rjones@redhat.com> - 4.5.0-11
-- OCaml 4.14.0 rebuild
-
-* Mon Feb 28 2022 Jerry James <loganjerry@gmail.com> - 4.5.0-10
-- Rebuild for ocaml-uutf 1.0.3
-- Build in release mode
-
-* Fri Feb 04 2022 Richard W.M. Jones <rjones@redhat.com> - 4.5.0-9
-- OCaml 4.13.1 rebuild to remove package notes
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 4.5.0-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Mon Dec 27 2021 Jerry James <loganjerry@gmail.com> - 4.5.0-7
-- Rebuild for ocaml-ppxlib 0.24.0
-
-* Tue Oct 05 2021 Richard W.M. Jones <rjones@redhat.com> - 4.5.0-6
-- OCaml 4.13.1 build
-
-* Wed Sep  1 2021 Jerry James <loganjerry@gmail.com> - 4.5.0-5
-- Rebuild for ocaml-ppxlib 0.23.0
-
-* Thu Jul 29 2021 Jerry James <loganjerry@gmail.com> - 4.5.0-4
-- Rebuild for ocaml-ppxlib 0.22.2
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 4.5.0-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Tue Jun 22 2021 Jerry James <loganjerry@gmail.com> - 4.5.0-2
-- Rebuild for ocaml-markup 1.0.1
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 4.5.0-2
+- Initial CBL-Mariner import from Fedora 34 (license: MIT).
 
 * Fri Apr 23 2021 Jerry James <loganjerry@gmail.com> - 4.5.0-1
 - Version 4.5.0
 - Drop all patches
-
-* Mon Mar  1 21:39:52 GMT 2021 Richard W.M. Jones <rjones@redhat.com> - 4.4.0-10
-- OCaml 4.12.0 build
 
 * Sat Feb 20 2021 Jerry James <loganjerry@gmail.com> - 4.4.0-9
 - Apply upstream merge request to migrate to ppxlib

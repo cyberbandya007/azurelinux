@@ -1,6 +1,8 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           webrtc-audio-processing
 Version:        1.3
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Library for echo cancellation
 
 License:        BSD-3-Clause
@@ -60,6 +62,10 @@ files for developing applications that use %{name}.
 
 
 %changelog
+* Fri Dec 20 2024 Akarsh Chaudhary <v-akarshc@microsoft.com> - 1.3-4
+- AzureLinux import from Fedora 41 .
+- License verified
+
 * Sun Aug 25 2024 Benjamin A. Beasley <code@musicinmybrain.net> - 1.3-3
 - Rebuilt for abseil-cpp-20240722.0
 

@@ -1,8 +1,10 @@
 %global tarball_version %%(echo %{version} | tr '~' '.')
 
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           yelp-xsl
 Version:        42.1
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        XSL stylesheets for the yelp help browser
 
 License:        LGPLv2+ and GPLv2+
@@ -54,6 +56,10 @@ XSL stylesheets in yelp-xsl.
 
 
 %changelog
+* Thu Jan 16 2025 Archana Shettigar <v-shettigara@microsoft.com> - 42.1-6
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License Verified
+
 * Sat Jul 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 42.1-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

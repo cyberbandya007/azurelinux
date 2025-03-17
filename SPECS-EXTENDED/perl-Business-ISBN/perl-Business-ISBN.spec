@@ -1,26 +1,20 @@
-# Enable rendering ISBN into PNG barcodes with GD library
-%if 0%{?rhel} >= 9
-%bcond_with perl_Business_ISBN_enables_PNG
-%else
-%bcond_without perl_Business_ISBN_enables_PNG
-%endif
-
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           perl-Business-ISBN
 %global cpan_version 3.009
 Version:        %(echo '%{cpan_version}' | tr '_' '.'})
-Release:        5%{?dist}
+Release:        1%{?dist}
 Summary:        Perl module to work with International Standard Book Numbers
 
-License:        Artistic-2.0
+License:        Artistic 2.0
 URL:            https://metacpan.org/release/Business-ISBN
-Source0:        https://cpan.metacpan.org/modules/by-module/Business/Business-ISBN-%{cpan_version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/B/BD/BDFOY/Business-ISBN-%{cpan_version}.tar.gz#/perl-Business-ISBN-%{cpan_version}.tar.gz
 BuildArch:      noarch
 BuildRequires:  coreutils
 BuildRequires:  findutils
 BuildRequires:  make
-BuildRequires:  perl-generators
 BuildRequires:  perl-interpreter
-BuildRequires:  perl(Config)
+BuildRequires:  perl-generators
 BuildRequires:  perl(ExtUtils::MakeMaker) >= 6.76
 BuildRequires:  perl(File::Spec)
 BuildRequires:  perl(File::Spec::Functions)
@@ -35,18 +29,15 @@ BuildRequires:  perl(Data::Dumper)
 BuildRequires:  perl(Exporter)
 BuildRequires:  perl(subs)
 BuildRequires:  perl(vars)
-%if %{with perl_Business_ISBN_enables_PNG}
-# Optional run-time:
+# Optinonal run-time
 BuildRequires:  perl(GD::Barcode::EAN13)
-%endif
 # Tests:
 BuildRequires:  perl(Test::More) >= 0.95
 # Optional tests:
 BuildRequires:  perl(Test::Pod) >= 1.00
 BuildRequires:  perl(Test::Pod::Coverage)
-%if %{with perl_Business_ISBN_enables_PNG}
-Recommends:     perl(GD::Barcode::EAN13)
-%endif
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
+Requires:       perl(GD::Barcode::EAN13)
 
 %description
 This modules handles International Standard Book Numbers, including
@@ -79,7 +70,7 @@ perl Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1 NO_PERLLOCAL=1
 
 %install
 %{make_install}
-%{_fixperms} -c %{buildroot}/*
+%{_fixperms} -c $RPM_BUILD_ROOT/*
 
 # Install tests
 mkdir -p %{buildroot}%{_libexecdir}/%{name}
@@ -96,6 +87,7 @@ chmod +x %{buildroot}%{_libexecdir}/%{name}/test
 export HARNESS_OPTIONS=j$(perl -e 'if ($ARGV[0] =~ /.*-j([0-9][0-9]*).*/) {print $1} else {print 1}' -- '%{?_smp_mflags}')
 make test
 
+
 %files
 %license LICENSE
 %doc Changes README.pod
@@ -106,60 +98,12 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.009-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Fri Dec 13 2024 Jyoti Kanase <v-jykanase@microsoft.com> - 3.009-1
+- Update to 3.009
+- License verified
 
-* Mon Feb 12 2024 Jitka Plesnikova <jplesnik@redhat.com> - 3.009-1
-- 3.009 bump (rhbz#2263687)
-
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.008-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.008-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.008-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Fri Mar 24 2023 Jitka Plesnikova <jplesnik@redhat.com> - 3.008-1
-- 3.008 bump
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.007-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.007-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 3.007-3
-- Perl 5.36 rebuild
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.007-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Mon Jan 10 2022 Jitka Plesnikova <jplesnik@redhat.com> - 3.007-1
-- 3.007 bump
-- Package tests
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.006-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 3.006-3
-- Perl 5.34 rebuild
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.006-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jan 19 2021 Jitka Plesnikova <jplesnik@redhat.com> - 3.006-1
-- 3.006 bump
-
-* Mon Jan 11 2021 Petr Pisar <ppisar@redhat.com> - 3.005-5
-- Weaken a dependency on GD::Barcode::EAN13 for rendering ISBN into PNG bar codes
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 3.005-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 3.005-3
-- Perl 5.32 rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 3.005-3
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 3.005-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

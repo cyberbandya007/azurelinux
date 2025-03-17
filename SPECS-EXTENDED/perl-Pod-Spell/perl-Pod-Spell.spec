@@ -1,8 +1,10 @@
 Name:           perl-Pod-Spell
-Version:        1.26
-Release:        5%{?dist}
+Version:        1.27
+Release:        1%{?dist}
 Summary:        A formatter for spell-checking POD
 License:        Artistic-2.0
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/Pod-Spell
 Source0:        https://cpan.metacpan.org/modules/by-module/Pod/Pod-Spell-%{version}.tar.gz
 BuildArch:      noarch
@@ -50,7 +52,7 @@ complain about mystery words like "$thing" or "Foo::Bar" or "hashref").
 Summary:        Tests for %{name}
 Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       perl-Test-Harness
-
+ 
 %description tests
 Tests from %{name}. Execute them
 with "%{_libexecdir}/%{name}/test".
@@ -101,57 +103,12 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.26-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Feb 27 2025 Sumit Jena <v-sumitjena@microsoft.com> - 1.27-1
+- Update to version 1.27
+- License verified
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.26-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.26-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.26-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Tue Mar 14 2023 Jitka Plesnikova <jplesnik@redhat.com> - 1.26-1
-- 1.26 bump
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.25-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Wed Oct 05 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.25-1
-- 1.25 bump
-
-* Thu Sep 22 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.23-1
-- 1.23 bump
-- Package tests
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.20-23
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Wed Jun 01 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.20-22
-- Perl 5.36 rebuild
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.20-21
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.20-20
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 1.20-19
-- Perl 5.34 rebuild
-
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.20-18
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.20-17
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 1.20-16
-- Perl 5.32 rebuild
-
-* Tue Mar 10 2020 Paul Howarth <paul@city-fan.org> - 1.20-15
-- BR: perl(blib) for t/00-compile.t
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.20-15
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.20-14
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

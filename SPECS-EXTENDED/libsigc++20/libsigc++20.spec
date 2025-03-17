@@ -1,9 +1,11 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 # first two digits of version
 %define release_version %(echo %{version} | awk -F. '{print $1"."$2}')
 
 Name:           libsigc++20
 Version:        2.12.1
-Release:        3%{?dist}
+Release:        1%{?dist}
 Summary:        Typesafe signal framework for C++
 
 License:        LGPL-2.1-or-later
@@ -36,7 +38,7 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 %description devel
 The %{name}-devel package contains the static libraries and header files
 needed for development with %{name}.
-
+ 
 
 %package        doc
 Summary:        Documentation for %{name}, includes full API docs
@@ -54,13 +56,11 @@ chmod -x NEWS
 
 
 %build
-%meson -Dbuild-documentation=true
+%meson -Dbuild-documentation=false
 %meson_build
-
 
 %install
 %meson_install
-
 
 %files
 %license COPYING
@@ -73,61 +73,20 @@ chmod -x NEWS
 %{_libdir}/pkgconfig/sigc++-2.0.pc
 %{_libdir}/libsigc-2.0.so
 
-%files doc
-%doc %{_datadir}/doc/libsigc++-2.0/
+#%files doc
+#%doc %{_datadir}/doc/libsigc++-2.0/
 # according guidelines, we can co-own this, since devhelp is not required
 # for accessing documentation
-%doc %{_datadir}/devhelp/
+#%doc %{_datadir}/devhelp/
 
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.12.1-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Nov 11 2024 Sumit Jena <v-sumitjena@microsoft.com> - 2.12.1-1
+- Update to version 2.12.1
+- License verified.
 
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.12.1-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Oct 01 2023 Kalev Lember <klember@redhat.com> - 2.12.1-1
-- Update to 2.12.1
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.10.8-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.10.8-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.10.8-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Fri Mar 25 2022 David King <amigadave@amigadave.com> - 2.10.8-1
-- Update to 2.10.8
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.10.7-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Tue Aug 24 2021 Kalev Lember <klember@redhat.com> - 2.10.7-3
-- Fix NEWS file to not be executable
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.10.7-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Wed May 26 2021 Kalev Lember <klember@redhat.com> - 2.10.7-1
-- Update to 2.10.7
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.10.6-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Wed Nov 25 2020 Kalev Lember <klember@redhat.com> - 2.10.6-1
-- Update to 2.10.6
-
-* Mon Sep 28 2020 Kalev Lember <klember@redhat.com> - 2.10.4-1
-- Update to 2.10.4
-- Switch to meson build system
-- Update upstream URL
-- Tighten soname globs
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.10.3-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 2.10.3-2
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Fri Mar 27 2020 Kalev Lember <klember@redhat.com> - 2.10.3-1
 - Update to 2.10.3

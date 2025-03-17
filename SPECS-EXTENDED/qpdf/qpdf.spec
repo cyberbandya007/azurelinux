@@ -1,70 +1,74 @@
-Summary: Command-line tools and library for transforming PDF files
-Name:    qpdf
-Version: 11.9.1
-Release: 3%{?dist}
+%global bash_completions_dir %{_datadir}/bash-completion/completions
+%global zsh_completions_dir %{_datadir}/zsh/site-functions
+
+Summary: 	Command-line tools and library for transforming PDF files
+Name:    	qpdf
+Version: 	11.9.1
+Release: 	4%{?dist}
 # MIT: e.g. libqpdf/sha2.c, but those are not compiled in (GNUTLS is used)
 # upstream uses ASL 2.0 now, but he allowed other to distribute qpdf under
 # old license (see README)
-License: Apache-2.0 OR Artistic-2.0
-URL:     https://qpdf.sourceforge.io/
-Source0: https://github.com/%{name}/%{name}/releases/download/v%{version}/%{name}-%{version}.tar.gz
-Source1: https://github.com/%{name}/%{name}/releases/download/v%{version}/%{name}-%{version}-doc.zip
+License: 	Apache-2.0 OR Artistic-2.0
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+URL:     	https://qpdf.sourceforge.io/
+Source0: 	https://github.com/%{name}/%{name}/releases/download/v%{version}/%{name}-%{version}.tar.gz
+Source1: 	https://github.com/%{name}/%{name}/releases/download/v%{version}/%{name}-%{version}-doc.zip
 
 # make qpdf working under FIPS, downstream patch
-Patch1:  qpdf-relax.patch
-
+Patch1:  	qpdf-relax.patch
 
 # gcc and gcc-c++ are no longer in buildroot by default
 # gcc is needed for qpdf-ctest.c
-BuildRequires: gcc
+BuildRequires: 	gcc
 # gcc-c++ is need for everything except for qpdf-ctest
-BuildRequires: gcc-c++
+BuildRequires: 	gcc-c++
 # uses cmake
-BuildRequires: cmake
+BuildRequires: 	cmake
 
-BuildRequires: zlib-devel
-BuildRequires: libjpeg-turbo-devel
+BuildRequires: 	zlib-devel
+BuildRequires: 	libjpeg-turbo-devel
 
 # for gnutls crypto
-BuildRequires: gnutls-devel
+BuildRequires: 	gnutls-devel
 
 # for fix-qdf and test suite
-BuildRequires: perl-generators
-BuildRequires: perl-interpreter
-BuildRequires: perl(Carp)
-BuildRequires: perl(Config)
-BuildRequires: perl(constant)
-BuildRequires: perl(Cwd)
-BuildRequires: perl(Digest::MD5)
-BuildRequires: perl(Digest::SHA)
-BuildRequires: perl(File::Basename)
-BuildRequires: perl(File::Compare)
-BuildRequires: perl(File::Copy)
-BuildRequires: perl(File::Find)
-BuildRequires: perl(File::Spec)
-BuildRequires: perl(FileHandle)
-BuildRequires: perl(IO::Handle)
-BuildRequires: perl(IO::Select)
-BuildRequires: perl(IO::Socket)
-BuildRequires: perl(POSIX)
-BuildRequires: perl(strict)
+BuildRequires: 	perl-generators
+BuildRequires: 	perl-interpreter
+BuildRequires: 	perl(Carp)
+BuildRequires: 	perl(Config)
+BuildRequires: 	perl(constant)
+BuildRequires: 	perl(Cwd)
+BuildRequires: 	perl(Digest::MD5)
+BuildRequires: 	perl(Digest::SHA)
+BuildRequires: 	perl(File::Basename)
+BuildRequires: 	perl(File::Compare)
+BuildRequires: 	perl(File::Copy)
+BuildRequires: 	perl(File::Find)
+BuildRequires: 	perl(File::Spec)
+BuildRequires: 	perl(FileHandle)
+BuildRequires: 	perl(IO::Handle)
+BuildRequires: 	perl(IO::Select)
+BuildRequires: 	perl(IO::Socket)
+BuildRequires: 	perl(POSIX)
+BuildRequires: 	perl(strict)
 # perl(Term::ANSIColor) - not needed for tests
 # perl(Term::ReadKey) - not needed for tests
 
-Requires: %{name}-libs%{?_isa} = %{version}-%{release}
+Requires: 	%{name}-libs%{?_isa} = %{version}-%{release}
 
 %package libs
-Summary: QPDF library for transforming PDF files
+Summary: 	QPDF library for transforming PDF files
 
 %package devel
-Summary: Development files for QPDF library
-Requires: %{name}-libs%{?_isa} = %{version}-%{release}
+Summary: 	Development files for QPDF library
+Requires: 	%{name}-libs%{?_isa} = %{version}-%{release}
 
 %package doc
-Summary: QPDF Manual
-BuildArch: noarch
-BuildRequires: unzip
-Requires: %{name}-libs = %{version}-%{release}
+Summary: 	QPDF Manual
+BuildArch: 	noarch
+BuildRequires: 	unzip
+Requires: 	%{name}-libs = %{version}-%{release}
 
 %description
 QPDF is a command-line program that does structural, content-preserving
@@ -86,24 +90,26 @@ for developing programs using the QPDF library.
 QPDF Manual
 
 %prep
-%setup -q
-
-%patch -P 1 -p1 -b .relax
+%autosetup -p1
 
 # unpack zip file with manual
 unzip %{SOURCE1}
 
-
 %build
+mkdir -p build
+cd build
 %cmake -DBUILD_STATIC_LIBS=0 \
        -DREQUIRE_CRYPTO_GNUTLS=1 \
        -DUSE_IMPLICIT_CRYPTO=0 \
-       -DSHOW_FAILED_TEST_OUTPUT=1
+       -DSHOW_FAILED_TEST_OUTPUT=1 \
+       ..
 
 %cmake_build
 
 %install
+cd build
 %cmake_install
+cd ..
 
 install -m 0644 %{name}-%{version}-doc/%{name}-manual.pdf %{buildroot}/%{_pkgdocdir}/%{name}-manual.pdf
 
@@ -144,8 +150,12 @@ install -m 0644 completions/zsh/_qpdf %{buildroot}%{zsh_completions_dir}/_qpdf
 %files doc
 %{_pkgdocdir}
 
-
 %changelog
+* Fri Feb 07 2025 Akhila Guruju <v-guakhila@microsoft.com> - 11.9.1-4
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+- Defined `bash_completions_dir` and `zsh_completions_dir`
+
 * Mon Dec 02 2024 Nicolas Fella <nicolas.fella@gmx.de> - 11.9.1-3
 - Don't exclude CMake config files
 

@@ -1,39 +1,27 @@
 %global dbver_rel 4.0
-# When you change dbver_snap, rebuild also foomatic against this build to pick up new IEEE 1284 Device IDs.
-# The postscriptdriver tags get put onto foomatic, because that's there the actual CUPS driver lives.
-%global dbver_snap 20230810
+%global dbver_snap 20241027
 
-Summary: Database of printers and printer drivers
-Name: foomatic-db
-Version: %{dbver_rel}
-Release: 80.%{dbver_snap}%{?dist}
-# GPL-2.0-or-later non-PPD files and some PPDs
-# MIT for ppds
-License: GPL-2.0-or-later AND MIT
-Requires: %{name}-filesystem = %{version}-%{release}
-Requires: %{name}-ppds = %{version}-%{release}
-
+Summary:        Database of printers and printer drivers
+Name:           foomatic-db
+Version:        %{dbver_rel}
+Release:        1%{?dist}
+License:        GPL-2.0-or-later
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+URL:            https://www.openprinting.org
 Source0: http://www.openprinting.org/download/foomatic/foomatic-db-%{dbver_rel}-%{dbver_snap}.tar.gz
 
-Patch1: foomatic-db-device-ids.patch
-Patch2: foomatic-db-invalid.patch
+Patch1:         foomatic-db-device-ids.patch
+Patch2:         foomatic-db-invalid.patch
 
-Url: http://www.openprinting.org
-BuildArch: noarch
-
-# Make sure we get postscriptdriver tags.
-BuildRequires: python3-cups
-
-# Build requires cups so that configure knows where to put PPDs.
-BuildRequires: cups
-# uses make
-BuildRequires: make
-
-# Build requires for perl
-BuildRequires: perl-interpreter
-
-# we needed sed for prep phase - removing perl from ppds
-BuildRequires: sed
+BuildRequires:  cups
+BuildRequires:  make
+BuildRequires:  perl-interpreter
+BuildRequires:  python3-cups
+BuildRequires:  sed
+Requires:       %{name}-filesystem = %{version}-%{release}
+Requires:       %{name}-ppds = %{version}-%{release}
+BuildArch:      noarch
 
 %description
 This is the database of printers, printer drivers, and driver options
@@ -42,37 +30,36 @@ for Foomatic.
 The site http://www.openprinting.org/ is based on this database.
 
 %package filesystem
-Summary: Directory layout for the foomatic package
+Summary:        Directory layout for the foomatic package
+License:        Public Domain
 
 %description filesystem
 Directory layout for the foomatic package.
 
 %package ppds
-Summary: PPDs from printer manufacturers
-# We ship a symlink in a directory owned by cups
-BuildRequires: cups
-Requires: cups
-Requires: sed
-Requires: %{name}-filesystem = %{version}-%{release}
+Summary:        PPDs from printer manufacturers
+License:        GPLv2+ AND MIT
+BuildRequires:  cups
+Requires:       %{name}-filesystem = %{version}-%{release}
+Requires:       cups
+Requires:       sed
 
 %description ppds
 PPDs from printer manufacturers.
 
 %prep
-%setup -q -n foomatic-db-%{dbver_snap}
+%autosetup -n foomatic-db-%{dbver_snap}
 
 find -type d | xargs -d '\n' chmod g-s
 
 pushd db/source
 
-# For gutenprint printers, use gutenprint-ijs-simplified.5.2.
 for i in printer/*.xml
 do
   perl -pi -e 's,>gutenprint<,>gutenprint-ijs-simplified.5.2<,' $i
 done
 
-# Remove references to SpliX (Samsung/Xerox/Dell)
-find printer -name '*.xml' |xargs -d '\n' grep -l "<driver>splix"|xargs -d '\n' rm -vf
+find printer -name '*.xml' |xargs grep -l "<driver>splix"|xargs rm -vf
 rm -f driver/splix.xml
 
 # Remove references to foo2zjs, foo2oak, foo2hp and foo2qpdl (bug #208851).
@@ -83,29 +70,29 @@ rm -f driver/splix.xml
 # foo2hiperc-z1
 for x in zjs zjs-z1 zjs-z2 zjs-z3 oak oak-z1 hp qpdl lava kyo xqx slx hiperc hiperc-z1 hbpl2
 do
-  find printer -name '*.xml' |xargs -d '\n' grep -l "<driver>foo2${x}"|xargs -d '\n' rm -vf
+  find printer -name '*.xml' |xargs grep -l "<driver>foo2${x}"|xargs rm -vf
   rm -f driver/foo2${x}.xml opt/foo2${x}-*
 done
 
 # Binaries for these were previously provided by printer-filters, but aren't anymore (bug #972740)
 for x in lm1100 pentaxpj pbm2l2030 pbm2l7k lex5700 lex7000 c2050 c2070 cjet
 do
-  find printer -name '*.xml' |xargs -d '\n' grep -l "<driver>${x}</driver>"|xargs -d '\n' rm -vf
+  find printer -name '*.xml' |xargs grep -l "<driver>${x}</driver>"|xargs rm -vf
   rm -vf driver/${x}.xml opt/${x}-*
 done
 
 # Same for all these.
 for x in drv_x125 ml85p pbm2lwxl pbmtozjs bjc800j m2300w m2400w
 do
-  find printer -name '*.xml' |xargs -d '\n' grep -l "<driver>${x}</driver>"|xargs -d '\n' rm -vf
+  find printer -name '*.xml' |xargs grep -l "<driver>${x}</driver>"|xargs rm -vf
   rm -vf driver/${x}.xml opt/${x}-*
 done
 
 # Remove Samsung-CLP-610/620 (bug #967930), they're in foo2qpdl
-find printer -name '*.xml' |grep -E 'Samsung-CLP-610|Samsung-CLP-620'|xargs -d '\n' rm -vf
+find printer -name '*.xml' |grep -E 'Samsung-CLP-610|Samsung-CLP-620'|xargs rm -vf
 
 # This one is part of foo2zjs
-find printer -name '*.xml' |grep -E 'KONICA_MINOLTA-magicolor_2430_DL'|xargs -d '\n' rm -vf
+find printer -name '*.xml' |grep -E 'KONICA_MINOLTA-magicolor_2430_DL'|xargs rm -vf
 
 # Remove Brother P-touch (bug #560610, comment #10)
 rm -vf driver/ptouch.xml
@@ -125,10 +112,10 @@ popd
 # HP DeskJet 720C (bug #797099)
 # Kyocera FS-1118MFP (bug #782377)
 # Brother HL-2040 (bug #999040)
-%patch -P 1 -p1
+%patch 1 -p1
 
 # These can't be generated at all (bug #866476)
-%patch -P 2 -p1
+%patch 2 -p1
 
 # Use sed instead of perl in the PPDs (bug #512739).
 find db/source/PPD -type f -name '*.ppd' -exec sed -i 's,perl -p,sed,g' {} +
@@ -139,13 +126,13 @@ make PREFIX=%{_prefix}
 
 
 %install
-make	DESTDIR=%buildroot PREFIX=%{_prefix} \
+make	DESTDIR=%{buildroot} PREFIX=%{_prefix} \
 	install
 
 # Remove ghostscript UPP drivers that are gone in 7.07
 rm -f %{buildroot}%{_datadir}/foomatic/db/source/driver/{bjc6000a1,PM760p,PM820p,s400a1,sharp,Stc670pl,Stc670p,Stc680p,Stc760p,Stc777p,Stp720p,Stp870p}.upp.xml
 
-find %{buildroot}%{_datadir}/foomatic/db/source/ -type f | xargs -d '\n' chmod 0644
+find %{buildroot}%{_datadir}/foomatic/db/source/ -type f | xargs chmod 0644
 
 mkdir %{buildroot}%{_datadir}/foomatic/db/source/PPD/Custom
 
@@ -175,49 +162,24 @@ ln -sf ../../foomatic/db/source/PPD %{buildroot}%{_datadir}/cups/model/foomatic-
 %{_datadir}/foomatic/xmlschema
 
 %files ppds
-%doc COPYING
+%license COPYING
 %{_datadir}/foomatic/db/source/PPD/*
 %{_datadir}/cups/model/foomatic-db-ppds
 
 %changelog
-* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.0-80.20230810
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Oct 28 2024 Jyoti kanase <v-jykanase@microsoft.com> - 4.0.20241027-1
+- Update to version 4.0.20241027
+- License verified
 
-* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.0-79.20230810
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+* Thu Feb 22 2024 Pawel Winogrodzki <pawelwi@microsoft.com> - 4.0-71
+- Updating naming for 3.0 version of Azure Linux.
 
-* Fri Jan 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.0-78.20230810
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+* Thu Feb 02 2023 Muhammad Falak <mwani@microsoft.com> - 4.0-70
+- License verified
 
-* Fri Aug 11 2023 Zdenek Dohnal <zdohnal@redhat.com> - 4.0-77.20230810
-- update to foomatic-db-4.0-20230810
-- fix xargs in %%prep to work with files with spaces
-- fix rpm warnings about patch macros
-- SPDX migration
-
-* Wed Jul 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 4.0-76.20210611
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 4.0-75.20210611
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 4.0-74.20210611
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 4.0-73.20210611
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 4.0-72.20210611
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Fri Jun 11 2021 Zdenek Dohnal <zdohnal@redhat.com> - 4.0-71.20210611
-- updated to foomatic-db-4.0-20210611
-
-* Wed Feb 10 2021 Zdenek Dohnal <zdohnal@redhat.com> - 4.0-70.20210209
-- updated to foomatic-db-4.0-20210209
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 4.0-69.20201104
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+* Thu Oct 14 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 4.0-69
+- Initial CBL-Mariner import from Fedora 33 (license: MIT).
+- Converting the 'Release' tag to the '[number].[distribution]' format.
 
 * Thu Nov 05 2020 Zdenek Dohnal <zdohnal@redhat.com> - 4.0-68.20201104
 - updated to foomatic-db-4.0-20201104

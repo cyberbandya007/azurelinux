@@ -11,20 +11,30 @@
 
 Name:           python-dns
 Version:        2.6.1
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        DNS toolkit for Python
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 
 # The entire package is licensed with both licenses, see LICENSE file
 License:        ISC
-URL:            http://www.dnspython.org
+URL:            https://www.dnspython.org
 
-Source0:        https://github.com/rthalley/%{pypi_name}/archive/v%{version}%{rctag}/%{pypi_name}-%{version}%{rctag}.tar.gz
+Source0:        https://github.com/rthalley/%{pypi_name}/archive/v%{version}%{rctag}/%{pypi_name}-%{version}%{rctag}.tar.gz#/%{name}-%{version}.tar.gz
 
 BuildArch:      noarch
 
 BuildRequires:  python3-devel
+BuildRequires:  python3-pip
+BuildRequires:  python3-wheel
 BuildRequires:  pyproject-rpm-macros
+BuildRequires:  python3-cryptography
+BuildRequires:  python3-requests
+BuildRequires:  python3-idna
 BuildRequires:  python3-pytest
+BuildRequires:  python3-hatchling
+BuildRequires:  python3-pathspec
+BuildRequires:  python3-trove-classifiers
 
 %global _description %{expand:
 dnspython is a DNS toolkit for Python. It supports almost all record
@@ -86,6 +96,10 @@ export OPENSSL_ENABLE_SHA1_SIGNATURES=yes
 %endif
 
 %changelog
+* Wed Feb 26 2025 Archana Shettigar <v-shettigara@microsoft.com> - 2.6.1-5
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.6.1-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

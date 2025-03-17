@@ -1,12 +1,13 @@
+Summary:        Wrapper for the libev high-performance event loop library
 Name:           perl-EV
 Version:        4.34
-Release:        5%{?dist}
-Summary:        Wrapper for the libev high-performance event loop library
-
+Release:        1%{?dist}
 # Note: The source archive includes a libev/ folder which contents are licensed
 #       as "BSD or GPLv2+". However, those are removed at build-time and
 #       perl-EV is instead built against the system-provided libev.
 License:        GPL-1.0-or-later
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/EV
 Source0:        https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/EV-%{version}.tar.gz
 Patch0:         perl-EV-4.03-Don-t-ask-questions-at-build-time.patch
@@ -30,7 +31,6 @@ Provides:       bundled(libev)
 
 %{?perl_default_filter}
 
-
 %description
 This module provides an interface to libev
 (<http://software.schmorp.de/pkg/libev.html>). While the included documentation
@@ -39,7 +39,6 @@ is comprehensive, one might also consult the documentation of libev itself
 semantics or some discussion on the available backends, or how to force a
 specific backend with "LIBEV_FLAGS", or just about in any case because it has
 much more detailed information.
-
 
 %prep
 %setup -q -n EV-%{version}
@@ -54,20 +53,16 @@ rm -fr ./libev
 mkdir -p ./libev
 cp -r /usr/share/libev-source/* ./libev/
 
-
 %build
 PERL_CANARY_STABILITY_NOPROMPT=1 perl Makefile.PL INSTALLDIRS=vendor OPTIMIZE="%{optflags}" NO_PACKLIST=1 NO_PERLLOCAL=1
 %make_build
-
 
 %install
 %make_install
 %{_fixperms} %{buildroot}/*
 
-
 %check
 %make_build test
-
 
 %files
 %license COPYING
@@ -76,44 +71,14 @@ PERL_CANARY_STABILITY_NOPROMPT=1 perl Makefile.PL INSTALLDIRS=vendor OPTIMIZE="%
 %exclude %dir %{perl_vendorarch}/auto/
 %{_mandir}/man3/EV*.3pm*
 
-
 %changelog
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.34-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Feb 27 2025 Sumit Jena <v-sumitjena@microsoft.com> - 4.34-1
+- Update to version 4.34
+- License verified
 
-* Tue Jun 11 2024 Jitka Plesnikova <jplesnik@redhat.com> - 4.34-4
-- Perl 5.40 rebuild
-
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.34-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.34-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Oct 22 2023 Emmanuel Seyman <emmanuel@seyman.fr> - 4.34-1
-- Update to 4.34
-
-* Mon Sep 11 2023 Carl George <carlwgeorge@fedoraproject.org> - 4.33-14
-- Update license field with SPDX identifier
-- Add provides for bundled libev
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 4.33-13
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Tue Jul 11 2023 Jitka Plesnikova <jplesnik@redhat.com> - 4.33-12
-- Perl 5.38 rebuild
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 4.33-11
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 4.33-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 4.33-9
-- Perl 5.36 rebuild
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 4.33-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+* Thu Jan 27 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 4.33-8
+- Initial CBL-Mariner import from Fedora 36 (license: MIT).
+- License verified.
 
 * Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 4.33-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild

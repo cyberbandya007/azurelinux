@@ -1,11 +1,13 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global source_name libwnck
 
 Summary: Window Navigator Construction Kit
 Name: libwnck3
 Version: 43.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://download.gnome.org/sources/%{source_name}/
-Source0: http://download.gnome.org/sources/%{source_name}/43/%{source_name}-%{version}.tar.xz
+Source0: https://download.gnome.org/sources/%{source_name}/43/%{source_name}-%{version}.tar.xz
 License: LGPL-2.0-or-later
 
 # https://gitlab.gnome.org/GNOME/libwnck/-/merge_requests/10
@@ -41,24 +43,19 @@ Requires: %{name}%{?_isa} = %{version}-%{release}
 The %{name}-devel package contains libraries and header files for
 developing applications that use %{name}.
 
-
 %prep
 %autosetup -n %{source_name}-%{version} -p1
-
 
 %build
 %meson -Dgtk_doc=true
 %meson_build
-
 
 %install
 %meson_install
 
 %find_lang %{source_name}-3.0 --with-gnome --all-name
 
-
 %ldconfig_scriptlets
-
 
 %files -f %{source_name}-3.0.lang
 %license COPYING
@@ -75,8 +72,11 @@ developing applications that use %{name}.
 %{_datadir}/gir-1.0/Wnck-3.0.gir
 %doc %{_datadir}/gtk-doc
 
-
 %changelog
+* Mon 18 Sreenivasulu Malavathula <vsmalavathu@microsoft.com> - 43.1-2
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Mon Oct 07 2024 Wolfgang Ulbrich <raveit65.sun@gmail.com> - 43.1-1
 - update to 43.1
 

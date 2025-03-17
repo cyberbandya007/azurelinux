@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global glib2_version 2.44
 %global gtk3_version 3.20
 
@@ -6,19 +8,18 @@ Version:        1.14.0
 Release:        1%{?dist}
 Summary:        Spell-checking library for GTK+
 
-License:        LGPL-2.1-or-later
-URL:            https://wiki.gnome.org/Projects/gspell
-Source0:        https://download.gnome.org/sources/%{name}/1.14/%{name}-%{version}.tar.xz
+License:        LGPLv2.1+
+URL:            https://gitlab.gnome.org/GNOME/gspell
+Source0:        https://gitlab.gnome.org/GNOME/gspell/-/archive/%{version}/%{name}-%{version}.tar.gz
 
 BuildRequires:  gettext
 BuildRequires:  gobject-introspection-devel
-BuildRequires:  gtk-doc
 BuildRequires:  meson
-BuildRequires:  vala
 BuildRequires:  pkgconfig(enchant-2)
 BuildRequires:  pkgconfig(glib-2.0) >= %{glib2_version}
 BuildRequires:  pkgconfig(gtk+-3.0) >= %{gtk3_version}
 BuildRequires:  pkgconfig(iso-codes)
+BuildRequires:  vala
 
 Requires:       glib2%{?_isa} >= %{glib2_version}
 Requires:       gtk3%{?_isa} >= %{gtk3_version}
@@ -36,15 +37,6 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 %description    devel
 The %{name}-devel package contains libraries and header files for
 developing applications that use %{name}.
-
-
-%package        tests
-Summary:        Installed tests for %{name}
-Requires:       %{name}%{?_isa} = %{version}-%{release}
-
-%description    tests
-The %{name}-tests package contains tests that can be used to verify
-the functionality of the installed %{name} package.
 
 
 %package        doc
@@ -67,6 +59,7 @@ This package contains the full API documentation for %{name}.
 
 %install
 %meson_install
+find $RPM_BUILD_ROOT -name '*.la' -delete
 
 %find_lang gspell-1
 
@@ -75,8 +68,7 @@ This package contains the full API documentation for %{name}.
 
 
 %files -f gspell-1.lang
-%license LICENSES/LGPL-2.1-or-later.txt
-%doc NEWS README.md
+%license LICENSES/*
 %{_libdir}/girepository-1.0/
 %{_libdir}/libgspell-1.so.3*
 
@@ -87,84 +79,23 @@ This package contains the full API documentation for %{name}.
 %{_libdir}/pkgconfig/gspell-1.pc
 %{_datadir}/gir-1.0/
 %{_datadir}/vala/
+%exclude %dir %{_datadir}/installed-tests/%{name}-1/
+%exclude %{_datadir}/installed-tests/%{name}-1/*
+%exclude %dir %{_libexecdir}/installed-tests/%{name}-1/
+%exclude %{_libexecdir}/installed-tests/%{name}-1/*
 
 %files doc
 %{_datadir}/gtk-doc/
 
-%files tests
-%{_libexecdir}/installed-tests/
-%{_datadir}/installed-tests/
-
 
 %changelog
-* Mon Sep 16 2024 nmontero <nmontero@redhat.com> - 1.14.0-1
-- Update to 1.14.0
+* Tue Oct 15 2024 Kevin Lockwood <v-klockwood@microsoft.com> - 1.14.0-1
+- Upgrade to latest upstream
+- Change to meson build system
+- License Verified
 
-* Thu Aug 29 2024 David King <amigadave@amigadave.com> - 1.13.2-1
-- Update to 1.13.2
-
-* Sat Aug 17 2024 David King <amigadave@amigadave.com> - 1.13.1-1
-- Update to 1.13.1
-
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.12.2-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
-
-* Wed Jan 31 2024 Pete Walter <pwalter@fedoraproject.org> - 1.12.2-4
-- Rebuild for ICU 74
-
-* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.12.2-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sat Jan 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.12.2-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Mon Jul 31 2023 Kalev Lember <klember@redhat.com> - 1.12.2-1
-- Update to 1.12.2
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.12.1-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Tue Jul 11 2023 František Zatloukal <fzatlouk@redhat.com> - 1.12.1-2
-- Rebuilt for ICU 73.2
-
-* Tue May 02 2023 David King <amigadave@amigadave.com> - 1.12.1-1
-- Update to 1.12.1
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.12.0-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Sat Dec 31 2022 Pete Walter <pwalter@fedoraproject.org> - 1.12.0-2
-- Rebuild for ICU 72
-
-* Fri Sep 30 2022 Kalev Lember <klember@redhat.com> - 1.12.0-1
-- Update to 1.12.0
-
-* Mon Aug 01 2022 Frantisek Zatloukal <fzatlouk@redhat.com> - 1.11.1-3
-- Rebuilt for ICU 71.1
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.11.1-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Fri Jul 15 2022 Kalev Lember <klember@redhat.com> - 1.11.1-1
-- Update to 1.11.1
-
-* Tue Apr 19 2022 David King <amigadave@amigadave.com> - 1.10.0-1
-- Update to 1.10.0
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.9.1-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.9.1-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Thu May 20 2021 Pete Walter <pwalter@fedoraproject.org> - 1.9.1-2
-- Rebuild for ICU 69
-
-* Thu Feb 18 2021 Kalev Lember <klember@redhat.com> - 1.9.1-1
-- Update to 1.9.1
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.8.4-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.8.4-2
+- Initial CBL-Mariner import from Fedora 33 (license: MIT).
 
 * Fri Sep 04 2020 Kalev Lember <klember@redhat.com> - 1.8.4-1
 - Update to 1.8.4

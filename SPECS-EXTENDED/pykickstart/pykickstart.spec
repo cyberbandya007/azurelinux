@@ -5,8 +5,10 @@
 
 Name:      pykickstart
 Version:   3.58
-Release:   3%{?dist}
+Release:   1%{?dist}
 License:   GPL-2.0-only
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Summary:   Python utilities for manipulating kickstart files.
 Url:       http://fedoraproject.org/wiki/pykickstart
 Source0:   https://github.com/pykickstart/%{name}/releases/download/r%{version}/%{name}-%{version}.tar.gz
@@ -79,6 +81,10 @@ LC_ALL=C make PYTHON=%{__python3} test-no-coverage
 %{python3_sitelib}/pykickstart*.egg-info
 
 %changelog
+* Wed Dec 18 2024 Sumit Jena <v-sumitjena@microsoft.com> - 3.58-1
+- Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Wed Oct 02 2024 Adam Williamson <awilliam@redhat.com> - 3.58-3
 - Fix the fix for _parse_optional changing (awilliam)
 

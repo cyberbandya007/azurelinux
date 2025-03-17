@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global sum docutils-compatibility bridge to CommonMark
 %global desc A docutils-compatibility bridge to CommonMark.\
 \
@@ -7,17 +9,16 @@ Documentation is available on Read the Docs: http://recommonmark.readthedocs.org
 
 Name:           python-recommonmark
 Version:        0.7.1
-Release:        10.git%{?dist}
+Release:        11%{?dist}
 Summary:        %{sum}
 
 License:        MIT
 URL:            https://github.com/readthedocs/recommonmark
-Source0:        https://github.com/readthedocs/recommonmark/archive/%{version}/recommonmark-%{version}.tar.gz
+Source0:        %{url}/archive/%{version}/recommonmark-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 
 %description
 %{desc}
-
 
 %package -n     python%{python3_pkgversion}-recommonmark
 Summary:        %{sum}
@@ -28,11 +29,12 @@ BuildRequires:  python%{python3_pkgversion}-docutils
 BuildRequires:  python%{python3_pkgversion}-CommonMark
 BuildRequires:  python%{python3_pkgversion}-pytest
 BuildRequires:  python%{python3_pkgversion}-sphinx
+# Dependencies
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 %{?python_provide:%python_provide python%{python3_pkgversion}-recommonmark}
 
 %description -n python%{python3_pkgversion}-recommonmark
 %{desc}
-
 
 %prep
 %setup -qn recommonmark-%{version}
@@ -41,10 +43,8 @@ rm -rf recommonmark.egg-info
 
 sed -i '1{\@^#!/usr/bin/env python@d}' recommonmark/scripts.py
 
-
 %build
 %py3_build
-
 
 %install
 #  install python3 first to have unversioned binaries for python 3
@@ -56,12 +56,9 @@ for cm2bin in cm2*; do
 done
 popd  # Leave buildroot bindir
 
-
-
 %check
 # Skip some tests because of https://github.com/readthedocs/recommonmark/issues/164
 %pytest --ignore tests/test_sphinx.py
-
 
 %files -n python%{python3_pkgversion}-recommonmark
 %doc README.md
@@ -71,8 +68,11 @@ popd  # Leave buildroot bindir
 %{_bindir}/cm2*-3
 %{_bindir}/cm2*-%{python3_version}
 
-
 %changelog
+* Thu Feb 27 2025 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 0.7.1-11
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.7.1-10.git
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

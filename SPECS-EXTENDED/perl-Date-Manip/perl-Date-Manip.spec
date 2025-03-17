@@ -1,10 +1,13 @@
 Name:           perl-Date-Manip
-Version:        6.96
-Release:        1%{?dist}
+Version:        6.95
+Release:        3%{?dist}
 Summary:        Date manipulation routines
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/Date-Manip
-Source0:        https://cpan.metacpan.org/authors/id/S/SB/SBECK/Date-Manip-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/S/SB/SBECK/Date-Manip-%{version}.tar.gz#/perl-Date-Manip-%{version}.tar.gz
+
 BuildArch:      noarch
 # Build
 BuildRequires:  coreutils
@@ -35,6 +38,7 @@ BuildRequires:  perl(utf8)
 # lib not used
 BuildRequires:  perl(Test::Inter) >= 1.09
 BuildRequires:  perl(Test::More)
+Requires:       perl(:MODULE_COMPAT_%(eval "$(perl -V:version)"; echo $version))
 # Test::Pod 1.00 not used
 # Test::Pod::Coverage 1.00 not used
 Requires:       perl(Cwd)
@@ -123,9 +127,9 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
-* Wed Dec 04 2024 Packit <hello@packit.dev> - 6.96-1
-- Update to version 6.96
-- Resolves: rhbz#2330447
+* Wed Dec 18 2024 Jyoti kanase <v-jykanase@microsoft.com> -  6.95 -3
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
 
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 6.95-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild

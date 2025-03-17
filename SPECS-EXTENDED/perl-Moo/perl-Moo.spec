@@ -1,11 +1,13 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           perl-Moo
 Version:        2.005005
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Minimalist Object Orientation (with Moose compatibility)
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 
 URL:            https://metacpan.org/release/Moo
-Source0:        https://cpan.metacpan.org/authors/id/H/HA/HAARG/Moo-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/H/HA/HAARG/Moo-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 BuildRequires:  make
 BuildRequires:  perl-interpreter
@@ -53,6 +55,8 @@ BuildRequires:  perl(lib)
 # MooX::ArrayRef is defined internally via %%INC
 BuildRequires:  perl(Test::More) >= 0.96
 BuildRequires:  perl(threads)
+# Dependencies
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 # Optional tests:
 BuildRequires:  perl(CPAN::Meta::Requirements)
 Requires:       perl(Carp)
@@ -95,6 +99,10 @@ not quite- two thirds of Moose.
 %{_mandir}/man3/*
 
 %changelog
+* Mon Dec 23 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 2.005005-8
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.005005-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

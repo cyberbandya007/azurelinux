@@ -1,19 +1,21 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           perl-SNMP_Session
 Version:        1.16
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        SNMP support for Perl 5
 
 License:        Artistic-2.0
 URL:            https://github.com/sleinen/snmp-session/
-Source0:        https://github.com/sleinen/snmp-session/archive/v%{version}/SNMP_Session-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/S/SK/SKIM/SNMP_Session-%{version}.tar.gz#/perl-SNMP_Session-%{version}.tar.gz
 Patch0:         SNMP_Session-1.13-fix_ivp6.patch
 BuildArch:      noarch
 BuildRequires:  make
 BuildRequires:  perl-generators
 BuildRequires:  perl(ExtUtils::MakeMaker)
 BuildRequires:  perl(Test::More)
-Requires:       perl(IO::Socket::INET6)
-Requires:       perl(Socket6)
+# Runtime
+Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
 %description
 Pure Perl SNMP v1 and SNMP v2 support for Perl 5.
@@ -21,27 +23,22 @@ Pure Perl SNMP v1 and SNMP v2 support for Perl 5.
 The SNMP operations currently supported are "get", "get-next", "get-bulk"
 and "set", as well as trap generation and reception. 
 
-
 %prep
 %setup -q -n SNMP_Session-%{version}
 %patch -P 0 -p1
 %{__perl} -pi -e 's{^#!/usr/local/bin/perl\b}{#!%{__perl}}' test/*
 chmod -c 644 test/*
 
-
 %build
 perl Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1 NO_PERLLOCAL=1
 %{make_build}
-
 
 %install
 %{make_install}
 %{_fixperms} %{buildroot}/*
 
-
 %check
 make test
-
 
 %files
 %license Artistic
@@ -49,8 +46,11 @@ make test
 %{perl_vendorlib}/*
 %{_mandir}/man3/*
 
-
 %changelog
+* Fri Dec 20 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 1.16-6
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.16-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

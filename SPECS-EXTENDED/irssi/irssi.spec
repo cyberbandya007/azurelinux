@@ -1,15 +1,11 @@
-%if 0%{?rhel} < 10
-%bcond_without	otr
-%else
-%bcond_with	otr
-%endif
-
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %define		perl_vendorarch	%(eval "`perl -V:installvendorarch`"; echo $installvendorarch)
 
 Summary:	Modular text mode IRC client with Perl scripting
 Name:		irssi
 Version:	1.4.5
-Release:	5%{?dist}
+Release:	1%{?dist}
 
 License:	gpl-2.0-or-later AND gpl-2.0-only AND gfdl-1.1-or-later AND licenseref-fedora-public-domain AND hpnd-markus-kuhn
 URL:		http://irssi.org/
@@ -32,9 +28,7 @@ BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	libtool
 BuildRequires:	utf8proc-devel
-%if %{with otr}
 BuildRequires:	libotr-devel
-%endif
 
 Requires:	perl(lib)
 Requires:	perl(Symbol)
@@ -72,8 +66,7 @@ autoreconf -fi
 	--with-perl=module		\
 	--with-perl-lib=vendor		\
 	--enable-true-color		\
-	%{?with_otr:--with-otr=yes}	\
-	%{!?with_otr:--with-otr=no}
+	--with-otr=yes
 
 %make_build CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing"
 mv irssi-config.h irssi-config-$(getconf LONG_BIT).h
@@ -90,6 +83,8 @@ rm -f $RPM_BUILD_ROOT%{perl_archlib}/perllocal.pod
 find $RPM_BUILD_ROOT%{perl_vendorarch} -type f -a -name '*.bs' -a -empty -exec rm -f {} ';'
 find $RPM_BUILD_ROOT%{perl_vendorarch} -type f -a -name .packlist -exec rm {} ';'
 chmod -R u+w $RPM_BUILD_ROOT%{perl_vendorarch}
+
+
 
 
 %files
@@ -110,84 +105,13 @@ chmod -R u+w $RPM_BUILD_ROOT%{perl_vendorarch}
 
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.4.5-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Nov 12 2024 Sumit Jena <v-sumitjena@microsoft.com> - 1.4.5-1
+- Update to version 1.4.5
+- License verified.
 
-* Mon Jun 10 2024 Jitka Plesnikova <jplesnik@redhat.com> - 1.4.5-4
-- Perl 5.40 rebuild
-
-* Wed Jan 24 2024 Jaroslav Škarvada <jskarvad@redhat.com> - 1.4.5-3
-- Converted license to SPDX
-
-* Sat Jan 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.4.5-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Tue Oct 10 2023 Jaroslav Škarvada <jskarvad@redhat.com> - 1.4.5-1
-- New version
-  Resolves: rhbz#2241891
-
-* Thu Aug 18 2023 Boudhayan Bhattacharya <bbhtt.zn0i8@slmail.me> - 1.4.4-5
-- Add irssi perl-ntype patch for perl>=5.38
-  Resolves rhbz#2232750
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.4.4-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Tue Jul 11 2023 Jitka Plesnikova <jplesnik@redhat.com> - 1.4.4-3
-- Perl 5.38 rebuild
-
-* Thu Mar 30 2023 Todd Zullinger <tmz@pobox.com> - 1.4.4-2
-- verify upstream source signature
-
-* Thu Mar 30 2023 Kalev Lember <klember@redhat.com> - 1.4.4-1
-- Update to 1.4.4
-
-* Thu Mar  2 2023 Jaroslav Škarvada <jskarvad@redhat.com> - 1.4.3-3
-- Added libotr conditionals for RHEL
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.4.3-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Mon Oct 31 2022 Kalev Lember <klember@redhat.com> - 1.4.3-1
-- Update to 1.4.3
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.4.2-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Sun Jul 17 2022 Kalev Lember <klember@redhat.com> - 1.4.2-1
-- Update to 1.4.2
-
-* Tue Jun 14 2022 Jaroslav Škarvada <jskarvad@redhat.com> - 1.4.1-1
-- New version
-  Resolves: rhbz#2095992
-
-* Mon May 30 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.2.3-6
-- Perl 5.36 rebuild
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.3-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Tue Sep 14 2021 Sahana Prasad <sahana@redhat.com> - 1.2.3-4
-- Rebuilt with OpenSSL 3.0.0
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.3-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 1.2.3-2
-- Perl 5.34 rebuild
-
-* Sun Apr 11 2021 Kalev Lember <klember@redhat.com> - 1.2.3-1
-- Update to 1.2.3
-- Drop old irc-otr obsoletes
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.2-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Thu Nov 12 2020 Kalev Lember <klember@redhat.com> - 1.2.2-7
-- Add missing perl(lib) and perl(Symbol) requires (#1897247)
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.2-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+* Thu Jul  8 2021 Muhammad Falak R Wani <mwani@microsoft.com> - 1.2.2-6
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+- Fix Patch directive `Patch -> Patch0`
 
 * Wed Jul  8 2020 Jaroslav Škarvada <jskarvad@redhat.com> - 1.2.2-5
 - Fixed ctrl+space problem
@@ -478,7 +402,7 @@ chmod -R u+w $RPM_BUILD_ROOT%{perl_vendorarch}
 - Release bump
 
 * Sun Sep 17 2006 Dams <anvil[AT]livna.org> - 0.8.10-6.a
-- Bumped release
+- Bumped release 
 
 * Sun Sep 17 2006 Dams <anvil[AT]livna.org> - 0.8.10-5.a
 - Updated to 0.8.10a

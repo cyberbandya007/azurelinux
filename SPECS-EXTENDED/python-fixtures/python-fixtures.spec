@@ -1,18 +1,30 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global pypi_name fixtures
-
 # fixtures has a circular dependency with testtools
 %bcond_with bootstrap
-
 Name:           python-%{pypi_name}
 Version:        4.0.1
-Release:        10%{?dist}
+Release:        1%{?dist}
 Summary:        Fixtures, reusable state for writing clean tests and more
-
 License:        Apache-2.0 OR BSD-3-Clause
 URL:            https://github.com/testing-cabal/fixtures
-Source:         %pypi_source
-BuildArch:      noarch
+Source:         %pypi_source 
 
+BuildRequires:  python3-pip
+BuildRequires:  python3-pbr
+BuildRequires:  python3-wheel
+BuildRequires:  python3-tox
+BuildRequires:  python3-tox-current-env
+BuildRequires:  python3-pluggy
+BuildRequires:  python3-py
+BuildRequires:  python3-filelock
+BuildRequires:  python3-six
+BuildRequires:  python3-toml
+#BuildRequires:  python3-testtools
+BuildRequires:  python3-extras
+ 
+BuildArch:      noarch
 
 %global _description %{expand:
 Fixtures defines a Python contract for reusable state / support logic,
@@ -23,7 +35,6 @@ compatible test cases easy and straight forward.}
 
 %description %{_description}
 
-
 %package -n python%{python3_pkgversion}-%{pypi_name}
 Summary:        %{summary}
 BuildRequires:  python%{python3_pkgversion}-devel
@@ -33,7 +44,6 @@ BuildRequires:  python%{python3_pkgversion}-devel
 %if %{without bootstrap}
 %pyproject_extras_subpkg -n python%{python3_pkgversion}-%{pypi_name} streams
 %endif
-
 
 %prep
 %autosetup -p1 -n %{pypi_name}-%{version}
@@ -48,7 +58,6 @@ sed -e 's/import mock/import unittest.mock as mock/' -i fixtures/tests/_fixtures
 
 %build
 %pyproject_wheel
-
 %install
 %pyproject_install
 %pyproject_save_files %{pypi_name}
@@ -58,88 +67,17 @@ sed -e 's/import mock/import unittest.mock as mock/' -i fixtures/tests/_fixtures
 %tox
 %endif
 
-
 %files -n python%{python3_pkgversion}-%{pypi_name} -f %{pyproject_files}
 %license Apache-2.0 BSD
 %doc README.rst GOALS NEWS
 
 %changelog
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.0.1-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Thu Feb 20 2025 Akarsh Chaudhary <v-akarshc@microsoft.com> - 4.0.1-1
+- Upgrade to version 4.0.1
+- License verified
 
-* Fri Jun 07 2024 Python Maint <python-maint@redhat.com> - 4.0.1-9
-- Rebuilt for Python 3.13
-
-* Fri Jan 26 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.0.1-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Mon Jan 22 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.0.1-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Tue Oct 17 2023 Zane Bitter <zaneb@fedoraproject.org> - 4.0.1-6
-- Add streams extra
-
-* Fri Jul 21 2023 Fedora Release Engineering <releng@fedoraproject.org> - 4.0.1-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Fri Jun 16 2023 Python Maint <python-maint@redhat.com> - 4.0.1-4
-- Rebuilt for Python 3.12
-
-* Tue Jun 13 2023 Python Maint <python-maint@redhat.com> - 4.0.1-3
-- Bootstrap for Python 3.12
-
-* Wed Jun 07 2023 Jan Friesse <jfriesse@redhat.com> - 4.0.1-2
-- migrated to SPDX license
-
-* Mon Feb 06 2023 Joel Capitao <jcapitao@redhat.com> - 4.0.1-1
-- Update to latest upstream (#2078479)
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.0-32
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.0-31
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Wed Jun 15 2022 Python Maint <python-maint@redhat.com> - 3.0.0-30
-- Rebuilt for Python 3.11
-
-* Wed Jun 15 2022 Python Maint <python-maint@redhat.com> - 3.0.0-29
-- Bootstrap for Python 3.11
-
-* Fri Apr 29 2022 Carl George <carl@george.computer> - 3.0.0-28
-- Convert to pyproject macros
-
-* Wed Feb 23 2022 Alfredo Moralejo <amoralej@redhat.com> - 3.0.0-27
-- Added python3-extras as runtime requirement
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.0-26
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Tue Jul 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.0-25
-- Second attempt - Rebuilt for
-  https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Wed Jun 02 2021 Python Maint <python-maint@redhat.com> - 3.0.0-24
-- Rebuilt for Python 3.10
-
-* Wed Jun 02 2021 Python Maint <python-maint@redhat.com> - 3.0.0-23
-- Bootstrap for Python 3.10
-
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.0-22
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Thu Oct 01 2020 Javier Peña <jpena@redhat.com> - 3.0.0-21
-- Skip unit tests failing in Python 3.0 (bz#1787753)
-
-* Sat Aug 01 2020 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.0-20
-- Second attempt - Rebuilt for
-  https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Wed Jul 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.0-19
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Fri May 22 2020 Miro Hrončok <mhroncok@redhat.com> - 3.0.0-18
-- Bootstrap for Python 3.9
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 3.0.0-18
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.0-17
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

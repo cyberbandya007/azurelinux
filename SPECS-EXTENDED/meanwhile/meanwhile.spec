@@ -1,8 +1,10 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           meanwhile
 Version:        1.1.1
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Lotus Sametime Community Client library
-License:        LGPLv2+
+License:        LGPL-3.0
 URL:            https://github.com/obriencj/%{name}
 
 Source:         %{url}/archive/refs/tags/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
@@ -73,6 +75,10 @@ rm -rf %{buildroot}%{_datadir}/doc/%{name}-doc-%{version}/
 %doc docs/*
 
 %changelog
+* Tue Dec 31 2024 Aninda Pradhan <v-anipradhan@microsoft.com> - 1.1.1-8
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified.
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.1.1-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

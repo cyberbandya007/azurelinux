@@ -1,13 +1,17 @@
-Name: libcdio
+Name:    libcdio
 Version: 2.1.0
-Release: 13%{?dist}
+Release: 14%{?dist}
 Summary: CD-ROM input and control library
+
 # include/cdio/ecma_167.h and lib/driver/netbsd.c and lib/udf/udf_fs.c are BSD-2-Clause
 # src/getopt* are LGPL-2.1-or-later
-License: GPL-3.0-or-later AND BSD-2-Clause AND LGPL-2.1-or-later
+License:        GPL-3.0-or-later AND BSD-2-Clause AND LGPL-2.1-or-later
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+
 URL: http://www.gnu.org/software/libcdio/
-Source0: http://ftp.gnu.org/gnu/libcdio/libcdio-%{version}.tar.bz2
-Source1: http://ftp.gnu.org/gnu/libcdio/libcdio-%{version}.tar.bz2.sig
+Source0: https://ftp.gnu.org/gnu/libcdio/libcdio-%{version}.tar.bz2
+Source1: https://ftp.gnu.org/gnu/libcdio/libcdio-%{version}.tar.bz2.sig
 Source2: libcdio-no_date_footer.hml
 Source3: cdio_config.h
 # Fixed upstream but not in a stable release yet.
@@ -16,8 +20,10 @@ Patch0: format-security.patch
 # http://git.savannah.gnu.org/cgit/libcdio.git/commit/?id=56335fff0f21d294cd0e478d49542a43e9495ed0
 Patch1: realpath-test-fix.patch
  
-BuildRequires: gcc gcc-c++
-BuildRequires: pkgconfig doxygen
+BuildRequires: gcc 
+BuildRequires: gcc-c++
+BuildRequires: pkgconfig
+BuildRequires: doxygen
 BuildRequires: ncurses-devel
 BuildRequires: help2man
 BuildRequires: gettext-devel
@@ -128,6 +134,10 @@ make check
 
 
 %changelog
+* Tue Mar 04 2025 Jyoti Kanase <v-jykanase@microsoft.com> - 2.1.0-14
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.1.0-13
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

@@ -1,3 +1,6 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+
 # Turn off automatic python byte compilation because these are Ansible
 # roles and the files are transferred to the node and compiled there with
 # the python version used in the node
@@ -11,15 +14,18 @@
 
 Summary: Roles and playbooks to deploy FreeIPA servers, replicas and clients
 Name: ansible-freeipa
-Version: 1.14.2
-Release: 1%{?dist}
+Version: 1.13.2
+Release: 2%{?dist}
 URL: https://github.com/freeipa/ansible-freeipa
 License: GPL-3.0-or-later
 Source: https://github.com/freeipa/ansible-freeipa/archive/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
+#Source:  https://github.com/freeipa/ansible-freeipa/archive/refs/tags/v1.13.2.tar.gz
 BuildArch: noarch
-Requires: ansible-core >= 2.14.0
-BuildRequires: ansible-core >= 2.14.0
+#Requires: ansible-core >= 1.15.0
+#BuildRequires: ansible-core >= 1.15.0
+BuildRequires: ansible
 BuildRequires: python
+BuildRequires: PyYAML
 
 %description
 Ansible roles to install and uninstall FreeIPA servers, replicas and clients,
@@ -98,7 +104,7 @@ Supported Distributions
 Requirements
 
   Controller
-  - Ansible version: 2.14+
+  - Ansible version: 2.13+
 
   Node
   - Supported FreeIPA version (see above)
@@ -211,31 +217,8 @@ utils/build-galaxy-release.sh -o "%{version}" -p %{buildroot}%{ansible_collectio
 %{ansible_collections_dir}/%{collection_namespace}/%{collection_name}
 
 %changelog
-* Fri Dec 13 2024 Thomas Woerner <twoerner@redhat.com> - 1.14.1-2
-- Update to version 1.14.2
-  https://github.com/freeipa/ansible-freeipa/releases/tag/v1.14.2
-  - ipareplica: Pass ipareplica_ip_addresses to client deployment part
-  - ipagroup: Correctly handle externalmember in member actions
-  - ipasudorule: Evaluate all members related to hosts and users
-  - ipacert: Correctly handle removFromCRL revocation
-  - Collection: No more role module duplication
-  - Enabled CentOS 10 Stream tests
-
-* Wed Nov 27 2024 Thomas Woerner <twoerner@redhat.com> - 1.14.1-1
-- Update to version 1.14.1
-  https://github.com/freeipa/ansible-freeipa/releases/tag/v1.14.1
-  - Change minimum Ansible version to 2.14
-
-* Fri Nov 22 2024 Thomas Woerner <twoerner@redhat.com> - 1.14.0-1
-- Update to version 1.14.0
-  https://github.com/freeipa/ansible-freeipa/releases/tag/v1.14.0
-  - Multi sudorule management with the ipasudorule module
-  - Use batch command internally for ipasudorule
-  - Lots of CI/infra fixes and enhancements
-  - Documentation fixes
-
-* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.13.2-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Tue Nov 12 2024 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 1.13.2-2
+- Update to 1.13.2
 
 * Mon Jul  1 2024 Thomas Woerner <twoerner@redhat.com> - 1.13.2-1
 - Update to version 1.13.2
@@ -429,8 +412,8 @@ utils/build-galaxy-release.sh -o "%{version}" -p %{buildroot}%{ansible_collectio
 - Update to version 0.3.5
   https://github.com/freeipa/ansible-freeipa/releases/tag/v0.3.5
 
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.3.4-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.3.4-2
+- Initial CBL-Mariner import from Fedora 33 (license: MIT).
 
 * Mon Jan 18 2021 Thomas Woerner <twoerner@redhat.com> - 0.3.4-1
 - Update to version 0.3.4

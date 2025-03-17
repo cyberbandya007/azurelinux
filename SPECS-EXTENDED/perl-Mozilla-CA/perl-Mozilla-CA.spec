@@ -1,9 +1,11 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           perl-Mozilla-CA
 # You do not need to back-port a new version for updating a list of the
 # certificates. They are taken from ca-certificates package instead
 # per bug #738383.
 Version:        20240730
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Mozilla's CA certificate bundle in PEM format
 # README:                       MPL-2.0
 ## Unbundled
@@ -11,7 +13,7 @@ Summary:        Mozilla's CA certificate bundle in PEM format
 # lib/Mozilla/CA/cacert.pem:    MPL-2.0
 License:        MPL-2.0
 URL:            https://metacpan.org/release/Mozilla-CA
-Source0:        https://cpan.metacpan.org/authors/id/A/AB/ABH/Mozilla-CA-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/L/LW/LWP/Mozilla-CA-%{version}.tar.gz#/perl-Mozilla-CA-%{version}.tar.gz
 # Use a CA bundle from ca-certificates package, bug #738383
 Patch0:         Mozilla-CA-20240730-Redirect-to-ca-certificates-bundle.patch
 BuildArch:      noarch
@@ -26,6 +28,7 @@ BuildRequires:  perl(strict)
 BuildRequires:  perl(File::Spec)
 # Tests:
 BuildRequires:  perl(Test::More)
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 Requires:       ca-certificates
 
 %description
@@ -81,6 +84,10 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
+* Mon Dec 16 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 20240730-2
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Thu Aug 01 2024 Michal Josef Špaček <mspacek@redhat.com> - 20240730-1
 - 20240730 bump
 

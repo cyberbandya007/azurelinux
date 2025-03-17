@@ -3,16 +3,20 @@
 %bcond py3docs %{undefined rhel}
 
 %global giturl https://github.com/oneapi-src/oneTBB
+%undefine __cmake_in_source_build
 
 Name:    tbb
 Summary: The Threading Building Blocks library abstracts low-level threading details
 Version: 2021.13.0
 Release: 2%{?dist}
 License: Apache-2.0 AND BSD-3-Clause
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:     http://threadingbuildingblocks.org/
 VCS:     git:%{giturl}.git
 
-Source0: %{giturl}/archive/v%{version}/%{name}-%{version}.tar.gz
+Source0: https://github.com/intel/tbb/archive/v%{version}/%{name}-%{version}.tar.gz
+
 # These two are downstream sources.
 Source7: tbbmalloc.pc
 Source8: tbbmalloc_proxy.pc
@@ -27,6 +31,10 @@ BuildRequires: hwloc
 BuildRequires: hwloc-devel
 BuildRequires: make
 BuildRequires: python3-devel
+BuildRequires: python3-pip
+BuildRequires: python3-wheel
+BuildRequires: python3-sphinxcontrib-jquery
+
 %if %{with py3docs}
 BuildRequires: python3-docs
 %endif
@@ -187,6 +195,10 @@ ctest --output-on-failure --force-new-ctest-process
 %{python3_sitearch}/__pycache__/TBB*
 
 %changelog
+* Mon Feb 24 2025 Mayank Singh <mayansingh@microsoft.com> - 2021.13.0-3
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Sat Jul 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2021.13.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

@@ -1,11 +1,13 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           pyxattr
 Summary:        Extended attributes library wrapper for Python
 Version:        0.7.2
-Release:        14%{?dist}
+Release:        15%{?dist}
 License:        LGPLv2+
 URL:            https://pyxattr.k1024.org/
-Source0:        %{URL}/downloads/%{name}-%{version}.tar.gz
-Source1:        %{URL}/downloads/%{name}-%{version}.tar.gz.asc
+Source0:        %{url}/downloads/%{name}-%{version}.tar.gz
+Source1:        %{url}/downloads/%{name}-%{version}.tar.gz.asc
 Source2:        https://k1024.org/files/key.asc
 
 BuildRequires:  gcc
@@ -14,6 +16,8 @@ BuildRequires:  python3-devel
 BuildRequires:  python3-setuptools
 BuildRequires:  gnupg2
 BuildRequires:  %{py3_dist pytest}
+# Dependencies
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 
 %global _description %{expand:
 Python extension module wrapper for libattr. It allows to query, list,
@@ -53,6 +57,10 @@ python3 -m pytest tests %{?copr_projectname:-k 'not (binary_payload or create_on
 %doc NEWS README.md
 
 %changelog
+* Fri Feb 28 2025 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 0.7.2-15
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.7.2-14
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

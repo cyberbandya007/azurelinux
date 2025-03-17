@@ -1,11 +1,13 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           optipng
 Version:        0.7.8
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        PNG optimizer and converter
 
 License:        zlib
-URL:            http://optipng.sourceforge.net/
-Source0:        http://downloads.sourceforge.net/optipng/%{name}-%{version}.tar.gz
+URL:            https://optipng.sourceforge.net/
+Source0:        https://downloads.sourceforge.net/optipng/%{name}-%{version}.tar.gz
 
 BuildRequires: make
 BuildRequires: gcc
@@ -55,6 +57,11 @@ chmod -c 755 $RPM_BUILD_ROOT%{_bindir}/optipng
 
 
 %changelog
+* Wed Jan 15 2025 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 0.7.8-5
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- change the URL and Source0 from http to https
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.7.8-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

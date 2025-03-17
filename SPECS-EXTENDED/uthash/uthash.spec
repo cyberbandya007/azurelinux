@@ -1,10 +1,13 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+
 Name:           uthash
 Version:        2.3.0
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        A hash table for C structures
 
 License:        BSD-1-Clause
-URL:            http://troydhanson.github.io/%{name}
+URL:            https://troydhanson.github.io/%{name}
 Source0:        https://github.com/troydhanson/%{name}/archive/v%{version}/%{name}-%{version}.tar.gz
 
 BuildRequires:  asciidoc
@@ -104,6 +107,11 @@ rm -f %{buildroot}%{_pkgdocdir}/html/google*.html
 
 
 %changelog
+* Tue Jan 20 2025 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 2.3.0-9
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- change the URL and Source from http to https
+- License verified
+
 * Sat Jul 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

@@ -1,18 +1,19 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global upstreamid 20240601
 
 Summary:        German thesaurus
 Name:           mythes-de
 Version:        0.%{upstreamid}
-Release:        2%{?dist}
+Release:        3%{?dist}
 License:        LGPL-2.1-or-later OR CC-BY-SA-4.0
 URL:            https://www.openthesaurus.de/
 Source0:        https://www.openthesaurus.de/export/Deutscher-Thesaurus.oxt
 Source1:        https://www.openthesaurus.de/export/Schweizer-Thesaurus.oxt
 BuildArch:      noarch
 Requires:       mythes
-%if 0%{?fedora} || 0%{?rhel} > 7
+
 Supplements:    (mythes and langpacks-de)
-%endif
 
 %description
 German thesaurus.
@@ -55,6 +56,10 @@ popd
 %{_datadir}/mythes/*
 
 %changelog
+* Fri Dec 20 2024 Aninda Pradhan <v-anipradhan@microsoft.com> - 0.20240601-3
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License Verified.
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.20240601-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

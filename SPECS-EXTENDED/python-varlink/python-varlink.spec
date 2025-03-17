@@ -1,8 +1,10 @@
 Name:           python-varlink
 Version:        31.0.0
-Release:        11%{?dist}
+Release:        12%{?dist}
 Summary:        Python implementation of Varlink
 License:        ASL 2.0
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://github.com/varlink/%{name}
 Source0:        https://github.com/varlink/%{name}/archive/%{version}/%{name}-%{version}.tar.gz
 BuildArch:      noarch
@@ -26,7 +28,7 @@ Obsoletes:     python-varlink <= 3-1.git.61.1bc637d.fc27
 %description -n python3-varlink %_description
 
 %prep
-%autosetup -n varlink-%{version}
+%autosetup -n python-%{version}
 # varlink also supports python-2.7 but python3 is required here
 sed -i -e 's#env python#env python3#' varlink/tests/test_certification.py
 # varlink also supports python-2.7 but python3 is required here
@@ -50,6 +52,10 @@ export SETUPTOOLS_SCM_PRETEND_VERSION=%{version}
 %{python3_sitelib}/*
 
 %changelog
+* Mon Dec 23 2024 Akhila Guruju <v-guakhila@microsoft.com> - 31.0.0-12
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 31.0.0-11
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

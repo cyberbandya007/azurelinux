@@ -2,9 +2,11 @@ Name:		perl-ExtUtils-Helpers
 Version:	0.028
 Release:	1%{?dist}
 Summary:	Various portability utilities for module builders
-License:	GPL-1.0-or-later OR Artistic-1.0-Perl
+License:	GPL+ or Artistic
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:		https://metacpan.org/release/ExtUtils-Helpers
-Source0:	https://cpan.metacpan.org/modules/by-module/ExtUtils/ExtUtils-Helpers-%{version}.tar.gz
+Source0:	https://cpan.metacpan.org/modules/by-module/ExtUtils/ExtUtils-Helpers-%{version}.tar.gz#/perl-ExtUtils-Helpers-%{version}.tar.gz
 BuildArch:	noarch
 # Build
 BuildRequires:	coreutils
@@ -26,8 +28,8 @@ BuildRequires:	perl(warnings)
 BuildRequires:	perl(Cwd)
 BuildRequires:	perl(lib)
 BuildRequires:	perl(Test::More)
-# Dependencies
-# (none)
+# Runtime
+Requires:	perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 
 %description
 This module provides various portable helper functions for module building
@@ -53,59 +55,23 @@ find %{buildroot} -type f -name .packlist -delete
 make test
 
 %files
+%if 0%{?_licensedir:1}
 %license LICENSE
+%else
+%doc LICENSE
+%endif
 %doc Changes README
 %{perl_vendorlib}/ExtUtils/
 %{_mandir}/man3/ExtUtils::Helpers.3*
 %{_mandir}/man3/ExtUtils::Helpers::Unix.3*
 
 %changelog
-* Tue Sep  3 2024 Paul Howarth <paul@city-fan.org> - 0.028-1
-- Update to 0.028
-  - Add ext argument to man1_pagename and man3_pagename
+* Fri Dec 20 2024 Kevin Lockwood <v-klockwood@microsoft.com> - 0.028-1
+- Update to version 0.028
+- License verified.
 
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.027-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
-
-* Wed Jun 19 2024 Paul Howarth <paul@city-fan.org> - 0.027-1
-- Update to 0.027
-  - Revert "Make split_like_shell always unixy"
-
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.026-25
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.026-24
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.026-23
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.026-22
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.026-21
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Mon May 30 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.026-20
-- Perl 5.36 rebuild
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.026-19
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.026-18
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.026-17
-- Perl 5.34 rebuild
-
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.026-16
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.026-15
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Mon Jun 22 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.026-14
-- Perl 5.32 rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.026-14
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.026-13
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

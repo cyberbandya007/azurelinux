@@ -1,10 +1,12 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           perl-PAR-Dist
 Version:        0.53
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Toolkit for creating and manipulating Perl PAR distributions
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/PAR-Dist
-Source0:        https://cpan.metacpan.org/authors/id/R/RS/RSCHUPP/PAR-Dist-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/R/RS/RSCHUPP/PAR-Dist-%{version}.tar.gz#/perl-PAR-Dist-%{version}.tar.gz
 BuildArch:      noarch
 BuildRequires:  coreutils
 BuildRequires:  make
@@ -25,7 +27,6 @@ BuildRequires:  perl(File::Find)
 BuildRequires:  perl(File::Path)
 BuildRequires:  perl(File::Spec)
 # perl(LWP::Simple) not tested
-# perl(Module::Signature) >= 0.25 not tested
 BuildRequires:  perl(strict)
 BuildRequires:  perl(vars)
 BuildRequires:  perl(warnings)
@@ -33,6 +34,7 @@ BuildRequires:  perl(YAML::Tiny)
 # Tests:
 BuildRequires:  perl(Test)
 BuildRequires:  perl(Test::More)
+Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires:       perl(Archive::Zip)
 Requires:       perl(Cwd)
 Requires:       perl(ExtUtils::Install)
@@ -42,7 +44,6 @@ Requires:       perl(File::Find)
 Requires:       perl(File::Path)
 Requires:       perl(File::Temp)
 Requires:       perl(LWP::Simple)
-Requires:       perl(Module::Signature) >= 0.25
 Requires:       perl(YAML::Tiny)
 
 %description
@@ -110,6 +111,10 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
+* Thu Dec 19 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 0.53-3
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.53-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

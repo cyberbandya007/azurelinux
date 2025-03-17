@@ -1,10 +1,12 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 # FTBFS with GCC 14 -Werror=incompatible-pointer-types
 # https://bugzilla.redhat.com/show_bug.cgi?id=2261063
 %global build_type_safety_c 2
 
 Name:           discount
 Version:        2.2.7
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        A command-line utility for converting Markdown files into HTML
 License:        BSD
 URL:            http://www.pell.portland.or.us/~orc/Code/%{name}
@@ -111,6 +113,10 @@ done
 
 
 %changelog
+* Wed Oct 24 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 2.2.7-10
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.2.7-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

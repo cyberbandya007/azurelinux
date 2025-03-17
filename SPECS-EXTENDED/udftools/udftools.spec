@@ -1,9 +1,11 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Summary: Linux UDF Filesystem userspace utilities
 Name: udftools
 Version: 2.3
-Release: 9%{?dist}
-License: GPLv2+
-URL: http://sourceforge.net/projects/linux-udf/
+Release: 10%{?dist}
+License: GPL-2.0-or-later
+URL: https://sourceforge.net/projects/linux-udf/
 Source: https://github.com/pali/udftools/releases/download/%{version}/udftools-%{version}.tar.gz
 Patch1: udftools-2.3-backported_fixes.patch
 BuildRequires: make
@@ -43,6 +45,10 @@ rm -rf %{buildroot}%{_bindir}/udffsck
 
 
 %changelog
+* Mon Jan 13 2025 Archana Shettigar <v-shettigara@microsoft.com> - 2.3-10
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Sat Jul 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.3-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
@@ -79,6 +85,7 @@ rm -rf %{buildroot}%{_bindir}/udffsck
 
 * Mon Apr 20 2020 Filipe Rosset <rosset.filipe@gmail.com> - 2.2-1
 - Update to 2.2
+
 
 * Fri Jan 31 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.1-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

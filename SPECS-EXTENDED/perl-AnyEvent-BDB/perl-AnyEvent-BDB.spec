@@ -1,30 +1,36 @@
+# Remove under-speficied dependencies
+%global __requires_exclude %{?__requires_exclude:%__requires_exclude|}^perl\\((AnyEvent|BDB)\\)$
+
+Summary:        Truly asynchronous Berkeley DB access
 Name:           perl-AnyEvent-BDB
 Version:        1.1
-Release:        46%{?dist}
-Summary:        Truly asynchronous Berkeley DB access
-License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+Release:        39%{?dist}
+License:        GPL+ OR Artistic
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/AnyEvent-BDB
 Source0:        https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/AnyEvent-BDB-%{version}.tar.gz
+
 BuildArch:      noarch
+
 BuildRequires:  coreutils
 BuildRequires:  make
 BuildRequires:  perl-generators
 BuildRequires:  perl-interpreter
-BuildRequires:  perl(ExtUtils::MakeMaker) >= 6.76
 # Run-time:
 BuildRequires:  perl(AnyEvent) >= 3.81
-BuildRequires:  perl(base)
 BuildRequires:  perl(BDB) >= 1.5
 BuildRequires:  perl(Exporter)
+BuildRequires:  perl(ExtUtils::MakeMaker) >= 6.76
+BuildRequires:  perl(base)
 BuildRequires:  perl(strict)
 BuildRequires:  perl(warnings)
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
+
 Requires:       perl(AnyEvent) >= 3.81
 Requires:       perl(BDB) >= 1.5
 Requires:       perl(Exporter)
 Requires:       perl(warnings)
-
-# Remove under-speficied dependencies
-%global __requires_exclude %{?__requires_exclude:%__requires_exclude|}^perl\\((AnyEvent|BDB)\\)$
 
 %description
 Loading this module will install the necessary magic to seamlessly integrate
@@ -36,10 +42,10 @@ BDB::poll_cb or any of that stuff.
 
 %build
 perl Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1 NO_PERLLOCAL=1
-%{make_build}
+%make_build
 
 %install
-%{make_install}
+%make_install
 %{_fixperms} %{buildroot}
 
 %check
@@ -52,32 +58,13 @@ make test
 %{_mandir}/man3/*.3*
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.1-46
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Jan 06 2024 Jyoti kanase <v-jykanase@microsoft.com> -  1.1 - 39
+- Rebuilt for perl-BDB dependency
+- License verified.
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.1-45
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.1-44
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.1-43
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.1-42
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Tue Oct 25 2022 Michal Josef Špaček <mspacek@redhat.com> - 1.1-41
-- Update license to SPDX format
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.1-40
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.1-39
-- Perl 5.36 rebuild
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.1-38
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+* Thu Jan 27 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.1-38
+- Initial CBL-Mariner import from Fedora 36 (license: MIT).
+- License verified.
 
 * Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.1-37
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
@@ -198,4 +185,3 @@ make test
 
 * Sat Nov 29 2008 kwizart < kwizart at gmail.com > - 1.0-1
 - Initial package.
-

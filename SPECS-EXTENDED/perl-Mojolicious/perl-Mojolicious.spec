@@ -1,12 +1,12 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           perl-Mojolicious
 Version:        9.37
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        A next generation web framework for Perl
 License:        Artistic-2.0
-
 URL:            https://metacpan.org/release/Mojolicious
-Source0:        http://cpan.metacpan.org/authors/id/S/SR/SRI/Mojolicious-%{version}.tar.gz
-
+Source0:        http://cpan.metacpan.org/authors/id/S/SR/SRI/Mojolicious-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 BuildRequires:  coreutils
 BuildRequires:  make
@@ -72,6 +72,8 @@ BuildRequires:  perl(Unicode::Normalize)
 BuildRequires:  perl(utf8)
 # Optional run-time:
 BuildRequires:  perl(Role::Tiny) >= 2.000001
+# Dependencies
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 # Tests:
 BuildRequires:  perl(base)
 BuildRequires:  perl(IO::Socket::INET)
@@ -141,6 +143,10 @@ mv README.md lib/Mojolicious/
 %{perl_vendorlib}/Test
 
 %changelog
+* Wed Dec 18 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 9.37-3
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 9.37-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

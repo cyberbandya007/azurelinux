@@ -1,8 +1,10 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global _hardened_build 1
 
 Name:           libvarlink
 Version:        23
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        Varlink C Library
 License:        Apache-2.0 AND BSD-3-Clause
 URL:            https://github.com/varlink/%{name}
@@ -10,7 +12,6 @@ Source:         %{url}/archive/%{version}/%{name}-%{version}.tar.gz
 
 BuildRequires:  meson
 BuildRequires:  gcc
-BuildRequires:  glibc-langpack-de
 
 %description
 Varlink C Library
@@ -65,6 +66,10 @@ test_list=${test_list//test-symbols}
 %{_libdir}/pkgconfig/libvarlink.pc
 
 %changelog
+* Tue Nov 19 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 23-10
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 23-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
@@ -187,3 +192,4 @@ Disable LTO
 
 * Fri Feb  2 2018 <kay@redhat.com>
 - libvarlink 1
+

@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %define luaver 5.4
 %define luapkgdir %{_datadir}/lua/%{luaver}
 %global commit 7a86bc22066858afeb23845a191a6ab680b46233
@@ -5,7 +7,7 @@
 
 Name:           lua-json
 Version:        1.3.4
-Release:        8%{?dist}
+Release:        1%{?dist}
 Summary:        JSON Parser/Constructor for Lua
 License:        MIT
 URL:            https://github.com/harningt/luajson
@@ -15,7 +17,6 @@ Patch0:         https://github.com/harningt/luajson/pull/48.patch
 BuildRequires:  lua >= %{luaver}, lua-lpeg >= 0.8.1
 # for checks
 BuildRequires:  lua-filesystem >= 1.4.1, lua-lunit >= 0.4
-BuildRequires: make
 Requires:       lua(abi) >= %{luaver}, lua-lpeg >= 0.8.1
 BuildArch:      noarch
 
@@ -42,44 +43,16 @@ make check-regression
 %{luapkgdir}/*
 
 %changelog
-* Thu Aug 01 2024 Orion Poplawski <orion@nwra.com> - 1.3.4-8
-- Add upstream patch to support lua lpeg 1.1.0 (bz#2302036)
+* Thu Nov 21 2024 Aninda Pradhan <v-anipradhan@microsoft.com> - 1.3.4-1
+- Updated to version 1.3.4.
+- License verified.
 
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.4-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Feb 28 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.3.2-16
+- Fixing run-time dependencies.
+- License verified.
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.4-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.4-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.4-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.4-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.4-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Sat May 28 2022 Orion Poplawski <orion@nwra.com> - 1.3.4-1
-- Update to 1.3.4
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.2-19
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.2-18
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.2-17
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.2-16
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Tue Jun 30 2020 Miro Hrončok <mhroncok@redhat.com> - 1.3.2-15
-- Rebuilt for Lua 5.4
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.3.2-15
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.2-14
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

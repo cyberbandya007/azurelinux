@@ -3,27 +3,33 @@
 # due to RPM environmental macros being lost for the subshells
 %undefine _package_note_file
 
-Name: memkind
-Summary: User Extensible Heap Manager
-Version: 1.14.0
-Release: 9%{?checkout}%{?dist}
-License: BSD-2-Clause
-URL: http://memkind.github.io/memkind
-BuildRequires: make patch
-BuildRequires: automake libtool numactl-devel systemd gcc gcc-c++ daxctl-devel
+Name: 		memkind
+Summary: 	User Extensible Heap Manager
+Version: 	1.14.0
+Release: 	10%{?dist}
+License: 	BSD-3-Clause
+URL: 		http://memkind.github.io/memkind
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+
+BuildRequires: 	make
+BuildRequires:	patch
+BuildRequires: 	automake
+BuildRequires:	libtool
+BuildRequires:	numactl-devel
+BuildRequires:	systemd
+BuildRequires:	gcc
+BuildRequires:	gcc-c++
+BuildRequires:	daxctl-devel
 # memkind has been discontinued and archived upstream. See Bugzilla 2296288.
 # We are deprecating it now, to flag any potential user of its future removal.
-Provides: deprecated()
+Provides: 	deprecated()
 
-# Upstream testing of memkind is done exclusively on x86_64; other archs
-# are unsupported but may work.
-ExclusiveArch: x86_64 ppc64 ppc64le s390x aarch64
-
-Source0: https://github.com/%{name}/%{name}/archive/%{gittag0}/%{name}-%{version}.tar.gz
+Source0: 	https://github.com/%{name}/%{name}/archive/%{gittag0}/%{name}-%{version}.tar.gz
 
 # unbreak the atrocious autotools Makefile.am construction for
 # libmemkind archive creation target
-Patch0: Makefile.am.patch
+Patch0: 	Makefile.am.patch
 
 %description
 The memkind library is an user extensible heap manager built on top of
@@ -41,9 +47,9 @@ features. This software is being made available for early evaluation.
 Feedback on design or implementation is greatly appreciated.
 
 %package devel
-Summary: Memkind User Extensible Heap Manager development lib and tools
-Requires: %{name} = %{version}-%{release}
-Provides: deprecated()
+Summary: 	Memkind User Extensible Heap Manager development lib and tools
+Requires: 	%{name} = %{version}-%{release}
+Provides: 	deprecated()
 
 %description devel
 Install header files and development aids to link memkind library 
@@ -55,8 +61,7 @@ pre-alpha: bugs may exist and the interfaces may be subject to change prior to
 alpha release. Feedback on design or implementation is greatly appreciated.
 
 %prep
-%setup -q -a 0 -n %{name}-%{version}
-%patch -P0 -p1
+%autosetup -n %{name}-%{version}
 
 %build
 cd %{_builddir}/%{name}-%{version}
@@ -112,6 +117,10 @@ rm -f %{buildroot}/%{_docdir}/%{name}/VERSION
 %{_mandir}/man3/libmemtier.3.*
 
 %changelog
+* Wed Jan 15 2025 Akhila Guruju <v-guakhila@microsoft.com> - 1.14.0-10
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.14.0-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
@@ -252,3 +261,4 @@ rm -f %{buildroot}/%{_docdir}/%{name}/VERSION
 
 * Mon May 18 2015 Rafael Aquini <aquini@linux.com> - 0.2.2-1.20150518git
 - Initial RPM packaging for Fedora
+

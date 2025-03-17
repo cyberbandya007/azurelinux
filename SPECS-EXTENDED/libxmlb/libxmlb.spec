@@ -1,56 +1,30 @@
-## START: Set by rpmautospec
-## (rpmautospec version 0.7.2)
-## RPMAUTOSPEC: autorelease, autochangelog
-%define autorelease(e:s:pb:n) %{?-p:0.}%{lua:
-    release_number = 1;
-    base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
-    print(release_number + base_release_number - 1);
-}%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{!?-n:%{?dist}}
-## END: Set by rpmautospec
-
-%bcond mingw %{defined fedora}
-%bcond stemmer %{defined fedora}
-
 %global glib2_version 2.45.8
-
-Summary:   Library for querying compressed XML metadata
-Name:      libxmlb
-Version:   0.3.21
-Release:   %autorelease
-License:   LGPL-2.1-or-later
-URL:       https://github.com/hughsie/%{name}
-Source0:   https://github.com/hughsie/%{name}/releases/download/%{version}/%{name}-%{version}.tar.xz
-
-BuildRequires: glib2-devel >= %{glib2_version}
-BuildRequires: gtk-doc
-%if %{with stemmer}
-BuildRequires: libstemmer-devel
+%global gtk_doc 0
+Summary:        Library for querying compressed XML metadata
+Name:           libxmlb
+Version:        0.3.21
+Release:        2%{?dist}
+License:        LGPL-2.1-or-later
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+URL:            https://github.com/hughsie/%{name}
+Source0:        https://github.com/hughsie/%{name}/releases/download/%{version}/%{name}-%{version}.tar.xz
+BuildRequires:  glib2-devel >= %{glib2_version}
+%if %{with gtk_doc}
+BuildRequires:  gtk-doc
 %endif
-BuildRequires: meson
-BuildRequires: gobject-introspection-devel
-BuildRequires: xz-devel
-BuildRequires: libzstd-devel
-BuildRequires: python3-setuptools
-
-%if %{with mingw}
-BuildRequires: mingw32-filesystem >= 95
-BuildRequires: mingw32-gcc-c++
-BuildRequires: mingw32-glib2
-BuildRequires: mingw32-xz
-BuildRequires: mingw32-zstd
-
-BuildRequires: mingw64-filesystem >= 95
-BuildRequires: mingw64-gcc-c++
-BuildRequires: mingw64-glib2
-BuildRequires: mingw64-xz
-BuildRequires: mingw64-zstd
-%endif
-
+BuildRequires:  libstemmer-devel
+BuildRequires:  meson
+BuildRequires:  gobject-introspection-devel
+BuildRequires:  xz-devel
+BuildRequires:  libzstd-devel
+BuildRequires:  python3-setuptools
+%if 0%{?with_check}
 # needed for the self tests
-BuildRequires: shared-mime-info
-
-Requires: glib2%{?_isa} >= %{glib2_version}
-Requires: shared-mime-info
+BuildRequires:  shared-mime-info
+%endif
+Requires:       glib2%{?_isa} >= %{glib2_version}
+Requires:       shared-mime-info
 
 %description
 XML is slow to parse and strings inside the document cannot be memory mapped as
@@ -63,35 +37,17 @@ return some strings without actually parsing the entire document. This is all
 done using (almost) zero allocations and no actual copying of the binary data.
 
 %package devel
-Summary: Development package for %{name}
-Requires: %{name}%{?_isa} = %{version}-%{release}
+Summary:        Development package for %{name}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 
 %description devel
 Files for development with %{name}.
 
 %package tests
-Summary: Files for installed tests
+Summary:        Files for installed tests
 
 %description tests
 Executable and data files for installed tests.
-
-%if %{with mingw}
-%package -n mingw32-libxmlb
-Summary: MinGW library for querying compressed XML metadata
-BuildArch: noarch
-
-%description -n mingw32-libxmlb
-MinGW32 libxmlb library.
-
-%package -n mingw64-libxmlb
-Summary: MinGW library for querying compressed XML metadata
-BuildArch: noarch
-
-%description -n mingw64-libxmlb
-MinGW64 libxmlb library.
-
-%{?mingw_debug_package}
-%endif
 
 %prep
 %autosetup -p1
@@ -99,28 +55,16 @@ MinGW64 libxmlb library.
 %build
 
 %meson \
-    -Dgtkdoc=true \
+    -Dgtkdoc=false \
     -Dtests=true
 
 %meson_build
-
-%if %{with mingw}
-%mingw_meson -Dintrospection=false -Dtests=false -Dgtkdoc=false
-%mingw_ninja
-%endif
 
 %check
 %meson_test
 
 %install
 %meson_install
-
-%if %{with mingw}
-%mingw_ninja_install
-%mingw_debug_install_post
-rm -f $RPM_BUILD_ROOT/%{mingw32_mandir}/man1/xb-tool.1*
-rm -f $RPM_BUILD_ROOT/%{mingw64_mandir}/man1/xb-tool.1*
-%endif
 
 %files
 %doc README.md
@@ -134,9 +78,11 @@ rm -f $RPM_BUILD_ROOT/%{mingw64_mandir}/man1/xb-tool.1*
 %files devel
 %dir %{_datadir}/gir-1.0
 %{_datadir}/gir-1.0/Xmlb-2.0.gir
+%if %{with gtk_doc}
 %dir %{_datadir}/gtk-doc
 %dir %{_datadir}/gtk-doc/html
 %{_datadir}/gtk-doc/html/libxmlb
+%endif
 %{_includedir}/libxmlb-2
 %{_libdir}/libxmlb.so
 %{_libdir}/pkgconfig/xmlb.pc
@@ -148,26 +94,13 @@ rm -f $RPM_BUILD_ROOT/%{mingw64_mandir}/man1/xb-tool.1*
 %dir %{_datadir}/installed-tests/libxmlb
 %{_datadir}/installed-tests/libxmlb/libxmlb.test
 
-%if %{with mingw}
-%files -n mingw32-libxmlb
-%license LICENSE
-%{mingw32_bindir}/xb-tool.exe
-%{mingw32_bindir}/libxmlb-2.dll
-%{mingw32_libdir}/libxmlb.dll.a
-%{mingw32_includedir}/libxmlb-2
-%{mingw32_libdir}/pkgconfig/xmlb.pc
-
-%files -n mingw64-libxmlb
-%license LICENSE
-%{mingw64_bindir}/xb-tool.exe
-%{mingw64_bindir}/libxmlb-2.dll
-%{mingw64_libdir}/libxmlb.dll.a
-%{mingw64_includedir}/libxmlb-2
-%{mingw64_libdir}/pkgconfig/xmlb.pc
-%endif
-
 %changelog
 ## START: Generated by rpmautospec
+*  Fri Oct 18 2024 Jocelyn Berrendonner <jocelynb@microsoft.com> - 0.3.21-2
+- Integrating the latest version of the library into Azure Linux
+- Initial CBL-Mariner import from Fedora 42 (license: MIT).
+- License verified.
+
 * Tue Oct 15 2024 Richard Hughes <richard@hughsie.com> - 0.3.21-1
 - New upstream release
 
@@ -221,6 +154,11 @@ rm -f $RPM_BUILD_ROOT/%{mingw64_mandir}/man1/xb-tool.1*
 
 * Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.3.11-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Wed Mar 08 2023 Sumedh Sharma <sumsharma@microsoft.com> - 0.3.11-2
+- Initial CBL-Mariner import from Fedora 36 (license: MIT)
+- Disable gtk-doc
+- license verified
 
 * Wed Feb 22 2023 Richard Hughes <richard@hughsie.com> - 0.3.11-2
 - migrated to SPDX license
@@ -347,4 +285,3 @@ rm -f $RPM_BUILD_ROOT/%{mingw64_mandir}/man1/xb-tool.1*
 
 * Thu Oct 04 2018 Richard Hughes <richard@hughsie.com> - 0.1.0-1
 - Initial import (1636169)
-## END: Generated by rpmautospec

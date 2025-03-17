@@ -1,8 +1,10 @@
+Summary:        Image meta information extraction module for Perl
 Name:           perl-Image-Info
 Version:        1.44
-Release:        4%{?dist}
-Summary:        Image meta information extraction module for Perl
+Release:        1%{?dist}
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/Image-Info
 Source0:        https://cpan.metacpan.org/authors/id/S/SR/SREZIC/Image-Info-%{version}.tar.gz
 BuildArch:      noarch
@@ -43,7 +45,7 @@ This Perl extension allows you to extract meta information from
 various types of image files.
 
 %prep
-%setup -q -n Image-Info-%{version}
+%autosetup -n Image-Info-%{version}
 chmod -c 644 exifdump imgdump
 
 %build
@@ -65,51 +67,15 @@ make test
 %{_mandir}/man3/*.3pm*
 
 %changelog
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.44-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Feb 27 2025 Sumit Jena <v-sumitjena@microsoft.com> - 1.44-1
+- Update to version 1.44
+- License verified
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.44-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+* Tue Mar 07 2023 Muhammad Falak <mwani@microsoft.com> - 1.42-4
+- License verified
 
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.44-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Aug 20 2023 Xavier Bachelot <xavier@bachellot.org> - 1.44-1
-- Update to 1.44
-- Convert License to SPDX
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.43-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.43-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Oct 13 2022 Tom Callaway <spot@fedoraproject.org> - 1.43-1
-- update to 1.43
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.42-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Wed Jun 01 2022 Jitka Plesnikova <jplesnik@redhat.com> - 1.42-9
-- Perl 5.36 rebuild
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.42-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.42-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Sun May 23 2021 Jitka Plesnikova <jplesnik@redhat.com> - 1.42-6
-- Perl 5.34 rebuild
-
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.42-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.42-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 1.42-3
-- Perl 5.32 rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.42-3
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.42-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

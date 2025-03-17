@@ -1,10 +1,12 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 # these are all substituted by autoconf
 %define pot_file  libsmbios
 %define lang_dom  libsmbios-2.4
 
 Name: libsmbios
 Version: 2.4.3
-Release: 15%{?dist}
+Release: 1%{?dist}
 Summary: Libsmbios C/C++ shared libraries
 
 License: GPL-2.0-or-later or OSL-2.1
@@ -103,7 +105,6 @@ echo '../configure "$@"' > configure
 chmod +x ./configure
 
 %configure
-
 mkdir -p out/libsmbios_c
 %make_build CFLAGS+="%{optflags} -Werror" 2>&1 | tee build-%{_arch}.log
 
@@ -136,12 +137,11 @@ mv out/libsmbios_c    out/libsmbios_c-%{_arch}
 
 # https://fedoraproject.org/wiki/Changes/No_more_automagic_Python_bytecompilation_phase_3
 %py_byte_compile %{python3} %{buildroot}%{python3_sitearch}/
-
+ 
 rename %{pot_file}.mo %{lang_dom}.mo $(find %{buildroot}/%{_datadir} -name %{pot_file}.mo)
 %find_lang %{lang_dom}
 
 %ldconfig_scriptlets
-
 %files -f _build/%{lang_dom}.lang
 # Only need to include license once here
 %license COPYING-GPL COPYING-OSL
@@ -199,60 +199,12 @@ rename %{pot_file}.mo %{lang_dom}.mo $(find %{buildroot}/%{_datadir} -name %{pot
 %{_datadir}/smbios-utils
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.3-15
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Tue Nov 12 2024 Sumit Jena <v-sumitjena@microsoft.com> - 2.4.3-1
+- Update to version 2.4.3
+- License verified.
 
-* Fri Jun 07 2024 Python Maint <python-maint@redhat.com> - 2.4.3-14
-- Rebuilt for Python 3.13
-
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.3-13
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.3-12
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sat Oct 21 2023 Sérgio Basto <sergio@serjux.com> - 2.4.3-11
-- Use make macros https://src.fedoraproject.org/rpms/libsmbios/pull-request/5
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.3-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Tue Jun 13 2023 Python Maint <python-maint@redhat.com> - 2.4.3-9
-- Rebuilt for Python 3.12
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.3-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.3-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Mon Jun 13 2022 Python Maint <python-maint@redhat.com> - 2.4.3-6
-- Rebuilt for Python 3.11
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.3-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.3-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Fri Jun 04 2021 Python Maint <python-maint@redhat.com> - 2.4.3-3
-- Rebuilt for Python 3.10
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.3-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Sun Jan 17 2021 Peter Robinson <pbrobinson@fedoraproject.org> - 2.4.3-1
-- Update to 2.4.3
-
-* Sat Aug 01 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.2-10
-- Second attempt - Rebuilt for
-  https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.2-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Tue May 26 2020 Miro Hrončok <mhroncok@redhat.com> - 2.4.2-8
-- Rebuilt for Python 3.9
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 2.4.2-8
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.2-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

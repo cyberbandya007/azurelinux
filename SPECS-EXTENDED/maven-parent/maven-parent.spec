@@ -1,26 +1,20 @@
-%bcond_with bootstrap
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 
 Name:           maven-parent
 Version:        41
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Apache Maven parent POM
 License:        Apache-2.0
+Group:          Development/Libraries/Java
 URL:            https://maven.apache.org
-Source0:        https://repo1.maven.org/maven2/org/apache/maven/%{name}/%{version}/%{name}-%{version}-source-release.zip
+Source0:        https://repo1.maven.org/maven2/org/apache/maven/%{name}/%{version}/%{name}-%{version}-source-release.zip#/%{name}-%{version}.zip
+BuildRequires:  apache-parent
+BuildRequires:  javapackages-local-bootstrap
+BuildRequires:  unzip
+Requires:       apache-parent
 BuildArch:      noarch
-#ExclusiveArch:  %{java_arches} noarch
 
-%if %{with bootstrap}
-BuildRequires:  javapackages-bootstrap
-%else
-BuildRequires:  maven-local
-BuildRequires:  mvn(org.apache.maven.plugin-tools:maven-plugin-annotations)
-BuildRequires:  mvn(org.apache.maven.plugins:maven-enforcer-plugin)
-BuildRequires:  mvn(org.apache.maven.plugins:maven-plugin-plugin)
-BuildRequires:  mvn(org.apache.maven.plugins:maven-remote-resources-plugin)
-BuildRequires:  mvn(org.apache:apache:pom:)
-BuildRequires:  mvn(org.codehaus.plexus:plexus-component-metadata)
-%endif
 
 %description
 Apache Maven parent POM file used by other Maven projects.
@@ -30,21 +24,23 @@ Apache Maven parent POM file used by other Maven projects.
 %pom_remove_plugin :maven-enforcer-plugin
 %pom_remove_plugin :maven-checkstyle-plugin
 %pom_remove_plugin :apache-rat-plugin
-%pom_remove_plugin :spotless-maven-plugin
-%pom_remove_plugin -r :maven-scm-publish-plugin
-
-%pom_xpath_remove "pom:execution[pom:id='generate-helpmojo']" maven-plugins
 
 %build
-%mvn_build
 
 %install
-%mvn_install
+install -dm 0755 %{buildroot}%{_mavenpomdir}/%{name}
+install -pm 0644 pom.xml %{buildroot}%{_mavenpomdir}/%{name}/%{name}.pom
+%add_maven_depmap %{name}/%{name}.pom
 
 %files -f .mfiles
 %doc LICENSE NOTICE
 
 %changelog
+* Fri Feb 14 2025 Archana Shettigar <v-shettigara@microsoft.com> - 41-7
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+- Use javapackages-bootstrap to avoid build cycle.
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 41-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

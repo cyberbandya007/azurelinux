@@ -1,10 +1,12 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           perl-Return-MultiLevel
 Version:        0.08
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        Return across multiple call levels
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/Return-MultiLevel
-Source0:        https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/Return-MultiLevel-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/Return-MultiLevel-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 # Build
 BuildRequires:  coreutils
@@ -23,6 +25,7 @@ BuildRequires:  perl(Config)
 BuildRequires:  perl(Test::Fatal)
 BuildRequires:  perl(Test::More)
 # Dependencies
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 # (none)
 # Optional Functionality
 BuildRequires:  perl(Scope::Upper) >= 0.29
@@ -55,6 +58,10 @@ make test
 %{_mandir}/man3/Return::MultiLevel.3*
 
 %changelog
+* Tue Dec 17 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 0.08-10
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.08-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

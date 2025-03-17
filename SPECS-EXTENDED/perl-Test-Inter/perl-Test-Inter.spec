@@ -1,10 +1,12 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           perl-Test-Inter
 Version:        1.11
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Framework for more readable interactive test scripts
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/Test-Inter
-Source0:        https://cpan.metacpan.org/authors/id/S/SB/SBECK/Test-Inter-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/S/SB/SBECK/Test-Inter-%{version}.tar.gz#/perl-Test-Inter-%{version}.tar.gz
 BuildArch:      noarch
 BuildRequires:  coreutils
 BuildRequires:  make
@@ -26,6 +28,7 @@ BuildRequires:  perl(Storable) >= 1.01
 BuildRequires:  perl(Test::More)
 # Test::Pod 1.00 not used
 # Test::Pod::Coverage 1.00 not used
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 Requires:       perl(lib)
 
 %description
@@ -35,7 +38,7 @@ replacement.
 
 %package tests
 Summary:        Tests for %{name}
-Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 Requires:       perl-Test-Harness
 
 %description tests
@@ -85,6 +88,10 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
+* Thu Dec 19 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 1.11-3
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.11-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

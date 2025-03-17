@@ -1,5 +1,3 @@
-%bcond_without compat
-
 %global compat_soname libminizip.so.1
 
 # Compatible with the following minizip-compat version.
@@ -13,9 +11,10 @@
 
 Name:           minizip-ng
 Version:        4.0.7
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Minizip-ng contrib in zlib-ng with the latest bug fixes and advanced features
-
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 License:        Zlib
 URL:            https://github.com/nmoinvaz/%{name}
 Source0:        https://github.com/nmoinvaz/%{name}/archive/%{version}/%{name}-%{version}.tar.gz
@@ -27,7 +26,6 @@ BuildRequires: zlib-devel
 BuildRequires: bzip2-devel
 BuildRequires: libzstd-devel
 BuildRequires: xz-devel
-BuildRequires: openssl-devel-engine
 
 %description
 Minizip-ng zlib-ng contribution that includes:
@@ -179,6 +177,10 @@ _EOF_
 
 
 %changelog
+* Fri Feb 21 2025 Archana Shettigar <v-shettigara@microsoft.com> - 4.0.7-2
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Tue Jul 30 2024 Lukas Javorsky <ljavorsk@redhat.com> - 4.0.7-1
 - Rebase to version 4.0.7
 

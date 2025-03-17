@@ -4,15 +4,23 @@
 
 Name:           python-aiodns
 Version:        3.2.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Simple DNS resolver for asyncio
 
 License:        MIT
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://github.com/saghul/aiodns
-Source0:        %{url}/archive/v%{version}/aiodns-%{version}.tar.gz
+Source0:        %{url}/archive/v%{version}/aiodns-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
 BuildArch:      noarch
 BuildRequires:  python3-devel
+BuildRequires: 	python3-pip
+BuildRequires: python3-wheel
+#for tests
+BuildRequires: 	python3-pycares
+BuildRequires:  python3-cffi
+
 %if %{with network_tests}
 BuildRequires:  %{py3_dist pytest}
 # Optional uvloop integration tests:
@@ -25,29 +33,23 @@ pycares.}
 
 %description %{_description}
 
-
 %package     -n python3-aiodns
 Summary:        %{summary}
 
 %description -n python3-aiodns %{_description}
 
-
 %prep
 %autosetup -n aiodns-%{version}
-
 
 %generate_buildrequires
 %pyproject_buildrequires
 
-
 %build
 %pyproject_wheel
 
-
 %install
 %pyproject_install
-%pyproject_save_files -l aiodns
-
+%pyproject_save_files aiodns
 
 %check
 %pyproject_check_import
@@ -55,12 +57,16 @@ Summary:        %{summary}
 %pytest tests.py
 %endif
 
-
 %files -n python3-aiodns -f %{pyproject_files}
+%license LICENSE
 %doc README.rst ChangeLog
 
-
 %changelog
+* Wed Feb 12 2025 Akhila Guruju <v-guakhila@microsoft.com> - 3.2.0-2
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+- Added `BuildRequires: python3-pip python3-wheel python3-cffi` to fix build.
+
 * Sat Aug 17 2024 Benjamin A. Beasley <code@musicinmybrain.net> - 3.2.0-1
 - Update to 3.2.0 (close RHBZ#2242855)
 
@@ -157,3 +163,4 @@ Summary:        %{summary}
 
 * Wed Apr  4 2018 Matthieu Saulnier <fantom@fedoraproject.org> - 1.1.1-1
 - Initial package
+

@@ -1,10 +1,12 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           perl-Parallel-Iterator
 Version:        1.002
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Simple parallel execution
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/Parallel-Iterator
-Source0:        https://cpan.metacpan.org/authors/id/A/AR/ARISTOTLE/Parallel-Iterator-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/A/AR/ARISTOTLE/Parallel-Iterator-%{version}.tar.gz#/perl-Parallel-Iterator-%{version}.tar.gz
 BuildArch:      noarch
 BuildRequires:  coreutils
 BuildRequires:  make
@@ -26,6 +28,7 @@ BuildRequires:  perl(Storable)
 # Tests:
 BuildRequires:  perl(lib)
 BuildRequires:  perl(Test::More)
+Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
 %{?perl_default_filter}
 
@@ -95,6 +98,10 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
+* Mon Dec 16 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 1.002-7
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.002-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

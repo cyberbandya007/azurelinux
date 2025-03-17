@@ -1,8 +1,10 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %undefine __cmake_in_source_build
 
 Name:          uchardet
 Version:       0.0.8
-Release:       6%{?dist}
+Release:       7%{?dist}
 Summary:       An encoding detector library ported from Mozilla
 
 License:       MPL-1.1 OR GPL-2.0-or-later OR LGPL-2.0-or-later
@@ -66,6 +68,10 @@ popd
 %{_libdir}/pkgconfig/%{name}.pc
 
 %changelog
+* Mon Jan 13 2025 Archana Shettigar <v-shettigara@microsoft.com> - 0.0.8-7
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Sat Jul 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.0.8-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
@@ -174,3 +180,4 @@ popd
 
 * Mon Sep 21 2015 Ilya Gradina <ilya.gradina@gmail.com> - 0.0.0-1
 - Initial package
+

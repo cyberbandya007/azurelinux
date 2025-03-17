@@ -9,11 +9,13 @@
 
 Name:		perl-B-Hooks-EndOfScope
 Version:	0.28
-Release:	2%{?dist}
+Release:	3%{?dist}
 License:	GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Summary:	Execute code after scope compilation finishes
 URL:		https://metacpan.org/release/B-Hooks-EndOfScope
-Source0:	https://cpan.metacpan.org/modules/by-module/B/B-Hooks-EndOfScope-%{version}.tar.gz
+Source0:	https://cpan.metacpan.org/modules/by-module/B/B-Hooks-EndOfScope-%{version}.tar.gz#/perl-B-Hooks-EndOfScope-%{version}.tar.gz
 Patch0:		B-Hooks-EndOfScope-0.13-shellbangs.patch
 BuildArch:	noarch
 # Build
@@ -88,6 +90,8 @@ BuildRequires:	perl(Test::Pod::Coverage) >= 1.08
 BuildRequires:	perl(Test::Portability::Files)
 BuildRequires:	perl(Test::Spelling), hunspell-en
 %endif
+# Runtime
+Requires:	perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 # Dependencies
 # (none)
 
@@ -131,6 +135,10 @@ make test TEST_FILES="$(echo $(find xt/ -name '*.t'))"
 %{_mandir}/man3/B::Hooks::EndOfScope::XS.3*
 
 %changelog
+* Fri Dec 20 2024 Jyoti kanase <v-jykanase@microsoft.com> -  0.28-3
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.28-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

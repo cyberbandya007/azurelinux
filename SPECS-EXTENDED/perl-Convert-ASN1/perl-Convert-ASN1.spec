@@ -4,10 +4,13 @@
 Summary:        ASN.1 encode/decode library
 Name:           perl-Convert-ASN1
 Version:        0.34
-Release:        4%{?dist}
+Release:        5%{?dist}
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/Convert-ASN1
-Source0:        https://cpan.metacpan.org/authors/id/T/TI/TIMLEGGE/Convert-ASN1-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/T/TI/TIMLEGGE/Convert-ASN1-%{version}.tar.gz#/perl-Convert-ASN1-%{version}.tar.gz
+
 # Allow running tests from a read-only location,
 # <https://github.com/gbarr/perl-Convert-ASN1/pull/40>
 Patch0:         Convert-ASN1-0.27-Use-temporary-output-files-for-tests.patch
@@ -41,6 +44,7 @@ BuildRequires:  perl(Test::More) >= 0.90
 # Optional tests:
 BuildRequires:  perl(Data::Dumper)
 %endif
+Requires:	perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 Suggests:       perl(bytes)
 Requires:       perl(Carp)
 Requires:       perl(Encode)
@@ -56,7 +60,7 @@ Convert::ASN1 encodes and decodes ASN.1 data structures using BER/DER rules.
 
 %package tests
 Summary:        Tests for %{name}
-Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 Requires:       perl-Test-Harness
 Requires:       perl(Math::BigInt) >= 1.997
 %if %{with perl_Convert_ASN1_enables_optional_test}
@@ -107,6 +111,10 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
+* Thu Dec 19 2024 Jyoti kanase <v-jykanase@microsoft.com> -  0.34-5
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.34-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

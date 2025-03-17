@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 # Run optional tests
 %if ! (0%{?rhel})
 %bcond_without perl_Test_Harness_enables_optional_test
@@ -6,13 +8,12 @@
 %endif
 
 Name:           perl-Test-Harness
-Epoch:          1
 Version:        3.50
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Run Perl standard test scripts with statistics
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/Test-Harness
-Source0:        https://cpan.metacpan.org/authors/id/L/LE/LEONT/Test-Harness-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/L/LE/LEONT/Test-Harness-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 # Remove hard-coded shell bangs
 Patch0:         Test-Harness-3.38-Remove-shell-bangs.patch
 BuildArch:      noarch
@@ -41,6 +42,7 @@ BuildRequires:  perl(IO::Handle)
 BuildRequires:  perl(IO::Select)
 BuildRequires:  perl(POSIX)
 BuildRequires:  perl(Text::ParseWords)
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 # Optional run-time:
 BuildRequires:  perl(Encode)
 # Keep Pod::Usage 1.12 really optional
@@ -156,6 +158,12 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
+
+%changelog
+* Thu Dec 19 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 3.50-2
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Thu Aug 15 2024 Jitka Plesnikova <jplesnik@redhat.com> - 1:3.50-1
 - 3.50 bump (rhbz#2304673)
 

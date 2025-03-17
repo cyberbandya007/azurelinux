@@ -15,29 +15,31 @@
 %global gitver %{?numcomm:.%{numcomm}}%{?alphatag:.%{alphatag}}%{?dirty:.%{dirty}}
 %global gittarver %{?numcomm:.%{numcomm}}%{?alphatag:-%{alphatag}}%{?dirty:-%{dirty}}
 
-Name: corosync
-Summary: The Corosync Cluster Engine and Application Programming Interfaces
-Version: 3.1.9
-Release: 1%{?gitver}%{?dist}
-License: BSD-3-Clause
-URL: http://corosync.github.io/corosync/
-Source0: http://build.clusterlabs.org/corosync/releases/%{name}-%{version}%{?gittarver}.tar.gz
+Name: 		corosync
+Summary: 	The Corosync Cluster Engine and Application Programming Interfaces
+Version: 	3.1.9
+Release: 	2%{?dist}
+License: 	BSD-3-Clause
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+URL: 		https://corosync.github.io/corosync/
+Source0: 	https://build.clusterlabs.org/corosync/releases/%{name}-%{version}%{?gittarver}.tar.gz#/%{name}-%{version}.tar.gz
 
 # Runtime bits
 # The automatic dependency overridden in favor of explicit version lock
 Requires: corosynclib%{?_isa} = %{version}-%{release}
 
 # Support crypto reload
-Requires: libknet1 >= 1.18
+Requires: 	libknet1 >= 1.18
 # NSS crypto plugin should be always installed
-Requires: libknet1-crypto-nss-plugin >= 1.18
+Requires: 	libknet1-crypto-nss-plugin >= 1.18
 
 # Build bits
-BuildRequires: gcc
-BuildRequires: groff
-BuildRequires: libqb-devel
-BuildRequires: libknet1-devel >= 1.18
-BuildRequires: zlib-devel
+BuildRequires: 	gcc
+BuildRequires: 	groff
+BuildRequires: 	libqb-devel
+BuildRequires: 	libknet1-devel >= 1.18
+BuildRequires: 	zlib-devel
 %if %{with runautogen}
 BuildRequires: autoconf automake libtool
 %endif
@@ -289,6 +291,10 @@ network splits)
 %endif
 
 %changelog
+* Wed Feb 05 2025 Akhila Guruju <v-guakhila@microsoft.com> - 3.1.9-2
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Fri Nov 15 2024 Jan Friesse <jfriesse@redhat.com> - 3.1.9-1
 - New upstream release
 

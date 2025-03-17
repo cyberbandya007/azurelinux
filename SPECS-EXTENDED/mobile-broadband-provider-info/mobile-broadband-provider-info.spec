@@ -1,7 +1,9 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Summary: Mobile broadband provider database
 Name: mobile-broadband-provider-info
 Version: 20240407
-Release: 2%{?dist}
+Release: 3%{?dist}
 URL: https://wiki.gnome.org/Projects/NetworkManager/MobileBroadband/ServiceProviders
 License: CC-PDDC
 Source: https://download.gnome.org/sources/%{name}/%{version}/%{name}-%{version}.tar.xz
@@ -55,6 +57,10 @@ developing developing applications that use %{name}.
 
 
 %changelog
+* Tue Dec 31 2024 Aninda Pradhan <v-anipradhan@microsoft.com> - 20240407-3
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified.
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 20240407-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
@@ -233,4 +239,3 @@ developing developing applications that use %{name}.
 
 * Tue Jun 2 2009 Dan Williams <dcbw@redhat.com> 0.20090602-1
 - Initial version
-

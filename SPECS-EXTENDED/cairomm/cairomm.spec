@@ -1,12 +1,3 @@
-## START: Set by rpmautospec
-## (rpmautospec version 0.7.3)
-## RPMAUTOSPEC: autorelease, autochangelog
-%define autorelease(e:s:pb:n) %{?-p:0.}%{lua:
-    release_number = 7;
-    base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
-    print(release_number + base_release_number - 1);
-}%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{!?-n:%{?dist}}
-## END: Set by rpmautospec
 
 %global so_version 1
 %global apiver 1.0
@@ -14,7 +5,7 @@
 # “Let mm-common-get copy some files to untracked/”, i.e., replace scripts from
 # the tarball with those from mm-common. This is (potentially) required if
 # building an autotools-generated tarball with meson, or vice versa.
-%bcond maintainer_mode 1
+%bcond maintainer_mode 0
 
 # Doxygen HTML help is not suitable for packaging due to a minified JavaScript
 # bundle inserted by Doxygen itself. See discussion at
@@ -25,42 +16,16 @@
 # We still generate the HTML documentation, but strip out all the JavaScript
 # that causes policy issues. This degrades it in the browser, but is sufficient
 # to keep the Devhelp documentation working.
-%bcond doc_pdf 1
+#%bcond doc_pdf 1
 
 Name:           cairomm
 Summary:        C++ API for the cairo graphics library
 Version:        1.14.5
-Release:        %autorelease
-
+Release:        1%{?dist}
+vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://www.cairographics.org
 License:        LGPL-2.0-or-later
-# The following files under other allowable licenses belong to the build system
-# and do not contribute to the licenses of the binary RPMs.
-#
-# FSFAP:
-#   build/ax_boost_base.m4
-#   build/ax_boost_test_exec_monitor.m4
-#   build/ax_boost_unit_test_framework.m4
-# GPL-2.0-or-later:
-#   MSVC_NMake/gendef/gendef.cc
-#   untracked/docs/tagfile-to-devhelp2.xsl
-# LGPL-2.1-or-later:
-#   Makefile.am
-#   cairomm/Makefile.am
-#   configure.ac
-#   docs/Makefile.am
-# MIT:
-#   untracked/docs/reference/html/dynsections.js
-#   untracked/docs/reference/html/jquery.js
-#   untracked/docs/reference/html/menu.js
-#   untracked/docs/reference/html/menudata.js
-SourceLicense:  %{shrink:
-                %{license} AND
-                FSFAP AND
-                GPL-2.0-or-later AND
-                LGPL-2.1-or-later AND
-                MIT
-                }
 
 %global src_base https://www.cairographics.org/releases
 Source0:        %{src_base}/cairomm-%{version}.tar.xz
@@ -70,14 +35,17 @@ Source0:        %{src_base}/cairomm-%{version}.tar.xz
 # https://gitlab.freedesktop.org/freedesktop/freedesktop/-/issues/290.
 Source1:        %{src_base}/cairomm-%{version}.tar.xz.asc
 Source2:        https://gitlab.freedesktop.org/freedesktop/freedesktop/uploads/0ac64e9582659f70a719d59fb02cd037/gpg_key.pub
-
+%global libsigc_version 2.5.1
+%global cairo_version 1.10.0
 BuildRequires:  gnupg2
 
 BuildRequires:  gcc-c++
 BuildRequires:  meson
 
 BuildRequires:  pkgconfig(cairo)
-BuildRequires:  pkgconfig(sigc++-2.0)
+BuildRequires:  libsigc++20-devel >= %{libsigc_version}
+Requires:       cairo%{?_isa} >= %{cairo_version}
+Requires:       libsigc++20%{?_isa} >= %{libsigc_version}
 BuildRequires:  pkgconfig(fontconfig)
 
 # Everything mentioned in data/cairomm*.pc.in, except the Quartz and Win32
@@ -101,10 +69,7 @@ BuildRequires:  graphviz
 # xsltproc
 BuildRequires:  libxslt
 BuildRequires:  pkgconfig(mm-common-libstdc++)
-%if %{with doc_pdf}
-BuildRequires:  doxygen-latex
-BuildRequires:  make
-%endif
+
 
 # For tests:
 BuildRequires:  boost-devel
@@ -136,23 +101,23 @@ applications that use cairomm.
 The API/ABI version series is %{apiver}.
 
 
-%package        doc
-Summary:        Documentation for cairomm
+#%package        doc
+#Summary:        Documentation for cairomm
 
-BuildArch:      noarch
+#BuildArch:      noarch
 
-Provides:       cairomm%{apiver}-doc = %{version}-%{release}
+#Provides:       cairomm%{apiver}-doc = %{version}-%{release}
 
-%description    doc
-Documentation for cairomm can be viewed through the devhelp documentation
-browser.
+#%description    doc
+#Documentation for cairomm can be viewed through the devhelp documentation
+#browser.
 
-The API/ABI version series is %{apiver}.
+#The API/ABI version series is %{apiver}.
 
 
 %prep
 %{gpgverify} \
-    --keyring='%{SOURCE2}' --signature='%{SOURCE1}' --data='%{SOURCE0}'
+    --keyring='%{SOURCE2}' --signature='%{SOURCE1}'  --data='%{SOURCE0}'
 
 %autosetup
 # Fix stray executable bit:
@@ -169,57 +134,40 @@ chmod -v a-x NEWS
 rm -rf untracked/docs/reference/html
 rm untracked/docs/reference/cairomm-%{apiver}.tag \
    untracked/docs/reference/cairomm-%{apiver}.devhelp2
-%if %{with doc_pdf}
-# We enable the Doxygen PDF documentation as a substitute. We must
-# enable GENERATE_LATEX and LATEX_BATCHMODE; the rest are precautionary and
-# should already be set as we like them.
-sed -r -i \
-    -e "s/^([[:blank:]]*(GENERATE_LATEX|LATEX_BATCHMODE|USE_PDFLATEX|\
-PDF_HYPERLINKS)[[:blank:]]*=[[:blank:]]*)NO[[:blank:]]*/\1YES/" \
-    -e "s/^([[:blank:]]*(LATEX_TIMESTAMP)\
-[[:blank:]]*=[[:blank:]]*)YES[[:blank:]]*/\1NO/" \
-    docs/reference/Doxyfile.in
-%endif
 
 
-%conf
+
+%build
 %meson \
   -Dmaintainer-mode=%{?with_maintainer_mode:true}%{?!with_maintainer_mode:false} \
-  -Dbuild-documentation=true \
+  -Dbuild-documentation=false \
   -Dbuild-examples=false \
   -Dbuild-tests=true \
   -Dboost-shared=true \
   -Dwarnings=max
 
 
-%build
 %meson_build
 
-%if %{with doc_pdf}
-%make_build -C '%{_vpath_builddir}/docs/reference/latex'
-%endif
+
+
 
 
 %install
 %meson_install
-
-install -t %{buildroot}%{_docdir}/cairomm-%{apiver} -m 0644 -p \
-    ChangeLog NEWS README.md
-cp -rp examples %{buildroot}%{_docdir}/cairomm-%{apiver}/
+#install -t %{buildroot}%{_docdir}/cairomm-%{apiver} -m 0644 -p \
+#    ChangeLog NEWS README.md
+#cp -rp examples %{buildroot}%{_docdir}/cairomm-%{apiver}/
 
 # Strip out bundled and/or pre-minified JavaScript; this degrades the browser
 # experience, but the HTML is still usable for devhelp.
-find '%{buildroot}%{_docdir}/cairomm-%{apiver}/reference/html' \
-    -type f \( -name '*.js' -o -name '*.js.*' \) -print -delete
-%if %{with doc_pdf}
-install '%{_vpath_builddir}/docs/reference/latex/refman.pdf' -p -m 0644 \
-    '%{buildroot}%{_docdir}/cairomm-%{apiver}/reference/cairomm-%{apiver}.pdf'
-%endif
+#find '%{buildroot}%{_docdir}/cairomm-%{apiver}/reference/html' \
+#  -type f \( -name '*.js' -o -name '*.js.*' \) -print -delete
+
 
 
 %check
 %meson_test
-
 
 %files
 %license COPYING
@@ -234,175 +182,27 @@ install '%{_vpath_builddir}/docs/reference/latex/refman.pdf' -p -m 0644 \
 %{_libdir}/cairomm-%{apiver}/
 
 
-%files doc
-%license COPYING
+#%files doc
+#%license COPYING
 # Note: JavaScript has been removed from HTML reference manual, degrading the
 # browser experience. It is still needed for Devhelp support.
-%doc %{_docdir}/cairomm-%{apiver}/
-%doc %{_datadir}/devhelp/
+#%doc %{_docdir}/cairomm-%{apiver}/
+#%doc %{_datadir}/devhelp/
 
 
 %changelog
-## START: Generated by rpmautospec
-* Wed Dec 11 2024 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.5-7
-- Add a SourceLicense field
+* Thu Nov 2024 Akarsh Chaudhary <v-akarshc@microsoft.com>- 1.14.5-1
+- upgrade to version 1.14.5
 
-* Thu Oct 31 2024 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.5-6
-- Invoke %%meson in %%conf rather than in %%build
+* Wed Oct 26 2022 Muhammad Falak <mwani@microsoft.com> - 1.12.0-15
+- License verified
 
-* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.14.5-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Wed Oct 06 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.12.0-14
+- Bringing back the dependency on 'cairo'.
 
-* Tue Jan 23 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.14.5-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Fri Jan 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.14.5-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Sep 28 2023 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.5-1
-- Update to 1.14.5 (close RHBZ#2240942)
-
-* Wed Jul 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.14.4-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Sat Jun 17 2023 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.4-9
-- Use new (rpm 4.17.1+) bcond style
-
-* Thu Jun 15 2023 Björn Persson <Bjorn@Rombobjörn.se> - 1.14.4-8
-- Removed superfluous processing of the OpenPGP key.
-
-* Mon Jan 23 2023 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.4-7
-- Revert "Work around missing dependency on texlive-wasy"
-
-* Thu Jan 19 2023 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.4-6
-- Work around missing dependency on texlive-wasy
-
-* Wed Jan 18 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.14.4-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Mon Dec 19 2022 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.4-4
-- Trivially simplify a files list
-
-* Mon Dec 19 2022 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.4-3
-- Indicate dirs. in files list with trailing slashes
-
-* Thu Sep 22 2022 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.4-2
-- Explicit perl BR no longer needed with mm-common >= 1.0.4
-
-* Wed Sep 21 2022 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.4-1
-- Update to 1.14.4 (close RHBZ#2128740)
-
-* Wed Aug 03 2022 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-24
-- Update License field to SPDX
-
-* Wed Jul 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.14.2-23
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Wed Jan 19 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.14.2-22
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Sat Nov 27 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-21
-- Tweak a spec file comment
-
-* Wed Oct 20 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-20
-- Bump release and rebuild (close RHBZ#2015257)
-
-* Fri Oct 01 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-19
-- Re-enable Doxygen HTML, stripping JS, for devhelp
-
-* Mon Sep 27 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-18
-- Rename PDF documentation file
-
-* Mon Sep 27 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-17
-- No need to remove .la files; meson doesn’t create them
-
-* Mon Sep 27 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-16
-- Package PDF docs in lieu of HTML
-
-* Sun Sep 26 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-15
-- Mention search/search.js
-
-* Sat Sep 25 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-14
-- In -doc, unbundle js-jquery and fix License
-
-* Sat Sep 25 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-13
-- Reduce macro indirection in spec file
-
-* Tue Aug 10 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-12
-- Rebuild for Boost 1.76
-
-* Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.14.2-11
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.14.2-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Tue Jul 20 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-9
-- Fix release number with rpmautospec
-
-* Sat Feb 20 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-8
-- Verify source with new strong signatures from upstream
-
-* Thu Feb 18 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-7
-- Working (but weak, dependent on SHA1) source signature verification
-- Added API/ABI version to descriptions
-
-* Wed Feb 17 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-6
-- Fix typo %%{_?isa} for %%{?_isa} in virtual Provides
-- Tidy up BR’s, including dropping make
-
-* Mon Feb 15 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-5
-- Update comments based on the new plan for the version 1.16 API/ABI
-
-* Thu Feb 11 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-4
-- Prepare for future upgrade to API/ABI version 1.16 by introducing virtual
-  Provides for a name for API/ABI version 1.0: cairomm1.0. This will be the name
-  of a future package that continues to provide API/ABI version 1.0 after the
-  upgrade.
-
-* Thu Feb 11 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-3
-- Switch from autotools to meson; enable the tests, since the meson build system
-  permits us to use a shared boost library
-- Install examples in the -doc subpackage
-
-* Thu Feb 11 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-2
-- Restore removal of pre-built documentation with its minified JS bundle
-
-* Thu Feb 11 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.14.2-1
-- Update to 1.14.2; this adds new APIs, but is ABI-backwards-compatible
-
-* Thu Feb 11 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.12.2-1
-- Update to 1.12.2
-
-* Thu Feb 11 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.12.0-16
-- Switch URLs from HTTP to HTTPS
-- Rough out code to verify source tarball signatures, and document why we
-  cannot yet do so
-
-* Thu Feb 11 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 1.12.0-15
-- Spec file style tweaks
-- Macro-ize documentation path in description
-- Simplified summaries and descriptions
-- Use make macros (https://src.fedoraproject.org/rpms/cairomm/pull-request/1)
-- Drop obsolete %%ldconfig_scriptlets macro
-- Much stricter file globs, including so-version
-- Stop requiring the base package from the -doc package
-- Migrate top-level text file documentation to the -doc subpackage
-- BR mm-common; at minimum, this lets us find tags for libstdc++ documentation;
-  require libstdc++-docs from the -doc subpackage, since we are now able to
-  find the tag file in configure
-- Remove bundled jQuery/jQueryUI from prebuilt documentation, and rebuild the
-  documentation ourselves
-- Add a note explaining why we cannot run the tests
-- Drop explicit/manual lib Requires on cairo/libsigc++20
-- Drop version requirements in BRs
-- Rebuild autotools-generated files
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.12.0-14
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.12.0-13
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+* Thu Jun 17 2021 Thomas Crain <thcrain@microsoft.com> - 1.12.0-13
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+- Use UI-cairo instead of cairo to avoid runtime conflicts
 
 * Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.12.0-12
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
@@ -570,7 +370,7 @@ install '%{_vpath_builddir}/docs/reference/latex/refman.pdf' -p -m 0644 \
 
 * Sun Mar  5 2006 Rick L Vinyard Jr <rvinyard@cs.nmsu.edu> - 0.5.0-10
 - Removed duplicate Group tag in devel
-- Disabled docs till they're fixed upstream
+- Disabled docs till they're fixed upstream 
 
 * Sun Mar  5 2006 Rick L Vinyard Jr <rvinyard@cs.nmsu.edu> - 0.5.0-9
 - Removed requires since BuildRequires is present
@@ -601,5 +401,3 @@ install '%{_vpath_builddir}/docs/reference/latex/refman.pdf' -p -m 0644 \
 
 * Fri Jan 27 2006 Rick L Vinyard Jr <rvinyard@cs.nmsu.edu> - 0.4.0-1
 - Initial creation from papyrus.spec.in
-
-## END: Generated by rpmautospec

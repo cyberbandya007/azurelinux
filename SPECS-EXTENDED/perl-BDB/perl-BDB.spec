@@ -3,11 +3,14 @@
 Name:           perl-BDB
 # Extend to 2 digits to get higher RPM package version than 1.88
 Version:        %{cpan_version}
-Release:        25%{?dist}
+Release:        26%{?dist}
 Summary:        Asynchronous Berkeley DB access
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/BDB
-Source0:        https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/BDB-%{cpan_version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/BDB-%{cpan_version}.tar.gz#/%{name}-%{cpan_version}.tar.gz
+
 BuildRequires:  findutils
 BuildRequires:  gcc
 BuildRequires:  libdb-devel
@@ -24,14 +27,14 @@ BuildRequires:  perl(common::sense)
 BuildRequires:  perl(Exporter)
 BuildRequires:  perl(XSLoader)
 Requires:       perl(XSLoader)
-
+Requires:	perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 %{?perl_default_filter}
 
 %description
 Asynchronous Berkeley DB access.
 
 %prep
-%setup -qn BDB-%{cpan_version}
+%autosetup -n BDB-%{cpan_version}
 
 %build
 perl Makefile.PL INSTALLDIRS=vendor OPTIMIZE="%{optflags}" NO_PACKLIST=1 NO_PERLLOCAL=1
@@ -53,6 +56,10 @@ make test
 %{_mandir}/man3/*.3*
 
 %changelog
+* Mon Jan 06 2025 Jyoti kanase <v-jykanase@microsoft.com> -  1.92-26
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.92-25
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 # Run optional test
 %if ! (0%{?rhel})
 %bcond_without perl_Path_Tiny_enables_optional_test
@@ -7,11 +9,11 @@
 
 Name:		perl-Path-Tiny
 Version:	0.146
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	File path utility
 License:	Apache-2.0
 URL:		https://metacpan.org/release/Path-Tiny
-Source0:	https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/Path-Tiny-%{version}.tar.gz
+Source0:	https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/Path-Tiny-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 BuildArch:	noarch
 # Module Build
 BuildRequires:	coreutils
@@ -57,9 +59,9 @@ BuildRequires:	perl(Test::More) >= 0.96
 BuildRequires:	perl(CPAN::Meta) >= 2.120900
 BuildRequires:	perl(CPAN::Meta::Prereqs)
 BuildRequires:	perl(Test::FailWarnings)
-BuildRequires:	perl(Test::MockRandom)
 %endif
 # Dependencies
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 Requires:	perl(Cwd)
 Requires:	perl(Digest) >= 1.03
 Requires:	perl(Digest::SHA) >= 5.45
@@ -122,6 +124,10 @@ make test
 %{_mandir}/man3/Path::Tiny.3*
 
 %changelog
+* Fri Dec 13 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 0.146-3
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.146-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

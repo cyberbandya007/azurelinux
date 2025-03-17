@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 # first two digits of version
 %global release_version %%(echo %{version} | awk -F. '{print $1"."$2}')
 
@@ -5,37 +7,29 @@
 %global has_valgrind 1
 %endif
 
-%bcond_without gnutls
-
 Name:           libsecret
 Version:        0.21.4
-Release:        3%{?dist}
+Release:        1%{?dist}
 Summary:        Library for storing and retrieving passwords and other secrets
 
-# libsecret/mock/aes.py is Apache-2.0
-# libsecret/mock/hkdf.py is GPL-2.0-or-later OR TGPPL-1.0
-# part of libsecret/mock/dh.py is LicenseRef-Fedora-Public-Domain
-License:        LGPL-2.1-or-later AND Apache-2.0 AND (GPL-2.0-or-later OR TGPPL-1.0) AND LicenseRef-Fedora-Public-Domain
+License:        LGPLv2+
 URL:            https://wiki.gnome.org/Projects/Libsecret
 Source0:        https://download.gnome.org/sources/libsecret/%{release_version}/libsecret-%{version}.tar.xz
 
-BuildRequires:  docbook-style-xsl
-BuildRequires:  gettext
-BuildRequires:  gi-docgen
 BuildRequires:  meson
+BuildRequires:  gettext
+BuildRequires:  glib2-devel
+BuildRequires:  gobject-introspection-devel
+BuildRequires:  libgcrypt-devel >= 1.2.2
 BuildRequires:  vala
-BuildRequires:  pkgconfig(glib-2.0)
-BuildRequires:  pkgconfig(gobject-introspection-1.0)
-%if %{with gnutls}
-BuildRequires:  pkgconfig(gnutls) >= 3.8.2
-%else
-BuildRequires:  pkgconfig(libgcrypt) >= 1.2.2
-%endif
-BuildRequires:  python3-devel
-BuildRequires:  /usr/bin/xsltproc
+BuildRequires:  gtk-doc
+BuildRequires:  libxslt-devel
+BuildRequires:  docbook-style-xsl
 %if 0%{?has_valgrind}
 BuildRequires:  valgrind-devel
 %endif
+BuildRequires:  python3-devel
+BuildRequires:  /usr/bin/xsltproc
 
 Provides:       bundled(egglib)
 
@@ -60,7 +54,7 @@ Summary:        Python mock-service files from %{name}
 # but this ensure that if it is installed, the version matches (for good measure):
 Requires:       (%{name} = %{version}-%{release} if %{name})
 BuildArch:      noarch
-
+ 
 %description    mock-service
 The %{name}-mock-service package contains testing Python files from %{name},
 for testing of other similar tools, such as the Python SecretStorage package.
@@ -77,6 +71,7 @@ rm -rf build/valgrind/
 
 %build
 %meson \
+-Dgtk_doc=false \
 %if %{with gnutls}
 -Dcrypto=gnutls \
 %else
@@ -86,10 +81,8 @@ rm -rf build/valgrind/
 
 %meson_build
 
-
 %install
 %meson_install
-
 %find_lang libsecret
 
 # For the mock-service subpackage
@@ -120,7 +113,6 @@ cp -a libsecret/mock-service*.py %{buildroot}%{_datadir}/libsecret/
 %dir %{_datadir}/vala/vapi
 %{_datadir}/vala/vapi/libsecret-1.deps
 %{_datadir}/vala/vapi/libsecret-1.vapi
-%doc %{_docdir}/libsecret-1/
 
 %files mock-service
 %license COPYING
@@ -130,62 +122,15 @@ cp -a libsecret/mock-service*.py %{buildroot}%{_datadir}/libsecret/
 
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.21.4-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Tue Nov 12 2024 Sumit Jena <v-sumitjena@microsoft.com> - 0.21.4-1
+- Update to version 0.21.4
+- License verified.
 
-* Fri Apr 05 2024 Nieves Montero <nmontero@redhat.com> - 0.21.4-1
-- Update to 0.21.4
-
-* Wed Apr 03 2024 Miro Hrončok <mhroncok@redhat.com> - 0.21.3-2
-- Package the mock-service files
-
-* Mon Feb 19 2024 David King <amigadave@amigadave.com> - 0.21.3-1
-- Update to 0.21.3
-
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.21.2-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.21.2-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Dec 10 2023 Daiki Ueno <dueno@redhat.com> - 0.21.2-2
-- Use GnuTLS as the default crypto backend
-
-* Sat Dec 09 2023 Kalev Lember <klember@redhat.com> - 0.21.2-1
-- Update to 0.21.2
-
-* Tue Sep 19 2023 Kalev Lember <klember@redhat.com> - 0.21.1-1
-- Update to 0.21.1
-
-* Fri Aug 11 2023 Kalev Lember <klember@redhat.com> - 0.21.0-1
-- Update to 0.21.0
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.20.5-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.20.5-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.20.5-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Mon Feb 21 2022 David King <amigadave@amigadave.com> - 0.20.5-1
-- Update to 0.20.5
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.20.4-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.20.4-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.20.4-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.20.4-2
+- Initial CBL-Mariner import from Fedora 31 (license: MIT).
 
 * Tue Nov 10 2020 Kalev Lember <klember@redhat.com> - 0.20.4-1
 - Update to 0.20.4
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.20.3-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
 * Mon Apr 20 2020 Kalev Lember <klember@redhat.com> - 0.20.3-1
 - Update to 0.20.3

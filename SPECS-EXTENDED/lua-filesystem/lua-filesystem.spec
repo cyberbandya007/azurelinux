@@ -1,18 +1,10 @@
-%if 0%{?el7}
-%bcond_with compat
-%else
-%bcond_without compat
-%endif
-
-%if %{with compat}
 %{!?lua_compat_version: %global lua_compat_version 5.1}
 %{!?lua_compat_libdir: %global lua_compat_libdir %{_libdir}/lua/%{lua_compat_version}}
 %{!?lua_compat_builddir: %global lua_compat_builddir %{_builddir}/compat-lua-%{name}-%{version}-%{release}}
-%endif
 
 Name:           lua-filesystem
 Version:        1.8.0
-Release:        12%{?dist}
+Release:        1%{?dist}
 Summary:        File System Library for the Lua Programming Language
 
 %global gitowner keplerproject
@@ -20,22 +12,18 @@ Summary:        File System Library for the Lua Programming Language
 %global gittag %(echo %{version} | sed -e 's/\\./_/g')
 
 License:        MIT
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://%{gitowner}.github.io/%{gitproject}/
 Source0:        https://github.com/%{gitowner}/%{gitproject}/archive/v%{gittag}/%{gitproject}-%{version}.tar.gz
 
 BuildRequires:  gcc
 BuildRequires:  make
 BuildRequires:  lua-devel >= 5.1
-%if 0%{?el7}
 BuildRequires:  lua-rpm-macros
-%endif
-%if %{with compat}
 BuildRequires:  compat-lua >= %{lua_compat_version}
 BuildRequires:  compat-lua-devel >= %{lua_compat_version}
-%endif
-%if 0%{?fedora} < 33 && 0%{?rhel} < 9
 Requires:       lua(abi) = %{lua_version}
-%endif
 
 %global _description %{expand:
 LuaFileSystem is a Lua library developed to complement the set of functions
@@ -47,52 +35,39 @@ structure and file attributes.}
 %description %{_description}
 
 
-%if %{with compat}
 %package -n lua%{lua_compat_version}-filesystem
 Summary:        File System Library for the Lua Programming Language %{lua_compat_version}
-%if 0%{?fedora} < 33 && 0%{?rhel} < 9
 Requires:       lua(abi) = %{lua_compat_version}
-%endif
 Obsoletes:      lua-filesystem-compat < 1.8.0-3
 Provides:       lua-filesystem-compat = %{version}-%{release}
 Provides:       lua-filesystem-compat%{?_isa} = %{version}-%{release}
 
 %description -n lua%{lua_compat_version}-filesystem %{_description}
-%endif
-
 
 %prep
 %autosetup -n %{gitproject}-%{gittag}
 
-%if %{with compat}
 rm -rf %{lua_compat_builddir}
 cp -a . %{lua_compat_builddir}
-%endif
 
 %build
 %make_build LUA_LIBDIR=%{lua_libdir} CFLAGS="%{optflags} -fPIC %{?__global_ldflags}"
 
-%if %{with compat}
 pushd %{lua_compat_builddir}
 %make_build LUA_LIBDIR=%{lua_compat_libdir} CFLAGS="-I%{_includedir}/lua-%{lua_compat_version} %{optflags} -fPIC %{?__global_ldflags}"
 popd
-%endif
 
 %install
 %make_install LUA_LIBDIR=%{lua_libdir}
 
-%if %{with compat}
 pushd %{lua_compat_builddir}
 %make_install LUA_LIBDIR=%{lua_compat_libdir}
 popd
-%endif
 
 %check
 LUA_CPATH=%{buildroot}%{lua_libdir}/\?.so lua tests/test.lua
 
-%if %{with compat}
 LUA_CPATH=%{buildroot}%{lua_compat_libdir}/\?.so lua-%{lua_compat_version} tests/test.lua
-%endif
 
 %files
 %license LICENSE
@@ -100,63 +75,20 @@ LUA_CPATH=%{buildroot}%{lua_compat_libdir}/\?.so lua-%{lua_compat_version} tests
 %doc README.md
 %{lua_libdir}/*
 
-%if %{with compat}
 %files -n lua%{lua_compat_version}-filesystem
 %license LICENSE
 %doc doc/us/*
 %doc README.md
 %{lua_compat_libdir}/*
-%endif
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.8.0-12
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Wed Dec 11 2024 Aninda Pradhan <v-anipradhan@microsoft.com> - 1.8.0-1
+- Upgraded to version 1.8.0
+- License verified.
 
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.8.0-11
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.8.0-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.8.0-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.8.0-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.8.0-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.8.0-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.8.0-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Sun Jan 31 2021 Michel Alexandre Salim <salimma@fedoraproject.org> - 1.8.0-4
-- Adjust conditionals for compat package
-
-* Fri Jan 29 2021 Robert Scheck <robert@fedoraproject.org> - 1.8.0-3
-- Use Fedora-specific linker flags
-- Remove unused PREFIX argument at %%make_build and %%make_install
-- compat: Extend %%check and rename package to match guidelines
- 
-* Wed Jan 27 2021 Michel Alexandre Salim <salimma@fedoraproject.org> - 1.8.0-2
-- compat: Add Requires on lua(abi) for older releases
-
-* Wed Jan 27 2021 Michel Alexandre Salim <salimma@fedoraproject.org> - 1.8.0-1
-- Update to 1.8.0
-- Simplify spec to use new Lua macros (thanks robert@fp.o)
-- Use standard make macros (thanks tbaeder@fp.o)
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.3-15
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.3-14
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Tue Jun 30 2020 Miro Hrončok <mhroncok@redhat.com> - 1.6.3-13
-- Rebuilt for Lua 5.4
+* Fri Jan 08 2021 Joe Schmitt <joschmit@microsoft.com> - 1.6.3-13
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
+- Remove Fedora/RHEL version checks
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.3-12
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

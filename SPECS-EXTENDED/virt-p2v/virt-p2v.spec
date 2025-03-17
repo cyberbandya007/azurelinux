@@ -1,5 +1,5 @@
-# Verify tarball signature with GPGv2.
-%global verify_tarball_signature 1
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 
 # So far there are no ELF binaries in this package, so the list
 # of files in the debuginfo package will be empty, triggering
@@ -8,27 +8,16 @@
 
 Summary:       Convert a physical machine to run on KVM
 Name:          virt-p2v
-Epoch:         1
 Version:       1.42.4
-Release:       1%{?dist}
+Release:       2%{?dist}
 License:       GPL-2.0-or-later AND LGPL-2.0-or-later
 
-# virt-p2v works only on x86_64 at the moment.  It requires porting
-# to properly detect the hardware on other architectures, and furthermore
-# virt-v2v requires porting too.
-ExclusiveArch: x86_64
-
 # Source and patches.
-URL:           http://libguestfs.org/
-Source0:       http://download.libguestfs.org/%{name}/%{name}-%{version}.tar.gz
-%if 0%{verify_tarball_signature}
-Source1:       http://download.libguestfs.org/%{name}/%{name}-%{version}.tar.gz.sig
-%endif
+URL:           https://libguestfs.org/
+Source0:       https://download.libguestfs.org/%{name}/%{name}-%{version}.tar.gz
+Source1:       https://download.libguestfs.org/%{name}/%{name}-%{version}.tar.gz.sig
 
-# Keyring used to verify tarball signature.
-%if 0%{verify_tarball_signature}
 Source2:       libguestfs.keyring
-%endif
 
 # Basic build requirements.
 BuildRequires: make
@@ -44,9 +33,7 @@ BuildRequires: xz
 BuildRequires: gtk3-devel
 BuildRequires: dbus-devel
 BuildRequires: m4
-%if 0%{verify_tarball_signature}
 BuildRequires: gnupg2
-%endif
 
 # Test suite requirements.
 BuildRequires: nbdkit
@@ -55,7 +42,7 @@ Requires:      gawk
 Requires:      gzip
 
 # virt-p2v-make-disk runs virt-builder:
-Requires:      guestfs-tools
+Requires:      libguestfs
 
 # virt-p2v-make-kickstart runs strip:
 Requires:      binutils
@@ -74,9 +61,7 @@ To convert virtual machines from other hypervisors, see virt-v2v.
 
 
 %prep
-%if 0%{verify_tarball_signature}
 %{gpgverify} --keyring='%{SOURCE2}' --signature='%{SOURCE1}' --data='%{SOURCE0}'
-%endif
 %autosetup -p1
 
 
@@ -88,9 +73,10 @@ To convert virtual machines from other hypervisors, see virt-v2v.
 
 
 %check
+
 if ! make check; then
     cat test-suite.log
-    exit 1
+    false
 fi
 
 
@@ -109,7 +95,7 @@ rm $RPM_BUILD_ROOT%{_mandir}/man1/p2v-release-notes.1*
 %{_bindir}/virt-p2v-make-disk
 %{_bindir}/virt-p2v-make-kickstart
 %{_bindir}/virt-p2v-make-kiwi
-%{bash_completions_dir}/virt-*
+%{_datadir}/bash-completion/completions/virt-*
 %{_datadir}/virt-p2v
 %{_libdir}/virt-p2v
 %{_mandir}/man1/virt-p2v-make-disk.1*
@@ -119,6 +105,13 @@ rm $RPM_BUILD_ROOT%{_mandir}/man1/p2v-release-notes.1*
 
 
 %changelog
+* Fri Jan 31 2025 Archana Shettigar <v-shettigara@microsoft.com> - 1.42.4-2
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- Remove epoch
+- Removing in-spec verification of source tarballs.
+- License verified.
+- Removing 'exit' calls from the '%%check' section.
+
 * Tue Nov 05 2024 Richard W.M. Jones <rjones@redhat.com> - 1:1.42.4-1
 - New upstream version 1.42.4
 

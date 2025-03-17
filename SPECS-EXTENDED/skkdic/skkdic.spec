@@ -5,20 +5,21 @@
 
 %global         githash_tools     0fe2106fbc052445c611e6c5b2a79899d740edcb
 
-%global         baserelease       2
-
 %undefine        _changelog_trimtime
 
 Summary:	Dictionaries for SKK (Simple Kana-Kanji conversion program)
 Name:		skkdic
 Version:	%{gitdate_num}
-Release:	%{baserelease}.git%{shorthash}%{?dist}
+Release:	3%{?dist}
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 # See Source2
 License:	GPLv2+ and CC-BY-SA and Unicode and Public Domain and MIT
 
 Source0:	https://github.com/skk-dev/dict/archive/%{githash}/%{name}-%{gitdate_num}.git%{githash}.tar.gz
 Source1:	https://raw.githubusercontent.com/skk-dev/skktools/%{githash_tools}/unannotation.awk
 Source2:	license-investigation.txt
+Source3:	%{name}-LICENSE.txt
 Source200:	README-skkdic.rh.ja
 
 URL:		https://skk-dev.github.io/dict/
@@ -32,6 +33,7 @@ SKK-JISYO.L and pubdic+ dictionary.
 
 %prep
 %setup -q -c -T -a 0
+mv %{SOURCE3} ./LICENSE.txt
 ln -sf dict-%{githash} src
 mkdir tools
 
@@ -69,6 +71,7 @@ gzip -9 ChangeLog
 popd
 
 %files
+%license LICENSE.txt
 %doc	src/ChangeLog.gz
 %doc	README-skkdic.rh.ja
 %doc	src/committers.md
@@ -78,6 +81,11 @@ popd
 %{_datadir}/skk/
 
 %changelog
+* Thu Jan 09 2025 Archana Shettigar <v-shettigara@microsoft.com> - 20240131-3
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- Converting the 'Release' tag to the '[number].[distribution]' format
+- License verified
+
 * Sat Jul 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 20240131-2.gitb798a46b88
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

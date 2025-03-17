@@ -1,19 +1,14 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global srcname keycloak-httpd-client-install
 %global summary Tools to configure Apache HTTPD as Keycloak client
 
-%if (0%{?fedora} > 0 && 0%{?fedora} < 30) || (0%{?rhel} > 0 && 0%{?rhel} <= 7)
-  %bcond_without python2
-  %bcond_without python3
-%endif
-
-%if 0%{?fedora} >= 30 || 0%{?rhel} >= 8
-  %bcond_with python2
-  %bcond_without python3
-%endif
+%bcond_with python2
+%bcond_without python3
 
 Name:           %{srcname}
 Version:        1.3
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        %{summary}
 
 License:        GPL-3.0-or-later
@@ -28,7 +23,6 @@ BuildRequires:  python2-devel
 
 %if 0%{?with_python3}
 BuildRequires:  python3-devel
-BuildRequires:  (python3-setuptools if python3-devel >= 3.12)
 %endif
 
 Requires:       %{_bindir}/keycloak-httpd-client-install
@@ -143,6 +137,10 @@ install -c -m 644 doc/keycloak-httpd-client-install.8 %{buildroot}/%{_mandir}/ma
 %endif
 
 %changelog
+* Tue Mar 11 2025 Aninda Pradhan <v-anipradhan@microsoft.com> - 1.3-2
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License Verified
+
 * Fri Sep 13 2024 Tomas Halman <thalman@redhat.com> - 1.3-1
 - Rebase to version 1.3
 

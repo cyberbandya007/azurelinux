@@ -1,9 +1,11 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global srcname suds
 
 Summary: A python SOAP client
 Name:  python-suds
 Version: 1.1.2
-Release: 10%{?dist}
+Release: 11%{?dist}
 Source0: https://github.com/suds-community/suds/archive/v%{version}.tar.gz#/%{srcname}-%{version}.tar.gz
 Patch0: suds-pyname.patch
 License: LGPL-3.0-or-later
@@ -11,7 +13,11 @@ BuildArch: noarch
 URL: https://github.com/suds-community/suds
 
 BuildRequires: python3-devel
-BuildRequires: %{py3_dist pytest six}
+BuildRequires: python3-six
+
+%if 0%{?with_check}
+BuildRequires: python3-pip
+%endif
 
 %global _description %{expand:
 The suds project is a python soap web services client lib.  Suds leverages
@@ -31,22 +37,28 @@ Summary:        %{summary}
 %autosetup -p1 -n %{srcname}-%{version}
 
 %build
-%pyproject_wheel
+%py3_build
 
 %generate_buildrequires
-%pyproject_buildrequires
 
 %install
-%pyproject_install
-%pyproject_save_files suds
+%py3_install
 
 %check
+%{__python3} -m pip install pytest==7.1.2
 %pytest
 
-%files -n python3-%{srcname} -f %{pyproject_files}
+%files -n python3-%{srcname}
+%{python3_sitelib}/%{srcname}*/
 %doc README.md
+%license LICENSE.txt
 
 %changelog
+* Wed Feb 12 2025 Archana Shettigar <v-shettigara@microsoft.com> - 1.1.2-11
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+- Add BR on `python3-pip` & drop `python3-pytest` to enable ptest
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.1.2-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

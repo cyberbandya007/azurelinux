@@ -4,26 +4,20 @@
 
 Name:           python-%{modname}
 Version:        1.47.0
-Release:        5%{?dist}
+Release:        6%{?dist}
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Summary:        Mutagen is a Python module to handle audio meta-data
 
-# licensecheck -r . | grep -vEe "UNKNOWN" -e "GNU General Public License v2.0" | sort
-#
-# ./mutagen/_senf/_argv.py: MIT License
-# ./mutagen/_senf/_compat.py: MIT License
-# ./mutagen/_senf/_environ.py: MIT License
-# ./mutagen/_senf/_fsnative.py: MIT License
-# ./mutagen/_senf/__init__.py: MIT License
-# ./mutagen/_senf/_print.py: MIT License
-# ./mutagen/_senf/_stdlib.py: MIT License
-# ./mutagen/_senf/_temp.py: MIT License
-# ./mutagen/_senf/_winansi.py: MIT License
-# ./mutagen/_senf/_winapi.py: MIT License
-License:        GPL-2.0-or-later AND MIT
+License:        GPL-2.0-or-later
 URL:            https://github.com/quodlibet/mutagen
 Source0:        %{url}/releases/download/release-%{version}/%{modname}-%{version}.tar.gz
 
 BuildArch:      noarch
+
+%if 0%{?with_check}
+BuildRequires:  python3-pip
+%endif
 
 %global _description \
 Mutagen is a Python module to handle audio meta-data. It supports\
@@ -37,11 +31,15 @@ includes a module to handle generic Ogg bit-streams.
 
 %package -n python3-%{modname}
 Summary:        %{summary}
+%{?python_provide:%python_provide python3-%{modname}}
 BuildRequires:  python3-devel
 BuildRequires:  python3-hypothesis
 BuildRequires:  python3-pytest
 BuildRequires:  python3-setuptools
 BuildRequires:  python3-sphinx_rtd_theme
+BuildRequires:  python3-sphinx
+BuildRequires:  python3-sphinxcontrib-jquery
+BuildRequires:  python3-sortedcontainers
 Obsoletes:      python2-mutagen < 1.42.0-10
 
 %description -n python3-%{modname} %{_description}
@@ -99,6 +97,10 @@ rm -rf docs/_build/{.buildinfo,.doctrees}
 %doc docs/_build/*
 
 %changelog
+* Wed Feb 19 2025 Archana Shettigar <v-shettigara@microsoft.com> - 1.47.0-6
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.47.0-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

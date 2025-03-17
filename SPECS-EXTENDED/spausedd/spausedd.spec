@@ -1,25 +1,16 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %bcond_without vmguestlib
 
 Name: spausedd
 Summary: Utility to detect and log scheduler pause
 Version: 20210719
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: ISC
 URL: https://github.com/jfriesse/spausedd
 Source0: https://github.com/jfriesse/%{name}/releases/download/%{version}/%{name}-%{version}.tar.gz
 
-# VMGuestLib exists only for x86 architectures (for Fedora) and x86_64 (for RHEL)
-%if %{with vmguestlib}
-%if 0%{?rhel} >= 6
-%ifarch x86_64
-%global use_vmguestlib 1
-%endif
-%else
-%ifarch %{ix86} x86_64
-%global use_vmguestlib 1
-%endif
-%endif
-%endif
+%global use_vmguestlib 0
 
 BuildRequires: gcc
 BuildRequires: make
@@ -51,8 +42,6 @@ Utility to detect and log scheduler pause
 mkdir -p %{buildroot}/%{_unitdir}
 install -m 644 -p init/%{name}.service %{buildroot}/%{_unitdir}
 
-%clean
-
 %files
 %doc AUTHORS
 %license COPYING
@@ -70,6 +59,11 @@ install -m 644 -p init/%{name}.service %{buildroot}/%{_unitdir}
 %systemd_postun spausedd.service
 
 %changelog
+* Fri Jan 10 2025 Archana Shettigar <v-shettigara@microsoft.com> - 20210719-10
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- Removing the explicit %%clean stage.
+- License verified.
+
 * Sat Jul 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 20210719-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

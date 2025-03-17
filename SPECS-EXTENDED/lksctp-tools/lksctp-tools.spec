@@ -1,7 +1,9 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:    lksctp-tools
 Summary: User-space access to Linux Kernel SCTP
 Version: 1.0.19
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: GPL-2.0-or-later AND LGPL-2.0-only AND MIT
 Group:   System Environment/Libraries
 URL:     http://lksctp.sourceforge.net
@@ -93,6 +95,10 @@ find $RPM_BUILD_ROOT -type f -name "*.la" -delete
 %doc doc/*.txt
 
 %changelog
+* Mon Jan 27 2025 Aninda Pradhan <v-anipradhan@microsoft.com> - 1.0.19-10
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License Verified.
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.0.19-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

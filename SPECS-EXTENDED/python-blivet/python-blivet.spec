@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Summary:  A python module for system storage configuration
 Name: python-blivet
 Url: https://storageapis.wordpress.com/projects/blivet
@@ -5,7 +7,7 @@ Version: 3.11.0
 
 #%%global prerelease .b2
 # prerelease, if defined, should be something like .a1, .b1, .b2.dev1, or .c2
-Release: 3%{?prerelease}%{?dist}
+Release: 4%{?dist}
 Epoch: 1
 License: LGPL-2.1-or-later
 %global realname blivet
@@ -117,6 +119,10 @@ make DESTDIR=%{buildroot} install
 %{python3_sitelib}/*
 
 %changelog
+* Wed Dec 18 2024 Sumit Jena <v-sumitjena@microsoft.com> - 3.11.0-4
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Wed Oct 09 2024 Vojtech Trefny <vtrefny@redhat.com> - 3.11.0-3
 - free_space_estimate: adjust for compression on btrfs (#2315638)
 

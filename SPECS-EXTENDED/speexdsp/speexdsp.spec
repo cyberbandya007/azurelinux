@@ -1,17 +1,19 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           speexdsp
 Version:        1.2.1
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        A voice compression format (DSP)
 
 License:        BSD-3-Clause
-URL:            http://www.speex.org/
-Source0:        http://downloads.xiph.org/releases/speex/%{name}-%{version}.tar.gz
+URL:            https://www.speex.org/
+Source0:        https://downloads.xiph.org/releases/speex/%{name}-%{version}.tar.gz
 
 BuildRequires:  gcc
 BuildRequires:  make
 # speexdsp was split from speex in 1.2rc2. As speexdsp does not depend on
 # speex, a versioned conflict is required.
-Conflicts:      speex <= 1.2-0.21.rc1
+Conflicts: speex <= 1.2-0.21.rc1
 
 %description
 Speex is a patent-free compression format designed especially for
@@ -27,7 +29,7 @@ Summary: 	Development package for %{name}
 Requires: 	%{name}%{?_isa} = %{version}-%{release}
 # speexdsp was split from speex in 1.2rc2. As speexdsp does not depend on
 # speex, a versioned conflict is required.
-Conflicts:      speex-devel <= 1.2-0.21.rc1
+Conflicts: speex-devel <= 1.2-0.21.rc1
 
 %description devel
 Speex is a patent-free compression format designed especially for
@@ -69,6 +71,10 @@ find %{buildroot} -type f -name "*.la" -delete
 %{_libdir}/libspeexdsp.so
 
 %changelog
+* Fri Jan 10 2025 Archana Shettigar <v-shettigara@microsoft.com> - 1.2.1-8
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Sat Jul 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.1-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

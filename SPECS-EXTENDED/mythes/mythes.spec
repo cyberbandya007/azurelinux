@@ -1,7 +1,9 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:      mythes
 Summary:   A thesaurus library
 Version:   1.2.5
-Release:   7%{?dist}
+Release:   8%{?dist}
 Source:    https://github.com/hunspell/%{name}/releases/download/v%{version}/%{name}-%{version}.tar.xz
 URL:       https://github.com/hunspell/mythes
 License:   BSD-3-Clause-Modification AND MIT
@@ -54,8 +56,9 @@ mkdir -p $RPM_BUILD_ROOT/%{_datadir}/mythes
 %{_bindir}/th_gen_idx.pl
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.5-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Dec 30 2024 Aninda Pradhan <v-anipradhan@microsoft.com> - 1.2.5-8
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
 
 * Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.5-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild

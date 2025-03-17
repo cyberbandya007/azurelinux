@@ -1,10 +1,12 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name: perl-Net-Telnet
 Summary: Interact with TELNET port or other TCP ports
 Version: 3.05
-Release: 11%{?alphatag:.%{alphatag}}%{?dist}
+Release: 12%{?dist}
 License: GPL-1.0-or-later OR Artistic-1.0-Perl
 URL: https://metacpan.org/release/Net-Telnet
-Source0: https://cpan.metacpan.org/authors/id/J/JR/JROGERS/Net-Telnet-%{version}.tar.gz
+Source0: https://cpan.metacpan.org/authors/id/J/JR/JROGERS/Net-Telnet-%{version}.tar.gz#/perl-Net-Telnet-%{version}.tar.gz
 
 # runtime depends
 Requires: perl(IO::Socket::INET)
@@ -24,6 +26,8 @@ BuildRequires: perl(Socket)
 BuildRequires: perl(strict)
 BuildRequires: perl(Symbol)
 BuildRequires: perl(vars)
+# Runtime
+Requires:      perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
 %description
 Net::Telnet allows you to make client connections to a TCP port and do
@@ -56,6 +60,10 @@ make test
 %{_mandir}/man3/*.3*
 
 %changelog
+* Mon Dec 16 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 3.05-12
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.05-11
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

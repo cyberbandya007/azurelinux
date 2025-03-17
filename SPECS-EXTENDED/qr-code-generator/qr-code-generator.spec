@@ -2,22 +2,22 @@
 %global cmakename qrcodegen-cmake
 %global cmakesuffix cmake2
 
-Name: qr-code-generator
-Version: 1.8.0
-Release: 11%{?dist}
-
-License: MIT
-Summary: High-quality QR Code generator library
-URL: https://github.com/nayuki/%{richname}
-Source0: %{url}/archive/v%{version}/%{name}-%{version}.tar.gz
-Source1: https://github.com/EasyCoding/%{cmakename}/archive/v%{version}-%{cmakesuffix}/%{cmakename}-%{version}-%{cmakesuffix}.tar.gz
-
-BuildRequires: cmake
-BuildRequires: gcc
-BuildRequires: gcc-c++
-BuildRequires: ninja-build
-BuildRequires: python3-devel
-BuildRequires: python3-setuptools
+Name: 		qr-code-generator
+Version: 	1.8.0
+Release: 	12%{?dist}
+License: 	MIT
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+Summary: 	High-quality QR Code generator library
+URL: 		https://github.com/nayuki/%{richname}
+Source0: 	%{url}/archive/refs/tags/v1.8.0.tar.gz#/%{name}-%{version}.tar.gz
+Source1: 	https://github.com/EasyCoding/%{cmakename}/archive/v%{version}-%{cmakesuffix}/%{cmakename}-%{version}-%{cmakesuffix}.tar.gz
+BuildRequires: 	cmake
+BuildRequires: 	gcc
+BuildRequires: 	gcc-c++
+BuildRequires: 	ninja-build
+BuildRequires: 	python3-devel
+BuildRequires: 	python3-setuptools
 
 %description
 This project aims to be the best, clearest QR Code generator library in
@@ -138,6 +138,10 @@ ln -s qrcodegen.hpp %{buildroot}%{_includedir}/qrcodegencpp/QrCode.hpp
 %{python3_sitelib}/qrcodegen-*.egg-info/
 
 %changelog
+* Wed Dec 18 2024 Akhila Guruju <v-guakhila@microsoft.com> - 1.8.0-12
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.8.0-11
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

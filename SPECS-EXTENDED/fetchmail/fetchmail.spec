@@ -1,10 +1,13 @@
 Summary: A remote mail retrieval and forwarding utility
 Name: fetchmail
 Version: 6.4.39
-Release: 1%{?dist}
-Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.xz
-Source1: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.xz.asc
-URL: http://www.fetchmail.info/
+Release: 2%{?dist}
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+
+Source0: https://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.xz
+Source1: https://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.xz.asc
+URL: https://www.fetchmail.info/
 # For a breakdown of the licensing, see COPYING
 License: GPL-2.0-or-later AND LicenseRef-Fedora-Public-Domain
 BuildRequires: gcc gettext-devel krb5-devel openssl-devel python3-devel
@@ -35,10 +38,10 @@ make
 make install DESTDIR=$RPM_BUILD_ROOT
 
 # remove fetchmailconf stuff
-rm -f $RPM_BUILD_ROOT%{_bindir}/fetchmailconf*
-rm -f $RPM_BUILD_ROOT%{_mandir}/man1/fetchmailconf.1*
-rm -f $RPM_BUILD_ROOT%{python3_sitelib}/fetchmailconf.py*
-rm -f $RPM_BUILD_ROOT%{python3_sitelib}/__pycache__/fetchmailconf*
+rm -f %{buildroot}%{_bindir}/fetchmailconf*
+rm -f %{buildroot}%{_mandir}/man1/fetchmailconf.1*
+rm -f %{buildroot}%{python3_sitelib}/fetchmailconf.py*
+rm -f %{buildroot}%{python3_sitelib}/__pycache__/fetchmailconf*
 
 %find_lang %name
 
@@ -48,6 +51,10 @@ rm -f $RPM_BUILD_ROOT%{python3_sitelib}/__pycache__/fetchmailconf*
 %{_mandir}/man1/fetchmail.1*
 
 %changelog
+* Fri Dec 28 2024 Jyoti kanase <v-jykanase@microsoft.com> -  6.4.39-2
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Thu Jul 25 2024 Vitezslav Crhonek <vcrhonek@redhat.com> - 6.4.39-1
 - Update to fetchmail-6.4.39
 

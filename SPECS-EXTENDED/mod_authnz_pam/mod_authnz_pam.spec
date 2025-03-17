@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %{!?_httpd_mmn: %{expand: %%global _httpd_mmn %%(cat %{_includedir}/httpd/.mmn || echo 0-0)}}
 %{!?_httpd_apxs:       %{expand: %%global _httpd_apxs       %%{_sbindir}/apxs}}
 %{!?_httpd_confdir:    %{expand: %%global _httpd_confdir    %%{_sysconfdir}/httpd/conf.d}}
@@ -8,7 +10,7 @@
 Summary: PAM authorization checker and PAM Basic Authentication provider
 Name: mod_authnz_pam
 Version: 1.2.3
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: ASL 2.0
 URL: https://www.adelton.com/apache/mod_authnz_pam/
 Source0: https://www.adelton.com/apache/mod_authnz_pam/%{name}-%{version}.tar.gz
@@ -16,7 +18,7 @@ BuildRequires: gcc
 BuildRequires: httpd-devel
 BuildRequires: pam-devel
 BuildRequires: pkgconfig
-Requires: httpd-mmn = %{_httpd_mmn}
+Provides: httpd-mmn = %{_httpd_mmn}
 Requires: pam
 
 # Suppres auto-provides for module DSO per
@@ -63,6 +65,10 @@ install -Dp -m 0644 authnz_pam.confx $RPM_BUILD_ROOT%{_httpd_confdir}/authnz_pam
 %{_httpd_moddir}/*.so
 
 %changelog
+* Tue Dec 31 2024 Aninda Pradhan <v-anipradhan@microsoft.com> - 1.2.3-9
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License Verified.
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.3-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %{!?_httpd_apxs: %{expand: %%global _httpd_apxs %%{_sbindir}/apxs}}
 %{!?_httpd_mmn: %{expand: %%global _httpd_mmn %%(cat %{_includedir}/httpd/.mmn || echo 0-0)}}
 # /etc/httpd/conf.d with httpd < 2.4 and defined as /etc/httpd/conf.modules.d with httpd >= 2.4
@@ -10,7 +12,7 @@
 Summary: Security module for the Apache HTTP Server
 Name: mod_security
 Version: 2.9.7
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: Apache-2.0
 URL: http://www.modsecurity.org/
 Source: https://github.com/SpiderLabs/ModSecurity/releases/download/v%{version}/modsecurity-%{version}.tar.gz
@@ -22,11 +24,9 @@ Patch1: modsecurity-2.9.3-apulibs.patch
 Patch2: mod_security-2.9.3-remote-rules-timeout.patch
 Patch3: mod_security-2.9.7-send_error_bucket.patch
 
-Requires: httpd httpd-mmn = %{_httpd_mmn}
-%if 0%{?fedora} || 0%{?rhel} > 7
-# Ensure apache user exists for file ownership
+Requires: httpd 
+Provides: httpd-mmn = %{_httpd_mmn}
 Requires(pre): httpd-filesystem
-%endif
 
 BuildRequires: gcc, make, autoconf, automake, libtool
 BuildRequires: httpd-devel
@@ -53,10 +53,7 @@ as a powerful umbrella - shielding web applications from attacks.
 %package        mlogc
 Summary:        ModSecurity Audit Log Collector
 Requires:       mod_security
-%if 0%{?fedora} || 0%{?rhel} > 7
-# Ensure apache user exists for file ownership
 Requires(pre):  httpd-filesystem
-%endif
 
 %description mlogc
 This package contains the ModSecurity Audit Log Collector.
@@ -145,6 +142,10 @@ install -m0644 mlogc/mlogc-default.conf %{buildroot}%{_sysconfdir}/mlogc.conf
 %endif
 
 %changelog
+* Mon Jan 06 2025 Aninda Pradhan <v-anipradhan@fedoraproject.org> - 2.9.7-8
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.9.7-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 # For deep debugging we need to build binaries with extra debug info
 %bcond_with     debug
 
@@ -5,7 +7,7 @@
 
 Name:           mariadb-connector-odbc
 Version:        3.2.1
-Release:        1.rc%{?with_debug:.debug}%{?dist}.3
+Release:        2.rc%{?with_debug:.debug}%{?dist}.3
 Summary:        The MariaDB Native Client library (ODBC driver)
 License:        LGPL-2.1-or-later
 Source:         https://archive.mariadb.org/connector-odbc-%{version}/%{name}-%{version}-rc-src.tar.gz
@@ -74,6 +76,10 @@ FCFLAGS="$FCFLAGS   -O0 -g"; export FCFLAGS
 
 
 %changelog
+* Tue Jan 14 2025 Aninda Pradhan <v-anipradhan@microsoft.com> - 3.2.1-2.rc.3
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License Verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.2.1-1.rc.3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

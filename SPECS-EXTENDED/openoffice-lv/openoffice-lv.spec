@@ -1,15 +1,14 @@
-%if 0%{?rhel} && 0%{?rhel} > 9
-%bcond_with mythes
-%else
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+
 %bcond_without mythes
-%endif
 
 Name: openoffice-lv
 Summary: Latvian linguistic dictionaries
 Version: 1.4.0
-Release: 9%{?dist}
-Source: http://dict.dv.lv/download/lv_LV-%{version}.oxt
-URL: http://dict.dv.lv/
+Release: 10%{?dist}
+Source: https://dict.dv.lv/download/lv_LV-%{version}.oxt
+URL: https://dict.dv.lv/
 License: LGPL-2.1-or-later
 BuildArch: noarch
 
@@ -83,6 +82,11 @@ cp -p th_lv_LV_v2.* $RPM_BUILD_ROOT/%{_datadir}/mythes
 %endif
 
 %changelog
+* Fri Jan 03 2025 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 1.4.0-10
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- change the http source into the https source URL
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.4.0-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

@@ -7,13 +7,15 @@
 
 Name:		perl-List-MoreUtils-XS
 Version:	0.430
-Release:	15%{?dist}
+Release:	1%{?dist}
 Summary:	Provide compiled List::MoreUtils functions
 # Code from List-MoreUtils < 0.417 is GPL-1.0-or-later OR Artistic-1.0-Perl
 # Anything after that is Apache-2.0
 # "git blame" on the upstream repo will probably be needed to
 # determine the license of any particular chunk of code
 License:	(GPL-1.0-or-later OR Artistic-1.0-Perl) AND Apache-2.0
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:		https://metacpan.org/release/List-MoreUtils-XS
 Source0:	https://cpan.metacpan.org/modules/by-module/List/List-MoreUtils-XS-%{version}.tar.gz
 Patch0:		List-MoreUtils-XS-0.430-unbundle.patch
@@ -89,67 +91,12 @@ make test
 %{_mandir}/man3/List::MoreUtils::XS.3*
 
 %changelog
-* Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.430-15
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Mon Feb 27 2025 Sumit Jena <v-sumitjena@microsoft.com> - 0.430-1
+- Update to version 0.430
+- License verified
 
-* Mon Jun 10 2024 Jitka Plesnikova <jplesnik@redhat.com> - 0.430-14
-- Perl 5.40 rebuild
-
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.430-13
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.430-12
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.430-11
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Tue Jul 11 2023 Jitka Plesnikova <jplesnik@redhat.com> - 0.430-10
-- Perl 5.38 rebuild
-
-* Tue Jun 13 2023 Paul Howarth <paul@city-fan.org> - 0.430-9
-- Disable extra test in RHEL builds (based on
-  https://src.fedoraproject.org/rpms/perl-List-MoreUtils-XS/pull-request/1)
-- Silence build-time warnings about missing bundled modules
-
-* Fri Jan 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.430-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.430-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Tue May 31 2022 Jitka Plesnikova <jplesnik@redhat.com> - 0.430-6
-- Perl 5.36 rebuild
-
-* Fri Jan 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.430-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.430-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 0.430-3
-- Perl 5.34 rebuild
-
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.430-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Wed Oct 21 2020 Paul Howarth <paul@city-fan.org> - 0.430-1
-- Update to 0.430
-  - Fix parts of CPAN RT#123989: more $a/$b/$_ refcounting bugs
-    - Since some bugs are simply reported wrong, dealing with them breaks more
-      (including running code) than it solves - way too heavy to feel better...
-  - Introduce functions slide and slideatatime
-  - Toolchain fixes
-  - Fix LANG=nb_NO.utf8 related str tests fails (CPAN RT#133128)
-  - Fix typo (GH#7)
-  - Fix parts of CPAN RT#132043: listcmp misbehave in XS implementation
-- Use author-independent source URL
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.428-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 0.428-9
-- Perl 5.32 rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 0.428-9
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.428-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

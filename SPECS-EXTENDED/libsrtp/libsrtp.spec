@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:		libsrtp
 Version:	2.6.0
 Release:	1%{?dist}
@@ -33,13 +35,10 @@ developing applications that use %{name}.
 %build
 %meson -Dcrypto-library=openssl -Dcrypto-library-kdf=disabled
 %meson_build
-
 %install
 %meson_install
-
 %check
 %meson_test
-
 %files
 %license LICENSE
 %doc CHANGES README.md
@@ -51,47 +50,11 @@ developing applications that use %{name}.
 %{_libdir}/*.so
 
 %changelog
-* Mon Aug  5 2024 Tom Callaway <spot@fedoraproject.org> - 2.6.0-1
-- update to 2.6.0
+* Tue Nov 12 2024 Sumit Jena <v-sumitjena@microsoft.com> - 2.6.0-1
+- Update to version 2.6.0
 
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-15
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
-
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-14
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-13
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-12
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Fri Jul 07 2023 Wim Taymans <wtaymans@redhat.com> - 2.3.0-11
-- add %check (thanks to Gerd v. Egidy) Related: rhbz#2163492
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Thu Apr 15 2021 Tom Callaway <spot@fedoraproject.org> - 2.3.0-6
-- fix NSS incompatibility, thanks to George Joseph
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Mon Oct 12 2020 Tom Callaway <spot@fedoraproject.org> - 2.3.0-4
-- add -tools subpackage (thanks to Gerd v. Egidy)
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 2.3.0-3
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

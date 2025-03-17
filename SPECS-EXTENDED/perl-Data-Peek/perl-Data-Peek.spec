@@ -3,11 +3,13 @@
 
 Name:           perl-Data-Peek
 Version:        0.52
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        Collection of low-level debug facilities
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/Data-Peek
-Source0:        https://cpan.metacpan.org/authors/id/H/HM/HMBRAND/Data-Peek-%{version}.tgz
+Source0:        https://cpan.metacpan.org/authors/id/H/HM/HMBRAND/Data-Peek-%{version}.tgz#/%{name}-%{version}.tgz
 BuildRequires:  coreutils
 BuildRequires:  findutils
 BuildRequires:  gcc
@@ -28,6 +30,8 @@ BuildRequires:  perl(warnings)
 # Tests:
 BuildRequires:  perl(Test::More) >= 0.90
 BuildRequires:  perl(Test::Warnings)
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
+
 %if %{with perl_Data_Peek_enables_option_test}
 # Optional tests:
 BuildRequires:  perl(Perl::Tidy) >= 20120714
@@ -93,6 +97,10 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
+* Thu Dec 19 2024 Jyoti kanase <v-jykanase@microsoft.com> -  0.52-9
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.52-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

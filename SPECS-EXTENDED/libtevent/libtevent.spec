@@ -1,13 +1,16 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+
 %global talloc_version 2.4.2
 
 Name: libtevent
 Version: 0.16.1
-Release: 4%{?dist}
+Release: 5%{?dist}
 Summary: The tevent library
 License: LGPL-3.0-or-later
 URL: http://tevent.samba.org/
-Source0: http://samba.org/ftp/tevent/tevent-%{version}.tar.gz
-Source1: http://samba.org/ftp/tevent/tevent-%{version}.tar.asc
+Source0: https://samba.org/ftp/tevent/tevent-%{version}.tar.gz
+Source1: https://samba.org/ftp/tevent/tevent-%{version}.tar.asc
 # gpg2 --no-default-keyring --keyring ./tevent.keyring --recv-keys 9147A339719518EE9011BCB54793916113084025
 Source2: tevent.keyring
 
@@ -93,6 +96,10 @@ cp -a doc/man/man3 %{buildroot}%{_mandir}
 %ldconfig_scriptlets
 
 %changelog
+* Thu Nov 21 2024 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 0.16.1-5
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.16.1-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

@@ -1,7 +1,9 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Summary: Tool for controlling tape drives
 Name: mt-st
 Version: 1.7
-Release: 7%{?dist}
+Release: 1%{?dist}
 License: GPL-1.0-or-later
 URL: https://github.com/iustin/mt-st
 Source0: https://github.com/iustin/mt-st/releases/download/v%{version}/%{name}-%{version}.tar.gz
@@ -12,41 +14,41 @@ BuildRequires: systemd
 Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
-
+ 
 %description
 The mt-st package contains the mt and st tape drive management
 programs. Mt (for magnetic tape drives) and st (for SCSI tape devices)
 can control rewinding, ejecting, skipping files and blocks and more.
-
+ 
 Install mt-st if you need a tool to  manage tape drives.
-
-
+ 
+ 
 %prep
 %autosetup
-
-
+ 
 %build
 make CFLAGS="%{build_cflags}" LDFLAGS="%{build_ldflags}"
-
-
+ 
+ 
 %install
-COMPLETIONDIR=%{buildroot}%{bash_completions_dir}
+COMPLETIONDIR=%{buildroot}%{_datadir}/bash-completion/completions
+ls -al
 %make_install EXEC_PREFIX=/usr COMPLETIONINSTALLDIR=$COMPLETIONDIR
 install -D -p -m 0644 %{SOURCE1} %{buildroot}%{_unitdir}/stinit.service
 cd $COMPLETIONDIR
 mv mt-st mt
-
-
+ 
+ 
 %post
 %systemd_post stinit.service
-
+ 
 %preun
 %systemd_preun stinit.service
-
+ 
 %postun
 %systemd_postun_with_restart stinit.service
-
-
+ 
+ 
 %files
 %doc COPYING README.md stinit.def.examples
 %{_bindir}/mt
@@ -55,66 +57,15 @@ mv mt-st mt
 %{_mandir}/man8/stinit.8*
 %{_unitdir}/stinit.service
 %{_datadir}/bash-completion/
-
+ 
 
 %changelog
-* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.7-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Wed Feb 12 2025 Akarsh Chaudhary <v-akarshc@microsoft.com> - 1.7-1
+- Upgrade to version 1.7
+- License verified
 
-* Tue Mar 19 2024 Dan Horák <dan[at]danny.cz> - 1.7-6
-- handle completions better
-
-* Mon Mar 18 2024 Dan Horák <dan[at]danny.cz> - 1.7-5
-- update BR
-
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.7-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.7-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.7-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Mon Apr 24 2023 Dan Horák <dan[at]danny.cz> - 1.7-1
-- rebased to 1.7 (#2189101)
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.4-10
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.4-9
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
-
-* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.4-8
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
-
-* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.4-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Tue Mar 02 2021 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 1.4-6
-- Rebuilt for updated systemd-rpm-macros
-  See https://pagure.io/fesco/issue/2583.
-
-* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.4-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
-
-* Sat Nov 07 2020 Paweł Marciniak <sunwire+repo@gmail.com> - 1.4-4
-- Make will no longer be in BuildRoot by default
-
-* Mon Oct 12 2020 Paweł Marciniak <sunwire+repo@gmail.com> - 1.4-3
-- Fix not working autocompletion
-
-* Thu Sep 24 2020 Dan Horák <dan[at]danny.cz> - 1.4-2
-- install completions to system directory
-
-* Wed Sep 16 2020 Paweł Marciniak <sunwire+repo@gmail.com> - 1.4-1
-- rebased to 1.4
-
-* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.3-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
-
-* Fri Jun 26 2020 Dan Horák <dan[at]danny.cz> - 1.3-1
-- rebased to 1.3 (#1849416)
+* Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 1.1-27
+- Initial CBL-Mariner import from Fedora 32 (license: MIT).
 
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.1-26
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild

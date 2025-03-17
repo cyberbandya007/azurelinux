@@ -1,14 +1,15 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global modname isort
-%global srcname isort
 
 Name:               python-%{modname}
 Version:            5.13.2
-Release:            5%{?dist}
+Release:            6%{?dist}
 Summary:            Python utility / library to sort Python imports
 
 License:            MIT
 URL:                https://github.com/timothycrosley/%{modname}
-Source0:            %pypi_source
+Source0:            https://files.pythonhosted.org/packages/87/f9/c1eb8635a24e87ade2efce21e3ce8cd6b8630bb685ddc9cdaca1349b2eb5/%{modname}-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 BuildArch:          noarch
 
 %description
@@ -20,6 +21,8 @@ Summary:            %{summary}
 BuildRequires:      python%{python3_pkgversion}-devel
 BuildRequires:      python%{python3_pkgversion}-setuptools
 BuildRequires:      python%{python3_pkgversion}-pytest
+# Dependencies
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 
 %description -n python%{python3_pkgversion}-%{modname}
 %{summary}.
@@ -57,6 +60,10 @@ ln -s %{modname}-3 %{buildroot}%{_bindir}/%{modname}
 %{python3_sitelib}/%{modname}-*.egg-info/
 
 %changelog
+* Thu Feb 27 2025 Sreenivasulu Malavathula <v-smalavathu@microsoft.com> - 5.13.2-6
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 5.13.2-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

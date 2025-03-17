@@ -1,10 +1,12 @@
 Name:           perl-File-Find-Object
 Version:        0.3.8
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Object oriented File::Find replacement
 License:        GPL-2.0-or-later OR Artistic-2.0
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/File-Find-Object
-Source0:        https://cpan.metacpan.org/modules/by-module/File/File-Find-Object-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/S/SH/SHLOMIF/File-Find-Object-%{version}.tar.gz#/perl-File-Find-Object-%{version}.tar.gz
 BuildArch:      noarch
 # Module Build
 BuildRequires:  coreutils
@@ -22,6 +24,7 @@ BuildRequires:  perl(List::Util)
 BuildRequires:  perl(parent)
 BuildRequires:  perl(strict)
 BuildRequires:  perl(warnings)
+Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 # Test Suite
 BuildRequires:  perl(blib)
 BuildRequires:  perl(File::Path)
@@ -66,6 +69,10 @@ make test
 %{_mandir}/man3/File::Find::Object::Result.3*
 
 %changelog
+* Tue Feb 04 2025 Aninda Pradhan <v-anipradhan@microsoft.com> - 0.3.8-5
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License Verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.3.8-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

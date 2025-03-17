@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %if 0%{?fedora} > 35
 %global dict_dirname hunspell 
 %else
@@ -7,7 +9,7 @@ Name: hunspell-pt
 Summary: Portuguese hunspell dictionaries
 %global upstreamid 20131030
 Version: 0.%{upstreamid}
-Release: 13%{?dist}
+Release: 14%{?dist}
 Source0: http://natura.di.uminho.pt/download/sources/Dictionaries/hunspell/hunspell-pt_PT-20130125.tar.gz
 Source1: https://pt-br.libreoffice.org/assets/Uploads/PT-BR-Documents/VERO/ptBR-2013-10-30AOC-2.zip
 URL: https://pt-br.libreoffice.org/projetos/vero
@@ -69,6 +71,10 @@ popd
 %{_datadir}/%{dict_dirname}/pt_BR.*
 
 %changelog
+* Fri Dec 20 2024 Akarsh Chaudhary <v-akarshc@microsoft.com> - 0.20131030-14
+- AzureLinux import from Fedora 41 .
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.20131030-13
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
