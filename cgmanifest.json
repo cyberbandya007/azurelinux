@@ -6911,7 +6911,7 @@
         "other": {
           "name": "hyphen-ru",
           "version": "0.20200325",
-          "downloadUrl": "downloadUrl": "http://mirrors.ctan.org/language/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-ru.tex"
+          "downloadUrl": "http://mirrors.ctan.org/language/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-ru.tex"
         }
       }
     },
