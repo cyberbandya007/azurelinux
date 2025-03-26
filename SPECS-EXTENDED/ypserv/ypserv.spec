@@ -1,12 +1,13 @@
-Summary: The NIS (Network Information Service) server
+Summary:        The NIS (Network Information Service) server
+Name:           ypserv
+Version:        4.2
+Release:        12%{?dist}
+License:        GPL-2.0-only
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+URL:            https://www.thkukuk.de/nis/nis/ypserv/
 
-Name: ypserv
-Version: 4.2
-Release: 11%{?dist}
-License: GPL-2.0-only
-URL: https://www.thkukuk.de/nis/nis/ypserv/
-
-Source0: https://github.com/thkukuk/%{name}/archive/v%{version}.tar.gz
+Source0: https://github.com/thkukuk/ypserv/archive/refs/tags/v4.2.tar.gz#/%{name}-%{version}.tar.gz
 Source1: ypserv.service
 Source2: yppasswdd.service
 Source3: ypxfrd.service
@@ -165,6 +166,10 @@ install -m 755 %{SOURCE4} $RPM_BUILD_ROOT%{_libexecdir}/rpc.yppasswdd.env
 %{_includedir}/rpcsvc
 
 %changelog
+* Fri Mar 14 2025 Jyoti kanase <v-jykanase@microsoft.com> - 4.2-12
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Sat Jul 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.2-11
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

@@ -1,5 +1,3 @@
-# OCaml packages not built on i686 since OCaml 5 / Fedora 39.
-ExcludeArch: %{ix86}
 
 %ifnarch %{ocaml_native_compiler}
 %global debug_package %{nil}
@@ -10,12 +8,12 @@ Version: 2.5
 %forgemeta
 
 Name:           ocaml-xml-light
-Release:        12%{?dist}
+Release:        13%{?dist}
 Summary:        Minimal XML parser and printer for OCaml
 
 License:        LGPL-2.1-or-later WITH OCaml-LGPL-linking-exception
 URL:            http://tech.motion-twin.com/xmllight.html
-Source0:        %{forgesource}
+Source0:        https://github.com/ncannasse/xml-light/archive/refs/tags/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
 BuildRequires:  ocaml >= 4.03
 BuildRequires:  ocaml-dune >= 2.7
@@ -65,6 +63,10 @@ developing applications that use %{name}.
 
 
 %changelog
+* Mon Mar 17 2025 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 2.5-13
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.5-12
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

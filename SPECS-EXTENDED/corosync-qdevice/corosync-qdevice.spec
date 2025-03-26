@@ -8,40 +8,42 @@
 %global gitver %{?numcomm:.%{numcomm}}%{?alphatag:.%{alphatag}}%{?dirty:.%{dirty}}
 %global gittarver %{?numcomm:.%{numcomm}}%{?alphatag:-%{alphatag}}%{?dirty:-%{dirty}}
 
-Name: corosync-qdevice
-Summary: The Corosync Cluster Engine Qdevice
-Version: 3.0.3
-Release: 6%{?gitver}%{?dist}
-License: BSD-3-Clause
-URL: https://github.com/corosync/corosync-qdevice
-Source0: https://github.com/corosync/corosync-qdevice/releases/download/v%{version}%{?gittarver}/%{name}-%{version}%{?gittarver}.tar.gz
+Name: 		corosync-qdevice
+Summary: 	The Corosync Cluster Engine Qdevice
+Version: 	3.0.3
+Release: 	7%{?gitver}%{?dist}
+License: 	BSD-3-Clause
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+URL:		https://github.com/corosync/corosync-qdevice
+Source0: 	https://github.com/corosync/corosync-qdevice/releases/download/v%{version}%{?gittarver}/%{name}-%{version}%{?gittarver}.tar.gz#/%{name}-%{version}.tar.gz
 
 # Runtime bits
-Requires: corosync >= 2.4.0
-Requires: corosynclib >= 2.4.0
-Requires: nss-tools
+Requires: 	corosync >= 2.4.0
+Requires: 	corosynclib >= 2.4.0
+Requires: 	nss-tools
 
 %if %{with systemd}
 %{?systemd_requires}
-BuildRequires: systemd
-BuildRequires: systemd-devel
+BuildRequires: 	systemd
+BuildRequires: 	systemd-devel
 %else
 Requires(post): /sbin/chkconfig
 Requires(preun): /sbin/chkconfig
 %endif
 
 # Build bits
-BuildRequires: gcc
-BuildRequires: corosynclib-devel
-BuildRequires: libqb-devel
-BuildRequires: sed
-BuildRequires: groff
-BuildRequires: nss-devel
+BuildRequires: 	gcc
+BuildRequires: 	corosynclib-devel
+BuildRequires: 	libqb-devel
+BuildRequires: 	sed
+BuildRequires: 	groff
+BuildRequires: 	nss-devel
 
 %if %{with runautogen}
 BuildRequires: autoconf automake libtool
 %endif
-BuildRequires: make
+BuildRequires: 	make
 
 %prep
 %setup -q -n %{name}-%{version}%{?gittarver}
@@ -135,8 +137,8 @@ fi
 %{_mandir}/man8/corosync-qdevice.8*
 
 %package -n corosync-qdevice-devel
-Summary: The Corosync Cluster Engine Qdevice Network Development Kit
-Requires: pkgconfig
+Summary: 	The Corosync Cluster Engine Qdevice Network Development Kit
+Requires: 	pkgconfig
 
 %description -n corosync-qdevice-devel
 This package contains files used to develop using
@@ -148,8 +150,8 @@ The Corosync Cluster Engine Qdevice
 
 %package -n corosync-qnetd
 Summary: The Corosync Cluster Engine Qdevice Network Daemon
-Requires: nss-tools
-Requires(pre): shadow-utils
+Requires: 	nss-tools
+Requires(pre): 	shadow-utils
 
 %if %{with systemd}
 %{?systemd_requires}
@@ -207,6 +209,10 @@ fi
 %{_mandir}/man8/corosync-qnetd.8*
 
 %changelog
+* Fri Mar 14 2025 Akhila Guruju <v-guakhila@microsoft.com> - 3.0.3-7
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.3-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

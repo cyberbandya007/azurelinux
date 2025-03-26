@@ -1,6 +1,8 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           amtk
 Version:        5.6.1
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Actions, Menus and Toolbars Kit for GTK+ applications
 
 License:        LGPL-3.0-or-later
@@ -67,6 +69,10 @@ developing applications that use %{name}.
 
 
 %changelog
+* Fri Mar 14 2025 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 5.6.1-8
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified.
+
 * Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 5.6.1-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

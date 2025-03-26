@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 ###############################################################################
 ###############################################################################
 ##
@@ -37,7 +39,7 @@
 Name: kronosnet
 Summary: Multipoint-to-Multipoint VPN daemon
 Version: 1.29
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPL-2.0-or-later AND LGPL-2.1-or-later
 URL: https://kronosnet.org
 Source0: https://kronosnet.org/releases/%{name}-%{version}.tar.xz
@@ -47,6 +49,7 @@ BuildRequires: make
 BuildRequires: gcc libqb-devel
 # required to build man pages
 %if %{with buildman}
+# BuildRequires: libxml2-devel doxygen 
 BuildRequires: libxml2-devel doxygen doxygen2man
 %endif
 %if %{with sctp}
@@ -436,6 +439,10 @@ Requires: libnozzle1%{_isa} = %{version}-%{release}
 %endif
 
 %changelog
+* Thu Mar 13 2025 Aninda Pradhan <v-anipradhan@microsoft.com> - 1.29-3
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License Verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.29-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

@@ -1,17 +1,7 @@
-## START: Set by rpmautospec
-## (rpmautospec version 0.7.2)
-%define autorelease(e:s:pb:) %{?-p:0.}%{lua:
-    release_number = 1;
-    base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
-    print(release_number + base_release_number - 1);
-}%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{?dist}
-## END: Set by rpmautospec
-
 %global gem_name facter
-%global debug_package %{nil}
 
 Name:           facter
-Version:        4.9.0
+Version:        4.8.0
 Release:        1%{?dist}
 Summary:        Command and ruby library for gathering system information
 Vendor:		Microsoft Corporation
@@ -111,8 +101,8 @@ GEM_HOME="%{buildroot}%{gem_dir}" %{buildroot}%{_bindir}/facter --help
 %doc %{gem_docdir}
 
 %changelog
-* Wed Oct 30 2024 Jyoti Kanase <v-jykanase@microsoft.com> - 4.9.0-1
-- Update to 4.9.0
+* Wed Oct 30 2024 Jyoti Kanase <v-jykanase@microsoft.com> - 4.8.0-1
+- Upgrade to 4.8.0
 - License verified
 
 * Tue May 07 2024 Andy Zaugg <azaugg@linkedin.com> 4.2.13-1

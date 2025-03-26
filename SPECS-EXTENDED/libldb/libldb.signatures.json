@@ -1,7 +1,0 @@
-{
- "Signatures": {
-  "ldb-2.9.1.tar.asc": "ea9060dadef5bd2327fd128b90e217ed9ecba74439fd890433e55698ebc14871",
-  "ldb-2.9.1.tar.gz": "c95e4dc32dea8864b79899ee340c9fdf28b486f464bbc38ba99151a08b493f9b",
-  "ldb.keyring": "11197db7d14c377d77cc931c089246da99800ba4b2e87884449f60ceb5dfe4ea"
- }
-}

@@ -1,11 +1,13 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name: rp-pppoe
 Version: 4.0
-Release: 5%{?dist}
+Release: 6%{?dist}
 Summary: A PPP over Ethernet client (for xDSL support).
 License: GPL-2.0-or-later
 Url: https://dianne.skoll.ca/projects/rp-pppoe/
 
-Source: https://dianne.skoll.ca/projects/rp-pppoe/download/rp-pppoe-%{version}.tar.gz
+Source: https://downloads.uls.co.za/rp-pppoe/rp-pppoe-%{version}.tar.gz
 
 BuildRequires: make
 BuildRequires: libtool
@@ -51,6 +53,10 @@ rm -rf %{buildroot}/etc/ppp/plugins
 %doc %{_docdir}/*
 
 %changelog
+* Mon Mar 17 2025 Aninda Pradhan <v-anipradhan@microsoft.com> - 4.0-6
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License Verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.0-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

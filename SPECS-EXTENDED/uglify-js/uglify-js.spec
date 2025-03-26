@@ -5,9 +5,11 @@
 
 Name:           uglify-js
 Version:        3.19.3
-Release:        1%{?dist}
+Release:        11%{?dist}
 Summary:        JavaScript parser, mangler/compressor and beautifier toolkit
 License:        BSD-2-Clause
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://github.com/mishoo/UglifyJS
 Source0:        https://registry.npmjs.org/%{name}/-/%{name}-%{version}.tgz
 
@@ -134,6 +136,11 @@ end
 
 
 %changelog
+* Mon Mar 17 2025 Archana Shettigar <v-shettigara@microsoft.com> - 3.19.3-2
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- Turn off tests
+- License verified
+
 * Tue Sep 10 2024 Mattias Ellert <mattias.ellert@physics.uu.se> - 3.19.3-1
 - Update to 3.19.3
 

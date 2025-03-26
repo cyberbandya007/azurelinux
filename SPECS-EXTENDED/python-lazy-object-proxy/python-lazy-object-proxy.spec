@@ -3,12 +3,14 @@
 
 Name:           python-%{srcname}
 Version:        1.10.0
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        %{sum}
 
 License:        BSD-2-Clause
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Url:            https://github.com/ionelmc/python-%{srcname}
-Source0:        https://github.com/ionelmc/python-%{srcname}/archive/v%{version}/%{srcname}-%{version}.tar.gz
+Source0:        https://github.com/ionelmc/python-%{srcname}/archive/v%{version}/%{srcname}-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
 BuildRequires:  gcc
 BuildRequires:  python%{python3_pkgversion}-devel
@@ -17,6 +19,13 @@ BuildRequires:  python%{python3_pkgversion}-setuptools_scm
 BuildRequires:  python%{python3_pkgversion}-tox-current-env
 BuildRequires:  python%{python3_pkgversion}-wheel
 BuildRequires:  python%{python3_pkgversion}-pip
+#for tests
+BuildRequires: 	python3-tox
+BuildRequires:  python3-pluggy
+BuildRequires: 	python3-py
+BuildRequires: 	python-filelock
+BuildRequires: 	python3-toml
+BuildRequires: 	python3-six
 
 %description
 A fast and thorough lazy object proxy.
@@ -53,6 +62,10 @@ A fast and thorough lazy object proxy.
 %exclude %{python3_sitearch}/lazy_object_proxy/cext.c
 
 %changelog
+* Fri Mar 14 2025 Akhila Guruju <v-guakhila@microsoft.com> - 1.10.0-6
+-  Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.10.0-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

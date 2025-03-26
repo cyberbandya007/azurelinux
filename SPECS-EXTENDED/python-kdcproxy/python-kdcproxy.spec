@@ -2,14 +2,16 @@
 
 Name:           python-%{realname}
 Version:        1.0.0
-Release:        17%{?dist}
+Release:        18%{?dist}
 Summary:        MS-KKDCP (kerberos proxy) WSGI module
 
 License:        MIT
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://github.com/latchset/%{realname}
-Source0:        https://github.com/latchset/%{realname}/archive/%{realname}-%{version}.tar.gz
+Source0:        https://github.com/latchset/%{realname}/releases/download/v%{version}/%{realname}-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
-Patch0: Drop-coverage-from-tests.patch
+Patch0: 	Drop-coverage-from-tests.patch
 
 BuildArch:      noarch
 BuildRequires:  git
@@ -56,6 +58,10 @@ minimal configuration.
 %{python3_sitelib}/%{realname}-%{version}-*.egg-info
 
 %changelog
+* Fri Mar 14 2025 Akhila Guruju <v-guakhila@microsoft.com> - 1.0.0-18
+-  Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.0.0-17
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

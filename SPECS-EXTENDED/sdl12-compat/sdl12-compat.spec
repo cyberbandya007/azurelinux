@@ -1,13 +1,6 @@
-%if 0%{?rhel}
-# Features disabled for RHEL
-%bcond_with static
-%else
-%bcond_without static
-%endif
-
 Name:           sdl12-compat
 Version:        1.2.68
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        SDL 1.2 runtime compatibility library using SDL 2.0
 # mp3 decoder code is MIT-0/PD
 # SDL_opengl.h is zlib and MIT
@@ -57,11 +50,6 @@ Obsoletes:      SDL-devel < 1.2.15-49
 Conflicts:      SDL-devel < 1.2.50
 Provides:       SDL-devel = %{version}
 Provides:       SDL-devel%{?_isa} = %{version}
-%if ! %{with static}
-# We don't provide the static library, but we want to replace SDL-static anyway
-Obsoletes:      SDL-static < 1.2.15-49
-Conflicts:      SDL-static < 1.2.50
-%endif
 # Add deps required to compile SDL apps
 ## For SDL_opengl.h
 Requires:       pkgconfig(gl)
@@ -81,7 +69,6 @@ If you are writing new code, please target SDL 2.0 directly and do not use
 this layer.
 
 
-%if %{with static}
 %package static
 Summary:        Static library to develop SDL 1.2 applications using SDL 2.0
 Requires:       %{name}-devel%{?_isa} = %{version}-%{release}
@@ -103,7 +90,6 @@ SDL-1.2 and SDL-2.0.
 
 If you are writing new code, please target SDL 2.0 directly and do not use
 this layer.
-%endif
 
 
 %prep
@@ -111,7 +97,7 @@ this layer.
 
 
 %build
-%cmake %{?with_static:-DSTATICDEVEL=ON}
+%cmake -DSTATICDEVEL=ON
 %cmake_build
 
 
@@ -123,10 +109,8 @@ this layer.
 mv %{buildroot}/%{_includedir}/SDL/SDL_config.h %{buildroot}/%{_includedir}/SDL/SDL_config-%{_arch}.h
 install -m644 %{SOURCE1} %{buildroot}/%{_includedir}/SDL/SDL_config.h
 
-%if ! %{with static}
 # Delete leftover static files
-rm -rf %{buildroot}%{_libdir}/*.a
-%endif
+#rm -rf %{buildroot}%{_libdir}/*.a
 
 
 %files
@@ -142,14 +126,16 @@ rm -rf %{buildroot}%{_libdir}/*.a
 %{_libdir}/libSDL.so
 %{_libdir}/pkgconfig/sdl12_compat.pc
 
-%if %{with static}
 %files static
 %{_libdir}/libSDL.a
 %{_libdir}/libSDLmain.a
-%endif
 
 
 %changelog
+* Mon Mar 17 2025 Jyoti kanase <v-jykanase@microsoft.com> - 1.2.68-4
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Sat Jul 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.68-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

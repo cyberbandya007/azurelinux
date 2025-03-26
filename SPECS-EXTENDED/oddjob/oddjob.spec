@@ -1,14 +1,12 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global build_sample_subpackage 0
 
-%if 0%{?fedora} > 21 || 0%{?rhel} > 7
 %global dbus_send /usr/bin/dbus-send
-%else
-%global dbus_send /bin/dbus-send
-%endif
 
 Name: oddjob
 Version: 0.34.7
-Release: 14%{?dist}
+Release: 15%{?dist}
 Source0: https://releases.pagure.org/oddjob/oddjob-%{version}.tar.gz
 Source1: https://releases.pagure.org/oddjob/oddjob-%{version}.tar.gz.asc
 Patch1: oddjob-override-mask-fix.patch
@@ -170,6 +168,10 @@ fi
 exit 0
 
 %changelog
+* Mon Mar 17 2025 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 0.34.7-15
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.34.7-14
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 

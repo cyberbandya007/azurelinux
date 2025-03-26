@@ -3,16 +3,23 @@
 
 Name:		mod_http2
 Version:	2.0.29
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	module implementing HTTP/2 for Apache 2
 License:	Apache-2.0
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:		https://icing.github.io/mod_h2/
 Source0:	https://github.com/icing/mod_h2/releases/download/v%{version}/mod_http2-%{version}.tar.gz
 BuildRequires:  make
 BuildRequires:  gcc
-BuildRequires:  pkgconfig, httpd-devel >= 2.4.20, libnghttp2-devel >= 1.7.0, openssl-devel >= 1.0.2
-BuildRequires:  autoconf, libtool, /usr/bin/hostname
-Requires:       httpd-mmn = %{_httpd_mmn}
+BuildRequires:  pkgconfig
+BuildRequires:	httpd-devel >= 2.4.20
+BuildRequires:	libnghttp2-devel >= 1.7.0
+BuildRequires:	openssl-devel >= 1.0.2
+BuildRequires:  autoconf
+BuildRequires:	libtool
+BuildRequires:	/usr/bin/hostname
+Requires:       httpd-mmn
 Conflicts:      httpd < 2.4.48
 # https://bugzilla.redhat.com/show_bug.cgi?id=2131458
 Conflicts:      libnghttp2 < 1.50.0-1
@@ -22,7 +29,7 @@ The mod_h2 Apache httpd module implements the HTTP2 protocol (h2+h2c) on
 top of libnghttp2 for httpd 2.4 servers.
 
 %prep
-%setup -q
+%autosetup
 
 %build
 autoreconf -i
@@ -47,6 +54,10 @@ echo "LoadModule proxy_http2_module modules/mod_proxy_http2.so" > %{buildroot}%{
 %{_httpd_moddir}/mod_proxy_http2.so
 
 %changelog
+* Wed Mar 12 2025 <v-guakhila@microsoft.com> - 2.0.29-3
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.0.29-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
