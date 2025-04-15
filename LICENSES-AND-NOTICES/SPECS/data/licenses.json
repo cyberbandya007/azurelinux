@@ -2655,6 +2655,7 @@
                 "kernel-64k",
                 "kernel-headers",
                 "kernel-ipe",
+                "kernel-lpg-innovate",
                 "kernel-mshv",
                 "kernel-rt",
                 "kernel-uvm",
