@@ -1,3 +1,6 @@
+%global _kde4_appsdir /usr/share/kde4/apps
+%global _kde4_iconsdir /usr/share/icons
+
 Vendor:         Microsoft Corporation
 Distribution:   Azure Linux
 Name:       generic-logos
