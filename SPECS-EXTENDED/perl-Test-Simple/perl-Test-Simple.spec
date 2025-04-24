@@ -1,27 +1,19 @@
-# Disable non-core dependencies when bootstrapping a core module
-# Run optional tests with additional dependencies
-# Break lines according to Unicode rules
-%if !%{defined perl_bootstrap} && ! (0%{?rhel})
-%bcond_without perl_Test_Simple_enables_Module_Pluggable
-%bcond_without perl_Test_Simple_enables_optional_test
-%bcond_without perl_Test_Simple_enables_unicode
-%else
 %bcond_with perl_Test_Simple_enables_Module_Pluggable
 %bcond_with perl_Test_Simple_enables_optional_test
 %bcond_with perl_Test_Simple_enables_unicode
-%endif
 
 Name:           perl-Test-Simple
 Summary:        Basic utilities for writing tests
-Epoch:          3
 Version:        1.302204
-Release:        1%{?dist}
+Release:        2%{?dist}
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 # CC0-1.0: lib/ok.pm
 # Public Domain: lib/Test/Tutorial.pod
 # GPL-1.0-or-later OR Artistic-1.0-Perl: the rest of the distribution
 License:        (GPL-1.0-or-later OR Artistic-1.0-Perl) AND CC0-1.0 AND LicenseRef-Fedora-Public-Domain
 URL:            https://metacpan.org/release/Test-Simple
-Source0:        https://cpan.metacpan.org/modules/by-module/Test/Test-Simple-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/modules/by-module/Test/Test-Simple-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 Patch0:         Test-Simple-1.302200-add_perl.patch
 BuildArch:      noarch
 # Module Build
@@ -79,7 +71,7 @@ BuildRequires:  perl(Module::Metadata)
 BuildRequires:  perl(Test::Harness) >= 2.03
 %if !%{defined perl_bootstrap}
 %if %{with perl_Test_Simple_enables_optional_test}
-BuildRequires:  perl(JSON::MaybeXS)
+BuildRequires:       perl(JSON::MaybeXS)
 BuildRequires:  perl(Test::Class)
 BuildRequires:  perl(Test::Pod) >= 0.95
 BuildRequires:  perl(Test::Script)
@@ -138,7 +130,7 @@ This package is the CPAN component of the dual-lifed core package Test-Simple.
 
 %package tests
 Summary:        Tests for %{name}
-Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 Requires:       perl-Test-Harness
 Requires:       perl(CPAN::Meta)
 Requires:       perl(CPAN::Meta::Requirements) >= 2.120920
@@ -404,6 +396,10 @@ make test %{!?perl_bootstrap:AUTHOR_TESTING=1}
 %{_libexecdir}/%{name}
 
 %changelog
+* Fri Mar 14 2025 Jyoti kanase <v-jykanase@microsoft.com> - 1.302204-2
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Sun Sep 15 2024 Paul Howarth <paul@city-fan.org> - 3:1.302204-1
 - Update to 1.302204
   - Add pending diagnostics functionality
