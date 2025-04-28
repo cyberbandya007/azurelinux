@@ -339,6 +339,7 @@ python-genshi
 python-gssapi
 python-httplib2
 python-hwdata
+python-hypothesmith
 python-iso8601
 python-isodate
 python-itsdangerous
@@ -354,6 +355,7 @@ python-pycares
 python-pymongo
 python-pyperclip
 python-pyrsistent
+python-pytest-flake8
 python-pytest-timeout
 python-recommonmark
 python-redis
