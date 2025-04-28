@@ -16,9 +16,15 @@ License:            MIT
 URL:                http://pypi.python.org/pypi/mccabe
 Source:             %{pypi_source mccabe}
 BuildArch:          noarch
-BuildRequires:      python%{python3_pkgversion}-devel
-BuildRequires:      python%{python3_pkgversion}-hypothesmith
-BuildRequires:      python%{python3_pkgversion}-pytest
+BuildRequires:      python3-pip
+BuildRequires:      python3-wheel
+BuildRequires:      python3-devel
+BuildRequires:      python3-hypothesmith
+BuildRequires:      python3-pytest
+BuildRequires:      python3-pytest-runner
+BuildRequires:      python3-hypothesis
+BuildRequires:      python3-sortedcontainers
+BuildRequires:      python3-setuptools
 
 %global _description %{expand:
 Ned's script to check McCabe complexity.
