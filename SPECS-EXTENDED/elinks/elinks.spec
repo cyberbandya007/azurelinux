@@ -1,26 +1,20 @@
-%if 0%{?rhel} >= 10 || 0%{?rescue}
-%bcond_with gpm
-%else
-%bcond_without gpm
-%endif
-
-Name:      elinks
-Summary:   A text-mode Web browser
-Version:   0.17.0
-Release:   5%{?dist}
-License:   GPL-2.0-only
-URL:       https://github.com/rkd77/elinks
-Source:    https://github.com/rkd77/elinks/releases/download/v%{version}/elinks-%{version}.tar.xz
-Source2:   elinks.conf
+Name:       	elinks
+Summary:   	A text-mode Web browser
+Version:   	0.17.0
+Release:   	1%{?dist}
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+License:   	GPLv2
+URL:       	https://github.com/rkd77/elinks
+Source:    	https://github.com/rkd77/elinks/releases/download/v%{version}/elinks-%{version}.tar.xz
+Source2:   	elinks.conf
 
 BuildRequires: automake
 BuildRequires: bzip2-devel
 BuildRequires: expat-devel
 BuildRequires: gcc-c++
 BuildRequires: gettext
-%if %{with gpm}
 BuildRequires: gpm-devel
-%endif
 BuildRequires: krb5-devel
 BuildRequires: libidn2-devel
 BuildRequires: lua-devel
@@ -52,6 +46,7 @@ Patch4: 0004-elinks-0.15.0-sysname.patch
 # Fix xterm terminal: "Linux" driver seems better than "VT100" (#128105)
 Patch5: 0005-elinks-0.15.0-xterm.patch
 
+
 # let list_is_singleton() return false for an empty list (#1075415)
 Patch6: elinks-0.12pre6-list_is_singleton.patch
 
@@ -78,14 +73,12 @@ export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS) -D_GNU_SOURCE"
 # make the code build with lua-5.4.x
 CFLAGS="$CFLAGS -DLUA_COMPAT_5_3"
 
-%configure \
+%configure %{?rescue:--without-gpm} \
     --enable-256-colors             \
     --enable-bittorrent             \
     --with-gssapi                   \
     --with-lua                      \
     --with-openssl                  \
-    %{?with_gpm:--with-gpm}         \
-    %{!?with_gpm:--without-gpm}     \
     --without-gnutls                \
     --without-spidermonkey          \
     --without-x
@@ -136,36 +129,13 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
-* Wed Jul 17 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.17.0-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+* Fri Mar 21 2025 Jyoti kanase <v-jykanase@microsoft.com> -  0.17.0-1
+- Upgrade to 0.17.0.
+- License verified.
 
-* Thu Feb 01 2024 Lukáš Zaoral <lzaoral@redhat.com> - 0.17.0-4
-- disable gpm integration for RHEL 10 (RHEL-23701)
-
-* Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.17.0-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Fri Jan 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.17.0-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Tue Jan 02 2024 Lukáš Zaoral <lzaoral@redhat.com> - 0.17.0-1
-- rebase to latest upstream release (rhbz#2255830)
-
-* Wed Jul 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.16.1.1-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Tue May 02 2023 Lukáš Zaoral <lzaoral@redhat.com> - 0.16.1.1-1
-- new upstream release (rhbz#2192272)
-
-* Tue Apr 11 2023 Lukáš Zaoral <lzaoral@redhat.com> - 0.16.0-5
-- migrate to SPDX license format
-
-* Fri Mar 24 2023 Arjun Shankar <arjun@redhat.com> - 0.16.0-4
-- Port configure script to C99
-
-* Mon Feb 20 2023 Jan Rybar <jrybar@redhat.com> - 0.16.0-3
-- parallel builds cause FTBFS
-- Resolves: bz#2171476
+* Thu Jan 26 2023 Henry Li <lihl@microsoft.com> - 0.16.0-1
+- Initial CBL-Mariner import from Fedora 38 (license: MIT)
+- License Verified
 
 * Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 0.16.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
