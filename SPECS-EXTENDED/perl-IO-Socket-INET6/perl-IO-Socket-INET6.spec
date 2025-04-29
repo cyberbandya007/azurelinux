@@ -4,13 +4,15 @@
 %{bcond_with perl_IO_Socket_INET6_enables_optional_test}
 %endif
 
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           perl-IO-Socket-INET6
 Version:        2.73
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        Perl Object interface for AF_INET|AF_INET6 domain sockets
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/IO-Socket-INET6
-Source0:        https://cpan.metacpan.org/modules/by-module/IO/IO-Socket-INET6-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/modules/by-module/IO/IO-Socket-INET6-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 # Fix bad code in test. Original code hides error, related to BZ#1207174
 Patch0:         IO-Socket-INET6-2.72-fix_die_in_test.patch
 # Fix random test error in binding to socket BZ#1207174
@@ -71,6 +73,10 @@ make test
 %{_mandir}/man3/IO::Socket::INET6.3*
 
 %changelog
+* Wed Apr 09 2025 Archana Shettigar <v-shettigara@microsoft.com> - 2.73-10
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.73-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
