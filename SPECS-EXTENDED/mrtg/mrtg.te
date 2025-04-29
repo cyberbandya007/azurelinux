@@ -1,4 +1,4 @@
-policy_module(mrtg, 1.9.0)
+policy_module(mrtg)
 
 ########################################
 #
@@ -21,11 +21,11 @@ files_lock_file(mrtg_lock_t)
 type mrtg_log_t;
 logging_log_file(mrtg_log_t)
 
+type mrtg_runtime_t alias mrtg_var_run_t;
+files_runtime_file(mrtg_runtime_t)
+
 type mrtg_var_lib_t;
 files_type(mrtg_var_lib_t)
-
-type mrtg_var_run_t;
-files_pid_file(mrtg_var_run_t)
 
 ########################################
 #
@@ -55,8 +55,8 @@ logging_log_filetrans(mrtg_t, mrtg_log_t, { dir file })
 manage_files_pattern(mrtg_t, mrtg_var_lib_t, mrtg_var_lib_t)
 manage_lnk_files_pattern(mrtg_t, mrtg_var_lib_t, mrtg_var_lib_t)
 
-allow mrtg_t mrtg_var_run_t:file manage_file_perms;
-files_pid_filetrans(mrtg_t, mrtg_var_run_t, file)
+allow mrtg_t mrtg_runtime_t:file manage_file_perms;
+files_runtime_filetrans(mrtg_t, mrtg_runtime_t, file)
 
 kernel_read_system_state(mrtg_t)
 kernel_read_network_state(mrtg_t)
@@ -71,7 +71,6 @@ corenet_tcp_sendrecv_generic_node(mrtg_t)
 
 corenet_sendrecv_all_client_packets(mrtg_t)
 corenet_tcp_connect_all_ports(mrtg_t)
-corenet_tcp_sendrecv_all_ports(mrtg_t)
 
 dev_read_sysfs(mrtg_t)
 dev_read_urand(mrtg_t)
@@ -81,6 +80,7 @@ domain_dontaudit_search_all_domains_state(mrtg_t)
 
 files_getattr_tmp_dirs(mrtg_t)
 files_read_etc_runtime_files(mrtg_t)
+files_read_usr_files(mrtg_t)
 files_search_var(mrtg_t)
 files_search_locks(mrtg_t)
 files_search_var_lib(mrtg_t)
@@ -103,12 +103,13 @@ libs_read_lib_files(mrtg_t)
 
 logging_send_syslog_msg(mrtg_t)
 
+miscfiles_read_localization(mrtg_t)
+
 selinux_dontaudit_getattr_dir(mrtg_t)
 
-userdom_use_inherited_user_terminals(mrtg_t)
+userdom_use_user_terminals(mrtg_t)
 userdom_dontaudit_read_user_home_content_files(mrtg_t)
 userdom_dontaudit_use_unpriv_user_fds(mrtg_t)
-userdom_dontaudit_list_admin_dir(mrtg_t)
 
 netutils_domtrans_ping(mrtg_t)
 
@@ -142,8 +143,4 @@ optional_policy(`
 
 optional_policy(`
 	snmp_read_snmp_var_lib_files(mrtg_t)
-')
-
-optional_policy(`
-	udev_read_db(mrtg_t)
 ')
