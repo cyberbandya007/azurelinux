@@ -1,13 +1,15 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 %global origname manpages-zh
 
 Summary: Chinese Man Pages from Chinese Man Pages Project
 Name: man-pages-zh-CN
 Version: 1.6.3.6
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: GFDL-1.2-no-invariants-or-later
 #Vendor: From CMPP (Chinese Man Pages Project)
 URL: https://github.com/man-pages-zh/
-Source0: https://github.com/man-pages-zh/%{origname}/archive/v%{version}.tar.gz
+Source0: https://github.com/man-pages-zh/%{origname}/archive/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
 BuildArchitectures: noarch
 Summary(zh_CN): 中文 man pages
 
@@ -64,6 +66,10 @@ rm -f %{manDest}/man1/newgrp.1
 %{_mandir}/zh_CN/man*/*
 
 %changelog
+* Tue Apr 29 2025 Archana Shettigar <v-shettigara@microsoft.com> - 1.6.3.6-11
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.3.6-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
