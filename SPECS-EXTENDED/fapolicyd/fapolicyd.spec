@@ -11,7 +11,7 @@ Release:        2%{?dist}
 License:        GPL-3.0-or-later
 URL:            https://people.redhat.com/sgrubb/fapolicyd
 
-Source0: https://people.redhat.com/sgrubb/fapolicyd/%{name}-%{version}.tar.gz
+Source0:   https://github.com/linux-application-whitelisting/fapolicyd/releases/download/v1.3.4/%{name}-%{version}.tar.gz
 #Source1: https://github.com/linux-application-whitelisting/%{name}-selinux/releases/download/v%{semodule_version}/%{name}-selinux-%{semodule_version}.tar.gz
 
 BuildRequires: gcc
