@@ -1,14 +1,12 @@
-# python2 is not available on RHEL > 7 and not needed on Fedora > 28
-%if 0%{?rhel} > 7 || 0%{?fedora} > 28
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+
 # disable python2 by default
 %bcond_with python2
-%else
-%bcond_without python2
-%endif
 
 Name:          marisa
 Version:       0.2.6
-Release:       11%{?dist}
+Release:       12%{?dist}
 Summary:       Static and spece-efficient trie data structure library
 
 License:       BSD-2-Clause OR LGPL-2.1-or-later
@@ -93,11 +91,7 @@ Python 3 language binding for marisa
 %package ruby
 Summary: Ruby language binding for marisa
 Requires:      %{name} = %{version}-%{release}
-%if 0%{?fedora} || 0%{?rhel} > 7
 Requires:      ruby(release)
-%else
-Requires:      ruby(abi) = 1.9.1
-%endif
 
 %description ruby
 Ruby language binding for groonga
@@ -169,11 +163,7 @@ popd
 
 # install Ruby bindings
 pushd bindings/ruby
-%if 0%{?fedora} || 0%{?rhel} > 7
 %make_install INSTALL="install -p"
-%else
-%make_install INSTALL="install -p" hdrdir=%{_includedir} arch_hdrdir="%{_includedir}/\$(arch)" rubyhdrdir=%{_includedir}
-%endif
 popd
 
 find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
@@ -225,6 +215,10 @@ rm -f $RPM_BUILD_ROOT%{perl_vendorarch}/sample.pl
 %{ruby_vendorarchdir}/marisa.so
 
 %changelog
+* Mon Apr 28 2025 Archana Shettigar <v-shettigara@microsoft.com> - 0.2.6-12
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 0.2.6-11
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
