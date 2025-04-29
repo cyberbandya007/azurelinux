@@ -58,7 +58,8 @@ Group:          Documentation/HTML
 %{summary}.
 
 %prep
-%autosetup -p1
+%setup -q
+%patch 0
 cp %{SOURCE1} build.xml
 
 # bnc#500524
