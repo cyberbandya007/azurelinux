@@ -1,18 +1,19 @@
 %define majorver 8.6
-%define vers %{majorver}.14
+%define vers %{majorver}.13
 
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Summary: The graphical toolkit for the Tcl scripting language
 Name: tk
 Version: %{vers}
-Release: 2%{?dist}
-Epoch:   1
+Release: 4%{?dist}
 License: TCL AND HPND-Pbmplus AND CC-BY-SA-3.0 AND MIT-open-group AND MIT
-URL: http://tcl.sourceforge.net
-Source0: http://download.sourceforge.net/sourceforge/tcl/%{name}%{version}-src.tar.gz
-Requires: tcl = %{epoch}:%{vers}
+URL: https://tcl.sourceforge.net
+Source0: https://download.sourceforge.net/sourceforge/tcl/%{name}%{version}-src.tar.gz
+Requires: tcl = %{vers}
 BuildRequires: make
 BuildRequires: gcc
-BuildRequires: tcl-devel = %{epoch}:%{vers}, autoconf
+BuildRequires: tcl-devel = %{vers}, autoconf
 BuildRequires: libX11-devel
 BuildRequires: libXft-devel
 # panedwindow.n from itcl conflicts
@@ -30,8 +31,8 @@ way to create cross-platform GUI applications.
 
 %package devel
 Summary: Tk graphical toolkit development files
-Requires: %{name} = %{epoch}:%{version}-%{release}
-Requires: tcl-devel = %{epoch}:%{vers}
+Requires: %{name} = %{version}-%{release}
+Requires: tcl-devel = %{vers}
 Requires: libX11-devel libXft-devel
 
 %description devel
@@ -77,11 +78,6 @@ find generic unix -name "*.h" -exec cp -p '{}' %{buildroot}/%{_includedir}/%{nam
 # remove buildroot traces
 sed -i -e "s|$PWD/unix|%{_libdir}|; s|$PWD|%{_includedir}/%{name}-private|" %{buildroot}/%{_libdir}/%{name}Config.sh
 
-%if 0%{?flatpak}
-mkdir -p %{buildroot}%{_usr}/bin
-ln -s %{_bindir}/wish %{_bindir}/wish%{majorver} %{buildroot}%{_usr}/bin/
-%endif
-
 %pre
 [ ! -h %{_prefix}/%{_lib}/%{name}%{majorver} ] || rm %{_prefix}/%{_lib}/%{name}%{majorver}
 
@@ -95,9 +91,6 @@ ln -s %{_bindir}/wish %{_bindir}/wish%{majorver} %{buildroot}%{_usr}/bin/
 %{_libdir}/%{name}%{majorver}
 %{_mandir}/man1/*
 %{_mandir}/mann/*
-%if 0%{?flatpak}
-%{_usr}/bin/wish*
-%endif
 %doc README.md changes license.terms
 
 %files devel
@@ -110,12 +103,9 @@ ln -s %{_bindir}/wish %{_bindir}/wish%{majorver} %{buildroot}%{_usr}/bin/
 %{_datadir}/%{name}%{majorver}/tkAppInit.c
 
 %changelog
-* Sat Jul 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1:8.6.14-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
-
-* Thu Feb 29 2024 Jaroslav Škarvada <jskarvad@redhat.com> - 1:8.6.14-1
-- New version
-  Related: rhbz#2267019
+* Wed Jan 15 2025 Archana Shettigar <v-shettigara@microsoft.com> - 1:8.6.13-4
+- Initial Azure Linux import from Fedora 40 (license: MIT).
+- License Verified
 
 * Sat Jan 27 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1:8.6.13-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
