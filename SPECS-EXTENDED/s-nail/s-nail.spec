@@ -1,6 +1,8 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:           s-nail
 Version:        14.9.25
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Environment for sending and receiving mail, providing functionality of POSIX mailx
 
 # Everything is ISC except parts coming from the original Heirloom mailx which are BSD
@@ -119,6 +121,10 @@ make test
 
 
 %changelog
+* Tue Apr 29 2025 Archana Shettigar <v-shettigara@microsoft.com> - 14.9.25-2
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Thu Aug 01 2024 Tomas Korbar <tkorbar@redhat.com> - 14.9.25-1
 - Rebase to 14.9.25
 - Resolves: rhbz#2301265
