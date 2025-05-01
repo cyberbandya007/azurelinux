@@ -52,7 +52,7 @@ rm -f lib/*.jar
 
 %build
 %{ant} \
-  -Dant.build.javac.source=1.6 -Dant.build.javac.target=1.6 \
+  -Dant.build.javac.source=1.8 -Dant.build.javac.target=1.8 \
   jar
 
 %install
