@@ -15,24 +15,11 @@
 %global gname haclient
 
 ## Where to install Pacemaker documentation
-%if 0%{?rhel}
-%global pcmk_docdir %{_docdir}/%{name}-doc
-%else
 %global pcmk_docdir %{_docdir}/%{name}
-%endif
 
 ## GitHub entity that distributes source (for ease of using a fork)
 %global github_owner ClusterLabs
 
-## Where bug reports should be submitted
-## Leave bug_url undefined to use ClusterLabs default, others define it here
-%if 0%{?rhel}
-%global bug_url https://bugzilla.redhat.com/
-%else
-%if 0%{?fedora}
-%global bug_url https://bugz.fedoraproject.org/%{name}
-%endif
-%endif
 
 ## What to use as the OCF resource agent root directory
 %global ocf_root %{_prefix}/lib/ocf
@@ -41,7 +28,6 @@
 ## can be incremented to build packages reliably considered "newer"
 ## than previously built packages with the same pcmkversion)
 %global pcmkversion 2.1.9
-%global specversion 1
 
 ## Upstream commit (full commit ID, abbreviated commit ID, or tag) to build
 %global commit 49aab998399b9fec21631ff610ae5bdcc4ffb7a4
@@ -58,11 +44,7 @@
 %bcond_with stonithd
 
 ## Add option for whether to support storing sensitive information outside CIB
-%if (0%{?fedora} && 0%{?fedora} <= 33) || (0%{?rhel} && 0%{?rhel} <= 8)
-%bcond_with cibsecrets
-%else
 %bcond_without cibsecrets
-%endif
 
 ## Add option to enable Native Language Support (experimental)
 %bcond_with nls
@@ -71,11 +53,7 @@
 %bcond_with profiling
 
 ## Allow deprecated option to skip (or enable, on RHEL) documentation
-%if 0%{?rhel}
 %bcond_with doc
-%else
-%bcond_without doc
-%endif
 
 ## Add option to default to start-up synchronization with SBD.
 ##
@@ -86,21 +64,13 @@
 ## after upgrading to versions that support synchronization.
 %bcond_without sbd_sync
 
-## Add option to prefix package version with "0."
-## (so later "official" packages will be considered updates)
-%bcond_with pre_release
-
 ## NOTE: skip --with upstart_job
 
 ## Add option to turn off hardening of libraries and daemon executables
-%bcond_without hardening
+%bcond_with hardening
 
 ## Add option to enable (or disable, on RHEL 8) links for legacy daemon names
-%if 0%{?rhel} && 0%{?rhel} <= 8
-%bcond_without legacy_links
-%else
 %bcond_with legacy_links
-%endif
 
 ## Nagios source control identifiers
 %global nagios_name nagios-agents-metadata
@@ -112,11 +82,6 @@
 ## Portion of export/dist tarball name after "pacemaker-", and release version
 %define archive_version %(c=%{commit}; echo ${c:0:%{commit_abbrev}})
 %define archive_github_url %{archive_version}#/%{name}-%{archive_version}.tar.gz
-%if %{with pre_release}
-%define pcmk_release 0.%{specversion}
-%else
-%define pcmk_release %{specversion}
-%endif
 
 ## Base GnuTLS cipher priorities (presumably only the initial, required keyword)
 ## overridable with "rpmbuild --define 'pcmk_gnutls_priorities PRIORITY-SPEC'"
@@ -138,19 +103,13 @@
 ## Distro-specific configuration choices
 
 ### Use 2.0-style output when other distro packages don't support current output
-%if ( 0%{?fedora} && 0%{?fedora} <=35 ) || ( 0%{?rhel} && 0%{?rhel} <= 8 )
 %global compat20 --enable-compat-2.0
-%endif
 
 ### Default concurrent-fencing to true when distro prefers that
-%if 0%{?rhel}
 %global concurrent_fencing --with-concurrent-fencing-default=true
-%endif
 
 ### Default resource-stickiness to 1 when distro prefers that
-%if 0%{?fedora} >= 35 || 0%{?rhel} >= 9
 %global resource_stickiness --with-resource-stickiness-default=1
-%endif
 
 
 # Python-related definitions
@@ -169,22 +128,10 @@
 %endif
 
 ## Prefer Python 3 definitions explicitly, in case 2 is also available
-%if %{defined __python3}
 %global python_name python3
 %global python_path %{__python3}
 %define python_site %{?python3_sitelib}%{!?python3_sitelib:%(
   %{python_path} -c 'from distutils.sysconfig import get_python_lib as gpl; print(gpl(1))' 2>/dev/null)}
-%else
-%if %{defined python_version}
-%global python_name python%(echo %{python_version} | cut -d'.' -f1)
-%define python_path %{?__python}%{!?__python:/usr/bin/%{python_name}}
-%else
-%global python_name python
-%global python_path %{?__python}%{!?__python:/usr/bin/python%{?python_pkgversion}}
-%endif
-%define python_site %{?python_sitelib}%{!?python_sitelib:%(
-  %{python_name} -c 'from distutils.sysconfig import get_python_lib as gpl; print(gpl(1))' 2>/dev/null)}
-%endif
 
 
 # Keep sane profiling data if requested
@@ -196,13 +143,14 @@
 %endif
 
 
-Name:          pacemaker
-Summary:       Scalable High-Availability cluster resource manager
-Version:       %{pcmkversion}
-Release:       %{pcmk_release}%{?dist}
-
-License:       GPL-2.0-or-later AND LGPL-2.1-or-later
-Url:           https://www.clusterlabs.org/
+Name:           pacemaker
+Summary:        Scalable High-Availability cluster resource manager
+Version:        %{pcmkversion}
+Release:        2%{?dist}
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
+License:        GPL-2.0-or-later AND LGPL-2.1-or-later
+Url:            https://www.clusterlabs.org/
 
 # Example: https://codeload.github.com/ClusterLabs/pacemaker/tar.gz/e91769e
 # will download pacemaker-e91769e.tar.gz
@@ -222,14 +170,6 @@ Requires:      %{pkgname_pcmk_libs}%{?_isa} = %{version}-%{release}
 Requires:      %{name}-cluster-libs%{?_isa} = %{version}-%{release}
 Requires:      %{name}-cli = %{version}-%{release}
 %{?systemd_requires}
-
-%if %{defined centos}
-ExclusiveArch: aarch64 i686 ppc64le s390x x86_64 %{arm}
-%else
-%if 0%{?rhel}
-ExclusiveArch: aarch64 i686 ppc64le s390x x86_64
-%endif
-%endif
 
 Requires:      %{python_path}
 BuildRequires: %{python_name}-devel
@@ -273,7 +213,7 @@ BuildRequires: %{pkgname_gettext} >= 0.18
 # Required for "make check"
 BuildRequires: libcmocka-devel >= 1.1.0
 
-BuildRequires: pkgconfig(systemd)
+BuildRequires: systemd-devel
 
 # RH patches are created by git, so we need git to apply them
 BuildRequires: git
@@ -300,12 +240,6 @@ Provides:      pacemaker-ticket-support = 2.0
 
 Provides:      pcmk-cluster-manager = %{version}-%{release}
 Provides:      pcmk-cluster-manager%{?_isa} = %{version}-%{release}
-
-# Bundled bits
-## Pacemaker uses the crypto/md5-buffer module from gnulib
-%if 0%{?fedora} || 0%{?rhel}
-Provides:      bundled(gnulib) = 20200404
-%endif
 
 %description
 Pacemaker is an advanced, scalable High-Availability cluster resource
@@ -855,7 +789,11 @@ exit 0
 %license %{nagios_name}-%{nagios_hash}/COPYING
 
 %changelog
-* Tue Nov 5 2024 Klaus Wenninger <kwenning@redhat.com> - 2.1.9-1
+* Fri May 02 2025 Jyoti kanase <v-jykanase@microsoft.com> - 2.1.9-2
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
+*Tue Nov 5 2024 Klaus Wenninger <kwenning@redhat.com> - 2.1.9-1
 - Update for new upstream release tarball: Pacemaker-2.1.9,
   for full details, see included ChangeLog file or
   https://github.com/ClusterLabs/pacemaker/releases/tag/Pacemaker-2.1.9
