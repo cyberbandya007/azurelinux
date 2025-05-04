@@ -1,14 +1,14 @@
-%bcond_without mingw
-
 %global data_version 1.17
 
 Name:           proj
 # Also check whether there is a new proj-data release when upgrading!
 Version:        9.4.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Cartographic projection software (PROJ)
 
 License:        MIT
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://proj.org
 Source0:        https://download.osgeo.org/%{name}/%{name}-%{version}.tar.gz
 Source1:        https://download.osgeo.org/%{name}/%{name}-data-%{data_version}.tar.gz
@@ -22,20 +22,6 @@ BuildRequires:  make
 BuildRequires:  libtiff-devel
 BuildRequires:  sqlite-devel
 
-%if %{with mingw}
-BuildRequires: mingw32-curl
-BuildRequires: mingw32-filesystem >= 95
-BuildRequires: mingw32-gcc-c++
-BuildRequires: mingw32-libtiff
-BuildRequires: mingw32-sqlite
-
-BuildRequires: mingw64-curl
-BuildRequires: mingw64-filesystem >= 95
-BuildRequires: mingw64-gcc-c++
-BuildRequires: mingw64-libtiff
-BuildRequires: mingw64-sqlite
-%endif
-
 Obsoletes:      proj-datumgrid < 1.8-6.3.2.6
 
 Requires:       proj-data = %{version}-%{release}
@@ -45,7 +31,6 @@ Proj and invproj perform respective forward and inverse transformation of
 cartographic data to or from cartesian data with a wide range of selectable
 projection functions.
 
-
 %package devel
 Summary:        Development files for PROJ
 Requires:       %{name}%{?_isa} = %{version}-%{release}
@@ -54,14 +39,12 @@ Obsoletes:      %{name}-static < 7.2.0
 %description devel
 This package contains libproj and the appropriate header files and man pages.
 
-
 %package data
 Summary:        Proj data files
 BuildArch:      noarch
 
 %description data
 Proj arch independent data files.
-
 
 %package data-europe
 Summary:        Compat package for old proj-datumgrid-europe
@@ -93,7 +76,6 @@ Compat package for old proj-datumgrid-europe.
 Please do not depend on this package, it will get removed!
 
 %files data-europe
-
 
 %package data-north-america
 Summary:        Compat package for old proj-datumgrid-north-america
@@ -195,76 +177,25 @@ Supplements:  proj\
 %data_subpkg -c us -n %{quote:United States}
 %data_subpkg -c za -n %{quote:South Africa}
 
-
-%if %{with mingw}
-%package -n mingw32-%{name}
-Summary:       Cartographic projection software (PROJ.4)
-Obsoletes:     mingw32-%{name}-static < 6.3.2-3
-BuildArch:     noarch
-
-%description -n mingw32-%{name}
-Proj and invproj perform respective forward and inverse transformation of
-cartographic data to or from cartesian data with a wide range of selectable
-projection functions. Proj docs: http://www.remotesensing.org/dl/new_docs/
-
-
-%package -n mingw64-%{name}
-Summary:       Cartographic projection software (PROJ.4)
-Obsoletes:     mingw64-%{name}-static < 6.3.2-3
-BuildArch:     noarch
-
-
-%description -n mingw64-%{name}
-Proj and invproj perform respective forward and inverse transformation of
-cartographic data to or from cartesian data with a wide range of selectable
-projection functions. Proj docs: http://www.remotesensing.org/dl/new_docs/
-
-
-%{?mingw_debug_package}
-%endif
-
-
 %prep
 %autosetup -p1
-
 
 %build
 # Native build
 %cmake -DUSE_EXTERNAL_GTEST=ON
 %cmake_build
 
-%if %{with mingw}
-# MinGW build
-%mingw_cmake -DBUILD_TESTING=OFF
-%mingw_make_build
-%endif
-
-
 %install
 %cmake_install
-%if %{with mingw}
-%mingw_make_install
-%endif
 
 # Install data
 mkdir -p %{buildroot}%{_datadir}/%{name}
 tar -xf %{SOURCE1} --directory %{buildroot}%{_datadir}/%{name}
 
-%if %{with mingw}
-rm -rf %{buildroot}%{mingw32_docdir}
-rm -rf %{buildroot}%{mingw32_mandir}
-rm -rf %{buildroot}%{mingw64_docdir}
-rm -rf %{buildroot}%{mingw64_mandir}
-
-
-%mingw_debug_install_post
-%endif
-
 
 %check
 # nkg test requires internet connection
 %ctest -- -E nkg
-
 
 %files
 %{_bindir}/cct
@@ -312,34 +243,13 @@ rm -rf %{buildroot}%{mingw64_mandir}
 %{_datadir}/%{name}/triangulation.schema.json
 %{_mandir}/man1/*.1*
 
-%if %{with mingw}
-%files -n mingw32-%{name}
-%license COPYING
-%{mingw32_bindir}/libproj_9_4.dll
-%{mingw32_bindir}/*.exe
-%{mingw32_libdir}/libproj.dll.a
-%{mingw32_libdir}/cmake/proj/
-%{mingw32_libdir}/cmake/proj4/
-%{mingw32_libdir}/pkgconfig/proj.pc
-%{mingw32_includedir}/*.h
-%{mingw32_includedir}/proj/
-%{mingw32_datadir}/%{name}/
-
-%files -n mingw64-%{name}
-%license COPYING
-%{mingw64_bindir}/libproj_9_4.dll
-%{mingw64_bindir}/*.exe
-%{mingw64_libdir}/libproj.dll.a
-%{mingw64_libdir}/cmake/proj/
-%{mingw64_libdir}/cmake/proj4/
-%{mingw64_libdir}/pkgconfig/proj.pc
-%{mingw64_includedir}/*.h
-%{mingw64_includedir}/proj/
-%{mingw64_datadir}/%{name}/
-%endif
-
 
 %changelog
+* Wed Apr 30 2025 Akhila Guruju <v-guakhila@microsoft.com> - 9.4.1-3
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- Build with mingw disabled.
+- License verified.
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 9.4.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
