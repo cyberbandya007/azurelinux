@@ -206,6 +206,7 @@ fi
 %{_unitdir}/mrtg.service
 %{_unitdir}/mrtg.timer
 
+
 %if 0%{?with_selinux}
 %files selinux
 %{_datadir}/selinux/packages/%{selinuxtype}/%{modulename}.pp.*
