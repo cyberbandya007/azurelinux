@@ -46,6 +46,8 @@ BuildRequires:  javapackages-tools
 
 # Python dependencies
 BuildRequires:  python3-devel
+BuildRequires:  python3-pip
+BuildRequires:  python3-wheel
 
 %global desc %{expand:Snowball is a small string processing language for creating stemming
 algorithms for use in Information Retrieval, plus a collection of
