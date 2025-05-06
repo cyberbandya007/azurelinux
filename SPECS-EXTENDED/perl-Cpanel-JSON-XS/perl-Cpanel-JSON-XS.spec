@@ -91,39 +91,6 @@ BuildRequires:	perl(Test::Pod) >= 1.00
 BuildRequires:	perl(Test::Pod::Coverage) >= 1.04
 BuildRequires:	perl(Text::CSV_XS)
 %endif
-# Dependencies
-Requires:	perl(Carp)
-Requires:	perl(overload)
-Requires:	perl(Scalar::Util)
-%if 0%{?fedora} > 22 || 0%{?rhel} > 7
-Suggests:	perl(CBOR::XS)
-%endif
-%if 0%{?fedora} > 20 || 0%{?rhel} > 7
-Recommends:	perl(Math::BigFloat) >= 1.16
-Recommends:	perl(Math::BigInt)
-Suggests:	perl(Bencode)
-Suggests:	perl(Compress::LZF)
-Suggests:	perl(CPAN::Meta::YAML)
-Suggests:	perl(Data::Dump)
-Suggests:	perl(Data::Dumper)
-Suggests:	perl(Sereal::Decoder)
-Suggests:	perl(Sereal::Encoder)
-Suggests:	perl(YAML)
-Suggests:	perl(YAML::Syck)
-Suggests:	perl(YAML::XS)
-%else
-Requires:	perl(Compress::LZF)
-Requires:	perl(Convert::Bencode)
-Requires:	perl(CPAN::Meta::YAML)
-Requires:	perl(Data::Dump)
-Requires:	perl(Data::Dumper)
-Requires:	perl(Math::BigFloat) >= 1.16
-Requires:	perl(Math::BigInt)
-Requires:	perl(Sereal::Decoder)
-Requires:	perl(Sereal::Encoder)
-Requires:	perl(YAML)
-Requires:	perl(YAML::Syck)
-Requires:	perl(YAML::XS)
 %endif
 # Dependencies
 Requires:	perl(Carp)
