@@ -8,16 +8,20 @@ different test data, and make it appear as multiple test cases.}
 
 Name:           python-%{srcname}
 Version:        1.6.0
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        Python library to multiply test cases
 License:        MIT
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://github.com/datadriventests/ddt
-Source:         %pypi_source
+Source:         %{pypi_source}#/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 BuildRequires:  python3-devel
+BuildRequires: 	python3-pip
+BuildRequires: 	python3-wheel
 %if %{with tests}
 BuildRequires:  python3-pytest
-BuildRequires:  python3-pyyaml
+BuildRequires:  python3-PyYAML
 BuildRequires:  python3-six
 %endif
 
@@ -33,7 +37,7 @@ Summary:        %{summary}
 
 
 %prep
-%autosetup -n %{srcname}-%{version} -p 1
+%autosetup -n %{srcname}-%{version}
 
 
 %generate_buildrequires
@@ -62,6 +66,11 @@ Summary:        %{summary}
 
 
 %changelog
+* Tue May 06 2025 Akhila Guruju <v-guakhila@microsoft.com> - 1.6.0-10
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- Added BR on `python-PyYAML` for tests
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.6.0-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
