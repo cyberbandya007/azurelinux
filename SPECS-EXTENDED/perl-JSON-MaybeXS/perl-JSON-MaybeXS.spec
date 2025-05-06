@@ -6,10 +6,12 @@
 # consistent results as we're always using the same, most-tested
 # back-end.
 
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:		perl-JSON-MaybeXS
 Summary:	Use Cpanel::JSON::XS with a fallback to JSON::XS and JSON::PP
 Version:	1.004008
-Release:	2%{?dist}
+Release:	3%{?dist}
 License:	GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:		https://metacpan.org/release/JSON-MaybeXS
 Source0:	https://cpan.metacpan.org/modules/by-module/JSON/JSON-MaybeXS-%{version}.tar.gz
@@ -33,12 +35,9 @@ BuildRequires:	perl(File::Temp)
 BuildRequires:	perl(base)
 BuildRequires:	perl(Carp)
 BuildRequires:	perl(constant)
-%if 0%{?fedora} > 36 || 0%{?rhel} > 9
-BuildRequires:	perl(Cpanel::JSON::XS) >= 4.38
-BuildRequires:	perl(experimental)
-%else
+
 BuildRequires:	perl(Cpanel::JSON::XS) >= 2.3310
-%endif
+
 BuildRequires:	perl(Exporter)
 BuildRequires:	perl(if)
 BuildRequires:	perl(Scalar::Util)
@@ -50,12 +49,8 @@ BuildRequires:	perl(JSON::XS) >= 3.0
 BuildRequires:	perl(Test::More) >= 0.88
 BuildRequires:	perl(Test::Needs) >= 0.002006
 # Dependencies
-%if 0%{?fedora} > 36 || 0%{?rhel} > 9
-Requires:	perl(Cpanel::JSON::XS) >= 4.38
-Requires:	perl(experimental)
-%else
+
 Requires:	perl(Cpanel::JSON::XS) >= 2.3310
-%endif
 
 %description
 This module first checks to see if either Cpanel::JSON::XS or JSON::XS
@@ -92,6 +87,10 @@ make test
 %{_mandir}/man3/JSON::MaybeXS.3*
 
 %changelog
+* Tue May 06 2025 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 1.004008-3
+- Initial Azure Linux import from Fedora 41 (license: MIT)
+- License verified
+
 * Tue Aug 13 2024 Paul Howarth <paul@city-fan.org> - 1.004008-2
 - Fix runtime dependency on Cpanel::JSON::XS 4.38 (rhbz#2304277)
 
