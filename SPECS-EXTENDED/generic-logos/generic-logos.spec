@@ -1,8 +1,11 @@
+%global _kde4_appsdir /usr/share/kde4/apps
+%global _kde4_iconsdir /usr/share/icons
+
 Vendor:         Microsoft Corporation
 Distribution:   Azure Linux
 Name:       generic-logos
 Version:    18.0.0
-Release:    11%{?dist}
+Release:    12%{?dist}
 Summary:    Icons and pictures
 
 URL:        https://pagure.io/generic-logos
@@ -11,7 +14,6 @@ Source0:    https://releases.pagure.org/%{name}/%{name}-%{version}.tar.bz2
 License:    GPLv2 and LGPLv2+
 BuildArch:  noarch
 
-Obsoletes:  redhat-logos
 Obsoletes:  generic-logos < 17.0.0-5
 Provides:   redhat-logos = %{version}-%{release}
 Provides:   system-logos = %{version}-%{release}
@@ -158,6 +160,10 @@ fi
 %{_datadir}/pixmaps/poweredby.png
 
 %changelog
+* Thu Apr 24 2025 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 18.0.0-12
+- Fix the build error.
+- License verified.
+
 * Fri Oct 15 2021 Pawel Winogrodzki <pawelwi@microsoft.com> - 18.0.0-11
 - Initial CBL-Mariner import from Fedora 32 (license: MIT).
 

@@ -215,15 +215,6 @@ that dnsmasq will read in.  Similarly, when a pod
 is removed from the network, it will remove the entry from the hosts
 file.  Each CNI network will have its own dnsmasq instance.
 
-%package gvproxy
-Summary: Go replacement for libslirp and VPNKit
-
-%description gvproxy
-A replacement for libslirp and VPNKit, written in pure Go.
-It is based on the network stack of gVisor. Compared to libslirp,
-gvisor-tap-vsock brings a configurable DNS server and
-dynamic port forwarding.
-
 %prep
 %autosetup -Sgit -p1
 sed -i 's;@@PODMAN@@\;$(BINDIR);@@PODMAN@@\;%{_bindir};' Makefile
@@ -292,7 +283,6 @@ ln -s ../../../../ src/%{import_path_gvproxy}
 cd ..
 ln -s vendor src
 export GOPATH=$(pwd)/_build:$(pwd)
-%gobuild -o bin/gvproxy %{import_path_gvproxy}/cmd/gvproxy
 cd ..
 
 %{__make} docs docker-docs
@@ -316,11 +306,6 @@ cd %{repo_plugins}-%{commit_plugins}
 %{__make} PREFIX=%{_prefix} DESTDIR=%{buildroot} install
 cd ..
 
-# install gvproxy
-cd %{repo_gvproxy}-%{commit_gvproxy}
-install -dp %{buildroot}%{_libexecdir}/%{name}
-install -p -m0755 bin/gvproxy %{buildroot}%{_libexecdir}/%{name}
-cd ..
 
 # do not include docker and podman-remote man pages in main package
 for file in `find %{buildroot}%{_mandir}/man[15] -type f | sed "s,%{buildroot},," | grep -v -e remote -e docker`; do
@@ -376,12 +361,6 @@ cp -pav test/system %{buildroot}/%{_datadir}/%{name}/test/
 %doc %{repo_plugins}-%{commit_plugins}/{README.md,README_PODMAN.md}
 %dir %{_libexecdir}/cni
 %{_libexecdir}/cni/dnsname
-
-%files gvproxy
-%license %{repo_gvproxy}-%{commit_gvproxy}/LICENSE
-%doc %{repo_gvproxy}-%{commit_gvproxy}/README.md
-%dir %{_libexecdir}/%{name}
-%{_libexecdir}/%{name}/gvproxy
 
 
 # rhcontainerbot account currently managed by lsm5
