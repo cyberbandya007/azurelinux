@@ -1,10 +1,12 @@
 Name:           perl-Test-Script
 Version:        1.29
-Release:        12%{?dist}
+Release:        13%{?dist}
 Summary:        Cross-platform basic tests for scripts
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://metacpan.org/release/Test-Script
-Source0:        https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/Test-Script-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/Test-Script-%{version}.tar.gz#/perl-Test-Script-%{version}.tar.gz
 BuildArch:      noarch
 
 BuildRequires:  %{__perl}
@@ -22,13 +24,12 @@ BuildRequires:  perl(File::Spec::Unix)
 BuildRequires:  perl(File::Temp)
 BuildRequires:  perl(IO::Handle)
 BuildRequires:  perl(Probe::Perl) >= 0.01
-BuildRequires:  perl(Test2::API)
 BuildRequires:  perl(Test2::V0)
-BuildRequires:  perl(Test::More) >= 0.96
 BuildRequires:  perl(Text::ParseWords)
 BuildRequires:  perl(strict)
 BuildRequires:  perl(warnings)
 
+Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
 %description
 The intent of this module is to provide a series of basic tests for scripts
@@ -55,6 +56,10 @@ in the bin directory of your Perl distribution.
 %{_mandir}/man3/*
 
 %changelog
+* Thu Mar 20 2025 Archana Shettigar <v-shettigara@microsoft.com> - 1.29-13
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1.29-12
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
