@@ -1,4 +1,4 @@
-openexr
+openEXR
 SDL2
 alsa-plugins
 amtk
@@ -92,7 +92,7 @@ isomd5sum
 iwd
 jansi
 javacc
-jboss-interceptors
+jboss-interceptors-1.2-api
 jdepend
 jdom2
 jimtcl
@@ -358,6 +358,7 @@ python-pyrsistent
 python-pytest-flake8
 python-pytest-timeout
 python-recommonmark
+python-redis
 python-requests-mock
 python-requests-toolbelt
 python-requests_ntlm
@@ -443,12 +444,10 @@ yelp-tools
 ypserv
 z3
 zenity
-DartSass
 libimobiledevice-glue
 rubygem-puppet-resource_api
 rubygem-hocon
 rubygem-deep_merge
-libselinux
 rubygem-racc
 rubygem-scanf
 rubygem-test-unit-ruby-core
@@ -466,11 +465,8 @@ s-nail
 man-pages-l10n
 openjpeg
 perl-Test-Simple
-libpsl
-llvm
 rust-ripgrep
 hyphen-es
 netsniff-ng
-nvmetcli
-Usbguard
-PyGreySQL
+usbguard
+PyGreSQL
