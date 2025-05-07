@@ -19,8 +19,6 @@ Release:        %autorelease
 Summary:        Tool for generating C bindings to Rust code
 
 License:        MPL-2.0
-Vendor:         Microsoft Corporation
-Distribution:   Azure Linux
 URL:            https://crates.io/crates/cbindgen
 Source:         %{crates_source}
 # Manually created patch for downstream crate metadata changes
@@ -36,6 +34,8 @@ BuildRequires:  /usr/bin/g++
 %endif
 
 %global _description %{expand:
+A tool for generating C bindings to Rust code.}
+
 %description %{_description}
 
 %package     -n %{crate}
