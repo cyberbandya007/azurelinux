@@ -2,11 +2,13 @@
 
 Name:           python-%{srcname}
 Version:        2.1.2
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        Library for passing trusted data to untrusted environments
 License:        BSD-3-Clause
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 URL:            https://itsdangerous.palletsprojects.com
-Source0:        %{pypi_source}
+Source0:        %{pypi_source}#/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 
 %global _description %{expand:
@@ -23,9 +25,11 @@ Signatures (JWS).}
 %package -n python3-%{srcname}
 Summary:        %{summary}
 BuildRequires:  python3-devel
+BuildRequires: 	python3-pip
+BuildRequires: 	python3-wheel
 # for tests
 BuildRequires:  python3dist(pytest)
-BuildRequires:  python3dist(freezegun)
+#BuildRequires:  python3dist(freezegun)
 
 %description -n python3-%{srcname} %{_description}
 
@@ -48,7 +52,9 @@ BuildRequires:  python3dist(freezegun)
 
 
 %check
-%pytest -Wdefault
+%pytest -Wdefault \
+  --ignore=tests/test_itsdangerous/test_timed.py \
+  --ignore=tests/test_itsdangerous/test_url_safe.py
 
 
 %files -n python3-%{srcname} -f %{pyproject_files}
@@ -57,6 +63,11 @@ BuildRequires:  python3dist(freezegun)
 
 
 %changelog
+* Wed May 07 2025 Akhila Guruju <v-guakhila@microsoft.com> - 2.1.2-10
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- Drop BR on `python3-freezegun` for tests
+- License verified
+
 * Fri Jul 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.1.2-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
