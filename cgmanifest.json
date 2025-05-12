@@ -21763,8 +21763,8 @@
         "type": "other",
         "other": {
           "name": "pulseaudio",
-          "version": "16.1",
-          "downloadUrl": "https://freedesktop.org/software/pulseaudio/releases/pulseaudio-16.1.tar.gz"
+          "version": "17.0",
+          "downloadUrl": "https://freedesktop.org/software/pulseaudio/releases/pulseaudio-17.0.tar.xz"
         }
       }
     },
