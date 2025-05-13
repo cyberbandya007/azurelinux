@@ -22533,8 +22533,8 @@
         "type": "other",
         "other": {
           "name": "python-dbusmock",
-          "version": "0.28.7",
-          "downloadUrl": "https://files.pythonhosted.org/packages/source/p/python-dbusmock/python-dbusmock-0.28.7.tar.gz"
+          "version": "0.34.3",
+          "downloadUrl": "https://files.pythonhosted.org/packages/source/p/python-dbusmock/python_dbusmock-0.34.3.tar.gz"
         }
       }
     },
