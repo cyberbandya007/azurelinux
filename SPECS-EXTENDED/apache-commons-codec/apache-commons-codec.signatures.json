@@ -1,6 +1,8 @@
 {
  "Signatures": {
+  "apache-commons-codec-build.xml": "5ed0d9c0048621d6d9dd61ac990d32d643ddbc2a4ba51ce0886529b4a76a7227",
   "aspell-mail.txt": "f57683a39b0414f197ba7f0eb32d12d772c52a509878f74b8eeb47633d3dfc93",
-  "commons-codec-1.17.1-src.tar.gz": "e9f28166a50e67536b2ddf05041c2c084e57e4adb339a1f8847704f615402e39"
+  "commons-codec-1.18.0-src.tar.gz": "d4c501c4d8c55d0981f122e4973248faf82cefa19183f2539717600efab7e663",
+  "commons-codec-1.18.0-src.tar.gz.asc": "e7cbd10c88080aa2afab7d1f573ce9b4406030deb888ef49b32b9608bee4f27b"
  }
 }
