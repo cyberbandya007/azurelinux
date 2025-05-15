@@ -8,14 +8,14 @@
 
 Name:           perl-Alien-Build
 Version:        2.84
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Build external dependencies for use in CPAN
 # lib/Alien/Build/Plugin/Test/Mock.pm contains Base64-encoded files for tests
 # (a bash script, C source file, a gzipped tar archive, Mach-O 64-bit x86_64
 # object file and a static library).
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/Alien-Build
-Source0:        https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/Alien-Build-%{version}.tar.gz
+Source0:        https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/Alien-Build-%{version}.tar.gz#/perl-Alien-Build-%{version}.tar.gz
 # Support only the most advanced pkgconfig implementation,
 # the files are deleted in prep section
 Patch0:         Alien-Build-2.83-Remove-redundant-pkgconfig-implementations.patch
@@ -444,6 +444,10 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
+* Thu May 15 2025 Jyoti kanase <v-jykanase@microsoft.com> - 2.84-2
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified.
+
 * Tue Oct 29 2024 Petr Pisar <ppisar@redhat.com> - 2.84-1
 - 2.84 bump
 
