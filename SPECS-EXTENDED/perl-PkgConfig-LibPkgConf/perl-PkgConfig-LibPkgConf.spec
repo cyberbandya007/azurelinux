@@ -62,7 +62,7 @@ BuildRequires:  perl(YAML)
 Requires:       perl(Carp)
 # libpkgconf.so.4() changed an ABI without changing SONAME
 # <https://github.com/pkgconf/pkgconf/issues/347>
-Requires:       libpkgconf >= 2.1.0
+Requires:       libpkgconf
 
 # Filter under-specified dependencies
 %global __requires_exclude %{?__requires_exclude:%{__requires_exclude}|}^perl\\(Test::More\\)$
