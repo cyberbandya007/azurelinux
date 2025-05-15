@@ -1,14 +1,12 @@
 #global pre RC1
 
-%if %{defined rhel} || %{defined flatpak}
-%bcond_with mingw
-%else
 %bcond_without mingw
-%endif
 
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 Name:          shapelib
 Version:       1.6.1
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       C library for handling ESRI Shapefiles
 # The core library is dual-licensed LGPLv2 or MIT.
 # Some contributed files have different licenses:
@@ -16,14 +14,14 @@ Summary:       C library for handling ESRI Shapefiles
 # - contrib/dbfinfo.c: Public domain
 # - contrib/dbfcat.c:  Public domain
 License:       (LGPL-2.0-or-later OR MIT) AND GPL-2.0-or-later AND LicenseRef-Fedora-Public-Domain
-URL:           http://shapelib.maptools.org/
-Source0:       http://download.osgeo.org/shapelib/%{name}-%{version}%{?pre:%pre}.tar.gz
+URL:           https://shapelib.maptools.org/
+Source0:       https://download.osgeo.org/shapelib/%{name}-%{version}%{?pre:%pre}.tar.gz
 # Man pages from debian package
 # wget https://salsa.debian.org/debian-gis-team/shapelib/-/archive/master/shapelib-master.tar.gz
 # tar --strip-components=2 -xvf shapelib-master.tar.gz shapelib-master/debian/man
 # tar -czf shapelib-man.tar.gz man/
 # rm -r man
-Source1:       %{name}-man.tar.gz
+Source1:       %{name}-man-1.tar.gz
 
 BuildRequires: automake autoconf libtool
 BuildRequires: gcc-c++
@@ -31,18 +29,6 @@ BuildRequires: make
 BuildRequires: proj-devel >= 4.4.1
 # For man pages
 BuildRequires: rubygem-ronn
-
-%if %{with mingw}
-BuildRequires: mingw32-filesystem >= 95
-BuildRequires: mingw32-gcc-c++
-BuildRequires: mingw32-binutils
-BuildRequires: mingw32-proj
-
-BuildRequires: mingw64-filesystem >= 95
-BuildRequires: mingw64-gcc-c++
-BuildRequires: mingw64-binutils
-BuildRequires: mingw64-proj
-%endif
 
 
 %description
@@ -67,64 +53,6 @@ Requires:      %{name}%{?_isa} = %{version}-%{release}
 %description tools
 This package contains various utility programs distributed with shapelib.
 
-
-%if %{with mingw}
-%package -n mingw32-%{name}
-Summary:       MinGW Windows %{name} library
-BuildArch:     noarch
-
-%description -n mingw32-%{name}
-%{summary}.
-
-
-%package -n mingw32-%{name}-static
-Summary:       Static version of the  MinGW Windows %{name} library
-Requires:      mingw32-%{name} = %{version}-%{release}
-BuildArch:     noarch
-
-%description -n mingw32-%{name}-static
-%{summary}.
-
-
-%package -n mingw32-%{name}-tools
-Summary:       Tools for the  MinGW Windows %{name} library
-Requires:      mingw32-%{name} = %{version}-%{release}
-BuildArch:     noarch
-
-%description -n mingw32-%{name}-tools
-%{summary}.
-
-
-%package -n mingw64-%{name}
-Summary:       MinGW Windows %{name} library
-BuildArch:     noarch
-
-%description -n mingw64-%{name}
-%{summary}.
-
-
-%package -n mingw64-%{name}-static
-Summary:       Static version of the  MinGW Windows %{name} library
-Requires:      mingw64-%{name} = %{version}-%{release}
-BuildArch:     noarch
-
-%description -n mingw64-%{name}-static
-%{summary}.
-
-
-%package -n mingw64-%{name}-tools
-Summary:       Tools for the  MinGW Windows %{name} library
-Requires:      mingw64-%{name} = %{version}-%{release}
-BuildArch:     noarch
-
-%description -n mingw64-%{name}-tools
-%{summary}.
-%endif
-
-
-%{?mingw_debug_package}
-
-
 %prep
 %autosetup -p1 -a1
 
@@ -141,18 +69,8 @@ pushd build_native
 %make_build
 popd
 
-%if %{with mingw}
-# MinGW build
-%mingw_configure
-%mingw_make_build
-%endif
-
-
 %install
 %make_install -C build_native
-%if %{with mingw}
-%mingw_make_install
-%endif
 
 # Remove static libraries
 find %{buildroot} -name '*.la' -exec rm -f {} ';'
@@ -161,9 +79,6 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 ronn -r --date="$(LC_ALL=C date -u "+%Y-%m-%d")" --manual=%{name} man/*.md
 mkdir -p %{buildroot}%{_mandir}/man1/
 install -pm 0644 man/*.1 %{buildroot}%{_mandir}/man1/
-
-
-%{?mingw_debug_install_post}
 
 
 %files
@@ -181,36 +96,11 @@ install -pm 0644 man/*.1 %{buildroot}%{_mandir}/man1/
 %{_bindir}/*
 %{_mandir}/man1/*.1*
 
-%if %{with mingw}
-%files -n mingw32-%{name}
-%license LICENSE*
-%{mingw32_bindir}/libshp-4.dll
-%{mingw32_includedir}/shapefil.h
-%{mingw32_libdir}/libshp.dll.a
-%{mingw32_libdir}/pkgconfig/shapelib.pc
-
-%files -n mingw32-%{name}-static
-%{mingw32_libdir}/libshp.a
-
-%files -n mingw32-%{name}-tools
-%{mingw32_bindir}/*.exe
-
-%files -n mingw64-%{name}
-%license LICENSE*
-%{mingw64_bindir}/libshp-4.dll
-%{mingw64_includedir}/shapefil.h
-%{mingw64_libdir}/libshp.dll.a
-%{mingw64_libdir}/pkgconfig/shapelib.pc
-
-%files -n mingw64-%{name}-static
-%{mingw64_libdir}/libshp.a
-
-%files -n mingw64-%{name}-tools
-%{mingw64_bindir}/*.exe
-%endif
-
-
 %changelog
+* Thu May 15 2025 Archana Shettigar <v-shettigara@microsoft.com> - 1.6.1-2
+- Initial Azure Linux import from Fedora 41 (license: MIT).
+- License verified
+
 * Wed Aug 14 2024 Sandro Mani <manisandro@gmail.com> - 1.6.1-1
 - Update to 1.6.1
 
