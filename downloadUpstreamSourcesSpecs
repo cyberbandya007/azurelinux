@@ -287,7 +287,6 @@ perl-Term-Table
 perl-Test-Differences
 perl-Test-MinimumVersion
 perl-Test-Script
-perl-Test-Simple
 perl-Test-TrailingSpace
 perl-Test2-Plugin-NoWarnings
 perl-Variable-Magic
