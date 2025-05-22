@@ -11,8 +11,8 @@ Source0:        https://gitlab.freedesktop.org/hadess/iio-sensor-proxy/uploads/a
 BuildRequires:  meson
 BuildRequires:  gcc
 BuildRequires:  gtk-doc
-BuildRequires:  pkgconfig(udev)
-BuildRequires:  pkgconfig(systemd)
+BuildRequires:  libudev-devel
+BuildRequires:  systemd-devel
 BuildRequires:  pkgconfig(gio-2.0)
 BuildRequires:  pkgconfig(gudev-1.0)
 BuildRequires:  pkgconfig(polkit-gobject-1)
