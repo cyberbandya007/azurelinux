@@ -22,7 +22,7 @@ Distribution:   Azure Linux
 
 Name:           xz-java
 Version:        1.10
-Release:        1
+Release:        1%{?dist}
 Summary:        Pure Java implementation of XZ compression
 License:        0BSD
 Group:          Development/Libraries/Java
@@ -55,41 +55,38 @@ This package contains the API documentation of xz-java.
 %setup -q -c -n %{name}
 
 %build
-%{ant} -Dant.build.javac.{source,target}=8 clean jar doc maven
+# Clean and build using Ant only (no Maven)
+sed -i 's/linkoffline="[^"]*"//;/extdoc_/d' build.xml
+%{ant} -Dant.build.javac.source=1.8 -Dant.build.javac.target=1.8 clean jar doc
 
 %install
-# jar
+# Install JAR
 install -dm 0755 %{buildroot}%{_javadir}
-install -pm 0644 build/maven/xz-%{version}.jar  %{buildroot}%{_javadir}/%{name}.jar
+install -pm 0644 build/jar/xz.jar %{buildroot}%{_javadir}/%{name}.jar
 (cd %{buildroot}%{_javadir} && ln -s %{name}.jar xz.jar)
-# pom
-# Install the POM file manually
-install -dm 0755 %{buildroot}%{_mavenpomdir}
-install -pm 0644 build/maven/xz-%{version}.pom %{buildroot}%{_mavenpomdir}/%{name}.pom
 
-# Optionally, create a symlink for consistency or compatibility
-ln -s %{_mavenpomdir}/%{name}.pom %{buildroot}%{_mavenpomdir}/xz.pom
-
-# javadoc
+# Install Javadoc
 mkdir -p %{buildroot}%{_javadocdir}/%{name}
 cp -pr build/doc/* %{buildroot}%{_javadocdir}/%{name}
+
+# Install license files
+install -Dm 0644 COPYING %{buildroot}%{_licensedir}/%{name}/COPYING
+
 %fdupes -s %{buildroot}%{_javadocdir}
 
-
 %files
-%license COPYING
-%doc NEWS.md README.md THANKS.md
+%license %{_licensedir}/%{name}/COPYING
+%doc AUTHORS.md NEWS.md README.md THANKS.md REUSE.toml
 %{_javadir}/xz-java.jar
 %{_javadir}/xz.jar
-%{_mavenpomdir}/xz-java.pom
-%{_mavenpomdir}/xz.pom
 
 %files javadoc
 %{_javadocdir}/%{name}
 
+
 %changelog
 * Tue May 20 2025 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 1.10-1
-- Initial CBL-Mariner import from openSUSE Tumbleweed (license: same as "License" tag).
+- Initial Azure Linux import from openSUSE Tumbleweed (license: same as "License" tag).
 - License verified
 
 -------------------------------------------------------------------
