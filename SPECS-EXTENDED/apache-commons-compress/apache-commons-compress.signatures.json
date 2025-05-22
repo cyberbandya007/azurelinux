@@ -1,5 +1,6 @@
 {
  "Signatures": {
-  "commons-compress-1.25.0-src.tar.gz": "6ac615534ce78cec2892de00013a5bdbbf69b6259f756bc21e842ea316e5ec29"
+  "apache-commons-compress-build.xml": "b08148f1c54080179fdc8c6afc5f4d9c414367fb191a546c4bd3cc24be914abb",
+  "commons-compress-1.26.1-src.tar.gz": "0fd4a84162f5edcca757b4d0048e7abd78272e1b6794f9f0b2b42832ead922ed"
  }
 }
