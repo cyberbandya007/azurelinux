@@ -55,15 +55,18 @@ This package contains the API documentation of xz-java.
 %setup -q -c -n %{name}
 
 %build
-# Clean and build using Ant only (no Maven)
 sed -i 's/linkoffline="[^"]*"//;/extdoc_/d' build.xml
-%{ant} -Dant.build.javac.source=1.8 -Dant.build.javac.target=1.8 clean jar doc
+ant  -Dant.build.javac.source=1.8 -Dant.build.javac.target=1.8 clean jar doc maven
 
 %install
 # Install JAR
 install -dm 0755 %{buildroot}%{_javadir}
 install -pm 0644 build/jar/xz.jar %{buildroot}%{_javadir}/%{name}.jar
 (cd %{buildroot}%{_javadir} && ln -s %{name}.jar xz.jar)
+
+install -dm 0755 %{buildroot}%{_mavenpomdir}
+install -pm 0644 build/maven/xz-%{version}.pom %{buildroot}%{_mavenpomdir}/%{name}.pom
+%add_maven_depmap %{name}.pom %{name}.jar
 
 # Install Javadoc
 mkdir -p %{buildroot}%{_javadocdir}/%{name}
@@ -74,8 +77,9 @@ install -Dm 0644 COPYING %{buildroot}%{_licensedir}/%{name}/COPYING
 
 %fdupes -s %{buildroot}%{_javadocdir}
 
-%files
-%license %{_licensedir}/%{name}/COPYING
+%files -f .mfiles
+%license COPYING
+
 %doc AUTHORS.md NEWS.md README.md THANKS.md REUSE.toml
 %{_javadir}/xz-java.jar
 %{_javadir}/xz.jar
