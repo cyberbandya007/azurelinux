@@ -23,10 +23,10 @@ BuildRequires:	perl(Test2::Util::HashBase)
 BuildRequires:	perl(warnings)
 # Test Suite
 BuildRequires:	perl(File::Spec)
-BuildRequires:	perl(IPC::Run3)
-BuildRequires:	perl(Module::Pluggable)
-BuildRequires:	perl(Test2::Require::Module)
-BuildRequires:	perl(Test2::V0)
+#BuildRequires:	perl(IPC::Run3)
+#BuildRequires:	perl(Module::Pluggable)
+#BuildRequires:	perl(Test2::Require::Module)
+#BuildRequires:	perl(Test2::V0)
 BuildRequires:	perl(Test::More) >= 0.96
 # Optional Tests
 BuildRequires:	perl(CPAN::Meta) >= 2.120900
