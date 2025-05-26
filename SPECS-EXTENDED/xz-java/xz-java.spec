@@ -19,7 +19,6 @@ Distribution:   Azure Linux
 # Please submit bugfixes or comments via https://bugs.opensuse.org/
 #
 
-
 Name:           xz-java
 Version:        1.10
 Release:        1%{?dist}
@@ -70,14 +69,20 @@ install -pm 0644 build/maven/xz-%{version}.pom %{buildroot}%{_mavenpomdir}/%{nam
 # javadoc
 mkdir -p %{buildroot}%{_javadocdir}/%{name}
 cp -pr build/doc/* %{buildroot}%{_javadocdir}/%{name}
+# remove duplicated license files from javadoc
+rm -f %{buildroot}%{_javadocdir}/%{name}/legal/LICENSE
+rm -f %{buildroot}%{_javadocdir}/%{name}/legal/ADDITIONAL_LICENSE_INFO
+
 %fdupes -s %{buildroot}%{_javadocdir}
 
 %files -f .mfiles
 %license COPYING
-%doc AUTHORS.md NEWS.md README.md THANKS.md REUSE.toml
+%doc NEWS.md README.md THANKS.md
 %{_javadir}/xz.jar
 
 %files javadoc
+%exclude %{_javadocdir}/%{name}/legal/LICENSE
+%exclude %{_javadocdir}/%{name}/legal/ADDITIONAL_LICENSE_INFO
 %{_javadocdir}/%{name}
 
 %changelog
