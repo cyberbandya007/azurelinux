@@ -21,7 +21,7 @@ Distribution:   Azure Linux
 
 Name:           osgi-annotation
 Version:        8.1.0
-Release:        2.4
+Release:        8%{?dist}
 Summary:        Annotations for use in compiling OSGi bundles
 License:        Apache-2.0
 Group:          Development/Libraries/Java
@@ -30,7 +30,7 @@ URL:            https://www.osgi.org/
 # read access, so we download the source from maven central instead
 Source0:        https://repo1.maven.org/maven2/org/osgi/osgi.annotation/%{version}/osgi.annotation-%{version}-sources.jar
 Source1:        https://repo1.maven.org/maven2/org/osgi/osgi.annotation/%{version}/osgi.annotation-%{version}.pom
-Source2:        https://www.apache.org/licenses/LICENSE-2.0
+Source2:        http://www.apache.org/licenses/LICENSE-2.0
 Source3:        %{name}-build.xml
 BuildRequires:  ant
 BuildRequires:  fdupes
@@ -100,7 +100,7 @@ cp -pr target/site/apidocs/* %{buildroot}%{_javadocdir}/%{name}/
 %{_javadocdir}/%{name}
 
 %changelog
-* Tue May 27 2025 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 8.1.0-2.4
+* Tue May 27 2025 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 8.1.0-8
 - Initial Azure Linux import from openSUSE Tumbleweed (license: same as "License" tag).
 - License verified
 
