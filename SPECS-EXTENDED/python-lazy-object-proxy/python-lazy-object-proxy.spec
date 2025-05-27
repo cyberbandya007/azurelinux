@@ -45,9 +45,11 @@ A fast and thorough lazy object proxy.
 #%%pyproject_buildrequires -t
 
 %build
+export SETUPTOOLS_SCM_PRETEND_VERSION=%{version}
 %pyproject_wheel
 
 %install
+export SETUPTOOLS_SCM_PRETEND_VERSION=%{version}
 %pyproject_install
 
 %check
