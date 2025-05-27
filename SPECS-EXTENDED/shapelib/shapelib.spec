@@ -1,6 +1,7 @@
 #global pre RC1
 
 %bcond_without mingw
+
 Vendor:         Microsoft Corporation
 Distribution:   Azure Linux
 Name:          shapelib
@@ -14,13 +15,13 @@ Summary:       C library for handling ESRI Shapefiles
 # - contrib/dbfcat.c:  Public domain
 License:       (LGPL-2.0-or-later OR MIT) AND GPL-2.0-or-later AND LicenseRef-Fedora-Public-Domain
 URL:           https://shapelib.maptools.org/
-Source0:       https://download.osgeo.org/shapelib/%{name}-%{version}.tar.gz
+Source0:       https://download.osgeo.org/shapelib/%{name}-%{version}%{?pre:%pre}.tar.gz
 # Man pages from debian package
 # wget https://salsa.debian.org/debian-gis-team/shapelib/-/archive/master/shapelib-master.tar.gz
 # tar --strip-components=2 -xvf shapelib-master.tar.gz shapelib-master/debian/man
 # tar -czf shapelib-man.tar.gz man/
 # rm -r man
-Source1:       %{name}-man.tar.gz
+Source1:       %{name}-man-1.tar.gz
 
 BuildRequires: automake autoconf libtool
 BuildRequires: gcc-c++
