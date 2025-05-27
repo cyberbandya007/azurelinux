@@ -22,13 +22,11 @@ Patch3: dyninst-cmake3.27.patch
 BuildRequires: gcc-c++
 BuildRequires: elfutils-devel
 BuildRequires: elfutils-libelf-devel
-BuildRequires: elfutils-debuginfod-client-devel
 BuildRequires: boost-devel
 BuildRequires: binutils-devel
 BuildRequires: cmake
 BuildRequires: libtirpc-devel
 BuildRequires: tbb tbb-devel
-BuildRequires: tex-latex
 
 # Extra requires just for the testsuite
 BuildRequires: gcc-gfortran libxml2-devel
@@ -51,12 +49,6 @@ monitoring, and to support composing applications out of existing packages.
 The goal of this API is to provide a machine independent interface to permit
 the creation of tools and applications that use run-time code patching.
 
-%package doc
-Summary: Documentation for using the Dyninst API
-Group: Documentation
-%description doc
-dyninst-doc contains API documentation for the Dyninst libraries.
-License: LGPL-2.1-or-later
 
 %package devel
 Summary: Header files for compiling programs with Dyninst
@@ -113,7 +105,7 @@ CXXFLAGS="$CFLAGS"
 export CFLAGS CXXFLAGS LDFLAGS
 
 %cmake \
- -DENABLE_DEBUGINFOD=1 \
+ -DENABLE_DEBUGINFOD=0 \
  -DINSTALL_LIB_DIR:PATH=%{_libdir}/dyninst \
  -DINSTALL_INCLUDE_DIR:PATH=%{_includedir}/dyninst \
  -DINSTALL_CMAKE_DIR:PATH=%{_libdir}/cmake/Dyninst \
@@ -170,17 +162,6 @@ find %{buildroot}%{_libdir}/dyninst/testsuite/ \
 %doc %{dyninst_base}/LICENSE.md
 
 %config(noreplace) /etc/ld.so.conf.d/*
-
-%files doc
-%doc %{dyninst_base}/dataflowAPI/doc/dataflowAPI.pdf
-%doc %{dyninst_base}/dynC_API/doc/dynC_API.pdf
-%doc %{dyninst_base}/dyninstAPI/doc/dyninstAPI.pdf
-%doc %{dyninst_base}/instructionAPI/doc/instructionAPI.pdf
-%doc %{dyninst_base}/parseAPI/doc/parseAPI.pdf
-%doc %{dyninst_base}/patchAPI/doc/patchAPI.pdf
-%doc %{dyninst_base}/proccontrol/doc/proccontrol.pdf
-%doc %{dyninst_base}/stackwalk/doc/stackwalk.pdf
-%doc %{dyninst_base}/symtabAPI/doc/symtabAPI.pdf
 
 %files devel
 %{_includedir}/dyninst
