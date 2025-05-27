@@ -30,7 +30,7 @@ URL:            https://www.osgi.org/
 # read access, so we download the source from maven central instead
 Source0:        https://repo1.maven.org/maven2/org/osgi/osgi.annotation/%{version}/osgi.annotation-%{version}-sources.jar
 Source1:        https://repo1.maven.org/maven2/org/osgi/osgi.annotation/%{version}/osgi.annotation-%{version}.pom
-Source2:        http://www.apache.org/licenses/LICENSE-2.0
+Source2:        https://www.apache.org/licenses/LICENSE-2.0
 Source3:        %{name}-build.xml
 BuildRequires:  ant
 BuildRequires:  fdupes
