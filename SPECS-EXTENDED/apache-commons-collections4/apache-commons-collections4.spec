@@ -1,3 +1,5 @@
+Vendor:         Microsoft Corporation
+Distribution:   Azure Linux
 #
 # spec file
 #
@@ -21,7 +23,7 @@
 %bcond_with tests
 Name:           apache-%{short_name}
 Version:        4.4
-Release:        1
+Release:        1%{?dist}
 Summary:        Extension of the Java Collections Framework
 License:        Apache-2.0
 Group:          Development/Libraries/Java
@@ -79,3 +81,33 @@ cp -pr target/site/apidocs/* %{buildroot}%{_javadocdir}/%{name}/
 * Thu May 15 2025 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 4.4-1
 - Initial CBL-Mariner import from openSUSE Tumbleweed (license: same as "License" tag).
 - License verified
+
+   + Updates the platform requirement from Java 6 to 8
+    + Add Automatic-Module-Name MANIFEST entry for Java 9
+      compatibility
+    + Added a few new APIs.
+  * Builds with java 21 out of the box
+  * Generated ant build system with maven-ant-plugin in order to
+    build with ant like before.
+- Removed patches:
+  * commons-collections4-4.1-bundle.patch
+  * commons-collections4-4.1-javadoc.patch
+  * commons-collections4-4.1-jdk11.patch
+    + All changes factored into the generated build.xml
+
+-------------------------------------------------------------------
+Fri Mar 18 18:14:43 UTC 2022 - Fridrich Strba <fstrba@suse.com>
+
+- Build with source/target levels 8
+
+-------------------------------------------------------------------
+Mon Mar  4 10:41:43 UTC 2019 - Fridrich Strba <fstrba@suse.com>
+
+- Initial packaging of apache-commons-collections4 4.1
+- Added patches:
+  * commons-collections4-4.1-bundle.patch
+    + Add to the manifest OSGi bundle information
+  * commons-collections4-4.1-javadoc.patch
+    + Do not try to download web-based resources during the build.
+  * commons-collections4-4.1-jdk11.patch
+    + Resolve type ambiguity in a toArray(null) call
