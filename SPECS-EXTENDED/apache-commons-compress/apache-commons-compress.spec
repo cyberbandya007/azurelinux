@@ -519,4 +519,3 @@ Thu Nov 29 14:57:33 UTC 2012 - mvyskocil@suse.com
 Thu May 14 16:05:37 CEST 2009 - mvyskocil@suse.cz
 
 - 'Initial SUSE packaging from jpackage.org 5.0'
-
