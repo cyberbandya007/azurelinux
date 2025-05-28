@@ -28,7 +28,7 @@ Summary:        Extension of the Java Collections Framework
 License:        Apache-2.0
 Group:          Development/Libraries/Java
 URL:            https://commons.apache.org/proper/commons-collections/
-Source0:        http://archive.apache.org/dist/commons/collections/source/commons-collections4-%{version}-src.tar.gz
+Source0:        https://archive.apache.org/dist/commons/collections/source/commons-collections4-%{version}-src.tar.gz
 Source1:        %{name}-build.xml
 BuildRequires:  ant
 BuildRequires:  fdupes
@@ -79,7 +79,7 @@ cp -pr target/site/apidocs/* %{buildroot}%{_javadocdir}/%{name}/
 
 %changelog
 * Thu May 15 2025 Durga Jagadeesh Palli <v-dpalli@microsoft.com> - 4.4-1
-- Initial CBL-Mariner import from openSUSE Tumbleweed (license: same as "License" tag).
+- Initial Azure Linux import from openSUSE Tumbleweed (license: same as "License" tag).
 - License verified
 
    + Updates the platform requirement from Java 6 to 8
