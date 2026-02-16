@@ -6,7 +6,7 @@
 Summary:        A high-level scripting language
 Name:           python3
 Version:        3.12.9
-Release:        2%{?dist}
+Release:        8%{?dist}
 License:        PSF
 Vendor:         Microsoft Corporation
 Distribution:   Azure Linux
@@ -19,6 +19,16 @@ Source1:        https://github.com/python/cpython/blob/3.9/Tools/scripts/pathfix
 Patch0:         cgi3.patch
 Patch1:         CVE-2025-4516.patch
 Patch2:         CVE-2025-4517.patch
+Patch3:         CVE-2025-6069.patch
+Patch4:         CVE-2025-8194.patch
+Patch5:         CVE-2025-8291.patch
+Patch6:         CVE-2025-6075.patch
+Patch7:         CVE-2025-12084.patch
+Patch8:         CVE-2025-13836.patch
+Patch9:         CVE-2025-13837.patch
+Patch10:        CVE-2025-11468.patch
+Patch11:        CVE-2026-0672.patch
+Patch12:        CVE-2026-0865.patch
 
 BuildRequires:  bzip2-devel
 BuildRequires:  expat-devel >= 2.1.0
@@ -171,7 +181,8 @@ rm %{buildroot}%{_bindir}/2to3
 rm -rf %{buildroot}%{_bindir}/__pycache__
 
 %check
-%{buildroot}%{_bindir}/python3 -m test
+# vsock_loopback module needed by `test_socket` is not loaded by default in AzureLinux.
+%{buildroot}%{_bindir}/python3 -m test --exclude test_socket
 
 %ldconfig_scriptlets
 
@@ -240,6 +251,25 @@ rm -rf %{buildroot}%{_bindir}/__pycache__
 %{_libdir}/python%{majmin}/test/*
 
 %changelog
+* Wed Jan 28 2026 Azure Linux Security Servicing Account <azurelinux-security@microsoft.com> - 3.12.9-8
+- Patch for CVE-2026-0865, CVE-2025-11468, CVE-2026-0672
+
+* Wed Dec 24 2025 Azure Linux Security Servicing Account <azurelinux-security@microsoft.com> - 3.12.9-7
+- Patch for CVE-2025-13837, CVE-2025-12084, CVE-2025-13836
+
+* Tue Nov 04 2025 Azure Linux Security Servicing Account <azurelinux-security@microsoft.com> - 3.12.9-6
+- Patch for CVE-2025-6075
+
+* Thu Oct 09 2025 Azure Linux Security Servicing Account <azurelinux-security@microsoft.com> - 3.12.9-5
+- Patch for CVE-2025-8291
+
+* Wed Aug 06 2025 Azure Linux Security Servicing Account <azurelinux-security@microsoft.com> - 3.12.9-4
+- Patch for CVE-2025-8194
+
+* Tue Jul 01 2025 Jyoti Kanase <v-jykanase@microsoft.com> - 3.12.9-3
+- Patch CVE-2025-6069
+- Fixed the test in %check
+
 * Tue Jun 10 2025 Jyoti Kanase <v-jykanase@microsoft.com> - 3.12.9-2
 - Patch CVE-2025-4516, CVE-2025-4517, CVE-2024-12718, CVE-2025-4138, CVE-2025-4330, CVE-2025-4330
 

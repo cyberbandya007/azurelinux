@@ -55,7 +55,7 @@ ExclusiveArch: x86_64
 
 Name:       edk2
 Version:    %{GITDATE}git%{GITCOMMIT}
-Release:    8%{?dist}
+Release:    14%{?dist}
 Summary:    UEFI firmware for 64-bit virtual machines
 License:    Apache-2.0 AND (BSD-2-Clause OR GPL-2.0-or-later) AND BSD-2-Clause-Patent AND BSD-3-Clause AND BSD-4-Clause AND ISC AND MIT AND LicenseRef-Fedora-Public-Domain
 URL:        https://www.tianocore.org
@@ -130,6 +130,7 @@ Patch0017: 0017-silence-.-has-a-LOAD-segment-with-RWX-permissions-wa.patch
 Patch0018: 0018-NetworkPkg-TcpDxe-Fixed-system-stuck-on-PXE-boot-flo.patch
 Patch0019: 0019-NetworkPkg-DxeNetLib-adjust-PseudoRandom-error-loggi.patch
 Patch0020: CVE-2024-38796.patch
+Patch0021: CVE-2025-2296.patch
 
 # Patches for the vendored OpenSSL are in the range from 1000 to 1999 (inclusive).
 Patch1000: CVE-2022-3996.patch
@@ -138,6 +139,15 @@ Patch1002: CVE-2024-4741.patch
 Patch1003: CVE-2024-13176.patch
 Patch1004: CVE-2024-2511.patch
 Patch1005: CVE-2024-4603.patch
+Patch1006: CVE-2025-3770.patch
+Patch1007: CVE-2025-9230.patch
+Patch1008: CVE-2025-15467.patch
+Patch1009: CVE-2025-2295.patch
+Patch1010: CVE-2025-68160.patch
+Patch1011: CVE-2025-69418.patch
+Patch1012: CVE-2025-69420.patch
+Patch1013: CVE-2025-69421.patch
+Patch1014: CVE-2026-22796.patch
 
 # python3-devel and libuuid-devel are required for building tools.
 # python3-devel is also needed for varstore template generation and
@@ -799,6 +809,24 @@ done
 /boot/efi/HvLoader.efi
 
 %changelog
+* Tue Feb 03 2026 Azure Linux Security Servicing Account <azurelinux-security@microsoft.com> - 20240524git3e722403cd16-14
+- Patch for CVE-2026-22796, CVE-2025-69421, CVE-2025-69420, CVE-2025-69418, CVE-2025-68160
+
+* Sun Feb 01 2026 Azure Linux Security Servicing Account <azurelinux-security@microsoft.com> - 20240524git3e722403cd16-13
+- Patch for CVE-2025-2295
+
+* Fri Jan 30 2026 Azure Linux Security Servicing Account <azurelinux-security@microsoft.com> - 20240524git3e722403cd16-12
+- Patch for CVE-2025-15467
+
+* Thu Dec 18 2025 Jyoti kanase <v-jykanase@microsoft.com> - 20240524git3e722403cd16-11
+- Patch for CVE-2025-2296
+
+* Fri Oct 03 2025 Azure Linux Security Servicing Account <azurelinux-security@microsoft.com> - 20240524git3e722403cd16-10
+- Patch for CVE-2025-9230
+
+* Mon Aug 11 2025 Azure Linux Security Servicing Account <azurelinux-security@microsoft.com> - 20240524git3e722403cd16-9
+- Patch for CVE-2025-3770
+
 * Thu Apr 24 2025 Jyoti Kanase <v-jykanase@microsoft.com> - 20240524git3e722403cd16-8
 - Fix CVE-2024-38796
 

@@ -21,7 +21,7 @@
 Summary:        Tool for creating supermin appliances
 Name:           supermin
 Version:        5.3.4
-Release:        6%{?dist}
+Release:        13%{?dist}
 License:        GPLv2+
 Vendor:         Microsoft Corporation
 Distribution:   Azure Linux
@@ -54,7 +54,7 @@ BuildRequires:  systemd-udev
 %if %{with dietlibc}
 BuildRequires:  dietlibc-devel
 %else
-BuildRequires:  glibc-static >= 2.38-11%{?dist}
+BuildRequires:  glibc-static >= 2.38-18%{?dist}
 %endif
 
 %if 0%{?with_check}
@@ -129,6 +129,27 @@ make check || {
 %{_rpmconfigdir}/supermin-find-requires
 
 %changelog
+* Thu Jan 22 2026 Kanishk Bansal <kanbansal@microsoft.com> - 5.3.4-13
+- Bump to rebuild with updated glibc
+
+* Mon Jan 19 2026 Kanishk Bansal <kanbansal@microsoft.com> - 5.3.4-12
+- Bump to rebuild with updated glibc
+
+* Mon Nov 10 2025 Andrew Phelps <anphel@microsoft.com> - 5.3.4-11
+- Bump to rebuild with updated glibc
+
+* Thu Oct 23 2025 Kanishk Bansal <kanbansal@microsoft.com> - 5.3.4-10
+- Bump to rebuild with updated glibc
+
+* Wed Oct 08 2025 Andrew Phelps <anphel@microsoft.com> - 5.3.4-9
+- Bump to rebuild with updated glibc
+
+* Thu Aug 28 2025 Kanishk Bansal <kanbansal@microsoft.com> - 5.3.4-8
+- Bump to rebuild with updated glibc
+
+* Mon Aug 25 2025 Andrew Phelps <anphel@microsoft.com> - 5.3.4-7
+- Bump to rebuild with updated glibc
+
 * Thu May 22 2025 Kanishk Bansal <kanbansal@microsoft.com> - 5.3.4-6
 - Bump to rebuild with updated glibc
 

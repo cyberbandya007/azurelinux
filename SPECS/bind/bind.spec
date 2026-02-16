@@ -9,7 +9,7 @@
 
 Summary:        Domain Name System software
 Name:           bind
-Version:        9.20.9
+Version:        9.20.18
 Release:        1%{?dist}
 License:        ISC
 Vendor:         Microsoft Corporation
@@ -536,6 +536,15 @@ fi;
 %{_mandir}/man1/named-nzd2nzf.1*
 
 %changelog
+* Wed Jan 21 2026 CBL-Mariner Servicing Account <cblmargh@microsoft.com> - 9.20.18-1
+- Auto-upgrade to 9.20.18 - for CVE-2025-13878
+
+* Fri Oct 24 2025 Kanishk Bansal <kanbansal@microsoft.com> - 9.20.15-1
+- Auto-upgrade to 9.20.15 - for CVE-2025-40778, CVE-2025-8677, CVE-2025-40780
+
+* Fri Jul 18 2025 Kevin Lockwood <v-klockwood@microsoft.com> - 9.20.11-1
+- Upgrade to 9.20.11 - for CVE-2025-40777
+
 * Mon May 26 2025 CBL-Mariner Servicing Account <cblmargh@microsoft.com> - 9.20.9-1
 - Auto-upgrade to 9.20.9 - for CVE-2025-40775
 
